@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/services/api_service.dart';
+import '../data/services/nutrition_api_service.dart';
 import '../data/repositories/recipe_repository.dart';
+import '../data/repositories/nutrition_repository.dart';
 import '../data/models/recipe.dart';
 import '../data/models/shopping_list.dart';
+import '../data/models/nutrition.dart';
 
 // API Service Provider
 final apiServiceProvider = Provider<ApiService>((ref) {
@@ -57,4 +60,26 @@ final filteredRecipesProvider = Provider<List<Recipe>>((ref) {
     loading: () => [],
     error: (_, __) => [],
   );
+});
+
+// ===== NUTRITION PROVIDERS =====
+
+// Nutrition API Service Provider
+final nutritionApiServiceProvider = Provider<NutritionApiService>((ref) {
+  return NutritionApiService();
+});
+
+// Nutrition Repository Provider
+final nutritionRepositoryProvider = Provider<NutritionRepository>((ref) {
+  return NutritionRepository(ref.read(nutritionApiServiceProvider));
+});
+
+// User ID Provider (in a real app, this would come from auth)
+final userIdProvider = StateProvider<String>((ref) => 'user123');
+
+// Nutrition Board Provider
+final nutritionBoardProvider = FutureProvider<NutritionBoard>((ref) async {
+  final repository = ref.read(nutritionRepositoryProvider);
+  final userId = ref.watch(userIdProvider);
+  return await repository.getNutritionBoard(userId);
 });

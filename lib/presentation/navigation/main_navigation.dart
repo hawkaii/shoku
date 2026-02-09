@@ -35,7 +35,7 @@ class MainNavigation extends ConsumerWidget {
                     context,
                     ref,
                     icon: Icons.home,
-                    label: 'Home',
+                    label: 'Recipes',
                     index: 0,
                     isActive: currentIndex == 0,
                     onTap: () {
@@ -49,12 +49,27 @@ class MainNavigation extends ConsumerWidget {
                   child: _buildNavButton(
                     context,
                     ref,
-                    icon: Icons.add_circle,
-                    label: 'Add',
+                    icon: Icons.restaurant_menu,
+                    label: 'Nutrition',
                     index: 1,
                     isActive: currentIndex == 1,
                     onTap: () {
                       ref.read(navigationIndexProvider.notifier).state = 1;
+                      context.go('/nutrition');
+                    },
+                  ),
+                ),
+                const SizedBox(width: NeuSpacing.sm),
+                Expanded(
+                  child: _buildNavButton(
+                    context,
+                    ref,
+                    icon: Icons.add_circle,
+                    label: 'Add',
+                    index: 2,
+                    isActive: currentIndex == 2,
+                    onTap: () {
+                      ref.read(navigationIndexProvider.notifier).state = 2;
                       context.go('/add');
                     },
                   ),
@@ -87,18 +102,23 @@ class MainNavigation extends ConsumerWidget {
         shadowColor: NeuColors.neuBlack,
         child: Container(
           height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: NeuColors.neuBlack, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                  color: NeuColors.neuBlack,
+              Icon(icon, color: NeuColors.neuBlack, size: 20),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                    color: NeuColors.neuBlack,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],

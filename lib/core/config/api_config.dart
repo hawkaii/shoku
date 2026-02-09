@@ -5,7 +5,7 @@ class ApiConfig {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://e0ae2d8b1eca.ngrok-free.app',
+    defaultValue: 'https://9767b3334c10.ngrok-free.app',
   );
 
   // API Endpoints
@@ -14,5 +14,6 @@ class ApiConfig {
 
   static String recipeById(int id) => '/api/recipes/$id';
   static String deleteRecipe(int id) => '/api/recipes/$id';
-  static String shoppingList(int recipeId) => '/api/recipes/$recipeId/shopping-list';
+  static String shoppingList(int recipeId) =>
+      '/api/recipes/$recipeId/shopping-list';
 }
