@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../../core/config/nutrition_api_config.dart';
 import '../models/nutrition.dart';
+import '../models/dish_suggestion.dart';
+import '../models/youtube_video.dart';
 
 class NutritionApiService {
   late final Dio _dio;
@@ -93,14 +95,16 @@ class NutritionApiService {
   }
 
   // Get recipe suggestions from ingredients
-  Future<List<String>> suggestRecipes(List<String> ingredients) async {
+  Future<List<DishSuggestion>> suggestRecipes(List<String> ingredients) async {
     try {
       final response = await _dio.post(
         NutritionApiConfig.recipeSuggest,
         data: {'ingredients': ingredients},
       );
       final data = response.data as Map<String, dynamic>;
-      return (data['dishes'] as List<dynamic>).map((e) => e as String).toList();
+      return (data['dishes'] as List<dynamic>)
+          .map((e) => DishSuggestion.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -121,6 +125,22 @@ class NutritionApiService {
       );
       final data = response.data as Map<String, dynamic>;
       return (data['items'] as List<dynamic>).map((e) => e as String).toList();
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // Search YouTube videos for a dish (placeholder endpoint)
+  Future<List<YouTubeVideo>> searchYouTubeVideos(String query) async {
+    try {
+      final response = await _dio.post(
+        NutritionApiConfig.youtubeSearch,
+        data: {'query': query},
+      );
+      final data = response.data as Map<String, dynamic>;
+      return (data['videos'] as List<dynamic>)
+          .map((e) => YouTubeVideo.fromJson(e as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw _handleError(e);
     }

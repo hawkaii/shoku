@@ -46,6 +46,12 @@ dependencies:
   # Image picker
   image_picker: ^1.0.7
 
+  # Voice input
+  speech_to_text: ^7.3.0
+
+  # WebView for YouTube
+  flutter_inappwebview: ^6.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

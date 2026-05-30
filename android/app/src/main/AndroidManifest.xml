@@ -4,6 +4,9 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
+    <!-- Permission for voice input (speech-to-text) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:label="food_finder"
         android:name="${applicationName}"

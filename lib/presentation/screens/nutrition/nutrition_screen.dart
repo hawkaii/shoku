@@ -135,7 +135,7 @@ class NutritionScreen extends ConsumerWidget {
                     title: 'RECIPE IDEAS',
                     description: 'Get suggestions from ingredients',
                     color: NeuColors.neuLavender,
-                    onTap: () => context.push('/nutrition/recipes'),
+                    onTap: () => context.push('/ingredient-input'),
                   ),
                   const SizedBox(height: NeuSpacing.md),
                   _buildActionCard(

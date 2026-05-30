@@ -83,3 +83,17 @@ final nutritionBoardProvider = FutureProvider<NutritionBoard>((ref) async {
   final userId = ref.watch(userIdProvider);
   return await repository.getNutritionBoard(userId);
 });
+
+// ===== INGREDIENT FLOW PROVIDERS =====
+
+// Current ingredients list for the flow
+final ingredientsListProvider = StateProvider<List<String>>((ref) => []);
+
+// Selected dish name from recipe suggestions
+final selectedDishProvider = StateProvider<String>((ref) => '');
+
+// Selected YouTube video URL for recipe extraction
+final selectedVideoUrlProvider = StateProvider<String>((ref) => '');
+
+// Last added recipe ID (for highlighting newly added recipes)
+final lastAddedRecipeIdProvider = StateProvider<int?>((ref) => null);

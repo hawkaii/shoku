@@ -5,7 +5,7 @@ class ApiConfig {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://9767b3334c10.ngrok-free.app',
+    defaultValue: 'http://142.93.219.178:8000',
   );
 
   // API Endpoints

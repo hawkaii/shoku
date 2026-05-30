@@ -1,4 +1,6 @@
 import '../models/nutrition.dart';
+import '../models/dish_suggestion.dart';
+import '../models/youtube_video.dart';
 import '../services/nutrition_api_service.dart';
 
 class NutritionRepository {
@@ -38,7 +40,7 @@ class NutritionRepository {
     );
   }
 
-  Future<List<String>> suggestRecipes(List<String> ingredients) async {
+  Future<List<DishSuggestion>> suggestRecipes(List<String> ingredients) async {
     return await _apiService.suggestRecipes(ingredients);
   }
 
@@ -50,5 +52,9 @@ class NutritionRepository {
       userId: userId,
       imageBase64: imageBase64,
     );
+  }
+
+  Future<List<YouTubeVideo>> searchYouTubeVideos(String query) async {
+    return await _apiService.searchYouTubeVideos(query);
   }
 }

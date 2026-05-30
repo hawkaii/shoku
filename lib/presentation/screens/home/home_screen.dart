@@ -8,13 +8,30 @@ import '../../../providers/providers.dart';
 import '../../widgets/neu_recipe_card.dart';
 import 'widgets/home_search_bar.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Clear the last added recipe highlight after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        ref.read(lastAddedRecipeIdProvider.notifier).state = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final recipesAsync = ref.watch(recipesProvider);
     final filteredRecipes = ref.watch(filteredRecipesProvider);
+    final lastAddedRecipeId = ref.watch(lastAddedRecipeIdProvider);
 
     return Scaffold(
       backgroundColor: NeuColors.neuWhite,
@@ -84,6 +101,7 @@ class HomeScreen extends ConsumerWidget {
                         return NeuRecipeCard(
                           recipe: recipe,
                           backgroundColor: colors[index % colors.length],
+                          isNew: recipe.id == lastAddedRecipeId,
                           onTap: () => context.push('/recipe/${recipe.id}'),
                         );
                       },
