@@ -19,8 +19,10 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  final _controller = PageController();
-  int _page = 0;
+  late final int _initialPage =
+      int.tryParse(Uri.base.queryParameters['onboardStep'] ?? '') ?? 0;
+  late final PageController _controller = PageController(initialPage: _initialPage);
+  late int _page = _initialPage;
   int _stage = 0; // 0 = reel, 1 = share sheet, 2 = saved
 
   Future<void> _finish() async {
@@ -131,16 +133,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  if (_page == 1 && _stage < 2)
-                    Padding(
-                      padding: const EdgeInsets.only(top: ShokuSpace.sm),
-                      child: Text(
-                        _stage == 0
-                            ? 'Tap the share icon below'
-                            : 'Now tap Shoku in the sheet',
-                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -291,7 +283,12 @@ class _ShareStep extends StatelessWidget {
                       Text('12.4k',
                           style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
                       const Spacer(),
-                      ShokuPressable(
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _GlowRing(
+                            active: stage == 0,
+                            child: ShokuPressable(
                         onTap: onShareTap,
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 160),
@@ -307,6 +304,15 @@ class _ShareStep extends StatelessWidget {
                           child: Icon(Icons.send,
                               size: 14, color: stage == 0 ? c.onAccent : c.ink),
                         ),
+                      ),
+                          ),
+                          if (stage == 0)
+                            Positioned(
+                              right: 6,
+                              top: -58,
+                              child: _Bob(child: _ArrowHint()),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -491,4 +497,148 @@ Widget _reveal(BuildContext context, Widget child, {int delayMs = 0}) {
       .animate(delay: Duration(milliseconds: delayMs))
       .fadeIn(duration: 320.ms)
       .slideY(begin: 0.06, end: 0);
+}
+
+
+/// A hand-drawn-looking arrow that points at the share icon, plus a label.
+class _ArrowHint extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: c.accent,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text('TAP', style: ShokuType.label.copyWith(fontSize: 8, color: c.onAccent)),
+        ),
+        const SizedBox(height: 2),
+        CustomPaint(
+          size: const Size(34, 30),
+          painter: _ArrowPainter(color: c.accent),
+        ),
+      ],
+    );
+  }
+}
+
+class _ArrowPainter extends CustomPainter {
+  final Color color;
+  _ArrowPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round;
+    final path = Path()
+      ..moveTo(4, 2)
+      ..cubicTo(26, 2, 32, 12, 28, 26);
+    canvas.drawPath(path, p);
+    // arrowhead
+    final head = Path()
+      ..moveTo(21, 20)
+      ..lineTo(28, 27)
+      ..lineTo(34, 19);
+    canvas.drawPath(head, p);
+  }
+
+  @override
+  bool shouldRepaint(_ArrowPainter oldDelegate) => oldDelegate.color != color;
+}
+
+
+/// Gentle 6px bob, disabled when the OS asks for reduced motion.
+class _Bob extends StatefulWidget {
+  final Widget child;
+  const _Bob({required this.child});
+
+  @override
+  State<_Bob> createState() => _BobState();
+}
+
+class _BobState extends State<_Bob> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return widget.child;
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, -4 * _c.value),
+        child: child,
+      ),
+      child: widget.child,
+    );
+  }
+}
+
+/// A pulsing ring around the share button, so the eye lands on it without copy.
+class _GlowRing extends StatefulWidget {
+  final bool active;
+  final Widget child;
+  const _GlowRing({required this.active, required this.child});
+
+  @override
+  State<_GlowRing> createState() => _GlowRingState();
+}
+
+class _GlowRingState extends State<_GlowRing> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1300),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    if (!widget.active) return widget.child;
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) {
+        final v = reduce ? 0.35 : (1 - _c.value);
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 52 + 18 * (1 - v),
+              height: 52 + 18 * (1 - v),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: c.accent.withValues(alpha: 0.55 * v),
+                  width: 2,
+                ),
+              ),
+            ),
+            child!,
+          ],
+        );
+      },
+      child: widget.child,
+    );
+  }
 }
