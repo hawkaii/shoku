@@ -1,0 +1,82 @@
+name: Android APK
+
+on:
+  push:
+    branches: [flow, main]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Flutter build mode"
+        type: choice
+        options: [debug, release]
+        default: debug
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show toolchain versions
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Informational only: this repo has no meaningful tests yet, so a failure
+      # here must not block the APK. Remove continue-on-error once real tests exist.
+      - name: Analyze
+        continue-on-error: true
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Test
+        continue-on-error: true
+        run: flutter test --reporter expanded
+
+      # The app reads API_BASE_URL via String.fromEnvironment. Only pass the
+      # define when the repo variable is set, otherwise the app's compiled
+      # default would be overridden with an empty string.
+      - name: Build APK
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+        run: |
+          set -euo pipefail
+          args=("--$BUILD_TYPE")
+          if [ -n "${API_BASE_URL}" ]; then
+            echo "Using API_BASE_URL=${API_BASE_URL}"
+            args+=("--dart-define=API_BASE_URL=${API_BASE_URL}")
+          else
+            echo "::warning::Repository variable API_BASE_URL is not set; the APK will use the app's compiled-in default URL."
+          fi
+          flutter build apk "${args[@]}"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: food-finder-apk-${{ inputs.build_type || 'debug' }}
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
+          retention-days: 14
