@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="photo" x1="44" y1="38" x2="208" y2="184" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C8372B"/>
+      <stop offset="0.55" stop-color="#9E281E"/>
+      <stop offset="1" stop-color="#6E1A13"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="28" y1="22" x2="224" y2="234" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFDF9"/>
+      <stop offset="1" stop-color="#F6EFE3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- hard offset shadow (the brutalist edge, kept to one corner) -->
+  <rect x="33" y="27" width="196" height="212" rx="12" fill="#1C1614"/>
+
+  <!-- polaroid body -->
+  <rect x="28" y="22" width="196" height="212" rx="12" fill="url(#paper)" stroke="#1C1614" stroke-width="1.5"/>
+
+  <!-- photo window -->
+  <rect x="44" y="38" width="164" height="146" rx="7" fill="url(#photo)"/>
+
+  <!-- plate -->
+  <circle cx="126" cy="111" r="49" fill="#FFFDF9"/>
+  <circle cx="126" cy="111" r="37" stroke="#E7DBC9" stroke-width="2" fill="none"/>
+
+  <!-- veg: leaf, carrot, tomato -->
+  <path d="M104 100c8-11 22-13 30-6-7 12-21 15-30 6z" fill="#7FA07F"/>
+  <path d="M104 100c8-11 22-13 30-6" stroke="#28664B" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M146 96l13 20h-26l13-20z" fill="#E0A03C"/>
+  <path d="M146 96l13 20h-26l13-20z" stroke="#B87314" stroke-width="1.4"/>
+  <circle cx="128" cy="124" r="7.5" fill="#C8372B"/>
+
+  <!-- knife: blade + handle, diagonal across the right of the plate -->
+  <path d="M170 132l-30 30-10-10 30-30c3.3-3.3 8.7-3.3 12 0 3.3 3.3 3.3 8.7 0 12l-2 -2z" fill="#F4EFE6" stroke="#1C1614" stroke-width="1.4" stroke-linejoin="round"/>
+  <rect x="161" y="143" width="30" height="11" rx="5.5" transform="rotate(-45 161 143)" fill="#1C1614"/>
+
+  <!-- caption line in the polaroid margin -->
+  <rect x="48" y="199" width="82" height="6" rx="3" fill="#E4DACA"/>
+  <circle cx="196" cy="202" r="4" fill="#9E281E"/>
+</svg>

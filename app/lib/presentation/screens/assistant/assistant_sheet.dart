@@ -6,12 +6,16 @@ import '../../../data/mock/journal_data.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
 
-Future<void> showAssistantSheet(BuildContext context, {required Dish dish}) {
+Future<void> showAssistantSheet(
+  BuildContext context, {
+  required Dish dish,
+  VoidCallback? onLogChange,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: context.colors.canvas,
-    builder: (_) => AssistantSheet(dish: dish),
+    builder: (_) => AssistantSheet(dish: dish, onLogChange: onLogChange),
   );
 }
 
@@ -25,7 +29,8 @@ class _Turn {
 /// separating advice from cooking.
 class AssistantSheet extends ConsumerStatefulWidget {
   final Dish dish;
-  const AssistantSheet({super.key, required this.dish});
+  final VoidCallback? onLogChange;
+  const AssistantSheet({super.key, required this.dish, this.onLogChange});
 
   @override
   ConsumerState<AssistantSheet> createState() => _AssistantSheetState();
@@ -157,7 +162,33 @@ class _AssistantSheetState extends ConsumerState<AssistantSheet> {
                 ],
               ),
             ),
-            const SizedBox(height: ShokuSpace.sm),
+            if (widget.onLogChange != null) ...[
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  widget.onLogChange!();
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: surfaceTint(context),
+                    borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                    border: Border.all(color: c.hairline),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.bolt, size: 14, color: c.reward),
+                      const SizedBox(width: 6),
+                      Text('Log a change to this cook',
+                          style: ShokuType.label.copyWith(fontSize: 9.5, color: c.ink)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: ShokuSpace.sm),
+            ],
             MicField(
               controller: _input,
               hint: 'Ask, or hold the mic',
@@ -186,3 +217,8 @@ class _AssistantSheetState extends ConsumerState<AssistantSheet> {
     );
   }
 }
+
+
+Color surfaceTint(BuildContext context) => Theme.of(context).extension<dynamic>() != null
+    ? context.colors.surfaceAlt
+    : Colors.transparent;

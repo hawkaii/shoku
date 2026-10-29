@@ -145,3 +145,18 @@ category marks. Numbers in mono.
 - Full-screen confetti or mascots.
 - Stadium pills everywhere — they read as generic Material defaults.
 - Centre-aligned paragraphs.
+
+
+## 10. Diagram language
+
+Taken from the chosen marks (`brand/5-rim-tomato.svg`, `brand/6-rim-knife.svg`):
+
+- 256-unit design space, scaled from the widget size — never redrawn per screen.
+- Ink outlines at 7 units, round caps and joins. Nothing thinner.
+- Flat fills only: ink `#1C1614`, crimson `#9E281E`, bay leaf `#28664B`, paper.
+- No gradients, no shadows, no stock photography inside a diagram.
+- One idea per diagram: a bowl, a pan, a knife, a plate. Never two objects competing.
+- Diagrams map to intents derived from the step's own verbs: whisk, chop, fold,
+  separate, simmer, bake, chill, plate.
+- Motion is a slow loop (2.6 s) of the *object*, never of the layout. Reduced
+  motion renders a single frame.
