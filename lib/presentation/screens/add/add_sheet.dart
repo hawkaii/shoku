@@ -3,17 +3,33 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../widgets/kit/feedback.dart';
 
-Future<void> showAddSheet(BuildContext context) {
+Future<void> showAddSheet(BuildContext context, {String? prefill}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: context.colors.canvas,
-    builder: (_) => const AddSheet(),
+    builder: (_) => AddSheet(prefill: prefill),
   );
 }
 
-class AddSheet extends StatelessWidget {
-  const AddSheet({super.key});
+class AddSheet extends StatefulWidget {
+  final String? prefill;
+  const AddSheet({super.key, this.prefill});
+
+  @override
+  State<AddSheet> createState() => _AddSheetState();
+}
+
+class _AddSheetState extends State<AddSheet> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.prefill ?? '');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +59,8 @@ class AddSheet extends StatelessWidget {
               border: Border.all(color: c.hairline, width: ShokuStroke.hairline),
             ),
             child: TextField(
-              autofocus: true,
+              controller: _controller,
+              autofocus: widget.prefill == null,
               style: ShokuType.body.copyWith(color: c.ink),
               cursorColor: c.accent,
               decoration: InputDecoration(
