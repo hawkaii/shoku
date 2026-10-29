@@ -111,21 +111,21 @@ class MockData {
       progressTotal: 6,
     ),
     SavedItem(
-      id: 'books',
-      title: 'Six Popular Books That Surprised Me',
-      subtitle: 'I used to judge popular books too quickly — these six changed that.',
+      id: 'salt-onions',
+      title: 'Salt Your Onions the Second They Hit the Pan',
+      subtitle: 'The one habit that makes every sauce taste like it took longer.',
       kind: ItemKind.wisdom,
       source: ItemSource.instagram,
-      sourceHandle: '@reads.well',
-      duration: '1:12',
-      minutesAgo: 31,
-      tags: ['books', 'notes'],
+      sourceHandle: '@salt.fat.acid',
+      duration: '0:37',
+      minutesAgo: 64,
+      tags: ['technique', 'sauce'],
       xp: 15,
       body: [
-        'Popularity is not quality, but it is a signal about what a lot of people needed at one moment.',
-        'The first is a business book that reads like a memoir. Skip the frameworks, keep the stories.',
-        'The second is the one everyone quotes badly. Read the chapter on incentives, ignore the rest.',
-        'The last is out of print. The point is the marginalia, not the text.',
+        'Salt draws water out, and water is the enemy of browning. Salt first, then leave them alone.',
+        'Do not stir for the first three minutes. The pan is doing the work; your spoon is undoing it.',
+        'When the edges go translucent and the bottom sticks a little, that fond is the whole flavour of the sauce.',
+        'Deglaze with a splash of whatever you are drinking, not water. Water just washes the flavour away.',
       ],
     ),
     SavedItem(
@@ -192,7 +192,7 @@ class MockData {
   static const List<StashCollection> collections = [
     StashCollection('Weeknight dinners', '🍳', 12),
     StashCollection('Bread & dough', '🥖', 7),
-    StashCollection('Book notes', '📚', 5),
+    StashCollection('Sauce notes', '🥄', 5),
     StashCollection('Places to eat', '📍', 3),
   ];
 

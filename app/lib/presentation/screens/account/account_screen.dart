@@ -75,7 +75,12 @@ class AccountScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.md),
 
           // ---- Saves balance -------------------------------------------
-          ShokuSurface(
+          Container(
+            decoration: BoxDecoration(
+              gradient: context.isDark ? ShokuGradients.emberCellar : null,
+              borderRadius: BorderRadius.circular(ShokuRadius.card),
+            ),
+            child: ShokuSurface(
             padding: const EdgeInsets.all(ShokuSpace.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,6 +120,7 @@ class AccountScreen extends ConsumerWidget {
                   onPressed: () => context.push('/saves'),
                 ),
               ],
+            ),
             ),
           ),
 

@@ -31,12 +31,14 @@ class ShokuButton extends StatelessWidget {
 
     late final Color bg;
     late final Color fg;
+    Gradient? gradient;
     Border? border;
 
     switch (variant) {
       case ShokuButtonVariant.primary:
         bg = disabled ? c.surfaceAlt : c.accent;
-        fg = disabled ? c.inkMuted : (context.isDark ? const Color(0xFF1A0D09) : Colors.white);
+        fg = disabled ? c.inkMuted : c.onAccent;
+        gradient = disabled ? null : ShokuGradients.crimsonPress;
         border = Border.all(color: disabled ? c.hairline : c.ink, width: ShokuStroke.brutal);
       case ShokuButtonVariant.outline:
         bg = Colors.transparent;
@@ -76,7 +78,8 @@ class ShokuButton extends StatelessWidget {
         vertical: small ? 9 : 13,
       ),
       decoration: BoxDecoration(
-        color: bg,
+        color: gradient == null ? bg : null,
+        gradient: gradient,
         borderRadius: BorderRadius.circular(ShokuRadius.chip),
         border: border,
         boxShadow: variant == ShokuButtonVariant.primary && !disabled
