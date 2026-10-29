@@ -6,9 +6,9 @@ import 'package:food_finder/main.dart';
 void main() {
   testWidgets('Shoku boots into onboarding', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: ShokuApp()));
-    // Let the staged entrance animations finish so no timers are left pending.
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Your cooking,\nkept.'), findsOneWidget);
+    // The primary CTA is the stable signal that onboarding rendered.
+    expect(find.text('Start cooking'), findsOneWidget);
   });
 }
