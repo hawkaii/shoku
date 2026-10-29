@@ -21,7 +21,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   static const _tabs = [
     ShokuTabItem(Icons.menu_book_outlined, Icons.menu_book, 'Journal'),
     ShokuTabItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu, 'Cookbook'),
-    ShokuTabItem(Icons.shopping_basket_outlined, Icons.shopping_basket, 'Groceries'),
+    ShokuTabItem(Icons.grid_view_outlined, Icons.grid_view, 'Wall'),
     ShokuTabItem(Icons.person_outline, Icons.person, 'You'),
   ];
 
@@ -50,23 +50,15 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   Future<void> _handleBack() async {
-    // Inside a tab stack: let the branch pop first.
     if (widget.shell.currentIndex != 0) {
       widget.shell.goBranch(0);
       return;
     }
     if (_askedToExit) return;
     _askedToExit = true;
-
-    final leave = await showDialog<bool>(
-      context: context,
-      builder: (context) => _ExitDialog(),
-    );
+    final leave = await showDialog<bool>(context: context, builder: (_) => const _ExitDialog());
     _askedToExit = false;
-
-    if (leave == true) {
-      await SystemNavigator.pop();
-    }
+    if (leave == true) await SystemNavigator.pop();
   }
 
   @override
@@ -100,6 +92,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 }
 
 class _ExitDialog extends StatelessWidget {
+  const _ExitDialog();
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -135,10 +129,8 @@ class _ExitDialog extends StatelessWidget {
                         side: BorderSide(color: c.hairline),
                       ),
                     ),
-                    child: Text(
-                      'Keep cooking',
-                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 13),
-                    ),
+                    child: Text('Keep cooking',
+                        style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
                   ),
                 ),
                 const SizedBox(width: ShokuSpace.sm),
@@ -152,10 +144,8 @@ class _ExitDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(ShokuRadius.chip),
                       ),
                     ),
-                    child: Text(
-                      'Exit',
-                      style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13),
-                    ),
+                    child: Text('Exit',
+                        style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13)),
                   ),
                 ),
               ],

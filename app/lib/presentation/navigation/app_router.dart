@@ -1,11 +1,14 @@
 import 'package:go_router/go_router.dart';
 
 import '../screens/account/help_screen.dart';
+import '../screens/cook/cook_mode_screen.dart';
 import '../screens/dish/dish_screen.dart';
 import '../screens/journal/journal_screen.dart';
+import '../screens/nutrition/nutrition_lens_screen.dart';
+import '../screens/nutrition/nutrition_setup_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/recipes/recipes_screen.dart';
-import '../screens/shopping/shopping_screen.dart';
+import '../screens/wall/wall_screen.dart';
 import '../state/shoku_providers.dart';
 import 'app_shell.dart';
 
@@ -24,7 +27,7 @@ final GoRouter appRouter = GoRouter(
           routes: [GoRoute(path: '/recipes', builder: (_, __) => const RecipesScreen())],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/groceries', builder: (_, __) => const ShoppingScreen())],
+          routes: [GoRoute(path: '/wall', builder: (_, __) => const WallScreen())],
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen())],
@@ -37,6 +40,14 @@ final GoRouter appRouter = GoRouter(
         dishId: state.pathParameters['id'] ?? 'mousse',
       ),
     ),
+    GoRoute(
+      path: '/cook/:id',
+      builder: (context, state) => CookModeScreen(
+        dishId: state.pathParameters['id'] ?? 'mousse',
+      ),
+    ),
+    GoRoute(path: '/nutrition', builder: (_, __) => const NutritionLensScreen()),
+    GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionSetupScreen()),
     GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),
   ],
 );

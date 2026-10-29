@@ -7,6 +7,7 @@ import '../../data/mock/mock_data.dart';
 /// On a real device Uri.base carries no query, so nothing changes.
 final previewScreen = Uri.base.queryParameters['screen'];
 final previewTheme = Uri.base.queryParameters['theme'];
+final previewStatic = Uri.base.queryParameters.containsKey('static');
 
 /// Theme mode — Account → Appearance writes here.
 final themeModeProvider = StateProvider<ThemeMode>(

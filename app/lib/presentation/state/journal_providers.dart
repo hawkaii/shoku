@@ -1,13 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/mock/journal_data.dart';
+import 'journal_store.dart';
 
-final dishesProvider = Provider<List<Dish>>((ref) => JournalData.dishes);
+final dishesProvider = Provider<List<Dish>>((ref) => ref.watch(journalStoreProvider));
 
 final cooksProvider = Provider<List<CookLog>>((ref) => JournalData.allCooks);
 
 final dishProvider = Provider.family<Dish, String>(
-  (ref, id) => JournalData.dishFor(id),
+  (ref, id) => ref.watch(journalStoreProvider).firstWhere(
+        (d) => d.id == id,
+        orElse: () => ref.read(journalStoreProvider).first,
+      ),
 );
 
 final totalCooksProvider = Provider<int>((ref) => JournalData.totalCooks);
