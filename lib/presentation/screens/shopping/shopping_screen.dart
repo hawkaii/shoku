@@ -36,7 +36,7 @@ class _ShoppingScreenState extends ConsumerState<ShoppingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Shopping', style: ShokuType.h1.copyWith(color: c.ink)),
+                Text('Groceries', style: ShokuType.h1.copyWith(color: c.ink)),
                 const SizedBox(height: ShokuSpace.md),
                 ShokuSegmented(
                   labels: const ['TO BUY', 'PANTRY'],

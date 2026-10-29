@@ -1,0 +1,30 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/mock/journal_data.dart';
+
+final dishesProvider = Provider<List<Dish>>((ref) => JournalData.dishes);
+
+final cooksProvider = Provider<List<CookLog>>((ref) => JournalData.allCooks);
+
+final dishProvider = Provider.family<Dish, String>(
+  (ref, id) => JournalData.dishFor(id),
+);
+
+final totalCooksProvider = Provider<int>((ref) => JournalData.totalCooks);
+final totalUpgradesProvider = Provider<int>((ref) => JournalData.totalUpgrades);
+final signatureCountProvider = Provider<int>((ref) => JournalData.signatureCount);
+
+/// Which version is being inspected in the dish dossier.
+final inspectedVersionProvider = StateProvider.family<int, String>(
+  (ref, dishId) => JournalData.dishFor(dishId).versions.length,
+);
+
+/// Library filter.
+enum LibraryFilter { all, wantToTry, inProgress, signature }
+
+final libraryFilterProvider =
+    StateProvider<LibraryFilter>((ref) => LibraryFilter.all);
+
+/// Cook-log sheet state (mock write path).
+final pendingOutcomeProvider = StateProvider<CookOutcome?>((ref) => null);
+final pendingChangesProvider = StateProvider<String>((ref) => '');

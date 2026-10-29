@@ -30,8 +30,8 @@ class AddSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ShokuSheetHeader(
-            title: 'Add a save',
-            subtitle: 'One reel becomes one recipe or one note.',
+            title: 'Import a recipe',
+            subtitle: 'One reel becomes one dish you can cook and version.',
             onClose: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: ShokuSpace.lg),
