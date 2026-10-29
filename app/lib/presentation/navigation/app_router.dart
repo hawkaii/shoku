@@ -1,101 +1,41 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/models/recipe.dart';
-import '../../data/models/dish_suggestion.dart';
+
+import '../screens/account/account_screen.dart';
+import '../screens/account/help_screen.dart';
+import '../screens/account/saves_plan_screen.dart';
+import '../screens/discover/discover_screen.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/add_recipe/add_recipe_screen.dart';
-import '../screens/recipe_detail/recipe_detail_screen.dart';
-import '../screens/shopping_list/shopping_list_screen.dart';
-import '../screens/nutrition/nutrition_screen.dart';
-import '../screens/nutrition/food_lookup_screen.dart';
-import '../screens/nutrition/scan_bill_screen.dart';
-import '../screens/ingredient_flow/ingredient_input_screen.dart';
-import '../screens/ingredient_flow/ingredients_list_screen.dart';
-import '../screens/ingredient_flow/recipe_suggestions_screen.dart';
-import '../screens/ingredient_flow/youtube_webview_screen.dart';
-import '../screens/ingredient_flow/recipe_summary_screen.dart';
-import 'main_navigation.dart';
+import '../screens/recipe/recipe_detail_screen.dart';
+import '../screens/shopping/shopping_screen.dart';
+import '../screens/stash/stash_screen.dart';
+import 'app_shell.dart';
+import '../state/shoku_providers.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: previewScreen == null
+      ? '/'
+      : previewScreen == 'home'
+          ? '/'
+          : '/$previewScreen',
   routes: [
     ShellRoute(
-      builder: (context, state, child) {
-        return MainNavigation(child: child);
-      },
+      builder: (context, state, child) => AppShell(child: child),
       routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/nutrition',
-          builder: (context, state) => const NutritionScreen(),
-        ),
-        GoRoute(
-          path: '/add',
-          builder: (context, state) => const AddRecipeScreen(),
-        ),
+        GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
+        GoRoute(path: '/stash', builder: (_, __) => const StashScreen()),
+        GoRoute(path: '/discover', builder: (_, __) => const DiscoverScreen()),
+        GoRoute(path: '/shopping', builder: (_, __) => const ShoppingScreen()),
+        GoRoute(path: '/account', builder: (_, __) => const AccountScreen()),
       ],
     ),
     GoRoute(
       path: '/recipe/:id',
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return RecipeDetailScreen(recipeId: id);
-      },
+      builder: (context, state) => RecipeDetailScreen(
+        itemId: state.pathParameters['id'] ?? 'mousse',
+      ),
     ),
-    GoRoute(
-      path: '/shopping-list/:id',
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return ShoppingListScreen(recipeId: id);
-      },
-    ),
-    GoRoute(
-      path: '/nutrition/lookup',
-      builder: (context, state) => const FoodLookupScreen(),
-    ),
-    GoRoute(
-      path: '/nutrition/log',
-      builder: (context, state) => const FoodLookupScreen(), // Placeholder
-    ),
-    GoRoute(
-      path: '/nutrition/recipes',
-      builder: (context, state) => const FoodLookupScreen(), // Placeholder
-    ),
-    GoRoute(
-      path: '/nutrition/scan',
-      builder: (context, state) => const ScanBillScreen(),
-    ),
-    // Ingredient-to-Recipe Flow
-    GoRoute(
-      path: '/ingredient-input',
-      builder: (context, state) => const IngredientInputScreen(),
-    ),
-    GoRoute(
-      path: '/ingredients-list',
-      builder: (context, state) => const IngredientsListScreen(),
-    ),
-    GoRoute(
-      path: '/recipe-suggestions',
-      builder: (context, state) {
-        final dishes = state.extra as List<DishSuggestion>;
-        return RecipeSuggestionsScreen(dishes: dishes);
-      },
-    ),
-    GoRoute(
-      path: '/youtube-webview',
-      builder: (context, state) {
-        final youtubeUrl = state.extra as String;
-        return YouTubeWebViewScreen(youtubeUrl: youtubeUrl);
-      },
-    ),
-    GoRoute(
-      path: '/recipe-summary',
-      builder: (context, state) {
-        final recipe = state.extra as Recipe;
-        return RecipeSummaryScreen(recipe: recipe);
-      },
-    ),
+    GoRoute(path: '/saves', builder: (_, __) => const SavesPlanScreen()),
+    GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),
   ],
 );
