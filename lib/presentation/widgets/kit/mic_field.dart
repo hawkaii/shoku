@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+
+import '../../../core/theme/shoku_theme.dart';
+import 'motion.dart';
+
+/// Push-to-talk text field. The mic is live only while pressed — that press is
+/// the consent gesture, and it is visible.
+class MicField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final int maxLines;
+
+  const MicField({
+    super.key,
+    required this.controller,
+    this.hint = 'Type or hold the mic',
+    this.maxLines = 3,
+  });
+
+  @override
+  State<MicField> createState() => _MicFieldState();
+}
+
+class _MicFieldState extends State<MicField> {
+  final _speech = SpeechToText();
+  bool _listening = false;
+  bool _available = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech.initialize().then((ok) {
+      if (mounted) setState(() => _available = ok);
+    }).catchError((_) {});
+  }
+
+  Future<void> _start() async {
+    if (!_available) return;
+    setState(() => _listening = true);
+    try {
+      await _speech.listen(
+        onResult: (result) {
+          if (!mounted) return;
+          final text = result.recognizedWords;
+          if (text.isNotEmpty) widget.controller.text = text;
+        },
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+      );
+    } catch (_) {
+      setState(() => _listening = false);
+    }
+  }
+
+  Future<void> _stop() async {
+    setState(() => _listening = false);
+    try {
+      await _speech.stop();
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 6),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(ShokuRadius.chip),
+        border: Border.all(
+          color: _listening ? c.accent : c.hairline,
+          width: _listening ? ShokuStroke.brutal : ShokuStroke.hairline,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: widget.controller,
+              maxLines: widget.maxLines,
+              minLines: 1,
+              style: ShokuType.bodySmall.copyWith(color: c.ink),
+              cursorColor: c.accent,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: _listening ? 'Listening…' : widget.hint,
+                hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+              ),
+            ),
+          ),
+          const SizedBox(width: ShokuSpace.sm),
+          ShokuPressable(
+            onTap: () {},
+            child: GestureDetector(
+              onLongPressStart: (_) => _start(),
+              onLongPressEnd: (_) => _stop(),
+              onTap: _available ? _start : null,
+              child: AnimatedContainer(
+                duration: ShokuMotion.toggle,
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _listening ? c.accent : c.surfaceAlt,
+                  borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                  border: Border.all(color: _listening ? c.accent : c.hairline),
+                ),
+                child: Icon(
+                  _listening ? Icons.mic : Icons.mic_none,
+                  size: 17,
+                  color: _listening ? c.onAccent : c.ink,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

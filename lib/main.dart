@@ -9,12 +9,21 @@ import 'presentation/state/shoku_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   // Read the persisted flag before the first frame so onboarding never flashes.
-  final seen = await Prefs.onboardingDone();
+  var onboardingDone = false;
+  try {
+    onboardingDone = await Prefs.onboardingDone();
+  } catch (_) {
+    // Storage unavailable (e.g. web preview): show onboarding once.
+  }
+
   runApp(
     ProviderScope(
       overrides: [
-        onboardingDoneProvider.overrideWith((ref) => seen),
+        onboardingDoneProvider.overrideWith(
+          (ref) => onboardingDone || previewScreen != null,
+        ),
       ],
       child: const ShokuApp(),
     ),
@@ -29,24 +38,32 @@ class ShokuApp extends ConsumerWidget {
     final mode = ref.watch(themeModeProvider);
     final onboardingDone = ref.watch(onboardingDoneProvider);
 
-    final app = onboardingDone
-        ? MaterialApp.router(
-            title: 'Shoku',
-            debugShowCheckedModeBanner: false,
-            theme: ShokuTheme.light(),
-            darkTheme: ShokuTheme.dark(),
-            themeMode: mode,
-            routerConfig: appRouter,
-          )
-        : MaterialApp(
-            title: 'Shoku',
-            debugShowCheckedModeBanner: false,
-            theme: ShokuTheme.light(),
-            darkTheme: ShokuTheme.dark(),
-            themeMode: mode,
-            home: const OnboardingScreen(),
-          );
+    if (!onboardingDone) {
+      return MaterialApp(
+        title: 'Shoku',
+        debugShowCheckedModeBanner: false,
+        theme: ShokuTheme.light(),
+        darkTheme: ShokuTheme.dark(),
+        themeMode: mode,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
+          child: child ?? const SizedBox.shrink(),
+        ),
+        home: const OnboardingScreen(),
+      );
+    }
 
-    return app;
+    return MaterialApp.router(
+      title: 'Shoku',
+      debugShowCheckedModeBanner: false,
+      theme: ShokuTheme.light(),
+      darkTheme: ShokuTheme.dark(),
+      themeMode: mode,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
+        child: child ?? const SizedBox.shrink(),
+      ),
+      routerConfig: appRouter,
+    );
   }
 }

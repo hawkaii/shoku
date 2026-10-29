@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/prefs.dart';
 import '../../state/journal_providers.dart';
+import '../../state/nutrition_providers.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
@@ -21,6 +22,7 @@ class ProfileScreen extends ConsumerWidget {
     final upgrades = ref.watch(totalUpgradesProvider);
     final signature = ref.watch(signatureCountProvider);
     final mode = ref.watch(themeModeProvider);
+    final nutrition = ref.watch(nutritionProvider);
 
     return SafeArea(
       bottom: false,
@@ -40,56 +42,62 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: ShokuSpace.lg),
 
-          // ---- Stats --------------------------------------------------
           Row(
             children: [
-              Expanded(
-                child: _StatBlock(value: '$cooks', label: 'cooks', color: c.ink),
-              ),
+              Expanded(child: _StatBlock(value: '$cooks', label: 'cooks', color: c.ink)),
               const SizedBox(width: ShokuSpace.sm),
-              Expanded(
-                child: _StatBlock(value: '$upgrades', label: 'upgrades', color: c.reward),
-              ),
+              Expanded(child: _StatBlock(value: '$upgrades', label: 'upgrades', color: c.reward)),
               const SizedBox(width: ShokuSpace.sm),
-              Expanded(
-                child: _StatBlock(value: '$signature', label: 'signature', color: c.ready),
-              ),
+              Expanded(child: _StatBlock(value: '$signature', label: 'signature', color: c.ready)),
             ],
           ),
-          const SizedBox(height: ShokuSpace.lg),
 
-          // ---- Month strip -------------------------------------------
-          ShokuLabel('this month'),
+          const SizedBox(height: ShokuSpace.lg),
+          ShokuLabel('nutrition'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSurface(
             padding: const EdgeInsets.all(ShokuSpace.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    for (var i = 0; i < 4; i++) ...[
-                      Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsets.only(right: 6),
-                        decoration: BoxDecoration(
-                          color: i < 3 ? c.accent : c.hairline,
-                          borderRadius: BorderRadius.circular(2),
+                Text(
+                  nutrition.onboarded ? 'Nutrition is on' : 'Nutrition is off',
+                  style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  nutrition.onboarded
+                      ? '${nutrition.kcalTarget} kcal · ${nutrition.proteinTarget} g protein per day, read only from your cooks.'
+                      : 'Turn it on to see how your tweaks changed a dish, and whether your week of cooking is balanced. Off by default.',
+                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: ShokuSpace.md),
+                ShokuPressable(
+                  onTap: () => context.push(
+                    nutrition.onboarded ? '/nutrition' : '/nutrition/setup',
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: nutrition.onboarded ? c.surfaceAlt : null,
+                      gradient: nutrition.onboarded ? null : ShokuGradients.crimsonPress,
+                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                      border: Border.all(
+                        color: nutrition.onboarded ? c.hairline : c.ink,
+                        width: nutrition.onboarded ? 1 : ShokuStroke.brutal,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        nutrition.onboarded ? 'Open the lens' : 'Set up nutrition',
+                        style: ShokuType.title.copyWith(
+                          color: nutrition.onboarded ? c.ink : c.onAccent,
+                          fontSize: 13,
                         ),
                       ),
-                    ],
-                    const Spacer(),
-                    Text(
-                      '3 cooking days',
-                      style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                     ),
-                  ],
-                ),
-                const SizedBox(height: ShokuSpace.sm),
-                Text(
-                  'Three nights this month. Two upgrades. One dish is one cook from signature.',
-                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                  ),
                 ),
               ],
             ),
@@ -119,10 +127,10 @@ class ProfileScreen extends ConsumerWidget {
           ShokuListRow(
             icon: Icons.menu_book_outlined,
             title: 'How Shoku works',
-            subtitle: 'The share gesture, in four steps',
-            onTap: () {
+            subtitle: 'The share gesture, in three steps',
+            onTap: () async {
+              await Prefs.setOnboardingDone(false);
               ref.read(onboardingDoneProvider.notifier).state = false;
-              Prefs.setOnboardingDone(false);
             },
           ),
           ShokuHairline(),
@@ -133,8 +141,8 @@ class ProfileScreen extends ConsumerWidget {
           ),
           ShokuHairline(),
           ShokuListRow(
-            icon: Icons.logout,
-            title: 'Sign out',
+            icon: Icons.delete_outline,
+            title: 'Reset journal',
             showChevron: false,
             onTap: () {},
           ),
@@ -165,10 +173,7 @@ class _StatBlock extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.md),
       child: Column(
         children: [
-          ShokuNumberRoll(
-            value: value,
-            style: ShokuType.statHero.copyWith(color: color),
-          ),
+          ShokuNumberRoll(value: value, style: ShokuType.statHero.copyWith(color: color)),
           const SizedBox(height: 2),
           Text(label.toUpperCase(), style: ShokuType.label.copyWith(color: c.inkMuted)),
         ],

@@ -7,9 +7,10 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/prefs.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/foundation.dart';
+import '../../widgets/kit/motion.dart';
 
-/// Three steps, one of which you actually perform: tap share on a mock reel,
-/// then tap Shoku in the mock share sheet. That gesture is the whole product.
+/// Three steps, and the middle one is the product: you actually perform the
+/// share gesture once, here, so you know it forever.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -20,21 +21,22 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
+  int _stage = 0; // 0 = reel, 1 = share sheet, 2 = saved
 
-  void _finish() {
+  Future<void> _finish() async {
+    await Prefs.setOnboardingDone(true);
     ref.read(onboardingDoneProvider.notifier).state = true;
-    Prefs.setOnboardingDone(true);
   }
 
   void _next() {
-    if (_page == 2) {
+    if (_page < 2) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
       _finish();
-      return;
     }
-    _controller.nextPage(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
-    );
   }
 
   @override
@@ -52,12 +54,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                ShokuSpace.lg,
-                ShokuSpace.sm,
-                ShokuSpace.lg,
-                0,
-              ),
+              padding: const EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.sm, ShokuSpace.lg, 0),
               child: Row(
                 children: [
                   Text('SHOKU', style: ShokuType.label.copyWith(color: c.inkMuted)),
@@ -65,13 +62,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   if (_page < 2)
                     GestureDetector(
                       onTap: _finish,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(
-                          'Skip',
-                          style: ShokuType.label.copyWith(color: c.inkMuted),
-                        ),
-                      ),
+                      child: Text('Skip',
+                          style: ShokuType.label.copyWith(color: c.inkMuted)),
                     ),
                 ],
               ),
@@ -83,11 +75,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   const _IntroStep(),
                   _ShareStep(
-                    onDone: () {
-                      Future<void>.delayed(const Duration(milliseconds: 700), () {
-                        if (mounted) _next();
-                      });
-                    },
+                    stage: _stage,
+                    onShareTap: () => setState(() => _stage = 1),
+                    onPickShoku: () => setState(() => _stage = 2),
                   ),
                   const _JournalStep(),
                 ],
@@ -102,69 +92,59 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               child: Column(
                 children: [
-                  AnimatedSmoothIndicator(
-                    activeIndex: _page,
+                  SmoothPageIndicator(
+                    controller: _controller,
                     count: 3,
                     effect: ExpandingDotsEffect(
-                      dotHeight: 6,
                       dotWidth: 6,
-                      expansionFactor: 3.2,
-                      spacing: 5,
+                      dotHeight: 6,
+                      expansionFactor: 3,
+                      spacing: 4,
                       activeDotColor: c.ink,
                       dotColor: c.hairline,
                     ),
                   ),
                   const SizedBox(height: ShokuSpace.lg),
-                  _PrimaryCta(
-                    label: _page == 0
-                        ? 'Show me how'
-                        : _page == 1
-                            ? 'Continue'
-                            : 'Open my journal',
+                  ShokuPressable(
                     onTap: _next,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: ShokuGradients.crimsonPress,
+                        borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                        border: Border.all(color: c.ink, width: ShokuStroke.brutal),
+                        boxShadow: [
+                          BoxShadow(
+                              color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          _page == 0
+                              ? 'Start cooking'
+                              : _page == 1
+                                  ? (_stage == 2 ? 'Continue' : 'Share a reel to try it')
+                                  : 'Open my journal',
+                          style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: ShokuSpace.sm),
-                  Text(
-                    _page == 0
-                        ? 'Takes 20 seconds'
-                        : _page == 1
-                            ? 'You can do this from any app'
-                            : 'Everything stays on your phone',
-                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                  ),
+                  if (_page == 1 && _stage < 2)
+                    Padding(
+                      padding: const EdgeInsets.only(top: ShokuSpace.sm),
+                      child: Text(
+                        _stage == 0
+                            ? 'Tap the share icon below'
+                            : 'Now tap Shoku in the sheet',
+                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                      ),
+                    ),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PrimaryCta extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _PrimaryCta({required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        decoration: BoxDecoration(
-          gradient: ShokuGradients.crimsonPress,
-          borderRadius: BorderRadius.circular(ShokuRadius.chip),
-          border: Border.all(color: c.ink, width: ShokuStroke.brutal),
-          boxShadow: [
-            BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
-          ],
-        ),
-        child: Center(
-          child: Text(label, style: ShokuType.title.copyWith(color: c.onAccent)),
         ),
       ),
     );
@@ -183,244 +163,208 @@ class _IntroStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text.rich(
-            TextSpan(
-              text: 'Shoku',
-              style: ShokuType.display.copyWith(fontSize: 54, color: c.ink),
-              children: [TextSpan(text: '.', style: TextStyle(color: c.accent))],
+          _reveal(
+            context,
+            Text.rich(
+              TextSpan(
+                text: 'Shoku',
+                style: ShokuType.display.copyWith(fontSize: 54, color: c.ink),
+                children: [TextSpan(text: '.', style: TextStyle(color: c.accent))],
+              ),
             ),
-          ).animate().fadeIn(duration: 420.ms).slideY(begin: 0.12, curve: Curves.easeOutCubic),
+          ),
           const SizedBox(height: ShokuSpace.md),
-          Text(
-            'Your cooking,\nkept.',
-            style: ShokuType.h1.copyWith(color: c.ink, fontSize: 30),
-          ).animate().fadeIn(delay: 90.ms, duration: 420.ms).slideY(begin: 0.1),
+          _reveal(
+            context,
+            Text('Cook it once.\nMake it yours.',
+                style: ShokuType.h1.copyWith(color: c.ink, fontSize: 28)),
+            delayMs: 80,
+          ),
           const SizedBox(height: ShokuSpace.md),
-          Text(
-            'Save a recipe from a reel. Cook it. Log what you changed. Watch a dish become yours over four or five versions.',
-            style: ShokuType.body.copyWith(color: c.inkMuted),
-          ).animate().fadeIn(delay: 170.ms, duration: 420.ms),
+          _reveal(
+            context,
+            Text(
+              'Every time you cook, you change something. Shoku remembers those changes, so next time you can pick the version that fits tonight.',
+              style: ShokuType.body.copyWith(color: c.inkMuted),
+            ),
+            delayMs: 160,
+          ),
           const SizedBox(height: ShokuSpace.xl),
-          Row(
-            children: [
-              ShokuChip('Instagram', icon: Icons.camera_alt_outlined),
-              const SizedBox(width: ShokuSpace.xs),
-              ShokuChip('YouTube', icon: Icons.play_circle_outline),
-              const SizedBox(width: ShokuSpace.xs),
-              ShokuChip('Versions', icon: Icons.history),
-            ],
-          ).animate().fadeIn(delay: 250.ms, duration: 420.ms),
+          _reveal(
+            context,
+            Row(
+              children: const [
+                ShokuChip('Instagram', icon: Icons.camera_alt_outlined),
+                SizedBox(width: 6),
+                ShokuChip('YouTube', icon: Icons.play_circle_outline),
+              ],
+            ),
+            delayMs: 240,
+          ),
         ],
       ),
     );
   }
 }
 
-class _ShareStep extends StatefulWidget {
-  final VoidCallback onDone;
-  const _ShareStep({required this.onDone});
+class _ShareStep extends StatelessWidget {
+  final int stage;
+  final VoidCallback onShareTap;
+  final VoidCallback onPickShoku;
 
-  @override
-  State<_ShareStep> createState() => _ShareStepState();
-}
-
-class _ShareStepState extends State<_ShareStep> {
-  int _stage = 0; // 0 reel, 1 share sheet, 2 saved
-
-  void _tapShare() => setState(() => _stage = 1);
-
-  void _tapShoku() {
-    setState(() => _stage = 2);
-    widget.onDone();
-  }
+  const _ShareStep({
+    required this.stage,
+    required this.onShareTap,
+    required this.onPickShoku,
+  });
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.lg),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: ShokuSpace.md),
-          ShokuLabel('step 1 · share', color: c.accent),
-          const SizedBox(height: ShokuSpace.xs),
-          Text(
-            'Tap share, pick Shoku.',
-            style: ShokuType.h1.copyWith(color: c.ink, fontSize: 24),
-          ),
+          Text('01 · SHARE THE REEL', style: ShokuType.label.copyWith(color: c.accent)),
+          const SizedBox(height: ShokuSpace.sm),
+          Text('One tap, from the app you are already in.',
+              style: ShokuType.h1.copyWith(color: c.ink, fontSize: 24)),
           const SizedBox(height: ShokuSpace.md),
 
           // Mock reel
-          ShokuSurface(
-            padding: const EdgeInsets.all(ShokuSpace.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 26,
-                      height: 26,
-                      decoration: BoxDecoration(
-                        color: c.surfaceAlt,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: c.hairline),
-                      ),
-                      child: Center(
-                        child: Text('h', style: ShokuType.stat.copyWith(fontSize: 11)),
-                      ),
-                    ),
-                    const SizedBox(width: ShokuSpace.sm),
-                    Text('@highprotein.eats', style: ShokuType.bodySmall.copyWith(color: c.ink)),
-                    const Spacer(),
-                    Icon(Icons.more_horiz, size: 16, color: c.inkMuted),
-                  ],
-                ),
-                const SizedBox(height: ShokuSpace.sm),
-                Container(
-                  height: 110,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: c.surfaceAlt,
-                    borderRadius: BorderRadius.circular(ShokuRadius.media),
-                    border: Border.all(color: c.hairline),
-                  ),
-                  child: const Center(child: Text('🍫', style: TextStyle(fontSize: 36))),
-                ),
-                const SizedBox(height: ShokuSpace.sm),
-                Row(
-                  children: [
-                    Icon(Icons.favorite_border, size: 15, color: c.inkMuted),
-                    const SizedBox(width: 4),
-                    Text('12.4k', style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: _stage == 0 ? _tapShare : null,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.all(9),
-                        decoration: BoxDecoration(
-                          color: _stage == 0 ? c.accent : c.surfaceAlt,
-                          borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                          border: Border.all(
-                            color: _stage == 0 ? c.ink : c.hairline,
-                            width: _stage == 0 ? ShokuStroke.brutal : 1,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.send,
-                          size: 15,
-                          color: _stage == 0 ? c.onAccent : c.inkMuted,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          if (_stage == 0)
-            Padding(
-              padding: const EdgeInsets.only(top: ShokuSpace.sm),
-              child: Text(
-                '↑ tap the share arrow',
-                style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: stage == 2 ? 0.35 : 1,
+            child: Container(
+              padding: const EdgeInsets.all(ShokuSpace.sm),
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: BorderRadius.circular(ShokuRadius.card),
+                border: Border.all(color: c.hairline),
               ),
-            ),
-
-          // Mock share sheet
-          if (_stage >= 1)
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  margin: const EdgeInsets.only(top: ShokuSpace.md),
-                  padding: const EdgeInsets.all(ShokuSpace.lg),
-                  decoration: BoxDecoration(
-                    color: c.surface,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(ShokuRadius.sheet),
-                    ),
-                    border: Border.all(color: c.hairline),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Center(
-                        child: Container(
-                          width: 34,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: ShokuSpace.md),
-                          decoration: BoxDecoration(
-                            color: c.hairline,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: c.surfaceAlt,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: c.hairline),
+                        ),
+                        child: Center(
+                          child: Text('h',
+                              style: ShokuType.stat.copyWith(fontSize: 10, color: c.ink)),
                         ),
                       ),
-                      Text('Share to', style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
-                      const SizedBox(height: ShokuSpace.md),
-                      Row(
-                        children: [
-                          _Target(label: 'Messages', color: const Color(0xFF34C759), text: 'M'),
-                          const SizedBox(width: ShokuSpace.md),
-                          _Target(label: 'WhatsApp', color: const Color(0xFF25D366), text: 'W'),
-                          const SizedBox(width: ShokuSpace.md),
-                          GestureDetector(
-                            onTap: _stage == 1 ? _tapShoku : null,
-                            child: AnimatedScale(
-                              duration: const Duration(milliseconds: 200),
-                              scale: _stage == 1 ? 1.06 : 1,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(ShokuRadius.card),
-                                  border: Border.all(color: c.accent, width: ShokuStroke.brutal),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: c.accentSoft,
-                                        borderRadius: BorderRadius.circular(ShokuRadius.media),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          'S.',
-                                          style: ShokuType.h2.copyWith(color: c.accent),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text('Shoku', style: ShokuType.label.copyWith(color: c.accent, fontSize: 9)),
-                                  ],
-                                ),
-                              ),
+                      const SizedBox(width: ShokuSpace.sm),
+                      Text('@highprotein.eats',
+                          style: ShokuType.bodySmall.copyWith(color: c.ink)),
+                      const Spacer(),
+                      Text('0:48',
+                          style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
+                    ],
+                  ),
+                  const SizedBox(height: ShokuSpace.sm),
+                  Container(
+                    height: 74,
+                    decoration: BoxDecoration(
+                      color: c.surfaceAlt,
+                      borderRadius: BorderRadius.circular(ShokuRadius.media),
+                      border: Border.all(color: c.hairline),
+                    ),
+                    child: Center(
+                      child: Text('4-ingredient protein mousse',
+                          style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                    ),
+                  ),
+                  const SizedBox(height: ShokuSpace.sm),
+                  Row(
+                    children: [
+                      Icon(Icons.favorite_border, size: 15, color: c.inkMuted),
+                      const SizedBox(width: 4),
+                      Text('12.4k',
+                          style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
+                      const Spacer(),
+                      ShokuPressable(
+                        onTap: onShareTap,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 160),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: stage == 0 ? c.accent : c.surfaceAlt,
+                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                            border: Border.all(
+                              color: stage == 0 ? c.ink : c.hairline,
+                              width: stage == 0 ? ShokuStroke.brutal : 1,
                             ),
                           ),
-                          const SizedBox(width: ShokuSpace.md),
-                          _Target(label: 'More', color: c.surfaceAlt, text: '+'),
-                        ],
-                      ),
-                      const SizedBox(height: ShokuSpace.md),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Text(
-                          _stage == 2 ? 'Saved as v1 — now cook it' : '↑ tap Shoku',
-                          key: ValueKey(_stage),
-                          style: ShokuType.bodySmall.copyWith(
-                            color: _stage == 2 ? c.ready : c.inkMuted,
-                          ),
+                          child: Icon(Icons.send,
+                              size: 14, color: stage == 0 ? c.onAccent : c.ink),
                         ),
                       ),
                     ],
                   ),
-                ),
+                ],
+              ),
+            ),
+          ),
+
+          // Share sheet
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            child: stage == 0
+                ? const SizedBox(width: double.infinity)
+                : Container(
+                    margin: const EdgeInsets.only(top: ShokuSpace.sm),
+                    padding: const EdgeInsets.all(ShokuSpace.sm),
+                    decoration: BoxDecoration(
+                      color: c.surface,
+                      borderRadius: BorderRadius.circular(ShokuRadius.card),
+                      border: Border.all(color: c.hairline),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Share to',
+                            style: ShokuType.title.copyWith(color: c.ink, fontSize: 12)),
+                        const SizedBox(height: ShokuSpace.sm),
+                        Row(
+                          children: [
+                            _Target(label: 'Messages', text: 'M', color: const Color(0xFF34C759)),
+                            const SizedBox(width: ShokuSpace.sm),
+                            _Target(label: 'WhatsApp', text: 'W', color: const Color(0xFF25D366)),
+                            const SizedBox(width: ShokuSpace.sm),
+                            _Target(
+                              label: 'Shoku',
+                              text: 'S',
+                              color: stage == 1 ? c.accent : c.surfaceAlt,
+                              highlighted: stage == 1,
+                              onTap: onPickShoku,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+
+          if (stage == 2)
+            Padding(
+              padding: const EdgeInsets.only(top: ShokuSpace.sm),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, size: 16, color: c.ready),
+                  const SizedBox(width: 6),
+                  Text('Saved as v1 · extracted in 4 seconds',
+                      style: ShokuType.bodySmall.copyWith(color: c.ready)),
+                ],
               ),
             ),
         ],
@@ -431,35 +375,54 @@ class _ShareStepState extends State<_ShareStep> {
 
 class _Target extends StatelessWidget {
   final String label;
-  final Color color;
   final String text;
-  const _Target({required this.label, required this.color, required this.text});
+  final Color color;
+  final bool highlighted;
+  final VoidCallback? onTap;
+
+  const _Target({
+    required this.label,
+    required this.text,
+    required this.color,
+    this.highlighted = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Column(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(ShokuRadius.media),
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: ShokuType.title.copyWith(
-                color: label == 'More' ? c.ink : Colors.white,
-                fontSize: 16,
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(ShokuRadius.media),
+              border: Border.all(
+                color: highlighted ? c.ink : Colors.transparent,
+                width: highlighted ? ShokuStroke.brutal : 0,
               ),
             ),
+            child: Center(
+              child: Text(text,
+                  style: ShokuType.title.copyWith(
+                    color: color == c.surfaceAlt ? c.ink : Colors.white,
+                    fontSize: 15,
+                  )),
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: ShokuType.label.copyWith(color: c.inkMuted, fontSize: 9)),
-      ],
+          const SizedBox(height: 3),
+          Text(label,
+              style: ShokuType.label.copyWith(
+                fontSize: 8.5,
+                color: highlighted ? c.accent : c.inkMuted,
+              )),
+        ],
+      ),
     );
   }
 }
@@ -476,49 +439,56 @@ class _JournalStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ShokuLabel('step 2 · keep', color: c.accent),
-          const SizedBox(height: ShokuSpace.xs),
-          Text(
-            'Every cook becomes\na version.',
-            style: ShokuType.h1.copyWith(color: c.ink, fontSize: 26),
-          ).animate().fadeIn(duration: 380.ms).slideY(begin: 0.08),
+          Text('02 · COOK IT, CHANGE IT', style: ShokuType.label.copyWith(color: c.accent)),
+          const SizedBox(height: ShokuSpace.sm),
+          Text('Your journal remembers the changes.',
+              style: ShokuType.h1.copyWith(color: c.ink, fontSize: 24)),
           const SizedBox(height: ShokuSpace.md),
           Text(
-            'Log a photo, how it went, and one thing you changed. Next time you cook it, you start from what you learned.',
+            'Cook mode walks you through it. When you swap something, say so. At the end you get one version — with a photo, a rating and what altered.',
             style: ShokuType.body.copyWith(color: c.inkMuted),
-          ).animate().fadeIn(delay: 80.ms, duration: 380.ms),
+          ),
           const SizedBox(height: ShokuSpace.lg),
-          ...[
-            ('v1', 'Too sweet. Honey down to 1 tbsp.', c.inkMuted),
-            ('v2', 'Whip the whites separately.', c.ink),
-            ('v3', 'Nailed it. Salt on top.', c.ready),
-          ].asMap().entries.map(
-                (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: ShokuSpace.sm),
-                  child: Row(
-                    children: [
-                      Text(
-                        e.value.$1,
-                        style: ShokuType.stat.copyWith(fontSize: 12, color: c.accent),
-                      ),
-                      const SizedBox(width: ShokuSpace.md),
-                      Container(width: 1, height: 26, color: c.hairline),
-                      const SizedBox(width: ShokuSpace.md),
-                      Expanded(
-                        child: Text(
-                          e.value.$2,
-                          style: ShokuType.bodySmall.copyWith(color: e.value.$3),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                    .animate(delay: (120 + e.key * 70).ms)
-                    .fadeIn(duration: 320.ms)
-                    .slideX(begin: 0.04),
-              ),
+          Container(
+            padding: const EdgeInsets.all(ShokuSpace.md),
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(ShokuRadius.card),
+              border: Border.all(color: c.hairline),
+            ),
+            child: Row(
+              children: [
+                Text('v1', style: ShokuType.stat.copyWith(fontSize: 13, color: c.inkMuted)),
+                Container(
+                  width: 18,
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  color: c.hairline,
+                ),
+                Text('v2', style: ShokuType.stat.copyWith(fontSize: 13, color: c.inkMuted)),
+                Container(
+                  width: 18,
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  color: c.hairline,
+                ),
+                Text('v3', style: ShokuType.stat.copyWith(fontSize: 13, color: c.accent)),
+                const SizedBox(width: ShokuSpace.sm),
+                ShokuChip('altered', color: c.reward, filled: true),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+
+Widget _reveal(BuildContext context, Widget child, {int delayMs = 0}) {
+  if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
+  return child
+      .animate(delay: Duration(milliseconds: delayMs))
+      .fadeIn(duration: 320.ms)
+      .slideY(begin: 0.06, end: 0);
 }

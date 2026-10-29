@@ -27,14 +27,23 @@ class RecipeVersion {
   final List<String> changes;
   final List<String> ingredients;
   final DateTime createdAt;
+  final List<String> steps;
+  final int kcal;
+  final int protein;
 
   const RecipeVersion({
     required this.number,
     required this.changes,
     required this.ingredients,
     required this.createdAt,
+    this.steps = const [],
+    this.kcal = 0,
+    this.protein = 0,
   });
 }
+
+/// What mood a cook belonged to — captured at debrief, never inferred.
+enum CookMood { quick, project, comfort }
 
 class CookLog {
   final String id;
@@ -44,6 +53,8 @@ class CookLog {
   final CookOutcome outcome;
   final String note;
   final List<String> changes;
+  final CookMood mood;
+  final int rating;
 
   const CookLog({
     required this.id,
@@ -53,6 +64,8 @@ class CookLog {
     required this.outcome,
     required this.note,
     required this.changes,
+    this.mood = CookMood.comfort,
+    this.rating = 3,
   });
 }
 
@@ -66,6 +79,9 @@ class Dish {
   final List<RecipeVersion> versions;
   final List<CookLog> cooks;
   final int minutes;
+  final int baselineKcal;
+  final int baselineProtein;
+  final List<String> steps;
 
   const Dish({
     required this.id,
@@ -77,7 +93,33 @@ class Dish {
     required this.versions,
     required this.cooks,
     required this.minutes,
+    this.baselineKcal = 0,
+    this.baselineProtein = 0,
+    this.steps = const [],
   });
+
+  Dish copyWith({
+    String? title,
+    String? subtitle,
+    String? coverUrl,
+    DishStatus? status,
+    List<RecipeVersion>? versions,
+    List<CookLog>? cooks,
+  }) =>
+      Dish(
+        id: id,
+        title: title ?? this.title,
+        subtitle: subtitle ?? this.subtitle,
+        coverUrl: coverUrl ?? this.coverUrl,
+        sourceHandle: sourceHandle,
+        status: status ?? this.status,
+        versions: versions ?? this.versions,
+        cooks: cooks ?? this.cooks,
+        minutes: minutes,
+        baselineKcal: baselineKcal,
+        baselineProtein: baselineProtein,
+        steps: steps,
+      );
 
   int get cookCount => cooks.length;
   int get currentVersion => versions.length;
@@ -108,25 +150,40 @@ class JournalData {
       coverUrl: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=70',
       sourceHandle: '@highprotein.eats',
       status: DishStatus.signature,
-      minutes: 12,
+      minutes: 12,      baselineKcal: 340,
+      baselineProtein: 24,
+      steps: const [
+        'Separate the eggs. Yolks into a bowl, whites into a clean dry one.',
+        'Whisk yolks with cocoa, honey and salt until the mixture falls in a ribbon.',
+        'Whip the whites to soft peaks — they should hold a shape but still droop.',
+        'Fold the whites into the yolks in three additions, twenty slow strokes each.',
+        'Divide into glasses and chill at least two hours, ideally overnight.',
+        'Finish with flaked salt just before serving.',
+      ],
       versions: [
         RecipeVersion(
           number: 1,
           changes: const ['First attempt'],
           ingredients: const ['4 eggs', '3 tbsp cocoa', '2 tbsp honey', 'pinch of salt'],
           createdAt: _ago(46),
+          kcal: 340,
+          protein: 24,
         ),
         RecipeVersion(
           number: 2,
           changes: const ['+1 tbsp cocoa', 'Chilled 4 h instead of 2'],
           ingredients: const ['4 eggs', '4 tbsp cocoa', '2 tbsp honey', 'pinch of salt'],
           createdAt: _ago(21),
+          kcal: 355,
+          protein: 26,
         ),
         RecipeVersion(
           number: 3,
           changes: const ['Whipped whites separately', 'Flaked salt on top'],
           ingredients: const ['4 eggs', '4 tbsp cocoa', '2 tbsp honey', 'flaked salt'],
           createdAt: _ago(4),
+          kcal: 362,
+          protein: 28,
         ),
       ],
       cooks: [
@@ -166,19 +223,31 @@ class JournalData {
       coverUrl: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=900&q=70',
       sourceHandle: 'Kitchen Sanctuary',
       status: DishStatus.inProgress,
-      minutes: 35,
+      minutes: 35,      baselineKcal: 520,
+      baselineProtein: 38,
+      steps: const [
+        'Cube the chicken thigh and salt it. Leave it fifteen minutes to dry.',
+        'Toss in cornflour until every piece is dusty, not bready.',
+        'Air-fry at 200°C for 12 minutes, shaking once, until the crust is glassy.',
+        'Fry garlic and chilli paste for thirty seconds, then add soy and vinegar.',
+        'Toss the chicken through the sauce off the heat and serve immediately.',
+      ],
       versions: [
         RecipeVersion(
           number: 1,
           changes: const ['First attempt'],
           ingredients: const ['500 g thigh', '3 tbsp cornflour', '2 tbsp soy', '1 tbsp chilli paste'],
           createdAt: _ago(30),
+          kcal: 520,
+          protein: 38,
         ),
         RecipeVersion(
           number: 2,
           changes: const ['Air-fried at 200°C', 'Sauce off the heat'],
           ingredients: const ['500 g thigh', '4 tbsp cornflour', '2 tbsp soy', '1 tbsp chilli paste'],
           createdAt: _ago(9),
+          kcal: 538,
+          protein: 41,
         ),
       ],
       cooks: [
@@ -209,13 +278,22 @@ class JournalData {
       coverUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=70',
       sourceHandle: 'Bread Code',
       status: DishStatus.inProgress,
-      minutes: 25,
+      minutes: 25,      baselineKcal: 280,
+      baselineProtein: 8,
+      steps: const [
+        'Mix flour, water, yeast and salt with a spoon until no dry flour remains.',
+        'Cover and leave 18 hours at room temperature.',
+        'Oil the pan generously, tip in the dough, and dimple to the bottom.',
+        'Rest one hour, then bake at 230°C for 20 minutes.',
+      ],
       versions: [
         RecipeVersion(
           number: 1,
           changes: const ['First attempt'],
           ingredients: const ['500 g flour', '400 ml water', '7 g yeast', '80 ml oil', '12 g salt'],
           createdAt: _ago(12),
+          kcal: 280,
+          protein: 8,
         ),
       ],
       cooks: [
@@ -237,13 +315,22 @@ class JournalData {
       coverUrl: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=70',
       sourceHandle: '@weeknight.kitchen',
       status: DishStatus.wantToTry,
-      minutes: 15,
+      minutes: 15,      baselineKcal: 610,
+      baselineProtein: 18,
+      steps: const [
+        'Boil the noodles until just under done; keep a cup of the water.',
+        'Fry sliced garlic slowly in oil until barely golden.',
+        'Add chilli oil and soy, then the noodles and a splash of pasta water.',
+        'Toss hard for thirty seconds so the sauce clings, and serve.',
+      ],
       versions: [
         RecipeVersion(
           number: 1,
           changes: const ['Not cooked yet'],
           ingredients: const ['200 g noodles', '6 garlic cloves', '2 tbsp soy', '1 tbsp chilli oil'],
           createdAt: _ago(2),
+          kcal: 610,
+          protein: 18,
         ),
       ],
       cooks: const [],
