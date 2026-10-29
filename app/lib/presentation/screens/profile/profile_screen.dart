@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../data/services/prefs.dart';
 import '../../state/journal_providers.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
@@ -119,7 +120,10 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.menu_book_outlined,
             title: 'How Shoku works',
             subtitle: 'The share gesture, in four steps',
-            onTap: () => ref.read(onboardingDoneProvider.notifier).state = false,
+            onTap: () {
+              ref.read(onboardingDoneProvider.notifier).state = false;
+              Prefs.setOnboardingDone(false);
+            },
           ),
           ShokuHairline(),
           ShokuListRow(

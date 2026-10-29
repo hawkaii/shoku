@@ -51,6 +51,9 @@ dependencies:
 
   # WebView for YouTube
   flutter_inappwebview: ^6.1.5
+  smooth_page_indicator: ^3.0.0
+  flutter_animate: ^4.5.2
+  receive_sharing_intent: ^1.9.0
 
 dev_dependencies:
   flutter_test:
@@ -59,3 +62,27 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: ShokuSerif
+      fonts:
+        - asset: assets/fonts/Fraunces-600.ttf
+          weight: 600
+        - asset: assets/fonts/Fraunces-700.ttf
+          weight: 700
+    - family: ShokuSans
+      fonts:
+        - asset: assets/fonts/Jakarta-400.ttf
+          weight: 400
+        - asset: assets/fonts/Jakarta-500.ttf
+          weight: 500
+        - asset: assets/fonts/Jakarta-600.ttf
+          weight: 600
+        - asset: assets/fonts/Jakarta-700.ttf
+          weight: 700
+    - family: ShokuMono
+      fonts:
+        - asset: assets/fonts/Mono-600.ttf
+          weight: 600
+        - asset: assets/fonts/Mono-700.ttf
+          weight: 700

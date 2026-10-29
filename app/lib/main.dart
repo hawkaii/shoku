@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/shoku_theme.dart';
+import 'data/services/prefs.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/state/shoku_providers.dart';
 
-void main() {
-  runApp(const ProviderScope(child: ShokuApp()));
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Read the persisted flag before the first frame so onboarding never flashes.
+  final seen = await Prefs.onboardingDone();
+  runApp(
+    ProviderScope(
+      overrides: [
+        onboardingDoneProvider.overrideWith((ref) => seen),
+      ],
+      child: const ShokuApp(),
+    ),
+  );
 }
 
 class ShokuApp extends ConsumerWidget {

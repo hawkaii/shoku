@@ -76,21 +76,59 @@ Reading text is never below 15 px. Numbers always tabular.
 5. **Brass stamp HUD** — streak and level in one compact mono badge with a 1 px
    saffron border. Gamification as stamped metal.
 
-## 5. Screen inventory
+## 5. Product model — a cook journal, not a save inbox
+
+The product answers one question: *what have I cooked, and how is my food evolving?*
+
+Three entities:
+
+- **Dish** — the living concept. `id`, `title`, `coverUrl`, `sourceHandle`, `status`
+  (`wantToTry` / `inProgress` / `signature`), `currentVersion`, `cookCount`.
+- **RecipeVersion** — a snapshot: `number`, `changes[]`, `ingredients[]`, `createdAt`.
+  A version is created only when the cook changed something.
+- **CookLog** — a night: `cookedAt`, `versionNumber`, `photoUrl`, `outcome`
+  (`needsWork` / `good` / `nailedIt`), `note`, `changes[]`.
+
+Logging is **delta-first**: photo, outcome, one line of changes. Thirty seconds,
+never a full recipe edit. If nothing changed, no new version.
+
+## 6. Screen inventory
 
 | Route | Screen | Loudest element |
 |---|---|---|
 | `/onboarding` | 4 steps: intro → share → save → notify | the mock reel |
-| `/` | Home: extract bar, cook tonight, filters, feed | the extract bar |
-| `/discover` | reading view of a saved reel | the recipe title |
-| `/stash` | collections + saved notes | the collections grid |
-| `/shopping` | to-buy list ⇄ pantry | the "to buy" count |
-| `/account` | profile, saves, level, appearance, rows | saves balance |
-| `/recipe/:id` | ingredients, method, inline timers | the title |
-| `/saves` | plan tiers | the highlighted tier |
+| `/journal` | month header, on-the-counter card, photo timeline with date spine | the photos |
+| `/recipes` | cookbook grid, status filters, version badge per dish | the food |
+| `/dish/:id` | version scrubber, changes, ingredients, cook history | the hero photo |
+| `/groceries` | to-buy list ⇄ pantry | the "to buy" count |
+| `/profile` | cooks / upgrades / signature, month strip, appearance | the counts |
 | `/help` | FAQ | the questions |
 
-## 6. Voice
+Deleted from the earlier build: the Discover tab (a detail view masquerading as a
+tab), the permanent extract bar on Home, the All/Recipes/Notes filter, the dashed
+reward rows, and the saves-balance quota.
+
+## 7. Motion
+
+Tactile, fast, earned. Every action is acknowledged within 100 ms; travel settles
+once; spectacle only for milestones.
+
+| Motion | Duration | Curve |
+|---|---|---|
+| Page push | 280 ms | easeOutCubic, 6% horizontal travel + fade |
+| Page pop | 220 ms | easeInCubic |
+| Tab switch | 180 ms | easeOutCubic, 4 px shift |
+| Sheet | 280 / 220 ms | easeOutCubic in, easeInCubic out |
+| List entrance | 240 ms, 28 ms stagger (first 8) | easeOutCubic, 10 px rise |
+| Button press | 80 ms down / 120 ms up | easeOutBack on release, scale 0.97 |
+| Number change | 240 ms | odometer roll |
+| Recipe → detail | 280 ms | shared image (Hero), radius 8 → 0 |
+
+No confetti. No elastic bounce on repeated taps. No full-screen tab transitions.
+Reduced motion (`MediaQuery.disableAnimations`) removes travel, stagger and rolls,
+leaving a 120 ms crossfade.
+
+## 8. Voice
 
 Short declaratives. No exclamation marks. No emoji in body copy — emoji only as
 category marks. Numbers in mono.
@@ -99,7 +137,7 @@ category marks. Numbers in mono.
 - "One save is one extraction." not "Each extraction costs 1 credit."
 - Empty states say what to do next, in one line.
 
-## 7. Do not
+## 9. Do not
 
 - Coloured card backgrounds — they fight food photography.
 - Serif in UI labels, buttons, or numbers.

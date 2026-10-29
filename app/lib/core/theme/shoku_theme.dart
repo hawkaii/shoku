@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Shoku — "Kitchen Ticket".
 ///
@@ -119,54 +118,54 @@ class ShokuStroke {
 /// Type system: Fraunces for editorial voice, Plus Jakarta Sans for reading,
 /// JetBrains Mono for anything numeric.
 class ShokuType {
-  static TextStyle get display => GoogleFonts.fraunces(
+  static TextStyle get display => TextStyle(fontFamily: 'ShokuSerif', 
         fontSize: 34,
         fontWeight: FontWeight.w700,
         height: 1.1,
         letterSpacing: -0.8,
       );
 
-  static TextStyle get h1 => GoogleFonts.fraunces(
+  static TextStyle get h1 => TextStyle(fontFamily: 'ShokuSerif', 
         fontSize: 26,
         fontWeight: FontWeight.w600,
         height: 1.18,
         letterSpacing: -0.5,
       );
 
-  static TextStyle get h2 => GoogleFonts.fraunces(
+  static TextStyle get h2 => TextStyle(fontFamily: 'ShokuSerif', 
         fontSize: 19,
         fontWeight: FontWeight.w600,
         height: 1.25,
         letterSpacing: -0.2,
       );
 
-  static TextStyle get title => GoogleFonts.plusJakartaSans(
+  static TextStyle get title => TextStyle(fontFamily: 'ShokuSans', 
         fontSize: 16,
         fontWeight: FontWeight.w700,
         height: 1.3,
         letterSpacing: -0.1,
       );
 
-  static TextStyle get body => GoogleFonts.plusJakartaSans(
+  static TextStyle get body => TextStyle(fontFamily: 'ShokuSans', 
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 1.55,
       );
 
-  static TextStyle get bodySmall => GoogleFonts.plusJakartaSans(
+  static TextStyle get bodySmall => TextStyle(fontFamily: 'ShokuSans', 
         fontSize: 13,
         fontWeight: FontWeight.w500,
         height: 1.4,
       );
 
-  static TextStyle get label => GoogleFonts.jetBrainsMono(
+  static TextStyle get label => TextStyle(fontFamily: 'ShokuMono', 
         fontSize: 11,
         fontWeight: FontWeight.w600,
         height: 1.2,
         letterSpacing: 1.2,
       );
 
-  static TextStyle get stat => GoogleFonts.jetBrainsMono(
+  static TextStyle get stat => TextStyle(fontFamily: 'ShokuMono', 
         fontSize: 15,
         fontWeight: FontWeight.w700,
         height: 1.0,
@@ -174,7 +173,7 @@ class ShokuType {
         fontFeatures: const [FontFeature.tabularFigures()],
       );
 
-  static TextStyle get statHero => GoogleFonts.jetBrainsMono(
+  static TextStyle get statHero => TextStyle(fontFamily: 'ShokuMono', 
         fontSize: 22,
         fontWeight: FontWeight.w700,
         height: 1.0,
@@ -182,7 +181,7 @@ class ShokuType {
         fontFeatures: const [FontFeature.tabularFigures()],
       );
 
-  static TextStyle get quote => GoogleFonts.fraunces(
+  static TextStyle get quote => TextStyle(fontFamily: 'ShokuSerif', 
         fontSize: 18,
         fontWeight: FontWeight.w400,
         fontStyle: FontStyle.italic,
@@ -274,7 +273,7 @@ class ShokuTheme {
       textTheme: base.textTheme.apply(
         bodyColor: c.ink,
         displayColor: c.ink,
-        fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+        fontFamily: TextStyle(fontFamily: 'ShokuSans', ).fontFamily,
       ),
       extensions: <ThemeExtension<dynamic>>[
         ShokuTokens(colors: c, isDark: isDark),
