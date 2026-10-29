@@ -105,7 +105,7 @@ class HomeScreen extends ConsumerWidget {
 
             // ---- Filter --------------------------------------------------
             ShokuSegmented(
-              labels: const ['ALL', 'RECIPES', 'WISDOM'],
+              labels: const ['ALL', 'RECIPES', 'NOTES'],
               selected: filter.index,
               onChanged: (i) => ref.read(feedFilterProvider.notifier).state =
                   FeedFilter.values[i],
@@ -144,8 +144,8 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: ShokuSpace.sm),
             ShokuDashedRow(
               icon: Icons.add,
-              title: 'Save your first wisdom',
-              subtitle: 'Turn an advice reel into notes',
+              title: 'Save your first note',
+              subtitle: 'Turn a tip reel into cooking notes',
               reward: '+5',
               onTap: () => showAddSheet(context),
             ),
@@ -176,7 +176,8 @@ class _ExtractBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(ShokuSpace.md),
         decoration: BoxDecoration(
-          color: c.surface,
+          gradient: context.isDark ? null : ShokuGradients.ticketSheen,
+          color: context.isDark ? c.surface : null,
           borderRadius: BorderRadius.circular(ShokuRadius.card),
           border: Border.all(color: c.ink, width: ShokuStroke.brutal),
           boxShadow: [
@@ -244,11 +245,23 @@ class _CookCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              item.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                  ),
+                ),
+                const SizedBox(width: ShokuSpace.xs),
+                Text(
+                  item.duration,
+                  style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
+                ),
+              ],
             ),
             const Spacer(),
             Row(
@@ -258,6 +271,11 @@ class _CookCard extends StatelessWidget {
                 Text(
                   '${item.pantryHave}/${item.pantryNeed}',
                   style: ShokuType.stat.copyWith(fontSize: 11, color: c.ready),
+                ),
+                const Spacer(),
+                Text(
+                  '+${item.xp}',
+                  style: ShokuType.stat.copyWith(fontSize: 11, color: c.reward),
                 ),
               ],
             ),

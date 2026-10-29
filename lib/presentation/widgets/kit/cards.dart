@@ -203,7 +203,7 @@ class ShokuWisdomCard extends StatelessWidget {
                 Row(
                   children: [
                     ShokuLabel(
-                      'wisdom // ${index.toString().padLeft(3, '0')}',
+                      'note // ${index.toString().padLeft(3, '0')}',
                       color: c.reward,
                     ),
                     const Spacer(),

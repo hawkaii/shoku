@@ -46,7 +46,7 @@ class StashScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'Highlights, notes and places you kept from reels.',
+              'Techniques, tips and swaps you kept from reels.',
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
             const SizedBox(height: ShokuSpace.lg),

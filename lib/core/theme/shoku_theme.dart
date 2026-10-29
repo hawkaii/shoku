@@ -15,6 +15,8 @@ class ShokuColors {
   final Color inkMuted;
   final Color hairline;
   final Color accent;
+  final Color onAccent;
+  final Color accentSoft;
   final Color reward;
   final Color ready;
   final Color danger;
@@ -27,35 +29,41 @@ class ShokuColors {
     required this.inkMuted,
     required this.hairline,
     required this.accent,
+    required this.onAccent,
+    required this.accentSoft,
     required this.reward,
     required this.ready,
     required this.danger,
   });
 
   static const light = ShokuColors(
-    canvas: Color(0xFFF5F1E8),
-    surface: Color(0xFFFFFDF7),
+    canvas: Color(0xFFF7F3EB),
+    surface: Color(0xFFFFFDF9),
     surfaceAlt: Color(0xFFEFE9DD),
-    ink: Color(0xFF1A1714),
-    inkMuted: Color(0xFF6B6459),
-    hairline: Color(0xFFDCD4C6),
-    accent: Color(0xFFC8381A),
-    reward: Color(0xFFB87D14),
-    ready: Color(0xFF2D6A4F),
-    danger: Color(0xFFA33C31),
+    ink: Color(0xFF1C1614),
+    inkMuted: Color(0xFF6E5F58),
+    hairline: Color(0xFFDED5C8),
+    accent: Color(0xFF9E281E),
+    onAccent: Color(0xFFFFF9F5),
+    accentSoft: Color(0xFFF5DFD6),
+    reward: Color(0xFFB87314),
+    ready: Color(0xFF28664B),
+    danger: Color(0xFFB42318),
   );
 
   static const dark = ShokuColors(
-    canvas: Color(0xFF12100E),
-    surface: Color(0xFF1C1916),
-    surfaceAlt: Color(0xFF26221E),
-    ink: Color(0xFFF4EFE6),
-    inkMuted: Color(0xFFA69F94),
-    hairline: Color(0xFF2E2924),
-    accent: Color(0xFFE9664A),
-    reward: Color(0xFFE5A93C),
-    ready: Color(0xFF7FA07F),
-    danger: Color(0xFFEF8E7C),
+    canvas: Color(0xFF141110),
+    surface: Color(0xFF1E1A18),
+    surfaceAlt: Color(0xFF292320),
+    ink: Color(0xFFF5EFE6),
+    inkMuted: Color(0xFFA6988E),
+    hairline: Color(0xFF332B27),
+    accent: Color(0xFFC8372B),
+    onAccent: Color(0xFFFFF9F5),
+    accentSoft: Color(0xFF381D1A),
+    reward: Color(0xFFE09F3E),
+    ready: Color(0xFF4EA882),
+    danger: Color(0xFFE5484D),
   );
 }
 
@@ -182,6 +190,61 @@ class ShokuType {
       );
 
   const ShokuType._();
+}
+
+
+/// Six gradients, each with exactly one home. Everything else stays flat:
+/// a gradient on a list row reads as venetian-blind striping.
+class ShokuGradients {
+  /// Primary CTA. Gives the brutalist button ink-stamp density.
+  static const crimsonPress = LinearGradient(
+    begin: Alignment(-0.3, -1.0),
+    end: Alignment(0.3, 1.0),
+    colors: [Color(0xFFB33227), Color(0xFF9E281E), Color(0xFF7D1D15)],
+    stops: [0.0, 0.55, 1.0],
+  );
+
+  /// The one place the floral blush is allowed to be a field: the
+  /// "just extracted / saved" ticket header.
+  static const blushFolio = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFFFFDF9), Color(0xFFF9EBE4), Color(0xFFF2D3C6)],
+    stops: [0.0, 0.55, 1.0],
+  );
+
+  /// Empty-state atmosphere. Melts into canvas, so it needs no border.
+  static const warmVellum = RadialGradient(
+    center: Alignment(0.0, -0.35),
+    radius: 0.95,
+    colors: [Color(0xFFF5DFD6), Color(0xFFF2E9DC), Color(0xFFF7F3EB)],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  /// Featured card: top-lit paper curvature, not a shadow.
+  static const ticketSheen = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFFDF9), Color(0xFFF6EFE4)],
+  );
+
+  /// Dark-mode hero glow. Keeps dark mode from feeling like a dev tool.
+  static const emberCellar = RadialGradient(
+    center: Alignment(0.6, -0.8),
+    radius: 1.1,
+    colors: [Color(0xFF2E1916), Color(0xFF1C1614), Color(0xFF141110)],
+    stops: [0.0, 0.50, 1.0],
+  );
+
+  /// Any photo with text over it. Never pure black — it turns food grey.
+  static const photoScrim = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x001C1614), Color(0x661C1614), Color(0xD91C1614)],
+    stops: [0.0, 0.65, 1.0],
+  );
+
+  const ShokuGradients._();
 }
 
 class ShokuTheme {

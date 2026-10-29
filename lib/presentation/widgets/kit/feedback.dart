@@ -23,8 +23,13 @@ class ShokuEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xl),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: ShokuSpace.lg),
+        padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xl, vertical: ShokuSpace.xxl),
+        decoration: BoxDecoration(
+          gradient: context.isDark ? ShokuGradients.emberCellar : ShokuGradients.warmVellum,
+          borderRadius: BorderRadius.circular(ShokuRadius.card),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
