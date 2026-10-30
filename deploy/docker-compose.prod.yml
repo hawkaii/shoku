@@ -17,22 +17,11 @@ services:
     # These two limits plus a swap file are what keep it from OOM-killing.
     mem_limit: 256m
 
+  # The queue is the API's only link to the worker VM.
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--bind", "0.0.0.0"]
+    ports:
+      - "6379:6379"
     mem_limit: 64m
-
-  worker:
-    image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
-    restart: unless-stopped
-    env_file: .env
-    command: ["python", "-m", "shoku_api.imports.worker"]
-    depends_on:
-      api:
-        condition: service_started
-      redis:
-        condition: service_started
-    # One job at a time: yt-dlp and ffmpeg are the memory spikes here.
-    mem_limit: 320m
-    memswap_limit: 640m
