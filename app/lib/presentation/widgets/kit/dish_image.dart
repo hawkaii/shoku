@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/shoku_theme.dart';
@@ -31,15 +33,22 @@ class ShokuDishImage extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(
-            url,
-            fit: fit,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return Container(color: c.surfaceAlt);
-            },
-            errorBuilder: (context, error, stack) => _Fallback(title: title),
-          ),
+          if (url.startsWith('/') || url.startsWith('file://'))
+            Image.file(
+              File(url.replaceFirst('file://', '')),
+              fit: fit,
+              errorBuilder: (context, error, stack) => _Fallback(title: title),
+            )
+          else
+            Image.network(
+              url,
+              fit: fit,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return Container(color: c.surfaceAlt);
+              },
+              errorBuilder: (context, error, stack) => _Fallback(title: title),
+            ),
           // 1px keyline locks the photo into the paper grid.
           IgnorePointer(
             child: DecoratedBox(

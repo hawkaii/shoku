@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/shoku_theme.dart';
 import 'data/services/prefs.dart';
 import 'presentation/navigation/app_router.dart';
+import 'presentation/navigation/back_guard.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/state/shoku_providers.dart';
 
@@ -53,7 +54,8 @@ class ShokuApp extends ConsumerWidget {
       );
     }
 
-    return MaterialApp.router(
+    return ShokuBackGuard(
+      child: MaterialApp.router(
       title: 'Shoku',
       debugShowCheckedModeBanner: false,
       theme: ShokuTheme.light(),
@@ -64,6 +66,7 @@ class ShokuApp extends ConsumerWidget {
         child: child ?? const SizedBox.shrink(),
       ),
       routerConfig: appRouter,
+      ),
     );
   }
 }

@@ -24,10 +24,10 @@ final inspectedVersionProvider = StateProvider.family<int, String>(
 );
 
 /// Library filter.
-enum LibraryFilter { all, wantToTry, inProgress, signature }
+enum LibraryFilter { toCook, cooked }
 
 final libraryFilterProvider =
-    StateProvider<LibraryFilter>((ref) => LibraryFilter.all);
+    StateProvider<LibraryFilter>((ref) => LibraryFilter.toCook);
 
 /// Cook-log sheet state (mock write path).
 final pendingOutcomeProvider = StateProvider<CookOutcome?>((ref) => null);

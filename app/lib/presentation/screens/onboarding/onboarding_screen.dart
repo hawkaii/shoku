@@ -8,6 +8,7 @@ import '../../../data/services/prefs.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/plate_mark.dart';
 
 /// Three steps, and the middle one is the product: you actually perform the
 /// share gesture once, here, so you know it forever.
@@ -155,6 +156,11 @@ class _IntroStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _reveal(
+            context,
+            const PlateMark(size: 84),
+          ),
+          const SizedBox(height: ShokuSpace.sm),
           _reveal(
             context,
             Text.rich(
@@ -349,10 +355,11 @@ class _ShareStep extends StatelessWidget {
                             const SizedBox(width: ShokuSpace.sm),
                             _Target(
                               label: 'Shoku',
-                              text: 'S',
+                              text: '',
                               color: stage == 1 ? c.accent : c.surfaceAlt,
                               highlighted: stage == 1,
                               onTap: onPickShoku,
+                              mark: true,
                             ),
                           ],
                         ),
@@ -385,6 +392,7 @@ class _Target extends StatelessWidget {
   final Color color;
   final bool highlighted;
   final VoidCallback? onTap;
+  final bool mark;
 
   const _Target({
     required this.label,
@@ -392,6 +400,7 @@ class _Target extends StatelessWidget {
     required this.color,
     this.highlighted = false,
     this.onTap,
+    this.mark = false,
   });
 
   @override
@@ -414,11 +423,13 @@ class _Target extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: Text(text,
-                  style: ShokuType.title.copyWith(
-                    color: color == c.surfaceAlt ? c.ink : Colors.white,
-                    fontSize: 15,
-                  )),
+              child: mark
+                  ? const PlateMark(size: 30)
+                  : Text(text,
+                      style: ShokuType.title.copyWith(
+                        color: color == c.surfaceAlt ? c.ink : Colors.white,
+                        fontSize: 15,
+                      )),
             ),
           ),
           const SizedBox(height: 3),

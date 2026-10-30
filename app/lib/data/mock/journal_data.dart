@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 
 /// The journal model: a Dish you cook repeatedly, each attempt a version,
 /// each night a cook log. This is the whole product.
-enum DishStatus { wantToTry, inProgress, signature }
+enum DishStatus {
+  toCook,
+  cooked,
+  signature;
+
+  String get label => switch (this) {
+        DishStatus.toCook => 'TO COOK',
+        DishStatus.cooked => 'COOKED',
+        DishStatus.signature => 'SIGNATURE',
+      };
+}
 
 enum CookOutcome {
   needsWork,
@@ -222,7 +232,7 @@ class JournalData {
       subtitle: 'Takeaway crunch without a deep fryer.',
       coverUrl: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=900&q=70',
       sourceHandle: 'Kitchen Sanctuary',
-      status: DishStatus.inProgress,
+      status: DishStatus.cooked,
       minutes: 35,      baselineKcal: 520,
       baselineProtein: 38,
       steps: const [
@@ -277,7 +287,7 @@ class JournalData {
       subtitle: 'Eighteen hours of doing nothing.',
       coverUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=70',
       sourceHandle: 'Bread Code',
-      status: DishStatus.inProgress,
+      status: DishStatus.cooked,
       minutes: 25,      baselineKcal: 280,
       baselineProtein: 8,
       steps: const [
@@ -314,7 +324,7 @@ class JournalData {
       subtitle: 'Fifteen minutes, one pan, too much garlic.',
       coverUrl: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=70',
       sourceHandle: '@weeknight.kitchen',
-      status: DishStatus.wantToTry,
+      status: DishStatus.toCook,
       minutes: 15,      baselineKcal: 610,
       baselineProtein: 18,
       steps: const [

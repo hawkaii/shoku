@@ -8,6 +8,7 @@ import '../../state/journal_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/step_diagram.dart';
 
 /// Your wall: every night you actually cooked. Private, chronological, no feed.
@@ -66,10 +67,7 @@ class WallScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 200,
-                      child: StepDiagram(stepText: 'plate', height: 150),
-                    ),
+                    const PlateMark(size: 120),
                     const SizedBox(height: ShokuSpace.sm),
                     Text('Nothing on the wall yet.',
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
