@@ -7,7 +7,9 @@ import 'data/services/prefs.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/navigation/back_guard.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
+import 'presentation/state/journal_store.dart';
 import 'presentation/state/shoku_providers.dart';
+import 'presentation/state/sync_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +35,11 @@ Future<void> main() async {
       overrides: [
         onboardingDoneProvider.overrideWith(
           (ref) => onboardingDone || previewScreen != null,
+        ),
+        // The journal calls this after every local change. Bound here so the
+        // store stays ignorant of HTTP and the sync layer owns the policy.
+        syncHookProvider.overrideWith(
+          (ref) => ref.watch(syncControllerProvider).syncNow,
         ),
       ],
       child: const ShokuApp(),

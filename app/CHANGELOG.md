@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.7.0] — 2026-10-30
+
+### Added
+- Supabase sign-in, API client with bearer token, account row in profile *(auth)* — [`98db607`](https://github.com/hawkaii/food-finder-app/commit/98db6071cb9c3d5ce3f2ba1cefaebbdb61b3ba47)
+
+### Docs
+- V1.6.1 [skip ci] *(changelog)* — [`4ea64de`](https://github.com/hawkaii/food-finder-app/commit/4ea64de03cb5fe2392103a335de0d36696b5f791)
+
 ## [1.6.1] — 2026-10-30
 
 ### Docs

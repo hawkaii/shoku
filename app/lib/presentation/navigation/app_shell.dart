@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/shoku_theme.dart';
 import '../../data/services/share_intake.dart';
 import '../screens/add/add_sheet.dart';
+import '../screens/add/import_sheet.dart';
 import '../state/shoku_providers.dart';
+import '../state/sync_providers.dart';
 import '../widgets/kit/nav.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -32,6 +34,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     super.initState();
     _intake.start(ref);
     WidgetsBinding.instance.addPostFrameCallback((_) => _consumePendingShare());
+    // Pull whatever changed while the app was closed. Quiet by design: a
+    // failed sync is a state, not an error the user has to dismiss.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(syncControllerProvider).syncNow();
+    });
   }
 
   @override
@@ -45,7 +52,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (url == null || !mounted) return;
     ref.read(pendingShareProvider.notifier).state = null;
     HapticFeedback.mediumImpact();
-    showAddSheet(context, prefill: url);
+    showImportSheet(context, prefill: url);
   }
 
   @override
@@ -53,6 +60,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen<String?>(pendingShareProvider, (previous, next) {
       if (next != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _consumePendingShare());
+    // Pull whatever changed while the app was closed. Quiet by design: a
+    // failed sync is a state, not an error the user has to dismiss.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(syncControllerProvider).syncNow();
+    });
       }
     });
 
