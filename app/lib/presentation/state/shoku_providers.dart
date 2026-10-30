@@ -10,8 +10,14 @@ final previewTheme = Uri.base.queryParameters['theme'];
 final previewStatic = Uri.base.queryParameters.containsKey('static');
 
 /// Theme mode — Account → Appearance writes here.
+/// Default follows the phone: a dark-mode user should not be handed a bright
+/// paper app on first launch. `theme=dark` still forces a mode for previewing.
 final themeModeProvider = StateProvider<ThemeMode>(
-  (ref) => previewTheme == 'dark' ? ThemeMode.dark : ThemeMode.light,
+  (ref) => previewTheme == 'dark'
+      ? ThemeMode.dark
+      : previewTheme == 'light'
+          ? ThemeMode.light
+          : ThemeMode.system,
 );
 
 /// Onboarding gate. Previewing a screen skips the flow.
