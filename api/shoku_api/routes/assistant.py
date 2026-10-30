@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from ..container import AppContext
 from ..models import User
-from ..schemas.wire import AssistantRequest, AssistantResponse
-from ..services import assistant as assistant_service
+from ..schemas import AssistantRequest, AssistantResponse
+from .. import assistant as assistant_service
 from .deps import current_user, get_context, get_session
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])

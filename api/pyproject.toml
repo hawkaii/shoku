@@ -36,7 +36,6 @@ packages = ["shoku_api"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
 filterwarnings = ["error::DeprecationWarning:shoku_api.*"]
 
 [tool.ruff]

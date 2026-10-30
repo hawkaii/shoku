@@ -35,13 +35,17 @@ from ..domain.captions import has_quantities
 from ..domain.clock import Deadline
 from ..domain.errors import PipelineError
 from ..models import ImportJob
-from ..schemas.recipe import ProsePayload, RecipePayload
-from ..services import content as content_service
+from ..schemas import ProsePayload, RecipePayload
+from .. import content as content_service
 
 if TYPE_CHECKING:  # pragma: no cover
     from ..container import AppContext
 
 log = logging.getLogger(__name__)
+
+# The hard ceiling. Configuration may shorten it, never lengthen it: a 60 second
+# budget that a config flag can turn into ten minutes is not a budget.
+BUDGET_SECONDS = 60.0
 
 EXTRACTION_VERSION = 1
 
@@ -78,7 +82,7 @@ class ImportWorker:
             # Not queued: already done, cancelled, or picked up by someone else.
             return PipelineResult(job_id=job_id, state="skipped")
 
-        deadline = Deadline(self.ctx.settings.import_budget_seconds)
+        deadline = Deadline(min(self.ctx.settings.import_budget_seconds, BUDGET_SECONDS))
 
         try:
             return self._run(claimed, deadline)
@@ -271,5 +275,8 @@ def _build_prose(recipe: RecipePayload, caption: str, creator: str | None) -> Pr
         )
     note = ""
     if creator:
-        note = f"Imported from {creator}. The structured recipe is an extraction, not the creator's exact words."
+        note = (
+            f"Imported from {creator}. The structured recipe is an extraction, "
+            "not the creator's exact words."
+        )
     return ProsePayload(summary=summary, creator_note=note[:600])

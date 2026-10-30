@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from ..container import AppContext
 from ..models import User
-from ..schemas.wire import ImportRequest, ImportResponse, ImportStatus
-from ..services import imports as import_service
+from ..schemas import ImportRequest, ImportResponse, ImportStatus
+from ..imports import service as import_service
 from .deps import current_user, get_context, get_session
 
 router = APIRouter(prefix="/imports", tags=["imports"])

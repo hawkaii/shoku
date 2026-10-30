@@ -17,10 +17,10 @@ from datetime import datetime, timezone
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
-from ..domain.clock import Clock
-from ..domain.cursor import Cursor, TableKey, decode_cursor, encode_cursor
-from ..models import CookLog, Dish, RecipeVersion
-from ..schemas.sync import (
+from .domain.clock import Clock
+from .domain.cursor import Cursor, TableKey, decode_cursor, encode_cursor
+from .models import CookLog, Dish, RecipeVersion
+from .schemas import (
     CookLogRowOut,
     DishRowOut,
     PullResponse,
@@ -31,7 +31,7 @@ from ..schemas.sync import (
 
 # table name in the response -> (ORM model, change-time column)
 SYNCED_TABLES = {
-    "dishes": (Dish, Dish.updated_at),
+    "dishes": (Dish, Dish.server_received_at),
     "versions": (RecipeVersion, RecipeVersion.server_received_at),
     "cook_logs": (CookLog, CookLog.server_received_at),
 }
@@ -155,13 +155,16 @@ class SyncService:
         payload = row.model_dump(exclude={"id"})
 
         if stored is None:
-            self.session.add(Dish(id=row.id, user_id=uid, **payload))
+            self.session.add(
+                Dish(id=row.id, user_id=uid, server_received_at=now, **payload)
+            )
             self.session.flush()
             return RowResult(id=row.id, result="accepted", reason="created")
 
         if row.updated_at > stored.updated_at:
             for field, value in payload.items():
                 setattr(stored, field, value)
+            stored.server_received_at = now
             self.session.flush()
             return RowResult(id=row.id, result="accepted", reason="newer")
 

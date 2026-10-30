@@ -14,9 +14,9 @@ from sqlalchemy.orm import Session
 from ..domain.clock import Clock
 from ..domain.errors import Gone, NotFound
 from ..domain.urls import normalise_url
-from ..interfaces.queue import Queue
+from .queue import Queue
 from ..models import ContentCache, ImportJob
-from ..schemas.wire import ImportResponse, ImportStatus
+from ..schemas import ImportResponse, ImportStatus
 
 TERMINAL_STATES = ("ready", "failed")
 CANCELLED_REASON = "cancelled"

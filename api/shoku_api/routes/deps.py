@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from ..auth import Identity
 from ..container import AppContext
 from ..models import User
-from ..services.users import ensure_user
+from ..users import ensure_user
 
 
 def get_context(request: Request) -> AppContext:
