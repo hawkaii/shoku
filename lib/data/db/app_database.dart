@@ -85,7 +85,18 @@ class CookLogRows extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows])
+/// Small key/value store for database-level facts. The seed marker lives here
+/// rather than in SharedPreferences so that wiping the database also resets it —
+/// the two can never disagree about whether the demo kitchen exists.
+class MetaRows extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, MetaRows])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ??
@@ -100,12 +111,32 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Store timestamps as ISO-8601 text, not unix seconds.
+  ///
+  /// The default int format truncates to whole seconds, which destroys the
+  /// precision last-write-wins needs and makes "newest first" ambiguous for two
+  /// cooks in the same second. Changing this later is a full table rebuild.
+  @override
+  DriftDatabaseOptions get options =>
+      const DriftDatabaseOptions(storeDateTimeAsText: true);
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            // v1 wrote datetimes as unix seconds, which loses milliseconds and
+            // can't be read as ISO-8601 text. The only v1 rows in existence are
+            // the reproducible demo seed, so rebuild rather than convert.
+            await m.deleteTable('cook_log_rows');
+            await m.deleteTable('version_rows');
+            await m.deleteTable('dish_rows');
+            await m.createAll();
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

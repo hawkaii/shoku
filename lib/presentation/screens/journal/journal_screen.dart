@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
+import '../../state/journal_store.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
@@ -27,7 +28,15 @@ class JournalScreen extends ConsumerWidget {
 
     // The journal is read from the database on launch, so the first frame can
     // legitimately be empty — don't index into it.
-    if (dishes.isEmpty) return const _JournalLoading();
+    final status = ref.watch(journalStatusProvider);
+    if (status == JournalStatus.failed) {
+      return _JournalError(
+        onRetry: () => ref.read(journalStoreProvider.notifier).retry(),
+      );
+    }
+    if (dishes.isEmpty) {
+      return _JournalLoading(ready: status == JournalStatus.ready);
+    }
 
     final pinned = dishes.firstWhere(
       (d) => d.status == DishStatus.toCook,
@@ -424,7 +433,8 @@ class _EmptyJournal extends StatelessWidget {
 /// Shown for the frame or two while the journal is read from disk, and for a
 /// genuinely empty journal. No spinners: the mark, one line, and nothing to tap.
 class _JournalLoading extends StatelessWidget {
-  const _JournalLoading();
+  final bool ready;
+  const _JournalLoading({this.ready = false});
 
   @override
   Widget build(BuildContext context) {
@@ -437,10 +447,48 @@ class _JournalLoading extends StatelessWidget {
             const PlateMark(size: 56),
             const SizedBox(height: ShokuSpace.md),
             Text(
-              'Opening your journal',
+              ready ? 'Nothing here yet — cook something' : 'Opening your journal',
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The database failed to open. Say so, and offer the one useful action.
+class _JournalError extends StatelessWidget {
+  final VoidCallback onRetry;
+  const _JournalError({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const PlateMark(size: 56),
+              const SizedBox(height: ShokuSpace.md),
+              Text(
+                'Your journal could not be opened',
+                textAlign: TextAlign.center,
+                style: ShokuType.title.copyWith(color: c.ink, fontSize: 15),
+              ),
+              const SizedBox(height: ShokuSpace.xs),
+              Text(
+                'The saved cooks are still on this phone.',
+                textAlign: TextAlign.center,
+                style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+              ),
+              const SizedBox(height: ShokuSpace.lg),
+              TextButton(onPressed: onRetry, child: const Text('Try again')),
+            ],
+          ),
         ),
       ),
     );

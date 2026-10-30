@@ -2075,18 +2075,206 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
   }
 }
 
+class $MetaRowsTable extends MetaRows with TableInfo<$MetaRowsTable, MetaRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MetaRowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+      'key', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+      'value', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'meta_rows';
+  @override
+  VerificationContext validateIntegrity(Insertable<MetaRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+          _keyMeta, key.isAcceptableOrUnknown(data['key']!, _keyMeta));
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  MetaRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MetaRow(
+      key: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      value: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}value'])!,
+    );
+  }
+
+  @override
+  $MetaRowsTable createAlias(String alias) {
+    return $MetaRowsTable(attachedDatabase, alias);
+  }
+}
+
+class MetaRow extends DataClass implements Insertable<MetaRow> {
+  final String key;
+  final String value;
+  const MetaRow({required this.key, required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  MetaRowsCompanion toCompanion(bool nullToAbsent) {
+    return MetaRowsCompanion(
+      key: Value(key),
+      value: Value(value),
+    );
+  }
+
+  factory MetaRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MetaRow(
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  MetaRow copyWith({String? key, String? value}) => MetaRow(
+        key: key ?? this.key,
+        value: value ?? this.value,
+      );
+  MetaRow copyWithCompanion(MetaRowsCompanion data) {
+    return MetaRow(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MetaRow(')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MetaRow && other.key == this.key && other.value == this.value);
+}
+
+class MetaRowsCompanion extends UpdateCompanion<MetaRow> {
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const MetaRowsCompanion({
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MetaRowsCompanion.insert({
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  })  : key = Value(key),
+        value = Value(value);
+  static Insertable<MetaRow> custom({
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MetaRowsCompanion copyWith(
+      {Value<String>? key, Value<String>? value, Value<int>? rowid}) {
+    return MetaRowsCompanion(
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MetaRowsCompanion(')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $DishRowsTable dishRows = $DishRowsTable(this);
   late final $VersionRowsTable versionRows = $VersionRowsTable(this);
   late final $CookLogRowsTable cookLogRows = $CookLogRowsTable(this);
+  late final $MetaRowsTable metaRows = $MetaRowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [dishRows, versionRows, cookLogRows];
+      [dishRows, versionRows, cookLogRows, metaRows];
 }
 
 typedef $$DishRowsTableCreateCompanionBuilder = DishRowsCompanion Function({
@@ -3392,6 +3580,130 @@ typedef $$CookLogRowsTableProcessedTableManager = ProcessedTableManager<
     (CookLogRow, $$CookLogRowsTableReferences),
     CookLogRow,
     PrefetchHooks Function({bool dishId})>;
+typedef $$MetaRowsTableCreateCompanionBuilder = MetaRowsCompanion Function({
+  required String key,
+  required String value,
+  Value<int> rowid,
+});
+typedef $$MetaRowsTableUpdateCompanionBuilder = MetaRowsCompanion Function({
+  Value<String> key,
+  Value<String> value,
+  Value<int> rowid,
+});
+
+class $$MetaRowsTableFilterComposer
+    extends Composer<_$AppDatabase, $MetaRowsTable> {
+  $$MetaRowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+      column: $table.key, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get value => $composableBuilder(
+      column: $table.value, builder: (column) => ColumnFilters(column));
+}
+
+class $$MetaRowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $MetaRowsTable> {
+  $$MetaRowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+      column: $table.key, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get value => $composableBuilder(
+      column: $table.value, builder: (column) => ColumnOrderings(column));
+}
+
+class $$MetaRowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MetaRowsTable> {
+  $$MetaRowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$MetaRowsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $MetaRowsTable,
+    MetaRow,
+    $$MetaRowsTableFilterComposer,
+    $$MetaRowsTableOrderingComposer,
+    $$MetaRowsTableAnnotationComposer,
+    $$MetaRowsTableCreateCompanionBuilder,
+    $$MetaRowsTableUpdateCompanionBuilder,
+    (MetaRow, BaseReferences<_$AppDatabase, $MetaRowsTable, MetaRow>),
+    MetaRow,
+    PrefetchHooks Function()> {
+  $$MetaRowsTableTableManager(_$AppDatabase db, $MetaRowsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MetaRowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MetaRowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MetaRowsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> value = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MetaRowsCompanion(
+            key: key,
+            value: value,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String key,
+            required String value,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MetaRowsCompanion.insert(
+            key: key,
+            value: value,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$MetaRowsTable, MetaRow>(table),
+                    BaseReferences<_$AppDatabase, $MetaRowsTable, MetaRow>(
+                        db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$MetaRowsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $MetaRowsTable,
+    MetaRow,
+    $$MetaRowsTableFilterComposer,
+    $$MetaRowsTableOrderingComposer,
+    $$MetaRowsTableAnnotationComposer,
+    $$MetaRowsTableCreateCompanionBuilder,
+    $$MetaRowsTableUpdateCompanionBuilder,
+    (MetaRow, BaseReferences<_$AppDatabase, $MetaRowsTable, MetaRow>),
+    MetaRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3402,4 +3714,6 @@ class $AppDatabaseManager {
       $$VersionRowsTableTableManager(_db, _db.versionRows);
   $$CookLogRowsTableTableManager get cookLogRows =>
       $$CookLogRowsTableTableManager(_db, _db.cookLogRows);
+  $$MetaRowsTableTableManager get metaRows =>
+      $$MetaRowsTableTableManager(_db, _db.metaRows);
 }
