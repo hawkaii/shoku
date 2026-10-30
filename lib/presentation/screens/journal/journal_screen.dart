@@ -9,6 +9,7 @@ import '../../state/shoku_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/step_diagram.dart';
 import '../log/log_sheet.dart';
 
@@ -45,7 +46,13 @@ class JournalScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('October kitchen', style: ShokuType.h1.copyWith(color: c.ink)),
+                    Row(
+                      children: [
+                        const PlateMark(size: 26),
+                        const SizedBox(width: ShokuSpace.sm),
+                        Text('October kitchen', style: ShokuType.h1.copyWith(color: c.ink)),
+                      ],
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       '${dishes.length} dishes · ${upgrades} upgrades',
@@ -387,10 +394,7 @@ class _EmptyJournal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 120,
-            child: StepDiagram(stepText: 'plate', height: 120),
-          ),
+          const Center(child: PlateMark(size: 96)),
           const SizedBox(height: ShokuSpace.sm),
           Text('Your first page', style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: ShokuSpace.xs),

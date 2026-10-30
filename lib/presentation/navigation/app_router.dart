@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/account/help_screen.dart';
@@ -12,7 +13,10 @@ import '../screens/wall/wall_screen.dart';
 import '../state/shoku_providers.dart';
 import 'app_shell.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final GoRouter appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: previewScreen == null || previewScreen == 'home'
       ? '/journal'
       : '/$previewScreen',

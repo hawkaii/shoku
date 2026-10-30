@@ -8,6 +8,7 @@ import '../../../data/services/prefs.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/plate_mark.dart';
 
 /// Three steps, and the middle one is the product: you actually perform the
 /// share gesture once, here, so you know it forever.
@@ -155,6 +156,11 @@ class _IntroStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _reveal(
+            context,
+            const PlateMark(size: 84),
+          ),
+          const SizedBox(height: ShokuSpace.sm),
           _reveal(
             context,
             Text.rich(

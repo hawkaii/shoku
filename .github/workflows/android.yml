@@ -19,6 +19,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 30
 
     steps:
@@ -80,3 +82,17 @@ jobs:
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
           retention-days: 14
+
+      # Every successful build is published, so an installable link always
+      # exists without anyone cutting a release by hand.
+      - name: Publish release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Shoku build ${{ github.run_number }}
+          body: |
+            Automatic build of `${{ github.sha }}`.
+            ${{ vars.API_BASE_URL && format('API: {0}', vars.API_BASE_URL) || 'No API base URL configured.' }}
+          files: build/app/outputs/flutter-apk/*.apk
+          make_latest: true

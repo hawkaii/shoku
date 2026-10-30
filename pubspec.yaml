@@ -55,6 +55,7 @@ dependencies:
   flutter_animate: ^4.5.2
   receive_sharing_intent: ^1.9.0
   lottie: ^3.8.0
+  flutter_svg: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +66,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/motion/
+    - assets/brand/
 
   fonts:
     - family: ShokuSerif
