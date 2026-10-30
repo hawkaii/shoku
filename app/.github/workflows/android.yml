@@ -30,12 +30,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # full history and tags, for the changelog
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -92,12 +92,19 @@ jobs:
           cp build/app/outputs/flutter-apk/app-${BUILD_TYPE}.apk \
              "dist/shoku-${VERSION}-${BUILD_TYPE}.apk"
 
+      # git-cliff-action exposes the rendered changelog as an output rather
+      # than writing files itself.
       - name: Generate changelog
+        id: changelog
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
           args: --tag ${{ steps.version.outputs.tag }}
-          output: CHANGELOG.md
+
+      - name: Write CHANGELOG.md
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
+        run: printf '%s\n' "$CHANGELOG" > CHANGELOG.md
 
       - name: Generate release notes
         id: notes
@@ -122,8 +129,6 @@ jobs:
           size=$(du -h "$apk" | cut -f1)
           sha=$(sha256sum "$apk" | cut -d' ' -f1)
           {
-            echo "Shoku **${VERSION}** · $(date -u '+%d %B %Y')"
-            echo
             cat /tmp/notes.md
             echo
             echo "---"
@@ -157,7 +162,7 @@ jobs:
             --target "$GITHUB_SHA"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: shoku-apk-${{ steps.version.outputs.version }}
           path: dist/*.apk
