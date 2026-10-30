@@ -1,0 +1,28 @@
+# Production compose, rendered onto the VM by CI.
+# The image is built by GitHub Actions and pushed to GHCR; the VM only pulls.
+services:
+  api:
+    image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # An e2-micro has 1 GB; the API must never be starved by the worker.
+    mem_limit: 384m
+
+  worker:
+    image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
+    restart: unless-stopped
+    env_file: .env
+    command: ["python", "-m", "shoku_api.imports.worker"]
+    depends_on:
+      api:
+        condition: service_started
+    # One job at a time: yt-dlp and ffmpeg are the memory spikes here.
+    mem_limit: 512m
