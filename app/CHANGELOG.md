@@ -3,38 +3,6 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
-## [1.9.2] — 2026-10-30
-
-### Docs
-- V1.9.1 [skip ci] *(changelog)* — [`47394fd`](https://github.com/hawkaii/food-finder-app/commit/47394fd4737555bda866e8ae2215c39cb409841a)
-
-### Fixed
-- Follow the device theme instead of forcing light *(theme)* — [`594143b`](https://github.com/hawkaii/food-finder-app/commit/594143b93a0d0461dad4b62a4b6f1136e359b976)
-
-## [1.9.1] — 2026-10-30
-
-### Docs
-- V1.9.0 [skip ci] *(changelog)* — [`57a93b0`](https://github.com/hawkaii/food-finder-app/commit/57a93b005306c8e7709e220e6276081b30e27886)
-
-### Fixed
-- Report the server's reason instead of 'could not reach server' *(import)* — [`117fb1c`](https://github.com/hawkaii/food-finder-app/commit/117fb1c658eb32395f9d6c79cfa13f1c65903c4f)
-
-## [1.9.0] — 2026-10-30
-
-### Added
-- Push/pull sync engine, launch+post-write triggers, import a reel end to end *(sync)* — [`a13b5ad`](https://github.com/hawkaii/food-finder-app/commit/a13b5addfb7d212aca581ff494496f0a28827002)
-
-### Docs
-- V1.7.0 [skip ci] *(changelog)* — [`2f60f49`](https://github.com/hawkaii/food-finder-app/commit/2f60f49e105a08a669a2ff5a7b6226a7c5a3d88e)
-
-## [1.7.0] — 2026-10-30
-
-### Added
-- Supabase sign-in, API client with bearer token, account row in profile *(auth)* — [`98db607`](https://github.com/hawkaii/food-finder-app/commit/98db6071cb9c3d5ce3f2ba1cefaebbdb61b3ba47)
-
-### Docs
-- V1.6.1 [skip ci] *(changelog)* — [`4ea64de`](https://github.com/hawkaii/food-finder-app/commit/4ea64de03cb5fe2392103a335de0d36696b5f791)
-
 ## [1.6.1] — 2026-10-30
 
 ### Docs

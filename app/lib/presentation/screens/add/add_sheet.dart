@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../widgets/kit/feedback.dart';
-import 'import_sheet.dart';
 
 Future<void> showAddSheet(BuildContext context, {String? prefill}) {
   return showModalBottomSheet<void>(
@@ -76,10 +75,7 @@ class _AddSheetState extends State<AddSheet> {
             icon: Icons.share_outlined,
             title: 'Share from another app',
             subtitle: 'Instagram → share → Shoku',
-            onTap: () {
-              Navigator.of(context).pop();
-              showImportSheet(context, prefill: widget.prefill);
-            },
+            onTap: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: ShokuSpace.sm),
           _Option(
