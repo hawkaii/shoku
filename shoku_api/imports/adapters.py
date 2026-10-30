@@ -57,9 +57,16 @@ class YtDlpExtractor:
             part for part in (info.get("description") or "", info.get("title") or "") if part
         ).strip()
 
-        audio_path = None
-        # Only pay for a download when the text we have cannot carry a recipe.
+        # Published subtitles first: they are free, instant, and better than
+        # anything we can produce by downloading the audio and running a model.
+        transcript = ""
         if not has_quantities(caption):
+            transcript = self._fetch_subtitles(info, url, workdir, base, deadline)
+
+        audio_path = None
+        # Only pay for a download when neither the caption nor the subtitles
+        # can carry a recipe.
+        if not has_quantities(caption) and not transcript:
             deadline.check("download")
             out = workdir / "audio.%(ext)s"
             opts = {
@@ -76,11 +83,53 @@ class YtDlpExtractor:
 
         return Extraction(
             caption=caption,
+            transcript=transcript,
             creator=info.get("uploader") or info.get("channel"),
             source_url=info.get("webpage_url") or url,
             audio_path=audio_path,
             duration_seconds=float(duration) if duration else None,
         )
+
+    def _fetch_subtitles(
+        self,
+        info: dict,
+        url: str,
+        workdir: Path,
+        base: dict,
+        deadline: Deadline,
+    ) -> str:
+        """Downloads the first usable caption track and returns its text."""
+        import yt_dlp
+
+        tracks = {**info.get("subtitles", {}), **info.get("automatic_captions", {})}
+        if not tracks:
+            return ""
+        language = next(
+            (lang for lang in ("en", "en-US", "en-GB") if lang in tracks),
+            next(iter(tracks)),
+        )
+
+        deadline.check("subtitles")
+        opts = {
+            **base,
+            "skip_download": True,
+            "writesubtitles": True,
+            "writeautomaticsub": True,
+            "subtitleslangs": [language],
+            "subtitlesformat": "vtt/best",
+            "outtmpl": str(workdir / "subs.%(ext)s"),
+        }
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                ydl.extract_info(url, download=True)
+        except Exception:  # noqa: BLE001 - subtitles are a shortcut, not a requirement
+            log.warning("subtitle fetch failed for %s", url)
+            return ""
+
+        for path in workdir.glob("subs*"):
+            if path.suffix.lower() in {".vtt", ".srt"}:
+                return _cues_to_text(path.read_text(errors="ignore"))
+        return ""
 
 
 class FasterWhisperTranscriber:
@@ -209,6 +258,31 @@ class OpenAICompatStructurer:
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"]
         return json.loads(content)
+
+
+_CUE_TIME = re.compile(r"^\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s*-->")
+_CUE_TAG = re.compile(r"<[^>]+>")
+
+
+def _cues_to_text(raw: str) -> str:
+    """Turns a caption file into prose.
+
+    WebVTT repeats the same line across overlapping cues; without dedupe the
+    transcript doubles itself and the structurer sees everything twice.
+    """
+    lines: list[str] = []
+    seen: set[str] = set()
+    for line in raw.splitlines():
+        text = _CUE_TAG.sub("", line).strip()
+        if not text or text.startswith("WEBVTT") or _CUE_TIME.match(text):
+            continue
+        if text.isdigit():
+            continue
+        if text in seen:
+            continue
+        seen.add(text)
+        lines.append(text)
+    return " ".join(lines)
 
 
 def has_quantities(text: str) -> bool:

@@ -23,6 +23,9 @@ class Extraction:
     """What the media fetch produced. Everything except audio is metadata."""
 
     caption: str = ""
+    #: Spoken words already published by the platform (YouTube subtitles).
+    #: When present this replaces ASR entirely — same stage, free and faster.
+    transcript: str = ""
     creator: str | None = None
     source_url: str = ""
     audio_path: Path | None = None
