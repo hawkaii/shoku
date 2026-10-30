@@ -73,8 +73,24 @@ needs ~1 GB resident to transcribe. The free e2-micro has 953 MB in total and a
 disk that already sits above 90% full — putting whisper there fills the disk
 during the build. It belongs on the worker, which is started on demand.
 
-## Cost control
+## Cost
 
-`gcloud compute instances stop reel-worker --zone=us-central1-a` when done. A
-stopped VM costs only its disk. Nothing in the API depends on the worker being
-up: imports queue in Redis and drain when it comes back.
+| Machine | Type | Per hour | Notes |
+|---|---|---|---|
+| API box | `e2-micro` | **$0** | always-free tier |
+| Worker | `e2-custom-4-8192` | ~**$0.11** | down from n2-custom-10 (10 vCPU / 40 GB) at ~$0.48 |
+
+The worker was a 10-vCPU box bought for video rendering. Import work is a single
+yt-dlp fetch plus one whisper pass, so 4 vCPU and 8 GB is the level where a
+60-second reel still transcribes in well under the 60-second budget.
+
+`deploy/worker.sh up|down|status` starts it, drains the queue, and stops it.
+A stopped VM bills only its disk:
+
+```
+60 GB standard PD ≈ $2.40/month   ← the only recurring charge in the project
+```
+
+That disk cannot be shrunk in place. Replacing it with a 30 GB disk (snapshot →
+new disk) halves the bill; worth doing only if the worker will stay stopped for
+a while.
