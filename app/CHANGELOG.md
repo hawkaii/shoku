@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.9.1] — 2026-10-30
+
+### Docs
+- V1.9.0 [skip ci] *(changelog)* — [`57a93b0`](https://github.com/hawkaii/food-finder-app/commit/57a93b005306c8e7709e220e6276081b30e27886)
+
+### Fixed
+- Report the server's reason instead of 'could not reach server' *(import)* — [`117fb1c`](https://github.com/hawkaii/food-finder-app/commit/117fb1c658eb32395f9d6c79cfa13f1c65903c4f)
+
 ## [1.9.0] — 2026-10-30
 
 ### Added
