@@ -13,7 +13,7 @@ COPY shoku_api ./shoku_api
 COPY alembic.ini ./
 COPY alembic ./alembic
 
-RUN pip install --no-cache-dir ".[prod]"
+RUN pip install --no-cache-dir ".[prod,worker]"
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
