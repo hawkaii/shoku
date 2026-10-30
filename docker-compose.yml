@@ -1,0 +1,39 @@
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      SHOKU_ENVIRONMENT: prod
+      SHOKU_DATABASE_URL: postgresql+psycopg://shoku:shoku@postgres:5432/shoku
+      SHOKU_QUEUE_BACKEND: redis
+      SHOKU_REDIS_URL: redis://redis:6379/0
+      SHOKU_AUTH_MODE: ${SHOKU_AUTH_MODE:-dev}
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["python", "-m", "shoku_api.worker"]
+    environment:
+      SHOKU_ENVIRONMENT: prod
+      SHOKU_DATABASE_URL: postgresql+psycopg://shoku:shoku@postgres:5432/shoku
+      SHOKU_QUEUE_BACKEND: redis
+      SHOKU_REDIS_URL: redis://redis:6379/0
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: shoku
+      POSTGRES_PASSWORD: shoku
+      POSTGRES_DB: shoku
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  pgdata:
