@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from ..container import AppContext
-from ..schemas.wire import ContentResponse
-from ..services import content as content_service
+from ..schemas import ContentResponse
+from .. import content as content_service
 from .deps import get_context, get_session
 
 router = APIRouter(prefix="/content", tags=["content"])

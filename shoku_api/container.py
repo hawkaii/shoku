@@ -15,10 +15,10 @@ from sqlalchemy.orm import Session, sessionmaker
 from .auth import AuthVerifier, build_verifier
 from .config import Settings
 from .db import build_engine, build_session_factory
+from .assistant import AssistantDeps, AssistantModel, UnconfiguredAssistantModel
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
-from .interfaces.assistant import AssistantModel, UnconfiguredAssistantModel
-from .interfaces.media import (
+from .imports.interfaces import (
     Extractor,
     Structurer,
     Transcriber,
@@ -26,11 +26,9 @@ from .interfaces.media import (
     UnconfiguredStructurer,
     UnconfiguredTranscriber,
 )
-from .interfaces.queue import InMemoryQueue, Queue, RedisQueue
-from .interfaces.storage import DevStorage, R2Storage, Storage
-from .services.assistant import AssistantDeps
-from .services.imports import ImportDeps
-from .services.photos import PhotoDeps
+from .imports.queue import InMemoryQueue, Queue, RedisQueue
+from .imports.service import ImportDeps
+from .photos import DevStorage, PhotoDeps, R2Storage, Storage
 
 
 @dataclass
@@ -71,7 +69,9 @@ class AppContext:
         )
 
 
-def build_context(settings: Settings, *, engine: Engine | None = None, **overrides: Any) -> AppContext:
+def build_context(
+    settings: Settings, *, engine: Engine | None = None, **overrides: Any
+) -> AppContext:
     """Build the production graph; ``overrides`` swaps individual interfaces."""
     engine = engine or build_engine(settings)
 

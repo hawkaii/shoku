@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from .. import __version__
 from ..container import AppContext
-from ..schemas.wire import HealthResponse
+from ..schemas import HealthResponse
 from .deps import get_context, get_session
 
 router = APIRouter(tags=["health"])

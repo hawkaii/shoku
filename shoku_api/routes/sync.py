@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from ..container import AppContext
 from ..models import User
-from ..schemas.sync import PullRequest, PullResponse, PushRequest, PushResponse
-from ..services.sync import SyncService
+from ..schemas import PullRequest, PullResponse, PushRequest, PushResponse
+from ..sync import SyncService
 from .deps import current_user, get_context, get_session
 
 router = APIRouter(prefix="/sync", tags=["sync"])

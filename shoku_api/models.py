@@ -90,9 +90,16 @@ class Dish(Base):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    # Server clock, stamped on every accepted write. Pull pages on this, not on
+    # the client's updated_at: a device with a slow clock must still see its own
+    # rows, and a device with a fast one must not hide everyone else's.
+    server_received_at: Mapped[datetime] = mapped_column(
+        UTCDateTime, default=utcnow, nullable=False
+    )
 
     __table_args__ = (
         Index("ix_dishes_user_updated", "user_id", "updated_at"),
+        Index("ix_dishes_user_received", "user_id", "server_received_at"),
         Index("ix_dishes_user_deleted", "user_id", "deleted_at"),
     )
 

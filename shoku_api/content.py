@@ -10,11 +10,10 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from ..domain.clock import Clock
-from ..domain.errors import NotFound
-from ..models import ContentCache
-from ..schemas.recipe import ProsePayload, RecipePayload
-from ..schemas.wire import ContentResponse
+from .domain.clock import Clock
+from .domain.errors import NotFound
+from .models import ContentCache
+from .schemas import ContentResponse, ProsePayload, RecipePayload
 
 
 def get_content(session: Session, shortcode: str) -> ContentResponse:

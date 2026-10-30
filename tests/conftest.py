@@ -6,81 +6,26 @@ Nothing here needs Postgres, Redis, a bucket, ffmpeg or a model provider.
 
 from __future__ import annotations
 
-import itertools
-from pathlib import Path
 from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from shoku_api.assistant import FakeAssistantModel
 from shoku_api.config import Settings
 from shoku_api.container import build_context
-from shoku_api.domain.clock import Deadline
-from shoku_api.interfaces.assistant import AssistantAnswer, AssistantContext
-from shoku_api.interfaces.media import Extraction, UnconfiguredStructurer
+from shoku_api.imports.fakes import (
+    FakeExtractor,
+    FakeStructurer,
+    FakeTranscriber,
+    recipe,
+)
 from shoku_api.main import create_app
 from shoku_api.models import Base
-from shoku_api.worker.pipeline import ImportWorker
-
-_shortcodes = itertools.count(1)
-
-
-def _recipe() -> dict[str, Any]:
-    return {
-        "title": "Paneer butter masala",
-        "servings": 3,
-        "minutes": 35,
-        "kcal": 420,
-        "protein": 18,
-        "ingredients": [{"name": "paneer", "grams": 250}],
-        "steps": ["Fry the paneer.", "Simmer the gravy."],
-        "tags": ["weeknight"],
-    }
-
-
-class FakeExtractor:
-    """Returns a caption with quantities, so the caption-first path is used."""
-
-    def __init__(self) -> None:
-        self.calls = 0
-        self.audio_path: Path | None = None
-
-    def extract(self, url: str, workdir: Path, deadline: Deadline) -> Extraction:
-        self.calls += 1
-        audio = workdir / "audio.mp3"
-        audio.write_bytes(b"not really audio")
-        self.audio_path = audio
-        return Extraction(
-            caption="250 g paneer, 2 tbsp butter, 100 ml cream — simmer 20 min",
-            creator="@ravi",
-            source_url=url,
-            audio_path=audio,
-        )
-
-
-class FakeTranscriber:
-    def transcribe(self, audio_path: Path, deadline: Deadline) -> str:
-        return "spoken words"
-
-
-class FakeStructurer:
-    def __init__(self, payload: dict[str, Any] | None = None) -> None:
-        self.payload = payload or _recipe()
-
-    def structure(self, text: str, *, caption_first: bool) -> dict[str, Any]:
-        return dict(self.payload)
-
-
-class FakeAssistant:
-    def __init__(self, text: str = "It is done when the paneer squeaks.") -> None:
-        self.text = text
-        self.calls = 0
-
-    def answer(self, context: AssistantContext, question: str) -> AssistantAnswer:
-        self.calls += 1
-        return AssistantAnswer(text=self.text)
+from shoku_api.photos import FakeStorage
 
 
 @pytest.fixture
@@ -92,13 +37,14 @@ def settings() -> Settings:
         storage_backend="dev",
         auth_mode="dev",
         assistant_daily_cap=3,
+        breaker_window=20,
         breaker_min_samples=3,
-        breaker_window=3,
+        clock_skew_allowance_seconds=300,
     )
 
 
 @pytest.fixture
-def ctx(settings: Settings):
+def engine(settings: Settings):
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -106,32 +52,63 @@ def ctx(settings: Settings):
         future=True,
     )
     Base.metadata.create_all(engine)
+    yield engine
+    Base.metadata.drop_all(engine)
+    engine.dispose()
+
+
+@pytest.fixture
+def ctx(settings: Settings, engine):
     return build_context(
         settings,
         engine=engine,
         extractor=FakeExtractor(),
         transcriber=FakeTranscriber(),
         structurer=FakeStructurer(),
-        assistant_model=FakeAssistant(),
+        assistant_model=FakeAssistantModel(),
+        storage=FakeStorage(),
     )
 
 
 @pytest.fixture
-def client(ctx) -> TestClient:
-    app = create_app(ctx.settings, ctx=ctx, create_tables=False)
+def session(ctx) -> Session:
+    with ctx.session_factory() as s:
+        yield s
+
+
+@pytest.fixture
+def app(ctx):
+    return create_app(ctx.settings, ctx=ctx, create_tables=False)
+
+
+@pytest.fixture
+def client(app) -> TestClient:
     with TestClient(app) as c:
         c.headers.update({"X-Firebase-Uid": "user-1"})
         yield c
 
 
 @pytest.fixture
-def worker(ctx) -> ImportWorker:
+def anonymous(app) -> TestClient:
+    with TestClient(app) as c:
+        yield c
+
+
+@pytest.fixture
+def worker(ctx):
+    from shoku_api.imports.pipeline import ImportWorker
+
     return ImportWorker(ctx)
 
 
 @pytest.fixture
-def recipe_payload() -> dict[str, Any]:
-    return _recipe()
+def extractor(ctx) -> FakeExtractor:
+    return ctx.extractor
+
+
+@pytest.fixture
+def transcriber(ctx) -> FakeTranscriber:
+    return ctx.transcriber
 
 
 @pytest.fixture
@@ -140,8 +117,18 @@ def structurer(ctx) -> FakeStructurer:
 
 
 @pytest.fixture
-def extractor(ctx) -> FakeExtractor:
-    return ctx.extractor
+def assistant(ctx) -> FakeAssistantModel:
+    return ctx.assistant_model
+
+
+@pytest.fixture
+def storage(ctx) -> FakeStorage:
+    return ctx.storage
+
+
+@pytest.fixture
+def recipe_payload() -> dict[str, Any]:
+    return recipe()
 
 
 def _dish_payload(**overrides: Any) -> dict[str, Any]:
@@ -201,7 +188,7 @@ def _cook_payload(**overrides: Any) -> dict[str, Any]:
 
 @pytest.fixture
 def dish_payload():
-    """Factory: `dish_payload(title="x")`."""
+    """Factory: ``dish_payload(title="x")``."""
     return _dish_payload
 
 

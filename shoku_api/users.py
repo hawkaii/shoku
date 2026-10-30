@@ -3,7 +3,7 @@
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from ..models import AssistantUsage, CookLog, Dish, ImportJob, RecipeVersion, User, utcnow
+from .models import AssistantUsage, CookLog, Dish, ImportJob, RecipeVersion, User, utcnow
 
 
 def ensure_user(session: Session, uid: str) -> User:

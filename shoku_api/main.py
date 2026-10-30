@@ -9,8 +9,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from . import __version__
-from .api import v1
-from .api.health import router as health_router
+from .routes import v1
+from .routes.health import router as health_router
 from .config import Settings
 from .container import AppContext, build_context
 from .domain.errors import ShokuError

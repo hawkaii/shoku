@@ -1,7 +1,9 @@
-"""Object storage, behind a presigner.
+"""Photos: the storage interface, its implementations, and presigning.
 
 The API never proxies bytes. It hands the client a presigned PUT for a key it
-chose, and the client uploads straight to the bucket.
+chose, and the client uploads straight to the bucket. The key is always under
+``photos/<uid>/``, so a client cannot ask for a path in someone else's
+namespace.
 """
 
 import hashlib
@@ -11,7 +13,8 @@ from datetime import datetime, timezone
 from typing import Protocol
 from urllib.parse import quote
 
-from ..domain.errors import Unavailable
+from .domain.errors import Unavailable
+from .schemas import PresignRequest, PresignResponse
 
 
 @dataclass(frozen=True)
@@ -31,9 +34,10 @@ class Storage(Protocol):
 
 
 class DevStorage:
-    """Deterministic placeholder. Clearly not a real bucket.
+    """Deterministic placeholder URL for local development.
 
-    Exists so the endpoint is exercisable locally; the URL cannot be PUT to.
+    Exercisable but not uploadable: nothing can PUT to it. A real deployment
+    sets ``SHOKU_STORAGE_BACKEND=r2``.
     """
 
     def __init__(self, public_base_url: str) -> None:
@@ -50,8 +54,31 @@ class DevStorage:
         )
 
 
+class FakeStorage:
+    """Records presigns so tests can assert on the key namespace."""
+
+    def __init__(self, public_base_url: str = "https://media.test") -> None:
+        self._base = public_base_url.rstrip("/")
+        self.keys: list[str] = []
+
+    def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
+        self.keys.append(key)
+        return PresignedUpload(
+            key=key,
+            url=f"{self._base}/put/{quote(key)}",
+            method="PUT",
+            headers={"Content-Type": content_type},
+            expires_in=expires_in,
+            public_url=f"{self._base}/{quote(key)}",
+        )
+
+
 class R2Storage:
-    """Cloudflare R2 via a boto3 S3 client (path-style, region ``auto``)."""
+    """Cloudflare R2 via a boto3 S3 client (path-style, region ``auto``).
+
+    boto3 is an optional dependency (``shoku-api[prod]``): the base install and
+    the test suite must not need it.
+    """
 
     def __init__(
         self,
@@ -99,12 +126,31 @@ class R2Storage:
 
 
 def object_key(user_id: str, extension: str | None, now: datetime | None = None) -> str:
-    """``photos/<uid>/<yyyymm>/<random>.<ext>``.
-
-    The uid prefix is what stops a presigned key from ever pointing into
-    another user's namespace.
-    """
+    """``photos/<uid>/<yyyymm>/<random>.<ext>``, unguessable and namespaced."""
     moment = now or datetime.now(timezone.utc)
     digest = hashlib.sha256(f"{user_id}:{moment.isoformat()}".encode()).hexdigest()
     suffix = (extension or "jpg").lower()
-    return f"photos/{user_id}/{moment:%Y%m}/{hmac.new(digest.encode(), b'shoku', 'sha256').hexdigest()[:24]}.{suffix}"
+    token = hmac.new(digest.encode(), b"shoku", "sha256").hexdigest()[:24]
+    return f"photos/{user_id}/{moment:%Y%m}/{token}.{suffix}"
+
+
+@dataclass(frozen=True)
+class PhotoDeps:
+    storage: Storage
+    expires_in: int
+    public_base_url: str = ""
+
+
+def presign_upload(deps: PhotoDeps, *, uid: str, request: PresignRequest, now) -> PresignResponse:
+    key = object_key(uid, request.extension, now)
+    upload = deps.storage.presign_put(
+        key, content_type=request.content_type, expires_in=deps.expires_in
+    )
+    return PresignResponse(
+        key=upload.key,
+        upload_url=upload.url,
+        method="PUT",
+        headers=upload.headers,
+        expires_in=upload.expires_in,
+        public_url=upload.public_url,
+    )

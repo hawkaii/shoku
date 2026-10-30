@@ -1,0 +1,227 @@
+"""The pipeline: states, budget, caption-first, breaker, cleanup."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from shoku_api.imports.fakes import FakeStructurer, ScriptedExtractor
+from shoku_api.imports.pipeline import ImportWorker
+from shoku_api.models import ImportJob
+
+IG = "https://www.instagram.com/reel/abc123/"
+
+
+def start(client: TestClient, url: str = IG) -> dict:
+    response = client.post("/v1/imports", json={"url": url})
+    assert response.status_code == 202, response.text
+    return response.json()
+
+
+def status(client: TestClient, job_id: str) -> dict:
+    response = client.get(f"/v1/imports/{job_id}")
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def test_job_starts_queued_and_transitions_through_extracting(
+    client, ctx, worker
+) -> None:
+    body = start(client)
+    assert body["state"] == "queued"
+    assert body["cached"] is False
+    assert status(client, body["job_id"])["state"] == "queued"
+
+    observed: list[str] = []
+
+    class ObservingStructurer(FakeStructurer):
+        def structure(self, text: str, *, caption_first: bool):
+            with ctx.session_factory() as session:
+                job = session.scalars(select(ImportJob)).one()
+                observed.append(job.state)
+            return super().structure(text, caption_first=caption_first)
+
+    ctx.structurer = ObservingStructurer()
+
+    result = worker.process(body["job_id"])
+    assert result.state == "ready"
+    assert observed == ["extracting"], "the job must be extracting while it works"
+
+    final = status(client, body["job_id"])
+    assert final["state"] == "ready"
+    assert final["reason"] is None
+    assert final["progress_stage"] == "ready"
+
+
+def test_cache_hit_does_not_enqueue(client, worker, ctx) -> None:
+    first = start(client)
+    worker.process(first["job_id"])
+    enqueued_after_first = len(ctx.queue.enqueued)
+
+    second = client.post("/v1/imports", json={"url": IG})
+    assert second.status_code == 200
+    assert second.json()["cached"] is True
+    assert second.json()["job_id"] is None
+    assert second.json()["shortcode"] == first["shortcode"]
+    assert len(ctx.queue.enqueued) == enqueued_after_first, "no new work to do"
+
+
+def test_duplicate_active_job_reuses_the_same_queue_entry(client, ctx) -> None:
+    first = start(client)
+    second = start(client)
+    assert second["job_id"] == first["job_id"]
+    assert len(ctx.queue.enqueued) == 1
+
+
+def test_caption_with_quantities_skips_asr(client, worker, transcriber, structurer) -> None:
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "caption_first"
+    assert transcriber.calls == 0
+    assert structurer.caption_first == [True]
+
+
+def test_caption_without_quantities_uses_asr(client, worker, ctx, transcriber) -> None:
+    ctx.extractor = ScriptedExtractor()
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "transcript"
+    assert transcriber.calls == 1
+    assert transcriber.audio_seen[0].exists() is False, "audio is deleted, never persisted"
+
+
+def test_breaker_degrades_to_caption_only(client, worker, ctx, transcriber) -> None:
+    with ctx.session_factory() as session:
+        for i in range(20):
+            session.add(
+                ImportJob(
+                    id=f"old-{i}",
+                    user_id="user-1",
+                    shortcode=f"dead{i:03d}",
+                    state="failed",
+                    reason="extraction_failed",
+                    progress_stage="failed",
+                    created_at=ctx.clock.now(),
+                    updated_at=ctx.clock.now(),
+                )
+            )
+        session.commit()
+
+    # A caption with no quantities would normally force a transcription.
+    ctx.extractor = ScriptedExtractor()
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "caption_only_degraded"
+    assert transcriber.calls == 0
+    assert status(client, body["job_id"])["state"] == "ready"
+
+
+def test_breaker_ignores_cancellations(client, worker, ctx, transcriber) -> None:
+    with ctx.session_factory() as session:
+        for i in range(20):
+            session.add(
+                ImportJob(
+                    id=f"cancel-{i}",
+                    user_id="user-1",
+                    shortcode=f"gone{i:03d}",
+                    state="failed",
+                    reason="cancelled",
+                    progress_stage="cancelled",
+                    created_at=ctx.clock.now(),
+                    updated_at=ctx.clock.now(),
+                )
+            )
+        session.commit()
+
+    ctx.extractor = ScriptedExtractor()
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "transcript", "a cancellation is not a pipeline failure"
+    assert transcriber.calls == 1
+
+
+def test_hard_budget_failure(client, worker, ctx) -> None:
+    ctx.settings.import_budget_seconds = 0
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.state == "failed"
+    assert result.reason == "timeout"
+    assert ctx.extractor.calls == 0
+    assert status(client, body["job_id"])["reason"] == "timeout"
+
+
+def test_audio_is_never_persisted(client, worker, ctx, tmp_path: Path) -> None:
+    ctx.settings.media_tmp_dir = str(tmp_path)
+    body = start(client)
+    worker.process(body["job_id"])
+
+    assert ctx.extractor.workdir is not None
+    assert not ctx.extractor.workdir.exists()
+    assert list(tmp_path.iterdir()) == [], "the temp dir must be empty after the job"
+
+
+def test_extraction_failure_marks_the_job_failed(client, worker, ctx) -> None:
+    ctx.extractor.fail = True
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.state == "failed"
+    assert result.reason == "extraction_failed"
+
+
+def test_invalid_structured_output_fails_validation(client, worker, ctx) -> None:
+    ctx.structurer = FakeStructurer({"title": "x"})
+    body = start(client)
+    result = worker.process(body["job_id"])
+
+    assert result.state == "failed"
+    assert result.reason == "invalid_recipe"
+    assert client.get("/v1/content/abc123").status_code == 404
+
+
+def test_cancel_is_terminal_and_the_worker_skips(client, worker) -> None:
+    body = start(client)
+    cancelled = client.post(f"/v1/imports/{body['job_id']}/cancel")
+    assert cancelled.status_code == 200
+    assert cancelled.json()["state"] == "failed"
+    assert cancelled.json()["reason"] == "cancelled"
+
+    assert worker.process(body["job_id"]).state == "skipped"
+    # Cancelling twice is a no-op, not an error.
+    assert client.post(f"/v1/imports/{body['job_id']}/cancel").status_code == 200
+
+
+def test_taken_down_shortcode_cannot_be_reimported(client, worker) -> None:
+    body = start(client)
+    worker.process(body["job_id"])
+    client.delete(f"/v1/content/{body['shortcode']}")
+
+    response = client.post("/v1/imports", json={"url": IG})
+    assert response.status_code == 410
+    assert response.json()["error"] == "gone"
+
+
+def test_another_user_cannot_read_a_job(client, app, worker) -> None:
+    from fastapi.testclient import TestClient
+
+    body = start(client)
+    with TestClient(app) as other:
+        other.headers.update({"X-Firebase-Uid": "user-2"})
+        assert other.get(f"/v1/imports/{body['job_id']}").status_code == 404
+
+
+def test_unsupported_url_is_rejected(client) -> None:
+    response = client.post("/v1/imports", json={"url": "https://example.com/reel/x"})
+    assert response.status_code == 422
+    assert response.json()["error"] == "unsupported_url"
+
+
+def test_worker_is_constructible_without_http(ctx) -> None:
+    assert isinstance(ImportWorker(ctx), ImportWorker)

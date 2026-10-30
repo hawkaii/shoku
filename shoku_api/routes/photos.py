@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 
 from ..container import AppContext
 from ..models import User
-from ..schemas.wire import PresignRequest, PresignResponse
-from ..services.photos import presign_upload
+from ..schemas import PresignRequest, PresignResponse
+from ..photos import presign_upload
 from .deps import current_user, get_context
 
 router = APIRouter(prefix="/photos", tags=["photos"])
