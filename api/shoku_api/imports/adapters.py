@@ -17,6 +17,7 @@ from pathlib import Path
 
 from ..domain.clock import Deadline
 from .interfaces import Extraction
+from ..domain.errors import StructuringFailed
 
 log = logging.getLogger("shoku.imports")
 
@@ -199,8 +200,10 @@ class HeuristicStructurer:
         ][:20]
 
         if len(ingredients) < 2 or not steps:
-            raise ValueError(
-                "caption did not contain a usable ingredient list and steps"
+            # A stable reason the app can turn into a sentence, rather than an
+            # internal_error that tells the user nothing.
+            raise StructuringFailed(
+                detail="no ingredient list or steps found in the text"
             )
 
         title = lines[0][:120] if lines else "Imported recipe"
