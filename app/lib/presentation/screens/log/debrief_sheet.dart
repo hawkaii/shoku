@@ -46,7 +46,6 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   int _rating = 4;
   CookMood _mood = CookMood.comfort;
   File? _photo;
-  bool _saving = false;
 
   @override
   void dispose() {
@@ -66,37 +65,20 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
     }
   }
 
-  Future<void> _save() async {
-    if (_saving) return;
-    setState(() => _saving = true);
-
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-
-    try {
-      final version = await ref.read(journalStoreProvider.notifier).commitCook(
-            dishId: widget.dish.id,
-            mood: _mood,
-            rating: _rating,
-            note: _note.text.trim(),
-            changes: _changes,
-            photoUrl: _photo?.path,
-          );
-      HapticFeedback.mediumImpact();
-      navigator.pop();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(version == null
-              ? 'Could not save this cook'
-              : 'Saved as v$version · ${_mood.name}'),
-        ),
-      );
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Could not save this cook')),
-      );
-    }
+  void _save() {
+    ref.read(journalStoreProvider.notifier).commitCook(
+          dishId: widget.dish.id,
+          mood: _mood,
+          rating: _rating,
+          note: _note.text.trim(),
+          changes: _changes,
+          photoUrl: _photo?.path,
+        );
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Saved as v${widget.dish.versions.length + 1} · ${_mood.name}')),
+    );
   }
 
   @override

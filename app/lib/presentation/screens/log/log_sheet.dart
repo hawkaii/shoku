@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
-import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -31,7 +30,6 @@ class LogSheet extends ConsumerStatefulWidget {
 
 class _LogSheetState extends ConsumerState<LogSheet> {
   CookOutcome? _outcome;
-  bool _saving = false;
   final _controller = TextEditingController();
 
   @override
@@ -42,47 +40,15 @@ class _LogSheetState extends ConsumerState<LogSheet> {
 
   bool get _canSave => _outcome != null;
 
-  Future<void> _save() async {
-    if (_saving || _outcome == null) return;
-    setState(() => _saving = true);
-
-    final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final changes = _controller.text
-        .split(RegExp(r'[,;\n]'))
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-    final rating = switch (_outcome!) {
-      CookOutcome.nailedIt => 5,
-      CookOutcome.good => 4,
-      CookOutcome.needsWork => 2,
-    };
-
-    try {
-      final version = await ref.read(journalStoreProvider.notifier).commitCook(
-            dishId: widget.dish.id,
-            mood: CookMood.comfort,
-            rating: rating,
-            note: '',
-            changes: changes,
-          );
-      HapticFeedback.mediumImpact();
-      navigator.pop();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(version == null
-              ? 'Could not save that cook'
-              : 'Logged as v$version · ${_outcome!.label}'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (_) {
-      if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Could not save that cook')),
-      );
-    }
+  void _save() {
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Logged as v${widget.dish.currentVersion + 1} · ${_outcome!.label}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
