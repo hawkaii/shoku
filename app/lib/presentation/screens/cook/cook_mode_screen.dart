@@ -191,6 +191,9 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final dish = ref.watch(dishProvider(widget.dishId));
+    if (dish == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final steps = dish.steps.isEmpty ? const ['Follow the recipe.'] : dish.steps;
     final isLast = _step == steps.length - 1;
 

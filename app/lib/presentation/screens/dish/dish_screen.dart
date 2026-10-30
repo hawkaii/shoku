@@ -21,7 +21,12 @@ class DishScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final dish = ref.watch(dishProvider(dishId));
-    final inspected = ref.watch(inspectedVersionProvider(dishId)).clamp(1, dish.versions.length);
+    // Still loading, tombstoned, or imported with nothing extracted yet.
+    if (dish == null || dish.versions.isEmpty) {
+      return _DishUnavailable(dishId: dishId);
+    }
+    final inspected =
+        ref.watch(inspectedVersionProvider(dishId)).clamp(1, dish.versions.length);
     final version = dish.versions[inspected - 1];
     final recommended = dish.versions.last;
     final altered = recommended.changes.any((c) => c != 'First attempt' && c != 'No changes');
@@ -406,3 +411,45 @@ class _SmallAction extends StatelessWidget {
 
 String _date(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')} ${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]}';
+
+/// Shown when the dish is missing, was deleted, or is an import with nothing
+/// extracted yet. Beats a `Bad state: No element` from indexing an empty list.
+class _DishUnavailable extends StatelessWidget {
+  final String dishId;
+  const _DishUnavailable({required this.dishId});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Scaffold(
+      backgroundColor: c.canvas,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'This dish is not here',
+                  style: ShokuType.title.copyWith(color: c.ink),
+                ),
+                const SizedBox(height: ShokuSpace.xs),
+                Text(
+                  'It may still be loading, or it was removed.',
+                  textAlign: TextAlign.center,
+                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: ShokuSpace.lg),
+                TextButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  child: const Text('Back to the journal'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

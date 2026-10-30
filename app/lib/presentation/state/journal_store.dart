@@ -7,29 +7,54 @@ import '../../data/mock/journal_data.dart';
 /// The journal is the product, so it is the one piece of real state: every
 /// mutation goes through the repository and the UI re-reads what the database
 /// now holds, so what you see is what was actually written.
+enum JournalStatus { loading, ready, failed }
+
 class JournalStore extends StateNotifier<List<Dish>> {
-  JournalStore(this._repo) : super(const []) {
+  JournalStore(this._repo, {void Function(JournalStatus)? onStatus})
+      : _onStatus = onStatus,
+        super(const []) {
     _boot();
   }
 
   final JournalRepository _repo;
+  final void Function(JournalStatus)? _onStatus;
 
   bool _loaded = false;
   bool get isLoaded => _loaded;
 
+  Object? _error;
+  Object? get error => _error;
+
   Future<void> _boot() async {
-    // First run: seed with the demo journal so the app doesn't open empty.
-    if (await _repo.countDishes() == 0) {
-      await _repo.seed(JournalData.dishes);
+    try {
+      // Seed once, tracked by a database flag rather than by "are there rows" —
+      // a user who deletes everything must not get the demo kitchen back.
+      if (!await _repo.isSeeded()) {
+        await _repo.seed(JournalData.dishes);
+      }
+      state = await _repo.loadDishes();
+      _loaded = true;
+      _onStatus?.call(JournalStatus.ready);
+    } catch (error) {
+      // Never leave the UI on a spinner with no explanation, and never let a
+      // boot failure escape as an unhandled async error.
+      _error = error;
+      state = const [];
+      _loaded = true;
+      _onStatus?.call(JournalStatus.failed);
     }
-    state = await _repo.loadDishes();
-    _loaded = true;
+  }
+
+  Future<void> retry() async {
+    _error = null;
+    state = const [];
+    await _boot();
   }
 
   Dish byId(String id) =>
       state.firstWhere((d) => d.id == id, orElse: () => state.first);
 
-  Future<void> commitCook({
+  Future<int?> commitCook({
     required String dishId,
     required CookMood mood,
     required int rating,
@@ -37,7 +62,7 @@ class JournalStore extends StateNotifier<List<Dish>> {
     required List<String> changes,
     String? photoUrl,
   }) async {
-    await _repo.commitCook(
+    final version = await _repo.commitCook(
       dishId: dishId,
       mood: mood,
       rating: rating,
@@ -46,6 +71,7 @@ class JournalStore extends StateNotifier<List<Dish>> {
       photoUrl: photoUrl,
     );
     state = await _repo.loadDishes();
+    return version;
   }
 
   Future<void> setStatus(String dishId, DishStatus status) async {
@@ -73,6 +99,16 @@ final journalRepositoryProvider = Provider<JournalRepository>(
   (ref) => JournalRepository(ref.watch(databaseProvider)),
 );
 
+/// Whether the journal has finished loading — the UI needs this to tell
+/// "still opening" apart from "nothing here yet".
+final journalStatusProvider = StateProvider<JournalStatus>(
+  (ref) => JournalStatus.loading,
+);
+
 final journalStoreProvider = StateNotifierProvider<JournalStore, List<Dish>>(
-  (ref) => JournalStore(ref.watch(journalRepositoryProvider)),
+  (ref) => JournalStore(
+    ref.watch(journalRepositoryProvider),
+    onStatus: (status) =>
+        ref.read(journalStatusProvider.notifier).state = status,
+  ),
 );
