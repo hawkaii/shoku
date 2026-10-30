@@ -10,6 +10,7 @@ import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
+import '../../widgets/kit/status_badge.dart';
 import '../../widgets/kit/step_diagram.dart';
 import '../log/log_sheet.dart';
 
@@ -24,7 +25,7 @@ class JournalScreen extends ConsumerWidget {
     final totalCooks = ref.watch(totalCooksProvider);
     final upgrades = ref.watch(totalUpgradesProvider);
     final pinned = dishes.firstWhere(
-      (d) => d.status == DishStatus.wantToTry,
+      (d) => d.status == DishStatus.toCook,
       orElse: () => dishes.first,
     );
 
@@ -40,25 +41,28 @@ class JournalScreen extends ConsumerWidget {
         children: [
           // ---- Rhythm header ------------------------------------------
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const PlateMark(size: 24),
+              const SizedBox(width: ShokuSpace.sm),
+              Expanded(
+                child: Text(
+                  'October kitchen',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ShokuType.h1.copyWith(color: c.ink),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const PlateMark(size: 26),
-                        const SizedBox(width: ShokuSpace.sm),
-                        Text('October kitchen', style: ShokuType.h1.copyWith(color: c.ink)),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${dishes.length} dishes · ${upgrades} upgrades',
-                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                    ),
-                  ],
+                child: Text(
+                  '${dishes.length} dishes · ${upgrades} upgrades',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
               ),
               _CounterPill(
@@ -200,9 +204,13 @@ class _PinnedCard extends StatelessWidget {
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.accent),
                       ),
                       const SizedBox(width: ShokuSpace.xs),
-                      Text(
-                        '· ${dish.minutes} min',
-                        style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
+                      Flexible(
+                        child: Text(
+                          '· ${dish.minutes} min',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
+                        ),
                       ),
                     ],
                   ),
@@ -214,10 +222,7 @@ class _PinnedCard extends StatelessWidget {
                     style: ShokuType.title.copyWith(color: c.ink),
                   ),
                   const SizedBox(height: 1),
-                  Text(
-                    dish.cookCount == 0 ? 'Not cooked yet' : 'Cooked ${dish.cookCount}×',
-                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                  ),
+                  StatusBadge(status: dish.status, cookCount: dish.cookCount, compact: true),
                 ],
               ),
             ),
