@@ -97,7 +97,11 @@ def build_context(
         settings=settings,
         engine=engine,
         session_factory=build_session_factory(engine),
-        auth=build_verifier(settings.auth_mode),
+        auth=build_verifier(
+            settings.auth_mode,
+            supabase_url=settings.supabase_url,
+            supabase_audience=settings.supabase_audience,
+        ),
         queue=queue,
         extractor=UnconfiguredExtractor(),
         transcriber=UnconfiguredTranscriber(),
