@@ -6,6 +6,7 @@ with import-time side effects, and it is the uvicorn target.
 """
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import __version__
@@ -36,6 +37,18 @@ def create_app(
         docs_url="/docs" if settings.environment != "prod" else None,
     )
     app.state.ctx = context
+
+    # The Flutter web build runs in a browser, so every call carries an Origin
+    # and the browser blocks the response without these headers. Native builds
+    # send no Origin and are unaffected.
+    if settings.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_origins,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+            allow_headers=["authorization", "content-type"],
+        )
 
     # /health at the root, plus the /v1 group.
     app.include_router(health_router)
