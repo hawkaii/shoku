@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter/foundation.dart';
+
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
@@ -115,10 +117,17 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         _busy = false;
         _error = 'Sign in from You to import';
       });
-    } catch (_) {
+    } on ApiError catch (error) {
       setState(() {
         _busy = false;
-        _error = 'Could not reach the server';
+        _error = _reasonText(error.reason);
+      });
+    } catch (error) {
+      setState(() {
+        _busy = false;
+        _error = kDebugMode
+            ? 'Could not reach the server ($error)'
+            : 'Could not reach the server';
       });
     }
   }
