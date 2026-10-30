@@ -33,9 +33,15 @@ prod = [
 ]
 # Only the worker image installs these: extracting media and running speech
 # recognition are the heavy, optional half of the system.
+# Exactly what the worker needs: a database driver, a queue, a fetcher and an
+# HTTP client. No boto3 — the worker never touches object storage.
 worker = [
+    "psycopg[binary]>=3.2",
+    "redis>=5.0",
     "yt-dlp[default]>=2024.1.1",
     "httpx>=0.27",
+    # A static ~30 MB ffmpeg, instead of the 430 MB apt package.
+    "imageio-ffmpeg>=0.5",
 ]
 # Speech recognition needs ~1 GB of model + runtime. It does not fit the free
 # e2-micro alongside the API, so it is a separate extra installed only where

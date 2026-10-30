@@ -42,7 +42,7 @@ sudo docker build --build-arg EXTRAS=prod -t shoku-api:api .
 Same repo, heavier image:
 
 ```bash
-sudo docker build --build-arg EXTRAS="prod,worker,whisper" -t shoku-api:worker .
+sudo docker build --build-arg EXTRAS="worker,whisper" -t shoku-api:worker .
 sudo cp deploy/docker-compose.worker.yml docker-compose.yml
 sudo docker compose up -d
 ```
