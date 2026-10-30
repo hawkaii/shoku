@@ -53,6 +53,9 @@ class RedisQueue:
             ) from exc
         self._client = redis.Redis.from_url(url, decode_responses=True)
         self._name = name
+        # redis-py's TimeoutError is a RedisError, NOT the builtin, so catching
+        # the builtin alone lets a normal empty poll crash the worker.
+        self._timeout_error = redis.exceptions.TimeoutError
 
     def enqueue(self, job_id: str) -> None:
         self._client.lpush(self._name, job_id)
@@ -63,7 +66,7 @@ class RedisQueue:
         # must not kill the worker loop.
         try:
             result = self._client.brpop(self._name, timeout=int(max(1, timeout)))
-        except TimeoutError:
+        except (TimeoutError, self._timeout_error):
             return None
         return None if result is None else str(result[1])
 
