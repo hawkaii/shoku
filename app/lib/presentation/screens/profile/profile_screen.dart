@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
 import '../../state/journal_providers.dart';
 import '../../state/nutrition_providers.dart';
@@ -11,6 +12,7 @@ import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import 'sign_in_sheet.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -51,6 +53,11 @@ class ProfileScreen extends ConsumerWidget {
               Expanded(child: _StatBlock(value: '$signature', label: 'signature', color: c.ready)),
             ],
           ),
+
+          const SizedBox(height: ShokuSpace.lg),
+          ShokuLabel('account'),
+          const SizedBox(height: ShokuSpace.sm),
+          const _AccountRow(),
 
           const SizedBox(height: ShokuSpace.lg),
           ShokuLabel('nutrition'),
@@ -159,6 +166,77 @@ class _StatBlock extends StatelessWidget {
           Text(label.toUpperCase(), style: ShokuType.label.copyWith(color: c.inkMuted)),
         ],
       ),
+    );
+  }
+}
+
+
+/// Signed in, or a way to sign in — the one place auth surfaces in the app.
+class _AccountRow extends StatelessWidget {
+  const _AccountRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final auth = AuthService();
+    return StreamBuilder(
+      stream: auth.changes,
+      builder: (context, _) {
+        final session = auth.session;
+        final email = session?.user.email ?? '';
+        return Container(
+          padding: const EdgeInsets.all(ShokuSpace.md),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(ShokuRadius.card),
+            border: Border.all(color: c.hairline),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      session == null ? 'Not signed in' : 'Signed in',
+                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      session == null
+                          ? 'Cooks live on this phone only.'
+                          : email,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: ShokuSpace.sm),
+              if (session == null)
+                ShokuPressable(
+                  onTap: () => showSignInSheet(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: c.ink,
+                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                    ),
+                    child: Text('Sign in',
+                        style: ShokuType.label.copyWith(color: c.canvas)),
+                  ),
+                )
+              else
+                TextButton(
+                  onPressed: () => AuthService().signOut(),
+                  child: Text('Sign out',
+                      style: ShokuType.label.copyWith(color: c.inkMuted)),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

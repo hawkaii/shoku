@@ -270,13 +270,13 @@ class JournalRepository {
     // so a retry inserts nothing.
     for (final version in dish.versions) {
       await _db.into(_db.versionRows).insert(
-            _versionCompanion(dish.id, version),
+            _versionCompanion(dish.id, version, dirty: dirty ? 1 : 0),
             mode: InsertMode.insertOrIgnore,
           );
     }
     for (final cook in dish.cooks) {
       await _db.into(_db.cookLogRows).insert(
-            _cookCompanion(dish.id, cook),
+            _cookCompanion(dish.id, cook, dirty: dirty ? 1 : 0),
             mode: InsertMode.insertOrIgnore,
           );
     }
@@ -362,6 +362,7 @@ class JournalRepository {
     String dishId,
     RecipeVersion v, {
     int? number,
+    int dirty = 1,
   }) =>
       VersionRowsCompanion.insert(
         id: _versionId(dishId, v),
@@ -378,9 +379,10 @@ class JournalRepository {
         originShortcode: Value(v.originShortcode),
         parentVersionId: Value(v.parentVersionId),
         createdAt: v.createdAt,
+        dirty: Value(dirty),
       );
 
-  CookLogRowsCompanion _cookCompanion(String dishId, CookLog c) =>
+  CookLogRowsCompanion _cookCompanion(String dishId, CookLog c, {int dirty = 1}) =>
       CookLogRowsCompanion.insert(
         id: c.id.isEmpty ? _uuid.v4() : c.id,
         dishId: dishId,
@@ -394,6 +396,7 @@ class JournalRepository {
         note: Value(c.note),
         changes: Value(jsonEncode(c.changes)),
         rating: Value(c.rating),
+        dirty: Value(dirty),
       );
 
   static List<String> _decodeList(String raw) {
