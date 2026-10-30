@@ -1,0 +1,23 @@
+# Worker compose — runs on the bigger VM, not the free e2-micro.
+#
+# Start the worker VM only when imports are expected; it is the expensive one.
+# It shares the VPC with the API, so Redis and Postgres are reachable directly.
+
+services:
+  worker:
+    image: ${SHOKU_IMAGE:-shoku-api:worker}
+    restart: unless-stopped
+    env_file: .env
+    command: ["python", "-m", "shoku_api.imports.worker"]
+    # yt-dlp and whisper are the memory spikes: one job at a time, on purpose.
+    mem_limit: 3g
+    volumes:
+      - worker-tmp:/tmp/shoku
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "2"
+
+volumes:
+  worker-tmp:

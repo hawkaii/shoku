@@ -19,11 +19,6 @@ dependencies = [
     "pyjwt[crypto]>=2.9",
 ]
 
-worker = [
-    "yt-dlp[default]>=2024.1.1",
-    "faster-whisper>=1.0.1",
-]
-
 [project.optional-dependencies]
 dev = [
     "pytest>=8.2",
@@ -35,6 +30,18 @@ prod = [
     "psycopg[binary]>=3.2",
     "redis>=5.0",
     "boto3>=1.34",
+]
+# Only the worker image installs these: extracting media and running speech
+# recognition are the heavy, optional half of the system.
+worker = [
+    "yt-dlp[default]>=2024.1.1",
+    "httpx>=0.27",
+]
+# Speech recognition needs ~1 GB of model + runtime. It does not fit the free
+# e2-micro alongside the API, so it is a separate extra installed only where
+# there is room (see DEPLOY.md).
+whisper = [
+    "faster-whisper>=1.0.1",
 ]
 
 [tool.hatch.build.targets.wheel]
