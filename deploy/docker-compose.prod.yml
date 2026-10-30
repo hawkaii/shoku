@@ -13,8 +13,15 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
-    # An e2-micro has 1 GB; the API must never be starved by the worker.
-    mem_limit: 384m
+    # The free e2-micro has 953 MB total and already runs ~300 MB of OS.
+    # These two limits plus a swap file are what keep it from OOM-killing.
+    mem_limit: 256m
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    mem_limit: 64m
 
   worker:
     image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
@@ -24,5 +31,8 @@ services:
     depends_on:
       api:
         condition: service_started
+      redis:
+        condition: service_started
     # One job at a time: yt-dlp and ffmpeg are the memory spikes here.
-    mem_limit: 512m
+    mem_limit: 320m
+    memswap_limit: 640m

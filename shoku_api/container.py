@@ -115,6 +115,24 @@ def build_context(
             min_samples=settings.breaker_min_samples,
         ),
     )
+    from .imports.adapters import (
+        FasterWhisperTranscriber,
+        HeuristicStructurer,
+        OpenAICompatStructurer,
+        YtDlpExtractor,
+    )
+
+    if settings.extractor == "ytdlp":
+        ctx.extractor = YtDlpExtractor(cookies_file=settings.cookies_file or None)
+    if settings.transcriber == "whisper":
+        ctx.transcriber = FasterWhisperTranscriber(model_size=settings.whisper_model)
+    if settings.structurer == "heuristic":
+        ctx.structurer = HeuristicStructurer()
+    elif settings.structurer == "openai":
+        ctx.structurer = OpenAICompatStructurer(
+            settings.structurer_base_url, settings.structurer_api_key, settings.structurer_model
+        )
+
     for name, value in overrides.items():
         if not hasattr(ctx, name):
             raise TypeError(f"unknown AppContext field {name!r}")

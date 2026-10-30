@@ -36,6 +36,17 @@ class Settings(BaseSettings):
     breaker_min_samples: int = 5
     media_tmp_dir: str = ""  # empty -> system temp dir
 
+    # Which real adapters the worker uses. Empty means "not configured", which
+    # makes jobs fail with a stable reason instead of producing junk.
+    extractor: str = ""          # "ytdlp"
+    transcriber: str = ""        # "whisper"
+    structurer: str = ""         # "heuristic" | "openai"
+    whisper_model: str = "base"
+    cookies_file: str = ""
+    structurer_base_url: str = ""
+    structurer_api_key: str = ""
+    structurer_model: str = ""
+
     # Assistant.
     assistant_daily_cap: int = 20
     assistant_model_name: str = "fake-assistant"
