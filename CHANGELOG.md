@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.9.2] — 2026-10-30
+
+### Docs
+- V1.9.1 [skip ci] *(changelog)* — [`47394fd`](https://github.com/hawkaii/food-finder-app/commit/47394fd4737555bda866e8ae2215c39cb409841a)
+
+### Fixed
+- Follow the device theme instead of forcing light *(theme)* — [`594143b`](https://github.com/hawkaii/food-finder-app/commit/594143b93a0d0461dad4b62a4b6f1136e359b976)
+
 ## [1.9.1] — 2026-10-30
 
 ### Docs
