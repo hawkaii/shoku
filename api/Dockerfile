@@ -36,11 +36,14 @@ ENV PATH="/opt/venv/bin:$PATH" \
 WORKDIR /app
 COPY shoku_api ./shoku_api
 
-# A JS runtime for yt-dlp's YouTube extractor. Only the worker needs it, but
-# installing it unconditionally keeps one Dockerfile.
-RUN apt-get update \
- && apt-get install -y --no-install-recommends nodejs \
- && rm -rf /var/lib/apt/lists/*
+# A JS runtime for yt-dlp's YouTube extractor. Only the worker image gets it,
+# so the API stays ~400 MB instead of paying for a dependency it never uses.
+ARG EXTRAS=prod
+RUN if echo "$EXTRAS" | grep -q worker; then \
+      apt-get update \
+      && apt-get install -y --no-install-recommends nodejs \
+      && rm -rf /var/lib/apt/lists/*; \
+    fi
 
 # On the worker image, put the static ffmpeg on PATH so yt-dlp finds it.
 RUN if /opt/venv/bin/python -c "import imageio_ffmpeg" 2>/dev/null; then \
