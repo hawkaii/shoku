@@ -7,6 +7,7 @@ on SIGTERM/SIGINT after the job in hand, so a deploy never leaves a job in
 
 import logging
 import signal
+import time
 import sys
 
 from ..config import get_settings
@@ -38,10 +39,19 @@ def main() -> int:
 
     log.info("worker ready (queue=%s)", settings.queue_backend)
     while not stopping:
-        job_id = ctx.queue.dequeue(timeout=5)
+        try:
+            job_id = ctx.queue.dequeue(timeout=5)
+        except Exception:  # noqa: BLE001 - a dead queue must not kill the worker
+            log.exception("queue read failed; retrying in 2s")
+            time.sleep(2)
+            continue
         if job_id is None:
             continue
-        result = worker.process(job_id)
+        try:
+            result = worker.process(job_id)
+        except Exception:  # noqa: BLE001 - one bad job must not kill the worker
+            log.exception("job %s crashed", job_id)
+            continue
         log.info(
             "job %s -> %s%s",
             result.job_id,
