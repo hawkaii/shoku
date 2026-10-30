@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     # verifies signed ID tokens (see shoku_api.auth).
     auth_mode: str = "dev"
 
+    # Supabase Auth: the JWT issuer is <url>/auth/v1 and user tokens carry
+    # audience "authenticated". Both are required to verify an access token.
+    supabase_url: str = ""
+    supabase_audience: str = "authenticated"
+
     cors_origins: list[str] = Field(default_factory=list)
 
 
