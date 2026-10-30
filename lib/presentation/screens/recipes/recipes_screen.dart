@@ -8,6 +8,7 @@ import '../../state/journal_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/status_badge.dart';
 
 class RecipesScreen extends ConsumerWidget {
   const RecipesScreen({super.key});
@@ -18,12 +19,9 @@ class RecipesScreen extends ConsumerWidget {
     final dishes = ref.watch(dishesProvider);
     final filter = ref.watch(libraryFilterProvider);
 
-    final visible = switch (filter) {
-      LibraryFilter.all => dishes,
-      LibraryFilter.wantToTry => dishes.where((d) => d.status == DishStatus.wantToTry).toList(),
-      LibraryFilter.inProgress => dishes.where((d) => d.status == DishStatus.inProgress).toList(),
-      LibraryFilter.signature => dishes.where((d) => d.status == DishStatus.signature).toList(),
-    };
+    final toCook = dishes.where((d) => d.status == DishStatus.toCook).toList();
+    final cooked = dishes.where((d) => d.status != DishStatus.toCook).toList();
+    final visible = filter == LibraryFilter.toCook ? toCook : cooked;
 
     return SafeArea(
       bottom: false,
@@ -40,78 +38,46 @@ class RecipesScreen extends ConsumerWidget {
               Text('Cookbook', style: ShokuType.h1.copyWith(color: c.ink)),
               const Spacer(),
               Text(
-                '${dishes.length} dishes',
+                '${cooked.length} cooked',
                 style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
               ),
             ],
           ),
           const SizedBox(height: ShokuSpace.md),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final f in LibraryFilter.values) ...[
-                  _FilterPill(
-                    label: switch (f) {
-                      LibraryFilter.all => 'ALL',
-                      LibraryFilter.wantToTry => 'TO TRY',
-                      LibraryFilter.inProgress => 'IN PROGRESS',
-                      LibraryFilter.signature => 'SIGNATURE',
-                    },
-                    selected: filter == f,
-                    onTap: () => ref.read(libraryFilterProvider.notifier).state = f,
-                  ),
-                  const SizedBox(width: ShokuSpace.xs),
-                ],
-              ],
-            ),
+          StatusToggle(
+            toCookCount: toCook.length,
+            cookedCount: cooked.length,
+            showingToCook: filter == LibraryFilter.toCook,
+            onChanged: (showToCook) => ref.read(libraryFilterProvider.notifier).state =
+                showToCook ? LibraryFilter.toCook : LibraryFilter.cooked,
           ),
           const SizedBox(height: ShokuSpace.lg),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: ShokuSpace.md,
-            crossAxisSpacing: ShokuSpace.md,
-            childAspectRatio: 0.72,
-            children: [
-              for (var i = 0; i < visible.length; i++)
-                ShokuEntrance(
-                  index: i,
-                  child: _DishTile(dish: visible[i]),
+          if (visible.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: ShokuSpace.xxl),
+              child: Center(
+                child: Text(
+                  filter == LibraryFilter.toCook
+                      ? 'Nothing waiting to be cooked.'
+                      : 'No cooks yet. Pick something from To cook.',
+                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
-            ],
-          ),
+              ),
+            )
+          else
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: ShokuSpace.md,
+              crossAxisSpacing: ShokuSpace.md,
+              childAspectRatio: 0.70,
+              children: [
+                for (var i = 0; i < visible.length; i++)
+                  ShokuEntrance(index: i, child: _DishTile(dish: visible[i])),
+              ],
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _FilterPill extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterPill({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return ShokuPressable(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: ShokuMotion.toggle,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? c.ink : c.surface,
-          borderRadius: BorderRadius.circular(ShokuRadius.chip),
-          border: Border.all(color: selected ? c.ink : c.hairline),
-        ),
-        child: Text(
-          label,
-          style: ShokuType.label.copyWith(color: selected ? c.canvas : c.inkMuted),
-        ),
       ),
     );
   }
@@ -139,33 +105,29 @@ class _DishTile extends StatelessWidget {
                   heroTag: true,
                 ),
                 Positioned(
-                  left: ShokuSpace.sm,
-                  top: ShokuSpace.sm,
+                  left: ShokuSpace.xs,
+                  top: ShokuSpace.xs,
+                  child: StatusBadge(
+                    status: dish.status,
+                    cookCount: dish.cookCount,
+                    compact: true,
+                  ),
+                ),
+                Positioned(
+                  right: ShokuSpace.xs,
+                  top: ShokuSpace.xs,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: c.canvas.withValues(alpha: 0.94),
+                      color: c.ink.withValues(alpha: 0.78),
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
                     ),
                     child: Text(
                       'v${dish.currentVersion}',
-                      style: ShokuType.stat.copyWith(fontSize: 10, color: c.accent),
+                      style: ShokuType.stat.copyWith(fontSize: 10, color: c.canvas),
                     ),
                   ),
                 ),
-                if (dish.status == DishStatus.signature)
-                  Positioned(
-                    right: ShokuSpace.sm,
-                    top: ShokuSpace.sm,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: c.reward,
-                        borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                      ),
-                      child: Icon(Icons.star_rounded, size: 12, color: c.canvas),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -178,7 +140,11 @@ class _DishTile extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            dish.cookCount == 0 ? 'Not cooked yet' : '${dish.cookCount} cooks · ${dish.outcomeLabel}',
+            dish.cookCount == 0
+                ? '${dish.minutes} min · never cooked'
+                : '${dish.minutes} min · last ${dish.outcomeLabel.toLowerCase()}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11.5),
           ),
         ],
