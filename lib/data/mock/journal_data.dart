@@ -33,6 +33,9 @@ enum CookOutcome {
 }
 
 class RecipeVersion {
+  /// Client-generated UUID. Empty on rows built from seed/mock data; the
+  /// repository assigns one the first time the row is written.
+  final String id;
   final int number;
   final List<String> changes;
   final List<String> ingredients;
@@ -41,7 +44,16 @@ class RecipeVersion {
   final int kcal;
   final int protein;
 
+  /// `mine` or `import`. An import is an immutable snapshot of someone else's
+  /// reel; editing it forks a `mine` version rather than mutating the original.
+  final String originKind;
+  final String? originCreator;
+  final String? originUrl;
+  final String? originShortcode;
+  final String? parentVersionId;
+
   const RecipeVersion({
+    this.id = '',
     required this.number,
     required this.changes,
     required this.ingredients,
@@ -49,7 +61,14 @@ class RecipeVersion {
     this.steps = const [],
     this.kcal = 0,
     this.protein = 0,
+    this.originKind = 'mine',
+    this.originCreator,
+    this.originUrl,
+    this.originShortcode,
+    this.parentVersionId,
   });
+
+  bool get isImport => originKind == 'import';
 }
 
 /// What mood a cook belonged to — captured at debrief, never inferred.
