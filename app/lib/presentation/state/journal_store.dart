@@ -57,19 +57,10 @@ class JournalStore extends StateNotifier<List<Dish>> {
             versions: [...d.versions, version],
             cooks: [log, ...d.cooks],
             coverUrl: photoUrl ?? d.coverUrl,
-            status: d.cooks.length + 1 >= 3 ? DishStatus.signature : DishStatus.cooked,
+            status: d.cooks.length + 1 >= 3 ? DishStatus.signature : DishStatus.inProgress,
           )
         else
           d,
-    ];
-  }
-}
-
-extension DishStatusActions on JournalStore {
-  void setStatus(String dishId, DishStatus status) {
-    state = [
-      for (final d in state)
-        if (d.id == dishId) d.copyWith(status: status) else d,
     ];
   }
 }

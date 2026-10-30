@@ -5,11 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
-import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
-import '../../widgets/kit/status_badge.dart';
 import '../assistant/assistant_sheet.dart';
 import '../log/debrief_sheet.dart';
 
@@ -52,8 +50,6 @@ class DishScreen extends ConsumerWidget {
                     child: Icon(Icons.arrow_back, size: 18, color: c.ink),
                   ),
                 ),
-                const SizedBox(width: ShokuSpace.sm),
-                StatusBadge(status: dish.status, cookCount: dish.cookCount),
                 const Spacer(),
                 ShokuPressable(
                   onTap: () => showAssistantSheet(context, dish: dish),
@@ -159,9 +155,7 @@ class DishScreen extends ConsumerWidget {
             const SizedBox(height: ShokuSpace.md),
 
             // ---- Version scrubber ---------------------------------------
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            Row(
               children: [
                 for (var v = 1; v <= dish.versions.length; v++) ...[
                   ShokuPressable(
@@ -194,7 +188,6 @@ class DishScreen extends ConsumerWidget {
                     ),
                 ],
               ],
-              ),
             ),
             const SizedBox(height: ShokuSpace.lg),
 
@@ -281,24 +274,6 @@ class DishScreen extends ConsumerWidget {
                 child: Center(
                   child: Text('I just cooked this',
                       style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: ShokuSpace.sm),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  final next = dish.status == DishStatus.toCook
-                      ? DishStatus.cooked
-                      : DishStatus.toCook;
-                  ref.read(journalStoreProvider.notifier).setStatus(dishId, next);
-                },
-                child: Text(
-                  dish.status == DishStatus.toCook
-                      ? 'Mark as cooked — I made this before'
-                      : 'Mark as to cook',
-                  style: ShokuType.label.copyWith(color: c.inkMuted),
                 ),
               ),
             ),

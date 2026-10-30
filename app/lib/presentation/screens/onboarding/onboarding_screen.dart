@@ -355,11 +355,10 @@ class _ShareStep extends StatelessWidget {
                             const SizedBox(width: ShokuSpace.sm),
                             _Target(
                               label: 'Shoku',
-                              text: '',
+                              text: 'S',
                               color: stage == 1 ? c.accent : c.surfaceAlt,
                               highlighted: stage == 1,
                               onTap: onPickShoku,
-                              mark: true,
                             ),
                           ],
                         ),
@@ -392,7 +391,6 @@ class _Target extends StatelessWidget {
   final Color color;
   final bool highlighted;
   final VoidCallback? onTap;
-  final bool mark;
 
   const _Target({
     required this.label,
@@ -400,7 +398,6 @@ class _Target extends StatelessWidget {
     required this.color,
     this.highlighted = false,
     this.onTap,
-    this.mark = false,
   });
 
   @override
@@ -423,13 +420,11 @@ class _Target extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: mark
-                  ? const PlateMark(size: 30)
-                  : Text(text,
-                      style: ShokuType.title.copyWith(
-                        color: color == c.surfaceAlt ? c.ink : Colors.white,
-                        fontSize: 15,
-                      )),
+              child: Text(text,
+                  style: ShokuType.title.copyWith(
+                    color: color == c.surfaceAlt ? c.ink : Colors.white,
+                    fontSize: 15,
+                  )),
             ),
           ),
           const SizedBox(height: 3),

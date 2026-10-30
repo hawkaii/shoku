@@ -5,7 +5,8 @@ import '../screens/account/help_screen.dart';
 import '../screens/cook/cook_mode_screen.dart';
 import '../screens/dish/dish_screen.dart';
 import '../screens/journal/journal_screen.dart';
-import '../screens/nutrition/nutrition_coming_soon_screen.dart';
+import '../screens/nutrition/nutrition_lens_screen.dart';
+import '../screens/nutrition/nutrition_setup_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/recipes/recipes_screen.dart';
 import '../screens/wall/wall_screen.dart';
@@ -49,8 +50,8 @@ final GoRouter appRouter = GoRouter(
         dishId: state.pathParameters['id'] ?? 'mousse',
       ),
     ),
-    GoRoute(path: '/nutrition', builder: (_, __) => const NutritionComingSoonScreen()),
-    GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionComingSoonScreen()),
+    GoRoute(path: '/nutrition', builder: (_, __) => const NutritionLensScreen()),
+    GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionSetupScreen()),
     GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),
   ],
 );

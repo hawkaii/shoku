@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,24 +42,12 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   final _changeField = TextEditingController();
   int _rating = 4;
   CookMood _mood = CookMood.comfort;
-  File? _photo;
 
   @override
   void dispose() {
     _note.dispose();
     _changeField.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickPhoto() async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1800,
-      imageQuality: 85,
-    );
-    if (picked != null && mounted) {
-      setState(() => _photo = File(picked.path));
-    }
   }
 
   void _save() {
@@ -72,7 +57,6 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
           rating: _rating,
           note: _note.text.trim(),
           changes: _changes,
-          photoUrl: _photo?.path,
         );
     HapticFeedback.mediumImpact();
     Navigator.of(context).pop();
@@ -121,11 +105,11 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
 
             // Photo
             GestureDetector(
-              onTap: _pickPhoto,
+              onTap: () => HapticFeedback.selectionClick(),
               child: Stack(
                 children: [
                   ShokuDishImage(
-                    url: _photo?.path ?? widget.dish.coverUrl,
+                    url: widget.dish.coverUrl,
                     title: widget.dish.title,
                     height: 140,
                     radius: ShokuRadius.card,
@@ -143,7 +127,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                         children: [
                           Icon(Icons.photo_camera_outlined, size: 13, color: c.ink),
                           const SizedBox(width: 5),
-                          Text(_photo == null ? 'ADD PHOTO' : 'CHANGE PHOTO',
+                          Text('CHANGE PHOTO',
                               style: ShokuType.label.copyWith(fontSize: 9, color: c.ink)),
                         ],
                       ),
@@ -284,6 +268,32 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
+            // Diff vs original
+            if (_changes.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(ShokuSpace.md),
+                decoration: BoxDecoration(
+                  color: c.surfaceAlt,
+                  borderRadius: BorderRadius.circular(ShokuRadius.card),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShokuLabel('vs original · ${widget.dish.title}'),
+                    const SizedBox(height: ShokuSpace.xs),
+                    Text(
+                      '${kcalDelta >= 0 ? '+' : ''}$kcalDelta kcal · '
+                      '${proteinDelta >= 0 ? '+' : ''}$proteinDelta g protein per serving',
+                      style: ShokuType.stat.copyWith(fontSize: 12, color: c.ink),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Estimate only — refined once nutrition is on.',
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: ShokuSpace.md),
 
             // Note

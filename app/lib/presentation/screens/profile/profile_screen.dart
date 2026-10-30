@@ -55,31 +55,50 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.lg),
           ShokuLabel('nutrition'),
           const SizedBox(height: ShokuSpace.sm),
-          Container(
+          ShokuSurface(
             padding: const EdgeInsets.all(ShokuSpace.md),
-            decoration: BoxDecoration(
-              color: c.surface,
-              borderRadius: BorderRadius.circular(ShokuRadius.card),
-              border: Border.all(color: c.hairline),
-            ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Coming soon',
-                          style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
-                      const SizedBox(height: 2),
-                      Text(
-                        'A future lens on how your versions change a dish.',
-                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                Text(
+                  nutrition.onboarded ? 'Nutrition is on' : 'Nutrition is off',
+                  style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  nutrition.onboarded
+                      ? '${nutrition.kcalTarget} kcal · ${nutrition.proteinTarget} g protein per day, read only from your cooks.'
+                      : 'Turn it on to see how your tweaks changed a dish, and whether your week of cooking is balanced. Off by default.',
+                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                ),
+                const SizedBox(height: ShokuSpace.md),
+                ShokuPressable(
+                  onTap: () => context.push(
+                    nutrition.onboarded ? '/nutrition' : '/nutrition/setup',
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: nutrition.onboarded ? c.surfaceAlt : null,
+                      gradient: nutrition.onboarded ? null : ShokuGradients.crimsonPress,
+                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                      border: Border.all(
+                        color: nutrition.onboarded ? c.hairline : c.ink,
+                        width: nutrition.onboarded ? 1 : ShokuStroke.brutal,
                       ),
-                    ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        nutrition.onboarded ? 'Open the lens' : 'Set up nutrition',
+                        style: ShokuType.title.copyWith(
+                          color: nutrition.onboarded ? c.ink : c.onAccent,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: ShokuSpace.sm),
-                ShokuChip('soon', color: c.reward, filled: true),
               ],
             ),
           ),
