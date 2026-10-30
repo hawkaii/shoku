@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.9.0] — 2026-10-30
+
+### Added
+- Push/pull sync engine, launch+post-write triggers, import a reel end to end *(sync)* — [`a13b5ad`](https://github.com/hawkaii/food-finder-app/commit/a13b5addfb7d212aca581ff494496f0a28827002)
+
+### Docs
+- V1.7.0 [skip ci] *(changelog)* — [`2f60f49`](https://github.com/hawkaii/food-finder-app/commit/2f60f49e105a08a669a2ff5a7b6226a7c5a3d88e)
+
 ## [1.7.0] — 2026-10-30
 
 ### Added
