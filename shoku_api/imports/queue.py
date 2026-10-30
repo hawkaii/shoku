@@ -58,7 +58,13 @@ class RedisQueue:
         self._client.lpush(self._name, job_id)
 
     def dequeue(self, timeout: float = 5.0) -> str | None:
-        result = self._client.brpop(self._name, timeout=int(max(1, timeout)))
+        # A blocking pop that finds nothing is a normal empty poll, but some
+        # redis-py versions raise TimeoutError instead of returning None. That
+        # must not kill the worker loop.
+        try:
+            result = self._client.brpop(self._name, timeout=int(max(1, timeout)))
+        except TimeoutError:
+            return None
         return None if result is None else str(result[1])
 
     def depth(self) -> int:
