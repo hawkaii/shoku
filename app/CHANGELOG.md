@@ -3,11 +3,27 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.6.0] — 2026-10-30
+
+### Added
+- Persist the journal in drift, with a sync-ready schema *(journal)* — [`78fe583`](https://github.com/hawkaii/food-finder-app/commit/78fe583bd81bb0ca100fd17d9016a35b4841f198)
+
+### Docs
+- V1.5.1 [skip ci] *(changelog)* — [`f0d45d9`](https://github.com/hawkaii/food-finder-app/commit/f0d45d916e40bf1e494c80e31af7a67ec57575eb)
+
+## [1.5.1] — 2026-10-30
+
+### Fixed
+- Write CHANGELOG.md from the git-cliff output, bump action majors *(ci)* — [`1036b01`](https://github.com/hawkaii/food-finder-app/commit/1036b01eab1ed4e4a7886ca6f1ad36980d977609)
+
 ## [1.5.0] — 2026-10-30
 
 ### Added
 - Plate mark as launcher + in-app, app-level exit guard, auto-publish every build *(brand)* — [`e4eff0d`](https://github.com/hawkaii/food-finder-app/commit/e4eff0da6b193101d7878e63860053114083521b)
 - To-cook/cooked status badges, two-state cookbook filter, real cook photo, nutrition coming soon, 360px overflow fixes — [`646d592`](https://github.com/hawkaii/food-finder-app/commit/646d5921f2dcb24f0afd4f8876b8dec71e947e07)
+
+### CI
+- Git-cliff changelog, APK only on main, checks on pull requests *(release)* — [`4cf80dc`](https://github.com/hawkaii/food-finder-app/commit/4cf80dc11d5e58854c3b60a16b9b1816722ecc6f)
 
 ### Fixed
 - Regenerate launcher icons from one render so no size is blank *(brand)* — [`b7a3688`](https://github.com/hawkaii/food-finder-app/commit/b7a36884cabe090b4eaa80ac6ae2d5a9f6660b44)

@@ -91,6 +91,8 @@ app.*.map.json
 
 # Web related
 /web/*.js
+# drift's web worker: required at runtime, not a build artefact
+!/web/drift_worker.js
 /web/*.js_
 /web/*.js.deps
 /web/*.js.map

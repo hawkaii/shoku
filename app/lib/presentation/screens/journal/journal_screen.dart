@@ -24,6 +24,11 @@ class JournalScreen extends ConsumerWidget {
     final dishes = ref.watch(dishesProvider);
     final totalCooks = ref.watch(totalCooksProvider);
     final upgrades = ref.watch(totalUpgradesProvider);
+
+    // The journal is read from the database on launch, so the first frame can
+    // legitimately be empty — don't index into it.
+    if (dishes.isEmpty) return const _JournalLoading();
+
     final pinned = dishes.firstWhere(
       (d) => d.status == DishStatus.toCook,
       orElse: () => dishes.first,
@@ -415,3 +420,29 @@ class _EmptyJournal extends StatelessWidget {
   }
 }
 
+
+/// Shown for the frame or two while the journal is read from disk, and for a
+/// genuinely empty journal. No spinners: the mark, one line, and nothing to tap.
+class _JournalLoading extends StatelessWidget {
+  const _JournalLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const PlateMark(size: 56),
+            const SizedBox(height: ShokuSpace.md),
+            Text(
+              'Opening your journal',
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
