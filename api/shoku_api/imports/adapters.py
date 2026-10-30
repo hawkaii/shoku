@@ -43,7 +43,14 @@ class YtDlpExtractor:
     def extract(self, url: str, workdir: Path, deadline: Deadline) -> Extraction:
         import yt_dlp  # imported here: only the worker needs it
 
-        base: dict = {"quiet": True, "no_warnings": True, "noplaylist": True}
+        base: dict = {
+            "quiet": True,
+            "no_warnings": True,
+            "noplaylist": True,
+            # YouTube's extraction needs a JS engine now; without it yt-dlp
+            # reports missing formats and the import fails for no good reason.
+            "js_runtimes": {"node": {}},
+        }
         if self.cookies_file:
             base["cookiefile"] = self.cookies_file
 
