@@ -1,0 +1,57 @@
+# git-cliff — turns conventional commits into CHANGELOG.md and the text of
+# every GitHub release. Docs: https://git-cliff.org/docs/configuration
+#
+# Release notes are read by humans deciding whether to install an APK, so each
+# bullet says what changed, not which file changed it.
+
+[changelog]
+header = """
+# Changelog
+
+What changed in each Shoku build, newest first. Generated from commit history
+by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
+
+"""
+body = """
+{% if version %}\
+## [{{ version | trim_start_matches(pat="v") | replace(from="-shoku", to="") }}] — {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## Unreleased
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") -%}
+### {{ group | striptags | trim | upper_first }}
+{% for commit in commits -%}
+- {{ commit.message | upper_first | trim }}{% if commit.scope %} *({{ commit.scope }})*{% endif %}{% if commit.breaking %} **breaking**{% endif %} — [`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/hawkaii/food-finder-app/commit/{{ commit.id }})
+{% endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+# Old commits predate the convention; keep them under "Other" rather than
+# dropping them from the history.
+filter_unconventional = false
+split_commits = false
+protect_breaking_commits = false
+filter_commits = false
+tag_pattern = "v[0-9].*"
+ignore_tags = "build-*,*-debug"
+sort_commits = "oldest"
+topo_order = false
+
+commit_parsers = [
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Performance" },
+  { message = "^refactor", group = "Changed" },
+  { message = "^style", group = "Changed" },
+  { message = "^docs", group = "Docs" },
+  { message = "^test", group = "Tests" },
+  { message = "^ci", group = "CI" },
+  { message = "^build", group = "Build" },
+  { message = "^chore", group = "Chores" },
+  { message = "^revert", group = "Reverted" },
+  { message = ".*", group = "Other" },
+]

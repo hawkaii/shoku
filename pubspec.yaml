@@ -1,7 +1,7 @@
 name: food_finder
-description: Shoku — turn reels into recipes worth keeping.
+description: Shoku — a cooking journal that remembers every version of a dish.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.5.0+15
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
