@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/shoku_theme.dart';
+import 'data/services/auth_service.dart';
 import 'data/services/prefs.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/navigation/back_guard.dart';
@@ -17,6 +18,14 @@ Future<void> main() async {
     onboardingDone = await Prefs.onboardingDone();
   } catch (_) {
     // Storage unavailable (e.g. web preview): show onboarding once.
+  }
+
+  // Auth must exist before the first screen: the journal asks whether it has an
+  // owner. A failure here (no network on first launch) must not block cooking.
+  try {
+    await AuthService.init();
+  } catch (_) {
+    // Signed-out is a valid state; the app works locally until you sign in.
   }
 
   runApp(

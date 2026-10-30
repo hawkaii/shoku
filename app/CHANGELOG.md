@@ -3,6 +3,30 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.7.0] — 2026-10-30
+
+### Added
+- Supabase sign-in, API client with bearer token, account row in profile *(auth)* — [`98db607`](https://github.com/hawkaii/food-finder-app/commit/98db6071cb9c3d5ce3f2ba1cefaebbdb61b3ba47)
+
+### Docs
+- V1.6.1 [skip ci] *(changelog)* — [`4ea64de`](https://github.com/hawkaii/food-finder-app/commit/4ea64de03cb5fe2392103a335de0d36696b5f791)
+
+## [1.6.1] — 2026-10-30
+
+### Docs
+- V1.6.0 [skip ci] *(changelog)* — [`917c0eb`](https://github.com/hawkaii/food-finder-app/commit/917c0ebc898f25779d51f82c67827c210b0b59ed)
+
+### Fixed
+- Make every cook path persist, and migrate timestamps to text *(journal)* — [`5475825`](https://github.com/hawkaii/food-finder-app/commit/547582543b01d0421cebdf89d28e7a67b30d33e2)
+
+## [1.6.0] — 2026-10-30
+
+### Added
+- Persist the journal in drift, with a sync-ready schema *(journal)* — [`78fe583`](https://github.com/hawkaii/food-finder-app/commit/78fe583bd81bb0ca100fd17d9016a35b4841f198)
+
+### Docs
+- V1.5.1 [skip ci] *(changelog)* — [`f0d45d9`](https://github.com/hawkaii/food-finder-app/commit/f0d45d916e40bf1e494c80e31af7a67ec57575eb)
+
 ## [1.5.1] — 2026-10-30
 
 ### Fixed

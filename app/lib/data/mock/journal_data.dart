@@ -78,7 +78,15 @@ class CookLog {
   final String id;
   final DateTime cookedAt;
   final int versionNumber;
+
+  /// Which version was actually cooked. Cooks are tied to a version by id, not
+  /// by ordinal, so renumbering a lineage can't mis-attribute a photo.
+  final String? versionId;
   final String photoUrl;
+
+  /// `none` | `local` | `synced`. Sync uses this to decide what still needs
+  /// uploading; a local file path is not a remote URL.
+  final String photoState;
   final CookOutcome outcome;
   final String note;
   final List<String> changes;
@@ -89,6 +97,8 @@ class CookLog {
     required this.id,
     required this.cookedAt,
     required this.versionNumber,
+    this.versionId,
+    this.photoState = '',
     required this.photoUrl,
     required this.outcome,
     required this.note,

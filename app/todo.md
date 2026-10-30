@@ -8,8 +8,10 @@ to be real (persisted, synced) before inventory means anything.
 
 ## v1.0 — make the journal real
 
-- [ ] **drift schema + repository** — UUID keys, `schemaVersion`, migration test,
-      server schema mirrors it. Nothing else is real until this lands.
+- [x] **drift schema + repository** — dishes/versions/cooks in SQLite, UUID keys,
+      origin + parent on versions, tombstones, `dirty` per row. 7 repository tests.
+      Chrome runs the same schema on `sqlite3.wasm`; APK ships `libsqlite3.so` for
+      all three ABIs. **Unverified: on-device launch + reload persistence (no phone).**
 - [ ] **Firebase Auth (Google) + claim** — sign-in after the first cook, one-way
       ownership claim, `uid` as identity, offline writes queue with `dirty = 1`.
 - [ ] **Sync API** — union by UUID for versions/cooks, LWW on dish metadata with
