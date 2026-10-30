@@ -119,9 +119,17 @@ class ImportWorker:
             caption = (extraction.caption or "").strip()
             breaker_open = self._breaker_open()
 
+            transcript = (extraction.transcript or "").strip()
+
             if has_quantities(caption):
                 mode = "caption_first"
                 text = caption
+                self._set_stage(job.id, "structuring")
+            elif transcript:
+                # YouTube almost always publishes captions. Using them skips
+                # the download, the model and the 60s budget entirely.
+                mode = "subtitles"
+                text = transcript
                 self._set_stage(job.id, "structuring")
             elif breaker_open:
                 # Degraded: no ASR. It is caption or nothing.

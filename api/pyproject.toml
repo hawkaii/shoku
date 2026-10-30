@@ -48,6 +48,9 @@ worker = [
 # there is room (see DEPLOY.md).
 whisper = [
     "faster-whisper>=1.0.1",
+    # faster-whisper still calls av.open(metadata_errors=...), which PyAV 19
+    # removed. Without this pin every transcription dies with a TypeError.
+    "av<19",
 ]
 
 [tool.hatch.build.targets.wheel]
