@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.10.0] — 2026-10-31
+
+### Added
+- Reel thumbnail as cover, creator handle, and a link back to the reel *(dish)* — [`e13d971`](https://github.com/hawkaii/food-finder-app/commit/e13d9718703dca818a8cfcf9b618a48aca635a2b)
+
+### Docs
+- V1.9.3 [skip ci] *(changelog)* — [`f991ef5`](https://github.com/hawkaii/food-finder-app/commit/f991ef527a57cdc76010a1ec97098ca680eaa958)
+
 ## [1.9.3] — 2026-10-31
 
 ### Docs
