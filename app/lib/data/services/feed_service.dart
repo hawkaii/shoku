@@ -31,13 +31,4 @@ class FeedService {
       hasMore: data['has_more'] == true,
     );
   }
-
-  /// Idempotent: publishing something already published is not an error.
-  Future<void> publish(String shortcode) async {
-    await _api.put('/v1/content/$shortcode/share');
-  }
-
-  Future<void> unpublish(String shortcode) async {
-    await _api.delete('/v1/content/$shortcode/share');
-  }
 }
