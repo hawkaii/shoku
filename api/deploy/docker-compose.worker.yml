@@ -17,8 +17,9 @@ services:
     mem_limit: 3g
     volumes:
       - worker-tmp:/tmp/shoku
-      # Platform session cookies. Read-only, never baked into the image.
-      - ../cookies.txt:/run/cookies.txt:ro
+      # Platform session cookies. Not baked into the image; writable because
+      # yt-dlp rewrites the jar to refresh it.
+      - ../cookies.txt:/run/cookies.txt
     logging:
       driver: json-file
       options:
