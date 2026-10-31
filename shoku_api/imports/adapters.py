@@ -334,6 +334,9 @@ class HeuristicStructurer:
             "protein": 0,
             "ingredients": ingredients,
             "steps": steps,
+            # It matches quantity lines to steps by position or not at all, and
+            # guessing would put the wrong chip next to a step. Null is honest.
+            "step_ingredients": None,
             "tags": ["imported"],
         }
 
@@ -364,7 +367,7 @@ class OpenAICompatStructurer:
         "additionalProperties": False,
         "required": [
             "title", "servings", "minutes", "kcal", "protein",
-            "ingredients", "steps", "tags",
+            "ingredients", "steps", "tags", "step_ingredients",
         ],
         "properties": {
             "title": {"type": "string", "maxLength": 120},
@@ -388,6 +391,19 @@ class OpenAICompatStructurer:
             },
             "steps": {"type": "array", "maxItems": 40, "items": {"type": "string"}},
             "tags": {"type": "array", "maxItems": 20, "items": {"type": "string"}},
+            # One entry per step, each a list of zero-based positions in
+            # ``ingredients``. Null when the text never says. JSON schema cannot
+            # express "less than len(ingredients)", so the range here is only a
+            # sanity bound; the strict check happens in RecipePayload.
+            "step_ingredients": {
+                "type": ["array", "null"],
+                "maxItems": 40,
+                "items": {
+                    "type": "array",
+                    "maxItems": 60,
+                    "items": {"type": "integer", "minimum": 0, "maximum": 59},
+                },
+            },
         },
     }
 
@@ -404,6 +420,16 @@ class OpenAICompatStructurer:
         "'Heat the ghee', not 'the ghee is heated'.\n"
         "- Keep every real instruction. A short step like 'Mix well' or "
         "'Serve hot' is still a step; do not drop it.\n"
+        "\n"
+        "Step ingredients:\n"
+        "- step_ingredients has exactly one entry per step, in the same order "
+        "as steps. Each entry lists the zero-based positions in ingredients "
+        "that the step uses: for the second ingredient it is 1, not 2.\n"
+        "- Cite only what the step actually calls for. 'Fry the paneer' cites "
+        "the paneer, not every ingredient in the dish. A step that uses "
+        "nothing listed gets an empty list.\n"
+        "- If the text never makes the pairing clear, emit null for the whole "
+        "field rather than guessing. A wrong citation is worse than none.\n"
         "\n"
         "Honesty:\n"
         "- Use only what the text states. If no quantity is given, amount is "
@@ -454,6 +480,48 @@ class OpenAICompatStructurer:
         )
 
 
+def _clip_step_ingredients(raw: dict) -> dict:
+    """Make the model's step↔ingredient citations true, or absent.
+
+    The decoder is constrained to integers, but JSON schema cannot say "an index
+    below len(ingredients)" — the only bound it can carry is the size of the
+    array type. A hallucinated index is a bad citation, not a bad recipe, so it
+    is dropped here and that step simply shows no ingredient links. If the shape
+    itself is wrong (the one thing that must hold is one entry per step), the
+    field becomes null and the recipe still lands.
+
+    ``RecipePayload`` validates whatever survives; this only stops a good parse
+    being thrown away over an optional display detail.
+    """
+    cited = raw.get("step_ingredients")
+    if cited is None:
+        raw["step_ingredients"] = None
+        return raw
+
+    steps = raw.get("steps") or []
+    count = len(raw.get("ingredients") or [])
+    if not isinstance(cited, list) or len(cited) != len(steps):
+        raw["step_ingredients"] = None
+        return raw
+
+    cleaned: list[list[int]] = []
+    for entry in cited:
+        if not isinstance(entry, list):
+            raw["step_ingredients"] = None
+            return raw
+        cleaned.append(
+            [
+                index
+                for index in entry
+                if isinstance(index, int)
+                and not isinstance(index, bool)
+                and 0 <= index < count
+            ]
+        )
+    raw["step_ingredients"] = cleaned
+    return raw
+
+
 def _chat_json(
     *,
     base_url: str,
@@ -501,7 +569,7 @@ def _chat_json(
             detail=f"model returned no content (finish={choice.get('finish_reason')}, "
             f"reasoning_tokens={(usage.get('completion_tokens_details') or {}).get('reasoning_tokens')})"
         )
-    return json.loads(content)
+    return _clip_step_ingredients(json.loads(content))
 
 
 class VisionStructurer:
@@ -642,22 +710,39 @@ def _merge_duplicate_ingredients(recipe: dict) -> dict:
     A reel often lists "2 tbsp ghee" up top and says it again mid-method; the
     model faithfully records both. Two identical lines in a cookbook read as a
     mistake, so keep the first and borrow an amount only if it was missing.
+
+    Removing an ingredient renumbers everything after it, so any step citations
+    are remapped through the same move. Left alone they would point one line
+    off — the worst kind of wrong, because it looks right.
     """
-    seen: dict[str, dict] = {}
     merged: list[dict] = []
-    for item in recipe.get("ingredients") or []:
+    #: old position -> the position it ended up at after the merge
+    moved: dict[int, int] = {}
+    first_at: dict[str, int] = {}
+
+    for position, item in enumerate(recipe.get("ingredients") or []):
         key = str(item.get("name", "")).strip().lower()
-        if key in seen:
-            existing = seen[key]
+        if key in first_at:
+            target = first_at[key]
+            existing = merged[target]
             if not existing.get("amount") and item.get("amount"):
                 existing["amount"] = item["amount"]
             if existing.get("grams") is None and item.get("grams") is not None:
                 existing["grams"] = item["grams"]
+            moved[position] = target
             continue
-        seen[key] = item
+        first_at[key] = len(merged)
+        moved[position] = len(merged)
         merged.append(item)
+
     if merged:
         recipe["ingredients"] = merged
+
+    cited = recipe.get("step_ingredients")
+    if cited:
+        recipe["step_ingredients"] = [
+            [moved[index] for index in entry if index in moved] for entry in cited
+        ]
     return recipe
 
 

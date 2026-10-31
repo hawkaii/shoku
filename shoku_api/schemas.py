@@ -21,6 +21,7 @@ from pydantic import (
     Field,
     StringConstraints,
     field_validator,
+    model_validator,
 )
 
 # ---------------------------------------------------------------------------
@@ -58,6 +59,30 @@ class RecipePayload(StrictModel):
     ingredients: list[Ingredient] = Field(min_length=1, max_length=60)
     steps: list[StepText] = Field(min_length=1, max_length=40)
     tags: list[TagText] = Field(default_factory=list, max_length=20)
+    #: Which ingredients each step uses, by zero-based position in
+    #: ``ingredients``. One entry per step, in step order. ``None`` means the
+    #: source never said — every parse written before this field existed, and
+    #: every heuristic parse. A client renders nothing for it; an index that
+    #: pointed at no ingredient would be a lie, so it is refused here.
+    step_ingredients: list[list[int]] | None = None
+
+    @model_validator(mode="after")
+    def _citations_point_at_real_ingredients(self) -> "RecipePayload":
+        if self.step_ingredients is None:
+            return self
+        if len(self.step_ingredients) != len(self.steps):
+            raise ValueError(
+                "step_ingredients needs one entry per step: "
+                f"{len(self.step_ingredients)} for {len(self.steps)} steps"
+            )
+        for step, cited in enumerate(self.step_ingredients):
+            for index in cited:
+                if not 0 <= index < len(self.ingredients):
+                    raise ValueError(
+                        f"step {step} cites ingredient {index}, "
+                        f"but there are {len(self.ingredients)}"
+                    )
+        return self
 
 
 class ProsePayload(StrictModel):

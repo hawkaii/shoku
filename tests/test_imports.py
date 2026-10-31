@@ -281,6 +281,101 @@ def test_schema_matches_recipe_payload():
     assert schema["additionalProperties"] is False
 
 
+def test_muse_is_told_how_to_cite_step_ingredients():
+    """The decoder can only fill the field if the prompt says what it means."""
+    from shoku_api.imports.adapters import OpenAICompatStructurer
+
+    prompt = OpenAICompatStructurer.PROMPT
+    assert "step_ingredients" in prompt
+    assert "zero-based" in prompt
+    assert "one entry per step" in prompt
+
+
+def test_step_ingredients_survive_a_constrained_call(monkeypatch):
+    from shoku_api.imports import adapters
+
+    content = (
+        '{"title":"x","servings":2,"minutes":5,"kcal":0,"protein":0,'
+        '"ingredients":[{"name":"ghee","amount":null,"grams":null},'
+        '{"name":"rice","amount":null,"grams":null}],'
+        '"steps":["Heat the ghee","Add the rice"],'
+        '"tags":[],"step_ingredients":[[0],[1]]}'
+    )
+
+    class Resp:
+        def raise_for_status(self): pass
+        def json(self):
+            return {"choices": [{"message": {"content": content}, "finish_reason": "stop"}]}
+
+    monkeypatch.setattr("httpx.post", lambda url, **kw: Resp())
+    s = adapters.OpenAICompatStructurer("https://api.meta.ai/v1", "k", "muse-spark-1.3")
+
+    assert s.structure("text", caption_first=True)["step_ingredients"] == [[0], [1]]
+
+
+def test_clipping_drops_a_citation_that_points_nowhere():
+    """An invented index must not cost the whole parse."""
+    from shoku_api.imports.adapters import _clip_step_ingredients
+
+    raw = {
+        "ingredients": [{"name": "ghee"}, {"name": "rice"}],
+        "steps": ["Heat the ghee", "Add the rice", "Serve"],
+        "step_ingredients": [[0], [1, 7], [-1]],
+    }
+    assert _clip_step_ingredients(raw)["step_ingredients"] == [[0], [1], []]
+
+
+def test_clipping_discards_the_field_when_it_cannot_be_trusted():
+    from shoku_api.imports.adapters import _clip_step_ingredients
+
+    ingredients = [{"name": "ghee"}, {"name": "rice"}]
+    steps = ["Heat the ghee", "Add the rice"]
+
+    # Wrong number of entries: positions no longer line up with the steps.
+    assert (
+        _clip_step_ingredients(
+            {"ingredients": ingredients, "steps": steps, "step_ingredients": [[0]]}
+        )["step_ingredients"]
+        is None
+    )
+    # Not the right shape at all.
+    assert (
+        _clip_step_ingredients(
+            {"ingredients": ingredients, "steps": steps, "step_ingredients": "0,1"}
+        )["step_ingredients"]
+        is None
+    )
+
+
+def test_merging_duplicate_ingredients_remaps_the_citations():
+    """Dropping an ingredient renumbers the rest; a stale index looks right."""
+    from shoku_api.imports.adapters import _merge_duplicate_ingredients
+
+    recipe = {
+        "ingredients": [
+            {"name": "ghee", "amount": "2 tbsp", "grams": None},
+            {"name": "Ghee ", "amount": None, "grams": None},
+            {"name": "rice", "amount": None, "grams": None},
+        ],
+        "steps": ["Fry in the ghee", "Add the rice"],
+        "step_ingredients": [[0, 1], [2]],
+    }
+    merged = _merge_duplicate_ingredients(recipe)
+
+    assert [i["name"] for i in merged["ingredients"]] == ["ghee", "rice"]
+    # Both ghee citations collapse onto the surviving line; rice moves 2 -> 1.
+    assert merged["step_ingredients"] == [[0, 0], [1]]
+
+
+def test_the_heuristic_never_invents_citations():
+    from shoku_api.imports.adapters import HeuristicStructurer
+
+    result = HeuristicStructurer().structure(
+        "250 g paneer\n2 tbsp butter\nMix well\nServe hot", caption_first=True
+    )
+    assert result["step_ingredients"] is None
+
+
 def test_duplicate_ingredients_are_merged():
     from shoku_api.imports.adapters import _merge_duplicate_ingredients
 

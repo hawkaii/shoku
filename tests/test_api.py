@@ -54,5 +54,65 @@ def test_content_miss_is_404(client: TestClient) -> None:
     assert client.get("/v1/content/nothere").status_code == 404
 
 
+def test_content_exposes_step_ingredients(client: TestClient, session, ctx) -> None:
+    from shoku_api.content import store_extraction
+    from shoku_api.schemas import ProsePayload, RecipePayload
+
+    recipe = RecipePayload(
+        title="Cited",
+        servings=2,
+        minutes=10,
+        kcal=0,
+        protein=0,
+        ingredients=[{"name": "ghee"}, {"name": "rice"}],
+        steps=["Heat the ghee", "Add the rice"],
+        tags=[],
+        step_ingredients=[[0], [1, 0]],
+    )
+    store_extraction(
+        session,
+        shortcode="cited1",
+        recipe=recipe,
+        prose=ProsePayload(summary=""),
+        creator=None,
+        source_url="https://www.instagram.com/reel/cited1/",
+        extraction_version=3,
+        clock=ctx.clock,
+    )
+
+    body = client.get("/v1/content/cited1").json()
+    assert body["recipe"]["step_ingredients"] == [[0], [1, 0]]
+
+
+def test_a_parse_written_before_the_field_still_serves(client: TestClient, ctx) -> None:
+    """Rows already in the cache have no key at all. They must not 500."""
+    with ctx.session_factory() as session:
+        from shoku_api.models import ContentCache
+
+        session.add(
+            ContentCache(
+                shortcode="old1",
+                structured_json={
+                    "title": "Old parse",
+                    "servings": 2,
+                    "minutes": 10,
+                    "kcal": 0,
+                    "protein": 0,
+                    "ingredients": [{"name": "paneer", "amount": None, "grams": None}],
+                    "steps": ["Mix"],
+                    "tags": [],
+                },
+                prose_json={"summary": ""},
+                source_url="https://www.instagram.com/reel/old1/",
+                extraction_version=3,
+                created_at=ctx.clock.now(),
+            )
+        )
+        session.commit()
+
+    body = client.get("/v1/content/old1").json()
+    assert body["recipe"]["step_ingredients"] is None
+
+
 def test_unknown_route_is_404(client: TestClient) -> None:
     assert client.get("/v1/nope").status_code == 404
