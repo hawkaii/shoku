@@ -11,6 +11,7 @@ import '../../state/cook_timer_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/step_ingredients.dart';
 import '../../widgets/kit/step_library.dart';
 import '../../widgets/kit/step_text.dart';
 import '../assistant/assistant_sheet.dart';
@@ -354,36 +355,6 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                 child: ShokuProgress(value: (_step + 1) / steps.length),
               ),
 
-              // ---- the timer ------------------------------------------------
-              if (timerForThisDish != null || _hasTime(steps[_step]))
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
-                  child: CookTimerCard(
-                    timer: timerForThisDish,
-                    currentStep: _step,
-                    remainingMs: remainingMs,
-                    suggestedMinutes:
-                        _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
-                    onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),
-                    onPause: () => ref.read(cookTimerProvider.notifier).pause(),
-                    onResume: () => ref.read(cookTimerProvider.notifier).resume(),
-                    onStop: () => ref.read(cookTimerProvider.notifier).stop(),
-                  ),
-                ),
-              if (_timerCleared && timerForThisDish == null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Timer cleared — this dish has a new version',
-                      style: ShokuType.label.copyWith(color: c.inkMuted),
-                    ),
-                  ),
-                ),
-
               // ---- swipeable steps + floating AI ---------------------------
               Expanded(
                 child: Stack(
@@ -414,6 +385,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                               fontSize: 26,
                               ingredients: dish.versions.last.ingredients,
                             ),
+                            const SizedBox(height: ShokuSpace.sm),
+                            // What this step uses, in the recipe's own words.
+                            // Nothing at all when the parse predates the links.
+                            StepIngredientsLine(
+                              ingredients: dish.versions.last.ingredients,
+                              indices:
+                                  dish.versions.last.stepIngredientLinks(i),
+                            ),
                           ],
                         ),
                       ),
@@ -433,6 +412,38 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                   ],
                 ),
               ),
+
+              // ---- the timer ------------------------------------------------
+              // Below the step text, above the buttons: the reading order the
+              // design asks for, and still visible whichever step is open.
+              if (timerForThisDish != null || _hasTime(steps[_step]))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
+                  child: CookTimerCard(
+                    timer: timerForThisDish,
+                    currentStep: _step,
+                    remainingMs: remainingMs,
+                    suggestedMinutes:
+                        _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
+                    onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),
+                    onPause: () => ref.read(cookTimerProvider.notifier).pause(),
+                    onResume: () => ref.read(cookTimerProvider.notifier).resume(),
+                    onStop: () => ref.read(cookTimerProvider.notifier).stop(),
+                  ),
+                ),
+              if (_timerCleared && timerForThisDish == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Timer cleared — this dish has a new version',
+                      style: ShokuType.label.copyWith(color: c.inkMuted),
+                    ),
+                  ),
+                ),
 
               // ---- navigation ---------------------------------------------
               Padding(

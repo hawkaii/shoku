@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.14.0] — 2026-10-31
+
+### Added
+- A timer that survives the app being killed *(cook)* — [`76828bf`](https://github.com/hawkaii/food-finder-app/commit/76828bfb547b4f305dd29d1b39f80841bec3cd49)
+
+### Docs
+- V1.13.0 [skip ci] *(changelog)* — [`e6bb635`](https://github.com/hawkaii/food-finder-app/commit/e6bb635a3e18a9630cd7c8b105bc4eb3cbf32110)
+
 ## [1.13.0] — 2026-10-31
 
 ### Docs
