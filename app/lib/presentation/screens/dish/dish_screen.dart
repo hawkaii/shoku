@@ -214,6 +214,16 @@ class DishScreen extends ConsumerWidget {
               ],
               ),
             ),
+            if (version.tags.contains('from video')) ...[
+              const SizedBox(height: ShokuSpace.xs),
+              // The design's line, not a warning: the reel was silent, so the
+              // amounts were read from what could be seen.
+              Text(
+                'read from the video — amounts may be off',
+                key: const ValueKey('from-video-note'),
+                style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+              ),
+            ],
             const SizedBox(height: ShokuSpace.lg),
 
             AnimatedSwitcher(

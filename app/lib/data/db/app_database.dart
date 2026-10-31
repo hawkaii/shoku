@@ -56,6 +56,9 @@ class VersionRows extends Table {
   /// another device simply has none and renders no ingredient line.
   TextColumn get stepIngredients => text().withDefault(const Constant(''))();
 
+  /// The extraction's tags, JSON. On the wire: the server stores what we send.
+  TextColumn get tags => text().withDefault(const Constant('[]'))();
+
   TextColumn get originKind => text().withDefault(const Constant('mine'))();
   TextColumn get originCreator => text().nullable()();
   TextColumn get originHandle => text().nullable()();
@@ -138,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -179,6 +182,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             // Which ingredients each step uses, for the imported version only.
             await m.addColumn(versionRows, versionRows.stepIngredients);
+          }
+          if (from < 6) {
+            // The extraction's tags, so a silent reel can say its amounts were
+            // guesses — and so the server stores what only we can send.
+            await m.addColumn(versionRows, versionRows.tags);
           }
         },
         beforeOpen: (details) async {
