@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.11.0] — 2026-10-31
+
+### Added
+- Say when a reel has nothing to read, and when we are watching it *(import)* — [`c0673d6`](https://github.com/hawkaii/food-finder-app/commit/c0673d60f7bca1664b300a4274dec61c6fc32ffb)
+
+### Docs
+- V1.10.0 [skip ci] *(changelog)* — [`9dda98e`](https://github.com/hawkaii/food-finder-app/commit/9dda98e6c683d2b43f3083b16310b1266301f7a1)
+
 ## [1.10.0] — 2026-10-31
 
 ### Added
