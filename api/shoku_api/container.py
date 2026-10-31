@@ -18,6 +18,14 @@ from .db import build_engine, build_session_factory
 from .assistant import AssistantDeps, AssistantModel, UnconfiguredAssistantModel
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
+from .domain.worker_pool import (
+    AlwaysWakeGate,
+    GceWorkerPool,
+    NoWorkerPool,
+    RedisWakeGate,
+    WorkerPool,
+    WorkerWaker,
+)
 from .imports.interfaces import (
     Extractor,
     Structurer,
@@ -45,6 +53,9 @@ class AppContext:
     assistant_model: AssistantModel
     clock: Clock
     breaker: CircuitBreaker
+    #: Starts the worker VM when a job is queued, and stops it when idle.
+    worker_pool: "WorkerPool | NoWorkerPool"
+    waker: WorkerWaker
     #: Reads a silent reel from frames. None when vision is off or unconfigured,
     #: which turns "no text" into a clear failure instead of a junk dish.
     vision: "VisionStructurer | None" = None
@@ -53,7 +64,14 @@ class AppContext:
 
     @property
     def import_deps(self) -> ImportDeps:
-        return ImportDeps(queue=self.queue, clock=self.clock)
+        return ImportDeps(
+            queue=self.queue,
+            clock=self.clock,
+            waker=self.waker,
+            unclaimed_timeout_seconds=float(
+                self.settings.worker_unclaimed_timeout_seconds
+            ),
+        )
 
     @property
     def assistant_deps(self) -> AssistantDeps:
@@ -96,6 +114,27 @@ def build_context(
     else:
         queue = InMemoryQueue()
 
+    worker_pool: WorkerPool | NoWorkerPool
+    if settings.autostart_worker and settings.gcp_project:
+        worker_pool = GceWorkerPool(
+            project=settings.gcp_project,
+            zone=settings.gcp_zone,
+            instance=settings.worker_instance,
+        )
+        # The gate lives in Redis because it is the one store both the API and
+        # the worker can see; without it every import would ask for a boot.
+        gate = (
+            RedisWakeGate(settings.redis_url)
+            if settings.queue_backend == "redis"
+            else AlwaysWakeGate()
+        )
+    else:
+        worker_pool = NoWorkerPool()
+        gate = AlwaysWakeGate()
+    waker = WorkerWaker(
+        worker_pool, gate, window=settings.worker_wake_debounce_seconds
+    )
+
     ctx = AppContext(
         settings=settings,
         engine=engine,
@@ -112,6 +151,8 @@ def build_context(
         storage=storage,
         assistant_model=UnconfiguredAssistantModel(),
         clock=SystemClock(),
+        worker_pool=worker_pool,
+        waker=waker,
         breaker=CircuitBreaker(
             window=settings.breaker_window,
             threshold=settings.breaker_threshold,

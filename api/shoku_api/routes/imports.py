@@ -30,9 +30,10 @@ def create_import(
 def get_import(
     job_id: str,
     session: Session = Depends(get_session),
+    ctx: AppContext = Depends(get_context),
     user: User = Depends(current_user),
 ) -> ImportStatus:
-    return import_service.get_import(session, uid=user.id, job_id=job_id)
+    return import_service.get_import(session, ctx.import_deps, uid=user.id, job_id=job_id)
 
 
 @router.post("/{job_id}/cancel", response_model=ImportStatus)
