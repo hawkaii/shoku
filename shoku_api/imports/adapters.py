@@ -16,6 +16,7 @@ import re
 from pathlib import Path
 
 from ..domain.clock import Deadline
+from ..domain.urls import platform_of
 from .interfaces import Extraction
 from ..domain.errors import ExtractionFailed, SourceBlocked, StructuringFailed
 
@@ -68,6 +69,10 @@ class YtDlpExtractor:
             part for part in (info.get("description") or "", info.get("title") or "") if part
         ).strip()
 
+        comment = ""
+        if platform_of(url) == "instagram" and not has_quantities(caption):
+            comment = self._instagram_comment(info.get("id"), deadline)
+
         # Published subtitles first: they are free, instant, and better than
         # anything we can produce by downloading the audio and running a model.
         transcript = ""
@@ -103,6 +108,7 @@ class YtDlpExtractor:
         return Extraction(
             caption=caption,
             transcript=transcript,
+            comment=comment,
             creator=info.get("uploader") or info.get("channel"),
             creator_handle=handle,
             platform=platform,
@@ -111,6 +117,56 @@ class YtDlpExtractor:
             audio_path=audio_path,
             duration_seconds=float(duration) if duration else None,
         )
+
+    def _instagram_comment(self, media_id: str | None, deadline: Deadline) -> str:
+        """The pinned/first comments of a reel.
+
+        Creators truncate captions and put the method in comment #1, so this is
+        often the only place the quantities exist. It needs a logged-in session;
+        without one Instagram answers 401/429 and we simply carry on.
+        """
+        if not media_id or not self.cookies_file:
+            return ""
+        import httpx
+
+        cookies = _netscape_cookies(self.cookies_file)
+        if not cookies:
+            return ""
+
+        deadline.check("comment")
+        try:
+            response = httpx.get(
+                f"https://i.instagram.com/api/v1/media/{media_id}/info/",
+                headers={
+                    "X-IG-App-ID": "936619743392459",
+                    "User-Agent": (
+                        "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/120 Mobile Safari/537.36"
+                    ),
+                    "Accept": "*/*",
+                },
+                cookies=cookies,
+                timeout=20.0,
+                follow_redirects=True,
+            )
+            payload = response.json()
+        except Exception:  # noqa: BLE001 - a comment is a bonus, never a blocker
+            log.warning("instagram comment fetch failed")
+            return ""
+
+        items = payload.get("items") or []
+        if not items:
+            return ""
+        texts = [
+            (c.get("text") or "").strip()
+            for c in (items[0].get("preview_comments") or [])
+        ]
+        texts = [t for t in texts if t]
+        if not texts:
+            return ""
+        # Prefer a comment that actually lists quantities, longest first.
+        with_qty = [t for t in texts if has_quantities(t)]
+        return max(with_qty or texts, key=len)
 
     def _fetch_subtitles(
         self,
@@ -328,6 +384,23 @@ class FallbackStructurer:
 
 _CUE_TIME = re.compile(r"^\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s*-->")
 _CUE_TAG = re.compile(r"<[^>]+>")
+
+
+def _netscape_cookies(path: str) -> dict[str, str]:
+    """Reads the cookie jar yt-dlp writes into a plain dict for httpx."""
+    jar: dict[str, str] = {}
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split("\t")
+                if len(parts) >= 7 and "instagram.com" in parts[0]:
+                    jar[parts[5]] = parts[6]
+    except OSError:
+        return {}
+    return jar
 
 
 def _translate_extraction_error(exc: Exception) -> Exception:

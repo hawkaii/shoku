@@ -125,6 +125,10 @@ class ImportWorker:
                 mode = "caption_first"
                 text = caption
                 self._set_stage(job.id, "structuring")
+            elif (extraction.comment or "").strip() and has_quantities(extraction.comment):
+                mode = "comment_first"
+                text = extraction.comment.strip()
+                self._set_stage(job.id, "structuring")
             elif transcript:
                 # YouTube almost always publishes captions. Using them skips
                 # the download, the model and the 60s budget entirely.
