@@ -55,7 +55,8 @@ BUDGET_SECONDS = 60.0
 # reel is served without re-extraction, so this is the only thing that makes an
 # improvement reach a dish someone imported before the improvement existed.
 #   2: Muse structurer replaces the line-splitting heuristic.
-EXTRACTION_VERSION = 2
+#   3: the creator handle comes from the profile URL, not a numeric account id.
+EXTRACTION_VERSION = 3
 
 # Below this, a "text" is not carrying a recipe: a bare hashtag, a greeting, or
 # the silence that speech recognition returns for a music-only reel.
@@ -165,16 +166,26 @@ class ImportWorker:
                 self._set_stage(job.id, "structuring")
 
             deadline.check("structure")
-            if len(text.strip()) < MIN_TEXT_CHARS:
-                # Nothing to read anywhere. If there is a video, watch it.
-                raw: dict[str, Any] = self._read_video(job, extraction, caption, deadline)
-                mode = "vision"
-                # Say so on the dish: these amounts were seen, not stated.
-                raw["tags"] = [*raw.get("tags", []), "from video"][:20]
-            else:
+
+            # Text first, but "there was text" is not the same as "the text had
+            # a recipe in it": a caption of hashtags is long and empty. So the
+            # test is what came back, not how much went in.
+            raw: dict[str, Any] | None = None
+            if len(text.strip()) >= MIN_TEXT_CHARS:
                 raw = self.ctx.structurer.structure(
                     text, caption_first=(mode != "transcript")
                 )
+                if not raw.get("ingredients") or not raw.get("steps"):
+                    log.info(
+                        "import %s: the text carried no recipe, watching the video", job.id
+                    )
+                    raw = None
+
+            if raw is None:
+                raw = self._read_video(job, extraction, caption, deadline)
+                mode = "vision"
+                # Say so on the dish: these amounts were seen, not stated.
+                raw["tags"] = [*raw.get("tags", []), "from video"][:20]
             recipe = RecipePayload.model_validate(raw)
             prose = _build_prose(recipe, caption, extraction.creator)
 

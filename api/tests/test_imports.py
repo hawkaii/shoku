@@ -177,7 +177,11 @@ def test_extraction_failure_marks_the_job_failed(client, worker, ctx) -> None:
 
 
 def test_invalid_structured_output_fails_validation(client, worker, ctx) -> None:
-    ctx.structurer = FakeStructurer({"title": "x"})
+    # Malformed but not empty: an empty recipe now means "look at the video",
+    # so this keeps testing what it was written for — junk never reaches cache.
+    ctx.structurer = FakeStructurer(
+        {"title": "x", "ingredients": "not a list", "steps": ["stir"]}
+    )
     body = start(client)
     result = worker.process(body["job_id"])
 
@@ -498,3 +502,31 @@ def test_handle_is_omitted_rather_than_showing_a_numeric_id() -> None:
 
     assert _creator_handle({"uploader_id": "273008788"}) is None
     assert _creator_handle({"uploader_id": "someuser"}) == "@someuser"
+
+
+def test_a_junk_caption_falls_back_to_the_video(client, ctx, worker, monkeypatch) -> None:
+    """Long text is not the same as a recipe: hashtags must not block the video.
+
+    The real failure this covers: a caption of '#food #recipe' passed the
+    length check, the model was handed nothing, and the import died as
+    invalid_recipe while the video itself was perfectly readable.
+    """
+    from shoku_api.imports import fakes, pipeline
+    from shoku_api.imports.fakes import FakeVision
+
+    ctx.extractor = fakes.FakeExtractor(
+        caption="#food #recipe #cooking #dinner #yum #homemade #instafood", creator="@ravi"
+    )
+    ctx.transcriber = fakes.FakeTranscriber(text="")
+    vision = FakeVision()
+    ctx.vision = vision
+    monkeypatch.setattr(
+        pipeline, "sample_frames", lambda *a, **k: [Path("frame_001.jpg")]
+    )
+
+    body = start(client, SILENT)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "vision"
+    assert vision.calls == 1
+    assert status(client, body["job_id"])["state"] == "ready"
