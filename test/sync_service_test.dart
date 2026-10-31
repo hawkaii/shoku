@@ -219,6 +219,19 @@ void main() {
     );
   });
 
+  test('a status change and a tombstone both reach the wire', () async {
+    await local.seed([_dish()]);
+    await local.setStatus('d1', DishStatus.signature);
+    await local.deleteDish('d1');
+
+    await SyncService(repository: sync, api: client()).sync();
+
+    final row = (pushedBodies.single['dishes'] as List).single as Map;
+    expect(row['status'], 'signature');
+    expect(row['deleted_at'], isNotNull,
+        reason: 'a delete is a tombstone the server has to hear about');
+  });
+
   test('step links are local: never pushed, and a pulled version has none',
       () async {
     await local.seed([
