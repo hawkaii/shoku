@@ -7,15 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
-import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/feed_service.dart';
 import 'package:food_finder/data/services/import_service.dart';
-import 'package:food_finder/presentation/screens/dish/share_row.dart';
 import 'package:food_finder/presentation/screens/wall/wall_screen.dart';
 import 'package:food_finder/presentation/state/feed_providers.dart';
 import 'package:food_finder/presentation/state/import_providers.dart';
-import 'package:food_finder/presentation/state/journal_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -55,29 +52,6 @@ final _content = jsonEncode({
   'url': 'https://instagram.com/reel/ABC/',
 });
 
-Dish _importedDish({String shortcode = 'ABC'}) => Dish(
-      id: 'd1',
-      title: 'Paneer',
-      subtitle: '',
-      coverUrl: '',
-      sourceHandle: '@ravi',
-      status: DishStatus.toCook,
-      minutes: 20,
-      steps: const ['Fry'],
-      versions: [
-        RecipeVersion(
-          id: 'v1',
-          number: 0,
-          changes: const [],
-          ingredients: const ['paneer'],
-          createdAt: DateTime(2026, 1, 1),
-          originKind: 'import',
-          originShortcode: shortcode,
-        ),
-      ],
-      cooks: const [],
-    );
-
 void main() {
   late AppDatabase db;
   late List<String> calls;
@@ -95,7 +69,7 @@ void main() {
         httpClient: client,
       );
 
-  Widget wall(http.Client client, {List<Dish> dishes = const []}) {
+  Widget wall(http.Client client) {
     return ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
@@ -104,7 +78,6 @@ void main() {
           api: api(client),
           repository: JournalRepository(db),
         )),
-        dishesProvider.overrideWithValue(dishes),
       ],
       child: MaterialApp(
         theme: ShokuTheme.light(),
@@ -133,7 +106,7 @@ void main() {
     expect(calls.single, 'GET /v1/feed');
   });
 
-  testWidgets('an empty wall says nobody has shared anything yet',
+  testWidgets('an empty wall has one empty state, with a way in',
       (tester) async {
     final client = MockClient((request) async {
       calls.add('${request.method} ${request.url.path}');
@@ -144,20 +117,30 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('wall-empty-title')), findsOneWidget);
-    expect(find.text('Nothing has been shared yet'), findsOneWidget);
-    expect(find.text('You have not shared anything of yours'), findsNothing);
+    expect(find.text('Nothing has been imported yet'), findsOneWidget);
+    // The old two-variant copy assumed publishing, which no longer exists.
+    expect(find.textContaining('shared'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('wall-empty-import')));
+    await tester.pumpAndSettle();
+    expect(find.text('Save a reel'), findsOneWidget,
+        reason: 'the empty Wall opens the import sheet');
   });
 
-  testWidgets('an empty wall you could fill says so', (tester) async {
+  testWidgets('nothing on the Wall offers to publish anything',
+      (tester) async {
     final client = MockClient((request) async {
       calls.add('${request.method} ${request.url.path}');
-      return http.Response(_feed([]), 200);
+      return http.Response(_feed([_item('ABC', 'Paneer Tikka')]), 200);
     });
 
-    await tester.pumpWidget(wall(client, dishes: [_importedDish()]));
+    await tester.pumpWidget(wall(client));
     await tester.pumpAndSettle();
 
-    expect(find.text('You have not shared anything of yours'), findsOneWidget);
+    expect(find.text('Paneer Tikka'), findsOneWidget);
+    expect(find.byKey(const ValueKey('share-wall')), findsNothing);
+    expect(find.byKey(const ValueKey('unshare-wall')), findsNothing);
+    expect(find.textContaining('Share'), findsNothing);
   });
 
   testWidgets('add to cookbook reads the cache and never queues an import',
@@ -229,53 +212,4 @@ void main() {
     );
   });
 
-  testWidgets('publishing calls PUT and flips the row; removing calls DELETE',
-      (tester) async {
-    final client = MockClient((request) async {
-      calls.add('${request.method} ${request.url.path}');
-      if (request.url.path == '/v1/feed') {
-        return http.Response(_feed([]), 200);
-      }
-      return http.Response(
-        jsonEncode({'shortcode': 'ABC', 'shared': request.method == 'PUT'}),
-        request.method == 'DELETE' ? 200 : 200,
-      );
-    });
-
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        feedServiceProvider.overrideWithValue(FeedService(api: api(client))),
-      ],
-      child: MaterialApp(
-        theme: ShokuTheme.light(),
-        home: const Scaffold(body: ShareOnWallRow(shortcode: 'ABC')),
-      ),
-    ));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Share this reel on the Wall'), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('share-wall')));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('Visible to every Shoku user'), findsOneWidget,
-        reason: 'the consequence is named before it happens');
-    await tester.tap(find.text('Share it'));
-    await tester.pumpAndSettle();
-
-    expect(calls, contains('PUT /v1/content/ABC/share'));
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey('share-wall-label'))).data,
-      'On the Wall',
-    );
-
-    await tester.tap(find.byKey(const ValueKey('unshare-wall')));
-    await tester.pumpAndSettle();
-
-    expect(calls, contains('DELETE /v1/content/ABC/share'));
-    expect(
-      tester.widget<Text>(find.byKey(const ValueKey('share-wall-label'))).data,
-      'Share this reel on the Wall',
-    );
-  });
 }

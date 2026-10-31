@@ -4,11 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
-import '../../../data/mock/journal_data.dart';
 import '../../state/feed_providers.dart';
 import '../../state/import_providers.dart';
-import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
+import '../add/import_sheet.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -275,9 +274,8 @@ class _FeedCardState extends ConsumerState<FeedCard> {
   }
 }
 
-/// Empty is normal. Two different empties, because they mean two different
-/// things: nobody has shared anything, or *you* have not.
-class _EmptyWall extends ConsumerWidget {
+/// Empty is normal: the Wall shows what has been imported, and nothing has.
+class _EmptyWall extends StatelessWidget {
   const _EmptyWall({
     required this.failed,
     required this.loading,
@@ -289,10 +287,8 @@ class _EmptyWall extends ConsumerWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final c = context.colors;
-    final dishes = ref.watch(dishesProvider);
-    final mine = _sharableCount(dishes);
 
     if (loading) {
       return Center(
@@ -333,33 +329,43 @@ class _EmptyWall extends ConsumerWidget {
             const PlateMark(size: 110),
             const SizedBox(height: ShokuSpace.sm),
             Text(
-              mine > 0
-                  ? 'You have not shared anything of yours'
-                  : 'Nothing has been shared yet',
+              'Nothing has been imported yet',
               key: const ValueKey('wall-empty-title'),
               textAlign: TextAlign.center,
               style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
             ),
             const SizedBox(height: 2),
             Text(
-              mine > 0
-                  ? 'Open a dish you imported and put it on the Wall — everyone gets the reel, never your edits.'
-                  : 'When someone publishes an imported reel, it lands here.',
+              'Import a reel and it lands here, for everyone.',
               textAlign: TextAlign.center,
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+            ),
+            const SizedBox(height: ShokuSpace.md),
+            ShokuPressable(
+              key: const ValueKey('wall-empty-import'),
+              onTap: () => showImportSheet(context),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                  color: c.surfaceAlt,
+                  borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                  border: Border.all(color: c.ink),
+                ),
+                child: Text(
+                  'Import a reel',
+                  style: ShokuType.label.copyWith(
+                    fontSize: 10,
+                    color: c.ink,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  /// How many dishes this phone holds that could be published at all.
-  static int _sharableCount(List<Dish> dishes) {
-    return dishes.where((dish) {
-      final imported = dish.versions.where((v) => v.isImport);
-      return imported.any((v) => (v.originShortcode ?? '').isNotEmpty);
-    }).length;
   }
 }
 

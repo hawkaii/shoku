@@ -6,7 +6,12 @@ import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/presentation/screens/dish/dish_screen.dart';
 import 'package:food_finder/presentation/state/journal_providers.dart';
 
-Dish _dish({List<List<int>>? links, List<String> tags = const []}) => Dish(
+Dish _dish({
+  List<List<int>>? links,
+  List<String> tags = const [],
+  String? shortcode,
+}) =>
+    Dish(
       id: 'd1',
       title: 'Paneer Tikka',
       subtitle: 'From Ravi',
@@ -25,6 +30,8 @@ Dish _dish({List<List<int>>? links, List<String> tags = const []}) => Dish(
           steps: const ['Heat the oil', 'Add the garlic'],
           stepIngredients: links,
           tags: tags,
+          originKind: shortcode == null ? 'mine' : 'import',
+          originShortcode: shortcode,
         ),
       ],
       cooks: const [],
@@ -80,10 +87,25 @@ void main() {
 
     expect(find.text('Heat the oil'), findsOneWidget);
     expect(find.byKey(const ValueKey('step-ingredients')), findsNothing);
-    // No shortcode, nothing to publish, no affordance at all.
     expect(find.byKey(const ValueKey('share-wall')), findsNothing);
     // No tag, no honesty line.
     expect(find.byKey(const ValueKey('from-video-note')), findsNothing);
+  });
+
+  testWidgets('an imported dish offers no way to share it', (tester) async {
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    // Even with a shortcode in hand: the Wall is a feed of imports, not
+    // something a user posts to.
+    await tester.pumpWidget(_app(_dish(shortcode: 'ABC')));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byKey(const ValueKey('share-wall')), findsNothing);
+    expect(find.byKey(const ValueKey('unshare-wall')), findsNothing);
+    expect(find.textContaining('Share'), findsNothing);
+    expect(find.textContaining('Wall'), findsNothing);
   });
 
   testWidgets('a silent reel says its amounts may be off, under the version',
