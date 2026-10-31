@@ -137,7 +137,7 @@ class ImportService {
           steps: steps,
           // Parallel to `steps`; null for a parse that predates the extractor's
           // per-step links. Stored locally only — sync never carries it.
-          stepIngredients: _stepLinks(content['step_ingredients']),
+          stepIngredients: _stepLinks(recipe['step_ingredients']),
           kcal: (recipe['kcal'] as num?)?.toInt() ?? 0,
           protein: (recipe['protein'] as num?)?.toInt() ?? 0,
           originKind: 'import',

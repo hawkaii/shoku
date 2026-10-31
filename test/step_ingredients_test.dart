@@ -108,10 +108,11 @@ void main() {
             ],
             'steps': ['Heat the oil', 'Add the garlic'],
             'tags': <String>[],
+            // On the recipe payload, alongside the steps it is parallel to.
+            'step_ingredients': links,
           },
           'creator': 'Ravi',
           'url': 'https://instagram.com/reel/SC/',
-          'step_ingredients': links,
         };
 
     test('step_ingredients lands on the imported version', () async {
