@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
@@ -121,7 +122,7 @@ class DishScreen extends ConsumerWidget {
                         ShokuChip('altered from original', color: c.reward, filled: true),
                       const Spacer(),
                       Text(
-                        '${dish.cookCount} cooks',
+                        count(dish.cookCount, 'cook'),
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                       ),
                     ],
@@ -225,7 +226,7 @@ class DishScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: ShokuSpace.md),
                   ],
-                  ShokuLabel('ingredients'),
+                  const ShokuLabel('ingredients'),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final ingredient in version.ingredients)
                     Container(
@@ -314,7 +315,7 @@ class DishScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.xl),
-            ShokuLabel('history'),
+            const ShokuLabel('history'),
             const SizedBox(height: ShokuSpace.sm),
             if (dish.cooks.isEmpty)
               Text('Not cooked yet. The first log becomes v1.',

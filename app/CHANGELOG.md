@@ -3,6 +3,15 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.13.0] — 2026-10-31
+
+### Docs
+- V1.12.0 [skip ci] *(changelog)* — [`d91beb3`](https://github.com/hawkaii/food-finder-app/commit/d91beb339efaceaca65485d6533d01ef5a467c51)
+
+### Fixed
+- Fill the journal on sign-in instead of waiting for a reload *(sync)* — [`6309fef`](https://github.com/hawkaii/food-finder-app/commit/6309fef1b53e54db31623f89a43643451ed9eaca)
+- Signing in now pulls the journal, and the app says when it is syncing *(sync)* — [`bcabe4f`](https://github.com/hawkaii/food-finder-app/commit/bcabe4f97cfd546028ad0dc469d86c33f4d1791f)
+
 ## [1.12.0] — 2026-10-31
 
 ### Added

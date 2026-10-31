@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
-import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
@@ -103,8 +102,6 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final nextVersion = widget.dish.versions.length + 1;
-    final kcalDelta = _changes.length * 18;
-    final proteinDelta = _changes.length * 2;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -175,7 +172,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             // Rating
             Row(
               children: [
-                ShokuLabel('rating'),
+                const ShokuLabel('rating'),
                 const Spacer(),
                 for (var i = 1; i <= 5; i++)
                   GestureDetector(
@@ -197,7 +194,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.md),
 
             // Mood
-            ShokuLabel('what kind of cook was it'),
+            const ShokuLabel('what kind of cook was it'),
             const SizedBox(height: ShokuSpace.sm),
             Row(
               children: [
@@ -232,7 +229,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.lg),
 
             // Changes
-            ShokuLabel('what altered from the original'),
+            const ShokuLabel('what altered from the original'),
             const SizedBox(height: ShokuSpace.sm),
             if (_changes.isEmpty)
               Text(
@@ -305,7 +302,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.md),
 
             // Note
-            ShokuLabel('what was missing'),
+            const ShokuLabel('what was missing'),
             const SizedBox(height: ShokuSpace.sm),
             MicField(controller: _note, hint: '“needed more acid, next time add lime”'),
             const SizedBox(height: ShokuSpace.lg),

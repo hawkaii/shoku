@@ -6,7 +6,6 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
 import '../../state/journal_providers.dart';
-import '../../state/nutrition_providers.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
@@ -24,7 +23,6 @@ class ProfileScreen extends ConsumerWidget {
     final upgrades = ref.watch(totalUpgradesProvider);
     final signature = ref.watch(signatureCountProvider);
     final mode = ref.watch(themeModeProvider);
-    final nutrition = ref.watch(nutritionProvider);
 
     return SafeArea(
       bottom: false,
@@ -55,12 +53,12 @@ class ProfileScreen extends ConsumerWidget {
           ),
 
           const SizedBox(height: ShokuSpace.lg),
-          ShokuLabel('account'),
+          const ShokuLabel('account'),
           const SizedBox(height: ShokuSpace.sm),
           const _AccountRow(),
 
           const SizedBox(height: ShokuSpace.lg),
-          ShokuLabel('nutrition'),
+          const ShokuLabel('nutrition'),
           const SizedBox(height: ShokuSpace.sm),
           Container(
             padding: const EdgeInsets.all(ShokuSpace.md),
@@ -92,7 +90,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
 
           const SizedBox(height: ShokuSpace.xl),
-          ShokuLabel('appearance'),
+          const ShokuLabel('appearance'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSegmented(
             labels: const ['SYSTEM', 'LIGHT', 'DARK'],
@@ -106,13 +104,6 @@ class ProfileScreen extends ConsumerWidget {
 
           const SizedBox(height: ShokuSpace.lg),
           ShokuListRow(
-            icon: Icons.add_link,
-            title: 'Import a recipe',
-            subtitle: 'Paste a reel or a link',
-            onTap: () {},
-          ),
-          ShokuHairline(),
-          ShokuListRow(
             icon: Icons.menu_book_outlined,
             title: 'How Shoku works',
             subtitle: 'The share gesture, in three steps',
@@ -121,13 +112,13 @@ class ProfileScreen extends ConsumerWidget {
               ref.read(onboardingDoneProvider.notifier).state = false;
             },
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.help_outline,
             title: 'Help & feedback',
             onTap: () => context.push('/help'),
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.delete_outline,
             title: 'Reset journal',
@@ -137,7 +128,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.xl),
           Center(
             child: Text(
-              'Shoku 1.1.0 · kitchen ticket',
+              'Shoku · evening kitchen',
               style: ShokuType.label.copyWith(color: c.inkMuted),
             ),
           ),

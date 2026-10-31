@@ -57,7 +57,7 @@ class NutritionLensScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    ShokuLabel('per home-cooked meal'),
+                    const ShokuLabel('per home-cooked meal'),
                     const Spacer(),
                     ShokuChip(profile.goal, color: c.accent, filled: true),
                   ],
@@ -86,7 +86,7 @@ class NutritionLensScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ShokuLabel('your tweaks vs the original'),
+                const ShokuLabel('your tweaks vs the original'),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   latest.title,
@@ -121,7 +121,7 @@ class NutritionLensScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    ShokuLabel('goal'),
+                    const ShokuLabel('goal'),
                     const Spacer(),
                     Text(
                       '${profile.weightKg} kg · BMI ${profile.bmi.toStringAsFixed(1)}',
@@ -139,7 +139,7 @@ class NutritionLensScreen extends ConsumerWidget {
                   style: ShokuType.body.copyWith(color: c.ink),
                 ),
                 const SizedBox(height: ShokuSpace.md),
-                ShokuChip('no weigh-ins yet', icon: Icons.monitor_weight_outlined),
+                const ShokuChip('no weigh-ins yet', icon: Icons.monitor_weight_outlined),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   'Weight is optional and weekly. If you never weigh in, Shoku falls back to intake consistency and stops asking.',

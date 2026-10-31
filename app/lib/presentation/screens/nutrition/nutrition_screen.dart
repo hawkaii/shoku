@@ -8,7 +8,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../providers/providers.dart';
 
 class NutritionScreen extends ConsumerWidget {
-  const NutritionScreen({Key? key}) : super(key: key);
+  const NutritionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +24,7 @@ class NutritionScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(NeuSpacing.md),
               child: Row(
                 children: [
-                  Text('🥗', style: const TextStyle(fontSize: 32)),
+                  const Text('🥗', style: TextStyle(fontSize: 32)),
                   const SizedBox(width: NeuSpacing.sm),
                   Text('NUTRITION', style: NeuTextStyles.heading1),
                 ],

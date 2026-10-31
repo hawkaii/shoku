@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../state/shoku_providers.dart';
-import '../../widgets/kit/cards.dart';
 import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
@@ -72,7 +71,7 @@ class DiscoverScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: ShokuSpace.md),
-            ShokuHairline(),
+            const ShokuHairline(),
 
             // ---- Source provenance --------------------------------------
             Padding(
@@ -129,7 +128,7 @@ class DiscoverScreen extends ConsumerWidget {
               const SizedBox(height: ShokuSpace.lg),
             ],
 
-            ShokuHairline(),
+            const ShokuHairline(),
             const SizedBox(height: ShokuSpace.lg),
 
             // ---- Body ----------------------------------------------------
@@ -182,7 +181,7 @@ class DiscoverScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.xxl),
-            ShokuLabel('next up'),
+            const ShokuLabel('next up'),
             const SizedBox(height: ShokuSpace.sm),
             ...others.take(3).map(
                   (item) => Padding(

@@ -11,8 +11,7 @@ import '../../../providers/providers.dart';
 class RecipeSuggestionsScreen extends ConsumerWidget {
   final List<DishSuggestion> dishes;
 
-  const RecipeSuggestionsScreen({Key? key, required this.dishes})
-      : super(key: key);
+  const RecipeSuggestionsScreen({super.key, required this.dishes});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

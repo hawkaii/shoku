@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/auth_service.dart';
-import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 
 /// Sign-in, kept to one sheet.
