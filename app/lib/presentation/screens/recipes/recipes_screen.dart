@@ -9,6 +9,7 @@ import '../../state/journal_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/status_badge.dart';
+import 'dish_actions.dart';
 
 class RecipesScreen extends ConsumerWidget {
   const RecipesScreen({super.key});
@@ -92,10 +93,13 @@ class RecipesScreen extends ConsumerWidget {
                         2 +
                         metaHeight,
                   ),
-                  itemBuilder: (context, i) => ShokuEntrance(
-                    index: i,
-                    child: _DishTile(dish: visible[i]),
-                  ),
+              itemBuilder: (context, i) => ShokuEntrance(
+                index: i,
+                child: _DishTile(
+                  dish: visible[i],
+                  onLongPress: () => showDishActions(context, visible[i]),
+                ),
+              ),
                 );
               },
             ),
@@ -107,7 +111,8 @@ class RecipesScreen extends ConsumerWidget {
 
 class _DishTile extends StatelessWidget {
   final Dish dish;
-  const _DishTile({required this.dish});
+  final VoidCallback onLongPress;
+  const _DishTile({required this.dish, required this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +126,9 @@ class _DishTile extends StatelessWidget {
 
     return ShokuPressable(
       onTap: () => context.push('/dish/${dish.id}'),
+      // Holding a card asks what to do with it, which is the only place the
+      // Cookbook offers to move or remove one.
+      onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
