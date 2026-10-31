@@ -111,3 +111,40 @@ def test_prose_is_capped_and_strict() -> None:
         ProsePayload(summary="ok", creator_note="a" * 601)
     with pytest.raises(ValidationError):
         ProsePayload(summary="ok", html="<script>alert(1)</script>")
+
+
+# ---- step ingredients ------------------------------------------------------
+
+
+def test_step_ingredients_are_optional_and_null_by_default() -> None:
+    recipe = RecipePayload.model_validate(valid())
+    assert recipe.step_ingredients is None
+
+
+def test_step_ingredients_round_trip() -> None:
+    recipe = RecipePayload.model_validate(valid(step_ingredients=[[0], [0]]))
+    assert recipe.model_dump()["step_ingredients"] == [[0], [0]]
+
+
+def test_step_ingredients_need_one_entry_per_step() -> None:
+    with pytest.raises(ValidationError) as exc:
+        RecipePayload.model_validate(valid(step_ingredients=[[0]]))
+    assert "one entry per step" in str(exc.value)
+
+
+def test_a_citation_to_an_ingredient_that_does_not_exist_is_rejected() -> None:
+    # valid() has exactly one ingredient, and two steps.
+    with pytest.raises(ValidationError) as exc:
+        RecipePayload.model_validate(valid(step_ingredients=[[0], [1]]))
+    assert "cites ingredient 1" in str(exc.value)
+
+
+def test_a_negative_citation_is_rejected() -> None:
+    with pytest.raises(ValidationError):
+        RecipePayload.model_validate(valid(step_ingredients=[[0], [-1]]))
+
+
+def test_an_empty_citation_list_is_legal() -> None:
+    recipe = RecipePayload.model_validate(valid(step_ingredients=[[], []]))
+    assert recipe.step_ingredients == [[], []]
+
