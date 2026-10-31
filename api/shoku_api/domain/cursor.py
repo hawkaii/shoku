@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-TABLES = ("dishes", "versions", "cook_logs")
+TABLES = ("dishes", "versions", "cook_logs", "photos")
 
 
 @dataclass(frozen=True)
