@@ -325,3 +325,19 @@ def test_structurer_pins_low_reasoning_effort_and_large_budget(monkeypatch):
     assert captured["reasoning_effort"] == "minimal"
     assert captured["max_tokens"] >= 4000
     assert captured["response_format"]["json_schema"]["strict"] is True
+
+
+def test_fallback_reports_the_structurer_that_actually_ran():
+    """Provenance must name what produced the parse, not what was tried."""
+    from shoku_api.imports.adapters import FallbackStructurer, HeuristicStructurer
+
+    class Broken:
+        name = "muse"
+
+        def structure(self, text, *, caption_first):
+            raise RuntimeError("down")
+
+    active = FallbackStructurer(Broken(), HeuristicStructurer())
+    assert active.name == "muse"
+    active.structure("250 g paneer\n2 tbsp butter\nMix well", caption_first=True)
+    assert active.name == "heuristic"

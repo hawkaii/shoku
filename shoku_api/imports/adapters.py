@@ -503,6 +503,9 @@ class FallbackStructurer:
             return self._primary.structure(text, caption_first=caption_first)
         except Exception as exc:  # noqa: BLE001 - the fallback is the point
             log.warning("structurer %s failed (%s); using heuristic", self.name, exc)
+            # The caller records ``name`` as the provenance of this parse, so it
+            # must name what actually ran — not what was attempted.
+            self.name = getattr(self._fallback, "name", "heuristic")
             result = self._fallback.structure(text, caption_first=caption_first)
             result.setdefault("tags", [])
             result["tags"] = list({*result["tags"], "fallback"})
