@@ -3,6 +3,25 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.17.0] — 2026-10-31
+
+### Added
+- Ring a timer with the phone in a pocket *(cook)* — [`3f20c56`](https://github.com/hawkaii/food-finder-app/commit/3f20c56a2c9f5d1d6d5592de3dc0f344c2d921a2)
+
+### CI
+- A changelog push must not fail a shipped release — [`d76b6fb`](https://github.com/hawkaii/food-finder-app/commit/d76b6fb8bf7fcbaf04085ee1c6507e68aa0cec4f)
+
+### Docs
+- V1.15.0 [skip ci] *(changelog)* — [`68a66f1`](https://github.com/hawkaii/food-finder-app/commit/68a66f1ad6d92eadbb49fe9fcaab411fe90b7bd3)
+
+## [1.16.0] — 2026-10-31
+
+### Added
+- Long-press a card to move it or remove it from the journal *(cookbook)* — [`1178f69`](https://github.com/hawkaii/food-finder-app/commit/1178f69bfa4ceae11b7fdeb739b7ecc23d64efaf)
+
+### Fixed
+- Read step links from the recipe payload, where the API puts them *(recipe)* — [`355adf8`](https://github.com/hawkaii/food-finder-app/commit/355adf8663d330282d228480b0ca5b72fb4fcfe4)
+
 ## [1.15.0] — 2026-10-31
 
 ### Added
