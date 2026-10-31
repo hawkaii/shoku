@@ -3,6 +3,11 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.18.0] — 2026-10-31
+
+### Added
+- A public feed of shared reels, and a way to share one *(wall)* — [`af28b47`](https://github.com/hawkaii/food-finder-app/commit/af28b47cf54f264867f5005d7742a4ea0dacccf4)
+
 ## [1.17.1] — 2026-10-31
 
 ### Docs

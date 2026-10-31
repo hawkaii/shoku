@@ -6,7 +6,7 @@ import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/presentation/screens/dish/dish_screen.dart';
 import 'package:food_finder/presentation/state/journal_providers.dart';
 
-Dish _dish({List<List<int>>? links}) => Dish(
+Dish _dish({List<List<int>>? links, List<String> tags = const []}) => Dish(
       id: 'd1',
       title: 'Paneer Tikka',
       subtitle: 'From Ravi',
@@ -24,6 +24,7 @@ Dish _dish({List<List<int>>? links}) => Dish(
           createdAt: DateTime(2026, 1, 1),
           steps: const ['Heat the oil', 'Add the garlic'],
           stepIngredients: links,
+          tags: tags,
         ),
       ],
       cooks: const [],
@@ -81,5 +82,29 @@ void main() {
     expect(find.byKey(const ValueKey('step-ingredients')), findsNothing);
     // No shortcode, nothing to publish, no affordance at all.
     expect(find.byKey(const ValueKey('share-wall')), findsNothing);
+    // No tag, no honesty line.
+    expect(find.byKey(const ValueKey('from-video-note')), findsNothing);
+  });
+
+  testWidgets('a silent reel says its amounts may be off, under the version',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(_app(_dish(tags: const ['from video'])));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byKey(const ValueKey('from-video-note')), findsOneWidget);
+    expect(find.text('read from the video — amounts may be off'),
+        findsOneWidget);
+
+    // Not a warning: muted body copy, and nowhere near the danger colour.
+    final note = tester.widget<Text>(
+      find.byKey(const ValueKey('from-video-note')),
+    );
+    final context = tester.element(find.byKey(const ValueKey('from-video-note')));
+    expect(note.style?.color, context.colors.inkMuted);
+    expect(note.style?.fontSize, ShokuType.bodySmall.fontSize);
   });
 }

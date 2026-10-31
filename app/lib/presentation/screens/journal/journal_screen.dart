@@ -368,6 +368,16 @@ class _TimelineEntry extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(dish.title, style: ShokuType.h2.copyWith(color: c.ink)),
+                          const SizedBox(height: 2),
+                          // How the night felt and what it was worth — quiet,
+                          // in the words the log already stores.
+                          Text(
+                            '${log.mood.name} · ${log.rating}/5',
+                            key: const ValueKey('cook-mood-rating'),
+                            style: ShokuType.bodySmall.copyWith(
+                              color: c.inkMuted,
+                            ),
+                          ),
                           if (log.changes.isNotEmpty) ...[
                             const SizedBox(height: ShokuSpace.sm),
                             Wrap(
