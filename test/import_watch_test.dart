@@ -83,6 +83,42 @@ void main() {
     expect(requests, 1);
   });
 
+  group('the watch window', () {
+    test('waits four minutes, not two', () {
+      // A real reel spends ~90 s transcribing, and a healthy import has been
+      // seen at 184 s end to end.
+      expect(ImportService.defaultWatchSeconds, 240);
+    });
+
+    test('a job that is still running is not called a timeout', () async {
+      final client = MockClient((request) async {
+        requests++;
+        return pollResponse('extracting', detail: 'transcribing');
+      });
+
+      final seen = <ImportProgress>[];
+      final sub = service(client).watch('job1').listen(seen.add);
+      await Future<void>.delayed(const Duration(milliseconds: 2500));
+      await sub.cancel();
+
+      expect(seen, isNotEmpty, reason: 'it keeps reading');
+      expect(seen.every((p) => p.reason != 'timed_out'), isTrue);
+    });
+
+    test('when the window runs out it says timed_out, not failed', () async {
+      final client = MockClient((request) async {
+        requests++;
+        return pollResponse('extracting', detail: 'transcribing');
+      });
+
+      final seen = await service(client).watch('job1', seconds: 0).toList();
+
+      expect(seen.single.stage, ImportStage.failed);
+      expect(seen.single.reason, 'timed_out');
+      expect(importReasonText('timed_out'), contains('You can leave this'));
+    });
+  });
+
   group('failure copy', () {
     test('a client timeout is not the generic message', () {
       final text = importReasonText('timed_out');

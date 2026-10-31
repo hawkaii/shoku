@@ -84,6 +84,41 @@ void main() {
     );
   }
 
+  /// The same sheet, with its two timing knobs turned down so a test can reach
+  /// the slow and expired paths without waiting minutes.
+  Widget appWithTimings(
+    ImportService importService, {
+    required Duration slowAfter,
+    required int watchSeconds,
+    String? prefill,
+  }) {
+    return ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        importServiceProvider.overrideWithValue(importService),
+      ],
+      child: MaterialApp(
+        theme: ShokuTheme.light(),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => ImportSheet(
+                  prefill: prefill,
+                  slowAfter: slowAfter,
+                  watchSeconds: watchSeconds,
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   testWidgets('a cached reel with no job goes straight to the dish',
       (tester) async {
     final client = MockClient((request) async {
@@ -225,5 +260,116 @@ void main() {
     expect(find.text('Saved Paneer Tikka'), findsOneWidget);
     expect(calls, ['GET /v1/imports/job1', 'GET /v1/content/$_shortcode']);
     expect(calls.any((c) => c == 'POST /v1/imports'), isFalse);
+  });
+
+  testWidgets('a long job stops saying "reading" and says it is still working',
+      (tester) async {
+    final client = MockClient((request) async {
+      calls.add('${request.method} ${request.url.path}');
+      if (request.url.path == '/v1/imports') {
+        return http.Response(
+          jsonEncode({
+            'job_id': 'job1',
+            'state': 'extracting',
+            'cached': false,
+            'shortcode': _shortcode,
+          }),
+          202,
+        );
+      }
+      return http.Response(
+        jsonEncode({
+          'job_id': 'job1',
+          'state': 'extracting',
+          'shortcode': _shortcode,
+          'reason': null,
+          'progress_stage': 'transcribing',
+          'created_at': '2026-10-31T06:20:00Z',
+          'updated_at': '2026-10-31T06:20:01Z',
+        }),
+        200,
+      );
+    });
+
+    await tester.pumpWidget(appWithTimings(
+      service(client),
+      slowAfter: const Duration(milliseconds: 300),
+      watchSeconds: 240,
+      prefill: _url,
+    ));
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Under the threshold it says what the worker is doing.
+    expect(find.text('Reading the audio'), findsOneWidget);
+    expect(find.text('Still working — this reel is long'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Still working — this reel is long'), findsOneWidget);
+    expect(
+      find.textContaining('takes a few minutes'),
+      findsOneWidget,
+      reason: 'the wait is explained, not just spinning',
+    );
+
+    // The job is still the server's; the sheet has not called it a failure.
+    expect(find.byKey(const ValueKey('import-still-reading')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+    // Let the cancelled poll delay drain so the test ends with no timer running.
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('an expired window says it is still reading and keeps the note',
+      (tester) async {
+    final client = MockClient((request) async {
+      calls.add('${request.method} ${request.url.path}');
+      if (request.url.path == '/v1/imports') {
+        return http.Response(
+          jsonEncode({
+            'job_id': 'job1',
+            'state': 'extracting',
+            'cached': false,
+            'shortcode': _shortcode,
+          }),
+          202,
+        );
+      }
+      return http.Response(
+        jsonEncode({
+          'job_id': 'job1',
+          'state': 'extracting',
+          'shortcode': _shortcode,
+          'reason': null,
+          'progress_stage': 'transcribing',
+          'created_at': '2026-10-31T06:20:00Z',
+          'updated_at': '2026-10-31T06:20:01Z',
+        }),
+        200,
+      );
+    });
+
+    await tester.pumpWidget(appWithTimings(
+      service(client),
+      slowAfter: const Duration(seconds: 60),
+      watchSeconds: 0,
+      prefill: _url,
+    ));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('import-still-reading')), findsOneWidget);
+    expect(find.textContaining('You can leave this'), findsOneWidget);
+    // Nothing has failed, so nothing is painted as an error.
+    expect(find.textContaining('Could not reach'), findsNothing);
+    expect(find.textContaining('Could not read'), findsNothing);
+
+    // The job is persisted, so the next open picks it up.
+    final pending = await PendingImportStore().read();
+    expect(pending, isNotNull);
+    expect(pending!.jobId, 'job1');
+
+    await tester.pumpWidget(const SizedBox());
   });
 }

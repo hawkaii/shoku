@@ -43,10 +43,18 @@ class ImportService {
     );
   }
 
+  /// How long the sheet waits before it stops looking at a running job.
+  ///
+  /// A real reel spends ~90 seconds in transcription alone, and with the
+  /// download and the model a healthy import has been seen at 184 seconds.
+  /// The old 120 s window timed out on ordinary reels.
+  static const int defaultWatchSeconds = 240;
+
   /// Polls until the job settles. Bounded by a deadline so a stuck worker can't
   /// leave the sheet spinning forever.
-  Stream<ImportProgress> watch(String jobId, {int seconds = 120}) async* {
-    final deadline = DateTime.now().add(Duration(seconds: seconds));
+  Stream<ImportProgress> watch(String jobId, {int? seconds}) async* {
+    final deadline =
+        DateTime.now().add(Duration(seconds: seconds ?? defaultWatchSeconds));
     var delay = const Duration(seconds: 1);
     while (DateTime.now().isBefore(deadline)) {
       final progress = await pollOnce(jobId);
@@ -234,7 +242,7 @@ String importReasonText(String? reason) => switch (reason) {
         'YouTube is blocking our server right now — try again later or paste the recipe',
       'timeout' => 'That took too long — try again',
       'timed_out' =>
-        'Still reading — this one is taking longer than usual. Open this again in a minute and it will be here',
+        'Still reading — this can take a few minutes. You can leave this and the dish will be here when it is ready',
       'gone' => 'That import is no longer on the server — try the link again',
       'invalid_recipe' => 'We could not find a recipe in that one',
       'no_audio' => 'That video has nothing to listen to',
