@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.12.0] — 2026-10-31
+
+### Added
+- Ship an empty app instead of a demo kitchen — [`7d002bc`](https://github.com/hawkaii/food-finder-app/commit/7d002bc758e6f8159acbfcd14d04ff17a1206447)
+
+### Docs
+- V1.11.0 [skip ci] *(changelog)* — [`de2307d`](https://github.com/hawkaii/food-finder-app/commit/de2307d3a08b2fe3b3e17d30030e4bff2660d52c)
+
 ## [1.11.0] — 2026-10-31
 
 ### Added
