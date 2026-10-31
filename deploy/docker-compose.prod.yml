@@ -1,5 +1,10 @@
 # Production compose, rendered onto the VM by CI.
 # The image is built by GitHub Actions and pushed to GHCR; the VM only pulls.
+
+# Stable project name: container and volume names must not depend on the
+# directory the compose file is invoked from.
+name: shoku
+
 services:
   api:
     image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
