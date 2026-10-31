@@ -256,3 +256,72 @@ def test_heuristic_keeps_short_steps_instead_of_dropping_them():
     result = HeuristicStructurer().structure(text, caption_first=True)
 
     assert result["steps"] == ["Mix well", "Serve hot", "Garnish"]
+
+
+# ---- Muse structurer -----------------------------------------------------
+
+
+def test_schema_matches_recipe_payload():
+    """The JSON schema and the Pydantic model must not drift apart.
+
+    The schema is what the decoder is constrained to; RecipePayload is what the
+    pipeline validates. If a field is added to one and not the other, imports
+    fail at the last step instead of the first.
+    """
+    from shoku_api.imports.adapters import OpenAICompatStructurer
+    from shoku_api.schemas import RecipePayload
+
+    schema = OpenAICompatStructurer.SCHEMA
+    assert set(schema["required"]) == set(RecipePayload.model_fields)
+    assert set(schema["properties"]) == set(RecipePayload.model_fields)
+    assert schema["additionalProperties"] is False
+
+
+def test_duplicate_ingredients_are_merged():
+    from shoku_api.imports.adapters import _merge_duplicate_ingredients
+
+    recipe = {
+        "ingredients": [
+            {"name": "ghee", "amount": "2 tbsp", "grams": None},
+            {"name": "Ghee ", "amount": "1 tbsp", "grams": None},
+            {"name": "rice", "amount": None, "grams": None},
+            {"name": "rice", "amount": "1.5 cups", "grams": 300},
+        ]
+    }
+    merged = _merge_duplicate_ingredients(recipe)["ingredients"]
+
+    assert len(merged) == 2, "the same ingredient twice is a mistake in a cookbook"
+    assert merged[1] == {"name": "rice", "amount": "1.5 cups", "grams": 300}
+
+
+def test_structurer_pins_low_reasoning_effort_and_large_budget(monkeypatch):
+    """Reasoning tokens share the budget with the answer.
+
+    A smaller budget is not a saving; it returns an empty response, which is
+    how the first attempt failed.
+    """
+    from shoku_api.imports import adapters
+
+    captured = {}
+
+    class Resp:
+        def raise_for_status(self): pass
+        def json(self):
+            return {
+                "choices": [{"message": {"content": '{"title":"x","servings":2,"minutes":5,'
+                          '"kcal":0,"protein":0,"ingredients":[],"steps":[],"tags":[]}'},
+                          "finish_reason": "stop"}],
+                "usage": {},
+            }
+
+    def fake_post(url, **kwargs):
+        captured.update(kwargs["json"])
+        return Resp()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+    s = adapters.OpenAICompatStructurer("https://api.meta.ai/v1", "k", "muse-spark-1.3")
+    s.structure("some text", caption_first=True)
+
+    assert captured["reasoning_effort"] == "minimal"
+    assert captured["max_tokens"] >= 4000
+    assert captured["response_format"]["json_schema"]["strict"] is True
