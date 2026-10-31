@@ -3,6 +3,19 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.15.0] — 2026-10-31
+
+### Added
+- Show each step's ingredients in the recipe's own words *(recipe)* — [`52acae3`](https://github.com/hawkaii/food-finder-app/commit/52acae3660e73aed7ea3bfb0576915ed4c0627b3)
+
+### Docs
+- V1.14.0 [skip ci] *(changelog)* — [`290b8d3`](https://github.com/hawkaii/food-finder-app/commit/290b8d3753bf8a774873f48ffa814f046c912f97)
+
+## [1.14.1] — 2026-10-31
+
+### Fixed
+- Keep an import alive through a dropped poll and a restart *(import)* — [`3acde63`](https://github.com/hawkaii/food-finder-app/commit/3acde631595c2aed72a9adf82c03b57e61aad140)
+
 ## [1.14.0] — 2026-10-31
 
 ### Added
