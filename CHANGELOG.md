@@ -3,6 +3,20 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.19.0] — 2026-10-31
+
+### Added
+- Carry tags on the wire, and say when amounts were read off video *(recipe)* — [`2d9a368`](https://github.com/hawkaii/food-finder-app/commit/2d9a368bc057db70753912e3a9d61608af56c760)
+- Show the mood and the rating of each cook again *(journal)* — [`05439c4`](https://github.com/hawkaii/food-finder-app/commit/05439c4177c8b398d1b3b30b3c1cc780c72b131a)
+
+### CI
+- Cache Gradle and stop building commits that cannot change the APK — [`07a7bb5`](https://github.com/hawkaii/food-finder-app/commit/07a7bb591f7bdfb8e16620a4313183a96e6946f0)
+- A release is a version bump, not a commit — [`e9ffabc`](https://github.com/hawkaii/food-finder-app/commit/e9ffabc1f0c978cbeb797aab7c7a9e7491196b47)
+
+### Docs
+- V1.17.1 [skip ci] *(changelog)* — [`152578c`](https://github.com/hawkaii/food-finder-app/commit/152578c33985d48ca092c84249b76a8d6839e57a)
+- V1.18.0 [skip ci] *(changelog)* — [`5d5b300`](https://github.com/hawkaii/food-finder-app/commit/5d5b3006b9ee64338a589f8cc07c07faa2cb6dd9)
+
 ## [1.18.0] — 2026-10-31
 
 ### Added
