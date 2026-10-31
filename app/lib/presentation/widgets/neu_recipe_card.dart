@@ -13,12 +13,12 @@ class NeuRecipeCard extends StatefulWidget {
   final bool isNew;
 
   const NeuRecipeCard({
-    Key? key,
+    super.key,
     required this.recipe,
     required this.onTap,
     this.backgroundColor = NeuColors.neuLavender,
     this.isNew = false,
-  }) : super(key: key);
+  });
 
   @override
   State<NeuRecipeCard> createState() => _NeuRecipeCardState();

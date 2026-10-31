@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
@@ -11,6 +12,7 @@ import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/status_badge.dart';
+import '../../widgets/kit/step_ingredients.dart';
 import '../assistant/assistant_sheet.dart';
 import '../log/debrief_sheet.dart';
 
@@ -29,6 +31,7 @@ class DishScreen extends ConsumerWidget {
     final inspected =
         ref.watch(inspectedVersionProvider(dishId)).clamp(1, dish.versions.length);
     final version = dish.versions[inspected - 1];
+    final stepLines = version.steps.isNotEmpty ? version.steps : dish.steps;
     final recommended = dish.versions.last;
     final altered = recommended.changes.any((c) => c != 'First attempt' && c != 'No changes');
 
@@ -121,7 +124,7 @@ class DishScreen extends ConsumerWidget {
                         ShokuChip('altered from original', color: c.reward, filled: true),
                       const Spacer(),
                       Text(
-                        '${dish.cookCount} cooks',
+                        count(dish.cookCount, 'cook'),
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                       ),
                     ],
@@ -225,7 +228,7 @@ class DishScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: ShokuSpace.md),
                   ],
-                  ShokuLabel('ingredients'),
+                  const ShokuLabel('ingredients'),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final ingredient in version.ingredients)
                     Container(
@@ -251,6 +254,45 @@ class DishScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  if (stepLines.isNotEmpty) ...[
+                    const SizedBox(height: ShokuSpace.lg),
+                    const ShokuLabel('steps'),
+                    const SizedBox(height: ShokuSpace.sm),
+                    // The dossier had no method section at all: a recipe's steps
+                    // could only be read in cook mode.
+                    for (var s = 0; s < stepLines.length; s++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: ShokuSpace.md),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 22,
+                              child: Text(
+                                '${s + 1}',
+                                style: ShokuType.label.copyWith(color: c.inkMuted),
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    stepLines[s],
+                                    style: ShokuType.body.copyWith(color: c.ink),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  StepIngredientsLine(
+                                    ingredients: version.ingredients,
+                                    indices: version.stepIngredientLinks(s),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ),
@@ -314,7 +356,7 @@ class DishScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.xl),
-            ShokuLabel('history'),
+            const ShokuLabel('history'),
             const SizedBox(height: ShokuSpace.sm),
             if (dish.cooks.isEmpty)
               Text('Not cooked yet. The first log becomes v1.',
@@ -406,7 +448,16 @@ class _SmallAction extends StatelessWidget {
           children: [
             Icon(icon, size: 13, color: c.ink),
             const SizedBox(width: 5),
-            Text(label, style: ShokuType.label.copyWith(fontSize: 9.5, color: c.ink)),
+            // Two of these sit side by side; a long label ellipsises instead of
+            // pushing the button wider than the phone.
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ShokuType.label.copyWith(fontSize: 9.5, color: c.ink),
+              ),
+            ),
           ],
         ),
       ),

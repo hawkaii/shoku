@@ -3,16 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
-import '../../state/shoku_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/status_badge.dart';
-import '../../widgets/kit/step_diagram.dart';
 import '../log/log_sheet.dart';
 
 class JournalScreen extends ConsumerWidget {
@@ -73,7 +72,10 @@ class JournalScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${dishes.length} dishes · ${upgrades} upgrades',
+                  metaLine([
+                    count(dishes.length, 'dish', 'dishes'),
+                    count(upgrades, 'upgrade'),
+                  ]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
@@ -97,7 +99,7 @@ class JournalScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.xl),
 
           // ---- On the counter -----------------------------------------
-          ShokuLabel('on the counter'),
+          const ShokuLabel('on the counter'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuEntrance(
             child: _PinnedCard(
@@ -111,10 +113,10 @@ class JournalScreen extends ConsumerWidget {
           // ---- Timeline ------------------------------------------------
           Row(
             children: [
-              ShokuLabel('cook log'),
+              const ShokuLabel('cook log'),
               const Spacer(),
               Text(
-                '${cooks.length} entries',
+                count(cooks.length, 'entry', 'entries'),
                 style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
               ),
             ],
@@ -217,15 +219,22 @@ class _PinnedCard extends StatelessWidget {
                         'v${dish.currentVersion}',
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.accent),
                       ),
-                      const SizedBox(width: ShokuSpace.xs),
-                      Flexible(
-                        child: Text(
-                          '· ${dish.minutes} min',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
+                      // A duration we don't know is not shown at all: a stray
+                      // dot or a dash would read as data.
+                      if (minutesLabel(dish.minutes).isNotEmpty) ...[
+                        const SizedBox(width: ShokuSpace.xs),
+                        Flexible(
+                          child: Text(
+                            '· ${minutesLabel(dish.minutes)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ShokuType.stat.copyWith(
+                              fontSize: 11,
+                              color: c.inkMuted,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -447,7 +456,7 @@ class _JournalLoading extends StatelessWidget {
             const PlateMark(size: 56),
             const SizedBox(height: ShokuSpace.md),
             Text(
-              ready ? 'Nothing here yet — cook something' : 'Opening your journal',
+              ready ? 'No dishes yet — import a reel to start' : 'Opening your journal',
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
           ],

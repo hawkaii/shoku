@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
-import '../../widgets/kit/step_diagram.dart';
 
 /// Your wall: every night you actually cooked. Private, chronological, no feed.
 class WallScreen extends ConsumerWidget {
@@ -49,13 +49,13 @@ class WallScreen extends ConsumerWidget {
                       Text('Wall', style: ShokuType.h1.copyWith(color: c.ink)),
                       const SizedBox(height: 2),
                       Text(
-                        '${entries.length} nights in your kitchen',
+                        '${count(entries.length, 'night')} in your kitchen',
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                       ),
                     ],
                   ),
                   const Spacer(),
-                  ShokuChip('private', icon: Icons.lock_outline),
+                  const ShokuChip('private', icon: Icons.lock_outline),
                 ],
               ),
             ),
@@ -118,7 +118,6 @@ class _WallTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     return ShokuPressable(
       onTap: () => context.push('/dish/${dish.id}'),
       child: ClipRRect(
