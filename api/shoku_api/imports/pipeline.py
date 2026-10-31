@@ -56,7 +56,10 @@ BUDGET_SECONDS = 60.0
 # improvement reach a dish someone imported before the improvement existed.
 #   2: Muse structurer replaces the line-splitting heuristic.
 #   3: the creator handle comes from the profile URL, not a numeric account id.
-EXTRACTION_VERSION = 3
+#   4: parses carry step_ingredients, so a step can name the ingredients it uses.
+#      Bumping means the next import of an already-cached reel re-extracts it
+#      once; nothing is backfilled in bulk and untouched rows stay served.
+EXTRACTION_VERSION = 4
 
 # Below this, a "text" is not carrying a recipe: a bare hashtag, a greeting, or
 # the silence that speech recognition returns for a music-only reel.
