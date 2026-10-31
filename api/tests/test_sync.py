@@ -419,3 +419,39 @@ def test_photo_url_is_derived_when_the_deployment_has_a_bucket(
         photo = pull(c)["photos"][0]
 
     assert photo["url"] == "https://media.test/photos/user-1/202601/abc.jpg"
+
+
+def test_an_imported_version_carries_its_handles(client, dish_payload, version_payload) -> None:
+    """The client sends ``origin_handle``/``origin_platform`` on every import.
+
+    ``VersionRowIn`` forbids extra fields, so a payload with them used to be
+    rejected with a 422 — and the client treats a rejected push as "nothing
+    saved", leaving every dish after the first one stuck on the device forever.
+    """
+    push(
+        client,
+        dishes=[dish_payload()],
+        versions=[
+            version_payload(
+                origin_kind="import",
+                origin_creator="Ralston D'Souza",
+                origin_handle="@kanji_club_",
+                origin_platform="instagram",
+                origin_url="https://www.instagram.com/reel/DctNWIDT540/",
+                origin_shortcode="DctNWIDT540",
+            )
+        ],
+    )
+
+    version = pull(client)["versions"][0]
+    assert version["origin_handle"] == "@kanji_club_"
+    assert version["origin_platform"] == "instagram"
+
+
+def test_a_version_without_handles_still_pushes(client, dish_payload, version_payload) -> None:
+    """Provenance is optional: an older client sends neither field."""
+    push(client, dishes=[dish_payload()], versions=[version_payload()])
+
+    version = pull(client)["versions"][0]
+    assert version["origin_handle"] is None
+    assert version["origin_platform"] is None
