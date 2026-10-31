@@ -66,7 +66,7 @@ class _NutritionSetupScreenState extends ConsumerState<NutritionSetupScreen> {
             onChanged: (v) => setState(() => _age = v.round()),
           ),
           const SizedBox(height: ShokuSpace.lg),
-          const ShokuLabel('goal'),
+          ShokuLabel('goal'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSegmented(
             labels: const ['LOSE', 'MAINTAIN', 'GAIN'],
@@ -74,7 +74,7 @@ class _NutritionSetupScreenState extends ConsumerState<NutritionSetupScreen> {
             onChanged: (i) => setState(() => _goal = ['lose', 'maintain', 'gain'][i]),
           ),
           const SizedBox(height: ShokuSpace.lg),
-          const ShokuLabel('how active are you'),
+          ShokuLabel('how active are you'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSegmented(
             labels: const ['LIGHT', 'MODERATE', 'HIGH'],

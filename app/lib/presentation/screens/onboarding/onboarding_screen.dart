@@ -190,8 +190,8 @@ class _IntroStep extends StatelessWidget {
           const SizedBox(height: ShokuSpace.xl),
           _reveal(
             context,
-            const Row(
-              children: [
+            Row(
+              children: const [
                 ShokuChip('Instagram', icon: Icons.camera_alt_outlined),
                 SizedBox(width: 6),
                 ShokuChip('YouTube', icon: Icons.play_circle_outline),
@@ -349,9 +349,9 @@ class _ShareStep extends StatelessWidget {
                         const SizedBox(height: ShokuSpace.sm),
                         Row(
                           children: [
-                            const _Target(label: 'Messages', text: 'M', color: Color(0xFF34C759)),
+                            _Target(label: 'Messages', text: 'M', color: const Color(0xFF34C759)),
                             const SizedBox(width: ShokuSpace.sm),
-                            const _Target(label: 'WhatsApp', text: 'W', color: Color(0xFF25D366)),
+                            _Target(label: 'WhatsApp', text: 'W', color: const Color(0xFF25D366)),
                             const SizedBox(width: ShokuSpace.sm),
                             _Target(
                               label: 'Shoku',

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 
 /// The journal model: a Dish you cook repeatedly, each attempt a version,
 /// each night a cook log. This is the whole product.
@@ -176,10 +177,226 @@ class Dish {
       };
 }
 
+const _u = 'https://images.unsplash.com/';
+const _q = '?auto=format&fit=crop&w=900&q=70';
+
 class JournalData {
-  /// The demo kitchen's dish ids. The app no longer ships demo recipes; these
-  /// are kept only so an install that already has them can lose them once.
-  static const List<String> demoDishIds = ['mousse', 'chicken', 'focaccia', 'noodles'];
+  static final DateTime _now = DateTime.now();
+
+  static DateTime _ago(int days) => _now.subtract(Duration(days: days));
+
+  static final List<Dish> dishes = [
+    Dish(
+      id: 'mousse',
+      title: 'Protein Rich Mousse',
+      subtitle: 'Four ingredients, no oven, set overnight.',
+      coverUrl: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=70',
+      sourceHandle: '@highprotein.eats',
+      status: DishStatus.signature,
+      minutes: 12,      baselineKcal: 340,
+      baselineProtein: 24,
+      steps: const [
+        'Separate the eggs. Yolks into a bowl, whites into a clean dry one.',
+        'Whisk yolks with cocoa, honey and salt until the mixture falls in a ribbon.',
+        'Whip the whites to soft peaks — they should hold a shape but still droop.',
+        'Fold the whites into the yolks in three additions, twenty slow strokes each.',
+        'Divide into glasses and chill at least two hours, ideally overnight.',
+        'Finish with flaked salt just before serving.',
+      ],
+      versions: [
+        RecipeVersion(
+          number: 1,
+          changes: const ['First attempt'],
+          ingredients: const ['4 eggs', '3 tbsp cocoa', '2 tbsp honey', 'pinch of salt'],
+          createdAt: _ago(46),
+          kcal: 340,
+          protein: 24,
+        ),
+        RecipeVersion(
+          number: 2,
+          changes: const ['+1 tbsp cocoa', 'Chilled 4 h instead of 2'],
+          ingredients: const ['4 eggs', '4 tbsp cocoa', '2 tbsp honey', 'pinch of salt'],
+          createdAt: _ago(21),
+          kcal: 355,
+          protein: 26,
+        ),
+        RecipeVersion(
+          number: 3,
+          changes: const ['Whipped whites separately', 'Flaked salt on top'],
+          ingredients: const ['4 eggs', '4 tbsp cocoa', '2 tbsp honey', 'flaked salt'],
+          createdAt: _ago(4),
+          kcal: 362,
+          protein: 28,
+        ),
+      ],
+      cooks: [
+        CookLog(
+          id: 'c1',
+          cookedAt: _ago(4),
+          versionNumber: 3,
+          photoUrl: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.nailedIt,
+          note: 'Folding the whites separately is the whole trick. Never going back.',
+          changes: const ['Whipped whites separately', 'Flaked salt on top'],
+        ),
+        CookLog(
+          id: 'c2',
+          cookedAt: _ago(21),
+          versionNumber: 2,
+          photoUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.good,
+          note: 'Too sweet. The cocoa bump helped but honey needs to come down.',
+          changes: const ['+1 tbsp cocoa', 'Chilled 4 h'],
+        ),
+        CookLog(
+          id: 'c3',
+          cookedAt: _ago(46),
+          versionNumber: 1,
+          photoUrl: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.needsWork,
+          note: 'Flat and dense. Whipping order was wrong.',
+          changes: const ['First attempt'],
+        ),
+      ],
+    ),
+    Dish(
+      id: 'chicken',
+      title: 'Crispy Chilli Chicken',
+      subtitle: 'Takeaway crunch without a deep fryer.',
+      coverUrl: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=900&q=70',
+      sourceHandle: 'Kitchen Sanctuary',
+      status: DishStatus.cooked,
+      minutes: 35,      baselineKcal: 520,
+      baselineProtein: 38,
+      steps: const [
+        'Cube the chicken thigh and salt it. Leave it fifteen minutes to dry.',
+        'Toss in cornflour until every piece is dusty, not bready.',
+        'Air-fry at 200°C for 12 minutes, shaking once, until the crust is glassy.',
+        'Fry garlic and chilli paste for thirty seconds, then add soy and vinegar.',
+        'Toss the chicken through the sauce off the heat and serve immediately.',
+      ],
+      versions: [
+        RecipeVersion(
+          number: 1,
+          changes: const ['First attempt'],
+          ingredients: const ['500 g thigh', '3 tbsp cornflour', '2 tbsp soy', '1 tbsp chilli paste'],
+          createdAt: _ago(30),
+          kcal: 520,
+          protein: 38,
+        ),
+        RecipeVersion(
+          number: 2,
+          changes: const ['Air-fried at 200°C', 'Sauce off the heat'],
+          ingredients: const ['500 g thigh', '4 tbsp cornflour', '2 tbsp soy', '1 tbsp chilli paste'],
+          createdAt: _ago(9),
+          kcal: 538,
+          protein: 41,
+        ),
+      ],
+      cooks: [
+        CookLog(
+          id: 'c4',
+          cookedAt: _ago(9),
+          versionNumber: 2,
+          photoUrl: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.good,
+          note: 'Crust held for five minutes, then went soft. Try a drier marinade next.',
+          changes: const ['Air-fried at 200°C', 'Sauce off the heat'],
+        ),
+        CookLog(
+          id: 'c5',
+          cookedAt: _ago(30),
+          versionNumber: 1,
+          photoUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.needsWork,
+          note: 'Bready crust, too much flour. Sauce drowned it.',
+          changes: const ['First attempt'],
+        ),
+      ],
+    ),
+    Dish(
+      id: 'focaccia',
+      title: 'No-Knead Focaccia',
+      subtitle: 'Eighteen hours of doing nothing.',
+      coverUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=70',
+      sourceHandle: 'Bread Code',
+      status: DishStatus.cooked,
+      minutes: 25,      baselineKcal: 280,
+      baselineProtein: 8,
+      steps: const [
+        'Mix flour, water, yeast and salt with a spoon until no dry flour remains.',
+        'Cover and leave 18 hours at room temperature.',
+        'Oil the pan generously, tip in the dough, and dimple to the bottom.',
+        'Rest one hour, then bake at 230°C for 20 minutes.',
+      ],
+      versions: [
+        RecipeVersion(
+          number: 1,
+          changes: const ['First attempt'],
+          ingredients: const ['500 g flour', '400 ml water', '7 g yeast', '80 ml oil', '12 g salt'],
+          createdAt: _ago(12),
+          kcal: 280,
+          protein: 8,
+        ),
+      ],
+      cooks: [
+        CookLog(
+          id: 'c6',
+          cookedAt: _ago(12),
+          versionNumber: 1,
+          photoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=70',
+          outcome: CookOutcome.good,
+          note: 'Pale top. Needs a hotter oven and three more minutes.',
+          changes: const ['First attempt'],
+        ),
+      ],
+    ),
+    Dish(
+      id: 'noodles',
+      title: 'Chilli Garlic Noodles',
+      subtitle: 'Fifteen minutes, one pan, too much garlic.',
+      coverUrl: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=70',
+      sourceHandle: '@weeknight.kitchen',
+      status: DishStatus.toCook,
+      minutes: 15,      baselineKcal: 610,
+      baselineProtein: 18,
+      steps: const [
+        'Boil the noodles until just under done; keep a cup of the water.',
+        'Fry sliced garlic slowly in oil until barely golden.',
+        'Add chilli oil and soy, then the noodles and a splash of pasta water.',
+        'Toss hard for thirty seconds so the sauce clings, and serve.',
+      ],
+      versions: [
+        RecipeVersion(
+          number: 1,
+          changes: const ['Not cooked yet'],
+          ingredients: const ['200 g noodles', '6 garlic cloves', '2 tbsp soy', '1 tbsp chilli oil'],
+          createdAt: _ago(2),
+          kcal: 610,
+          protein: 18,
+        ),
+      ],
+      cooks: const [],
+    ),
+  ];
+
+  static List<CookLog> get allCooks {
+    final logs = <CookLog>[];
+    for (final dish in dishes) {
+      logs.addAll(dish.cooks);
+    }
+    logs.sort((a, b) => b.cookedAt.compareTo(a.cookedAt));
+    return logs;
+  }
+
+  static Dish dishFor(String id) =>
+      dishes.firstWhere((d) => d.id == id, orElse: () => dishes.first);
+
+  static int get totalCooks => allCooks.length;
+  static int get totalUpgrades =>
+      dishes.fold(0, (sum, d) => sum + (d.versions.length - 1));
+  static int get signatureCount =>
+      dishes.where((d) => d.status == DishStatus.signature).length;
 
   const JournalData._();
 }

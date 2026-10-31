@@ -11,7 +11,7 @@ import '../../widgets/neu_loading_dialog.dart';
 import '../../widgets/neu_error_dialog.dart';
 
 class FoodLookupScreen extends ConsumerStatefulWidget {
-  const FoodLookupScreen({super.key});
+  const FoodLookupScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<FoodLookupScreen> createState() => _FoodLookupScreenState();

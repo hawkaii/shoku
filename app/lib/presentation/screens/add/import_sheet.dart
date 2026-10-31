@@ -8,20 +8,15 @@ import 'package:flutter/foundation.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
-import '../../../data/services/pending_import.dart';
-import '../../state/import_providers.dart';
 import '../../state/journal_store.dart';
+import '../../state/sync_providers.dart';
+import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 
 /// Import one link, with the wait made visible.
 ///
 /// The stages are real: they come from the worker through `/v1/imports/{id}`,
 /// not from a timer pretending to make progress.
-///
-/// The import belongs to the server, so this sheet is only a view of it. What is
-/// in flight is written down on the phone (see [PendingImportStore]); closing the
-/// sheet, or the app dying, leaves the job running and the next open picks it up
-/// instead of starting a second one.
 Future<void> showImportSheet(BuildContext context, {String? prefill}) {
   return showModalBottomSheet<void>(
     context: context,
@@ -50,14 +45,9 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if ((widget.prefill ?? '').isNotEmpty) {
-        _start();
-      } else {
-        _resume();
-      }
-    });
+    if ((widget.prefill ?? '').isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+    }
   }
 
   @override
@@ -79,37 +69,18 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       _error = null;
       _progress = null;
     });
-    await _sub?.cancel();
-    final service = ref.read(importServiceProvider);
-    final pendingStore = ref.read(pendingImportStoreProvider);
 
     try {
+      final service = ImportService(
+        api: ApiClient(),
+        repository: ref.read(journalRepositoryProvider),
+      );
       final started = await service.start(url);
 
-      // A cached reel comes back ready with no job at all: there is nothing to
-      // wait for, so this is a finish, not an error.
       if (started.stage == ImportStage.ready) {
-        if (started.shortcode.isEmpty) {
-          setState(() {
-            _busy = false;
-            _error = 'The reel is ready but the server sent no link for it';
-          });
-          return;
-        }
-        await pendingStore.write(PendingImport(
-          url: url,
-          shortcode: started.shortcode,
-          startedAt: DateTime.now(),
-        ));
         await _finish(service, started.shortcode);
         return;
       }
-
-      if (started.stage == ImportStage.failed) {
-        await _abandon(importReasonText(started.reason));
-        return;
-      }
-
       if (started.jobId == null) {
         setState(() {
           _busy = false;
@@ -118,15 +89,29 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         return;
       }
 
-      // Written before the first poll, so a kill in the next second still
-      // leaves something to come back to.
-      await pendingStore.write(PendingImport(
-        url: url,
-        shortcode: started.shortcode,
-        jobId: started.jobId,
-        startedAt: DateTime.now(),
-      ));
-      _watch(service, started.jobId!, started.shortcode);
+      _sub = service.watch(started.jobId!).listen(
+        (progress) {
+          if (!mounted) return;
+          setState(() => _progress = progress);
+          if (progress.stage == ImportStage.ready) {
+            _finish(service, progress.shortcode);
+          } else if (progress.stage == ImportStage.failed) {
+            setState(() {
+              _busy = false;
+              _error = _reasonText(progress.reason);
+            });
+          }
+        },
+        onError: (Object error) {
+          if (!mounted) return;
+          setState(() {
+            _busy = false;
+            _error = error is ApiUnauthenticated
+                ? 'Sign in from You to import'
+                : 'Could not reach the server';
+          });
+        },
+      );
     } on ApiUnauthenticated {
       setState(() {
         _busy = false;
@@ -135,7 +120,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     } on ApiError catch (error) {
       setState(() {
         _busy = false;
-        _error = importReasonText(error.reason);
+        _error = _reasonText(error.reason);
       });
     } catch (error) {
       setState(() {
@@ -147,180 +132,40 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     }
   }
 
-  void _watch(ImportService service, String jobId, String shortcode) {
-    _sub?.cancel();
-    _sub = service.watch(jobId).listen(
-      (progress) {
-        if (!mounted) return;
-        setState(() => _progress = progress);
-        switch (progress.stage) {
-          case ImportStage.ready:
-            _finish(
-              service,
-              progress.shortcode.isNotEmpty ? progress.shortcode : shortcode,
-            );
-          case ImportStage.failed:
-            if (progress.reason == 'timed_out') {
-              // We stopped waiting; the worker did not. Keep the note so the
-              // next open picks the finished parse up instead of re-importing.
-              setState(() {
-                _busy = false;
-                _error = importReasonText(progress.reason);
-              });
-            } else {
-              _abandon(importReasonText(progress.reason));
-            }
-          case ImportStage.queued:
-          case ImportStage.extracting:
-            break;
-        }
-      },
-      onError: (Object error) {
-        if (!mounted) return;
-        if (error is ApiUnauthenticated) {
-          _abandon('Sign in from You to import');
-          return;
-        }
-        // The retries are spent, but the job is still the server's: the note
-        // stays, and the next open resumes it rather than starting over.
-        setState(() {
-          _busy = false;
-          _error =
-              'Lost the connection — the reel is still being read. Open this again to pick it up';
-        });
-      },
-    );
-  }
-
-  /// Picks up an import that outlived the last opening of this sheet.
-  Future<void> _resume() async {
-    final pending = await ref.read(pendingImportStoreProvider).read();
-    if (pending == null || !mounted) return;
-
-    setState(() {
-      _busy = true;
-      _error = null;
-      _url.text = pending.url;
-    });
-    final service = ref.read(importServiceProvider);
-
-    final jobId = pending.jobId;
-    if (jobId != null) {
-      try {
-        final progress = await service.pollOnce(jobId);
-        if (!mounted) return;
-        setState(() => _progress = progress);
-        if (progress.stage == ImportStage.ready) {
-          await _finish(
-            service,
-            progress.shortcode.isNotEmpty ? progress.shortcode : pending.shortcode,
-          );
-          return;
-        }
-        if (progress.stage == ImportStage.failed) {
-          await _abandon(importReasonText(progress.reason));
-          return;
-        }
-        _watch(service, jobId, pending.shortcode);
-        return;
-      } on ApiUnauthenticated {
-        setState(() {
-          _busy = false;
-          _error = 'Sign in from You to import';
-        });
-        return;
-      } on ApiError catch (error) {
-        if (error.status == 404) {
-          // The server has forgotten the job; there is nothing left to resume.
-          await _abandon(importReasonText('gone'));
-          return;
-        }
-        setState(() {
-          _busy = false;
-          _error = 'Could not check on that import — open this again in a minute';
-        });
-        return;
-      } catch (_) {
-        setState(() {
-          _busy = false;
-          _error =
-              'Could not reach the server — the reel is still on it. Open this again to pick it up';
-        });
-        return;
-      }
-    }
-
-    // No job: the parse was already cached when the app went away, so the
-    // shortcode is the only handle left. The content endpoint is the short way
-    // back — never a second import of the same reel.
-    try {
-      final dish = await service.createDish(pending.shortcode);
-      await ref.read(pendingImportStoreProvider).clear();
-      await ref.read(journalStoreProvider.notifier).refresh();
-      if (!mounted) return;
-      if (dish == null) {
-        setState(() {
-          _busy = false;
-          _progress = null;
-          _error = 'That reel is no longer on the server — try the link again';
-        });
-        return;
-      }
-      Navigator.of(context).pop();
-      _requestSync();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Saved ${dish.title}')),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _error = 'Could not reach the server — open this again in a minute';
-      });
-    }
-  }
-
   Future<void> _finish(ImportService service, String shortcode) async {
     try {
       final dish = await service.createDish(shortcode);
-      await ref.read(pendingImportStoreProvider).clear();
       await ref.read(journalStoreProvider.notifier).refresh();
       if (!mounted) return;
       Navigator.of(context).pop();
-      _requestSync();
+      ref.read(syncControllerProvider).syncNow();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(dish == null ? 'Nothing to save' : 'Saved ${dish.title}')),
       );
     } catch (_) {
-      // Keep the note: the parse exists, only the save failed.
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = 'The recipe came back but could not be saved — open this again';
+        _error = 'The recipe came back but could not be saved';
       });
     }
   }
 
-  Future<void> _abandon(String message) async {
-    await ref.read(pendingImportStoreProvider).clear();
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _error = message;
-    });
-  }
-
-  /// The import changed the journal, so the sync layer gets its usual nudge.
-  void _requestSync() {
-    unawaited(ref.read(syncHookProvider)?.call() ?? Future<void>.value());
-  }
+  static String _reasonText(String? reason) => switch (reason) {
+        'unsupported_url' => 'That link is not a reel or video we can read',
+        'source_blocked' =>
+          'YouTube is blocking our server right now — try again later or paste the recipe',
+        'timeout' => 'That took too long — try again',
+        'invalid_recipe' => 'We could not find a recipe in that one',
+        'no_audio' => 'That video has nothing to listen to',
+        'taken_down' => 'That recipe was removed',
+        null => 'Could not read this one — paste the recipe instead',
+        _ => 'Could not read this one — paste the recipe instead',
+      };
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final showProgress = _progress != null &&
-        _busy &&
-        _progress!.stage != ImportStage.failed;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -358,7 +203,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
               ),
             ),
           ),
-          if (showProgress) ...[
+          if (_progress != null) ...[
             const SizedBox(height: ShokuSpace.md),
             Row(
               children: [
