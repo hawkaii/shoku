@@ -40,12 +40,18 @@ class Settings(BaseSettings):
     # makes jobs fail with a stable reason instead of producing junk.
     extractor: str = ""          # "ytdlp"
     transcriber: str = ""        # "whisper"
-    structurer: str = ""         # "heuristic" | "openai"
+    structurer: str = ""         # "heuristic" | "muse"
     whisper_model: str = "base"
     cookies_file: str = ""
     structurer_base_url: str = ""
     structurer_api_key: str = ""
     structurer_model: str = ""
+    # Muse reasons before it answers, and its reasoning tokens come out of the
+    # same budget as the reply. "minimal" is the cheapest level that still
+    # works for extraction; the budget must cover thinking plus the recipe.
+    structurer_reasoning_effort: str = "minimal"
+    structurer_max_tokens: int = 8000
+    structurer_timeout: float = 120.0
 
     # Assistant.
     assistant_daily_cap: int = 20

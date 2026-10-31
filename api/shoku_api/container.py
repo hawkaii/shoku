@@ -129,11 +129,14 @@ def build_context(
         ctx.transcriber = FasterWhisperTranscriber(model_size=settings.whisper_model)
     if settings.structurer == "heuristic":
         ctx.structurer = HeuristicStructurer()
-    elif settings.structurer in {"meta", "openai"}:
+    elif settings.structurer in {"muse", "meta", "openai"}:
         model = OpenAICompatStructurer(
-            settings.structurer_base_url or "https://api.llama.com/v1",
+            settings.structurer_base_url or "https://api.meta.ai/v1",
             settings.structurer_api_key,
-            settings.structurer_model,
+            settings.structurer_model or "muse-spark-1.3",
+            settings.structurer_timeout,
+            reasoning_effort=settings.structurer_reasoning_effort,
+            max_tokens=settings.structurer_max_tokens,
         )
         # The model improves the parse; it must never be able to fail an import.
         ctx.structurer = FallbackStructurer(model, HeuristicStructurer())
