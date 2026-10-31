@@ -11,7 +11,7 @@ import '../../widgets/neu_loading_dialog.dart';
 import '../../widgets/neu_error_dialog.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
-  const AddRecipeScreen({super.key});
+  const AddRecipeScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<AddRecipeScreen> createState() => _AddRecipeScreenState();

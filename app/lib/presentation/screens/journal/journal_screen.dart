@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
-import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
+import '../../state/shoku_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/status_badge.dart';
+import '../../widgets/kit/step_diagram.dart';
 import '../log/log_sheet.dart';
-import 'import_card.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
@@ -30,16 +30,12 @@ class JournalScreen extends ConsumerWidget {
     // legitimately be empty — don't index into it.
     final status = ref.watch(journalStatusProvider);
     if (status == JournalStatus.failed) {
-      return _withImportCard(
-        _JournalError(
-          onRetry: () => ref.read(journalStoreProvider.notifier).retry(),
-        ),
+      return _JournalError(
+        onRetry: () => ref.read(journalStoreProvider.notifier).retry(),
       );
     }
     if (dishes.isEmpty) {
-      return _withImportCard(
-        _JournalLoading(ready: status == JournalStatus.ready),
-      );
+      return _JournalLoading(ready: status == JournalStatus.ready);
     }
 
     final pinned = dishes.firstWhere(
@@ -47,8 +43,9 @@ class JournalScreen extends ConsumerWidget {
       orElse: () => dishes.first,
     );
 
-    return _withImportCard(
-      ListView(
+    return SafeArea(
+      bottom: false,
+      child: ListView(
         padding: const EdgeInsets.fromLTRB(
           ShokuSpace.lg,
           ShokuSpace.sm,
@@ -76,10 +73,7 @@ class JournalScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  metaLine([
-                    count(dishes.length, 'dish', 'dishes'),
-                    count(upgrades, 'upgrade'),
-                  ]),
+                  '${dishes.length} dishes · ${upgrades} upgrades',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
@@ -103,7 +97,7 @@ class JournalScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.xl),
 
           // ---- On the counter -----------------------------------------
-          const ShokuLabel('on the counter'),
+          ShokuLabel('on the counter'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuEntrance(
             child: _PinnedCard(
@@ -117,10 +111,10 @@ class JournalScreen extends ConsumerWidget {
           // ---- Timeline ------------------------------------------------
           Row(
             children: [
-              const ShokuLabel('cook log'),
+              ShokuLabel('cook log'),
               const Spacer(),
               Text(
-                count(cooks.length, 'entry', 'entries'),
+                '${cooks.length} entries',
                 style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
               ),
             ],
@@ -139,20 +133,6 @@ class JournalScreen extends ConsumerWidget {
                   isLast: i == cooks.length - 1,
                 ),
               ),
-        ],
-      ),
-    );
-  }
-
-  /// The import card sits above the scroll view, so it cannot scroll away and
-  /// the Journal never becomes unreachable behind it.
-  Widget _withImportCard(Widget body) {
-    return SafeArea(
-      bottom: false,
-      child: Column(
-        children: [
-          const JournalImportCard(),
-          Expanded(child: body),
         ],
       ),
     );
@@ -237,22 +217,15 @@ class _PinnedCard extends StatelessWidget {
                         'v${dish.currentVersion}',
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.accent),
                       ),
-                      // A duration we don't know is not shown at all: a stray
-                      // dot or a dash would read as data.
-                      if (minutesLabel(dish.minutes).isNotEmpty) ...[
-                        const SizedBox(width: ShokuSpace.xs),
-                        Flexible(
-                          child: Text(
-                            '· ${minutesLabel(dish.minutes)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: ShokuType.stat.copyWith(
-                              fontSize: 11,
-                              color: c.inkMuted,
-                            ),
-                          ),
+                      const SizedBox(width: ShokuSpace.xs),
+                      Flexible(
+                        child: Text(
+                          '· ${dish.minutes} min',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                         ),
-                      ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -386,16 +359,6 @@ class _TimelineEntry extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(dish.title, style: ShokuType.h2.copyWith(color: c.ink)),
-                          const SizedBox(height: 2),
-                          // How the night felt and what it was worth — quiet,
-                          // in the words the log already stores.
-                          Text(
-                            '${log.mood.name} · ${log.rating}/5',
-                            key: const ValueKey('cook-mood-rating'),
-                            style: ShokuType.bodySmall.copyWith(
-                              color: c.inkMuted,
-                            ),
-                          ),
                           if (log.changes.isNotEmpty) ...[
                             const SizedBox(height: ShokuSpace.sm),
                             Wrap(

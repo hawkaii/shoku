@@ -102,9 +102,9 @@ class RecipeDetailScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  const Expanded(child: ShokuStat('25m', label: 'total')),
+                  Expanded(child: ShokuStat('25m', label: 'total')),
                   Container(width: 1, height: 26, color: c.hairline),
-                  const Expanded(child: ShokuStat('4', label: 'servings')),
+                  Expanded(child: ShokuStat('4', label: 'servings')),
                   Container(width: 1, height: 26, color: c.hairline),
                   Expanded(
                     child: ShokuStat(
@@ -118,7 +118,7 @@ class RecipeDetailScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.lg),
-            const ShokuLabel('ingredients'),
+            ShokuLabel('ingredients'),
             const SizedBox(height: ShokuSpace.sm),
             for (final ingredient in ingredients)
               Container(
@@ -150,7 +150,7 @@ class RecipeDetailScreen extends ConsumerWidget {
               ),
 
             const SizedBox(height: ShokuSpace.xl),
-            const ShokuLabel('method'),
+            ShokuLabel('method'),
             const SizedBox(height: ShokuSpace.sm),
             for (var i = 0; i < item.body.length; i++)
               Padding(

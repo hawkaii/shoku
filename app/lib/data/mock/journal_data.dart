@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 
 /// The journal model: a Dish you cook repeatedly, each attempt a version,
 /// each night a cook log. This is the whole product.
@@ -43,19 +44,6 @@ class RecipeVersion {
   final int kcal;
   final int protein;
 
-  /// The extraction's own tags. `from video` means the reel was silent and the
-  /// amounts are guesses — the dish says so out loud.
-  final List<String> tags;
-
-  /// Which ingredients the extractor says each step uses: parallel to [steps],
-  /// each entry a list of indices into [ingredients].
-  ///
-  /// Null means the parse predates the link (or arrived through sync, which does
-  /// not carry it). Null renders nothing — the app never guesses which
-  /// ingredient a step meant, because a guessed quantity is the app lying about
-  /// a recipe.
-  final List<List<int>>? stepIngredients;
-
   /// `mine` or `import`. An import is an immutable snapshot of someone else's
   /// reel; editing it forks a `mine` version rather than mutating the original.
   final String originKind;
@@ -73,8 +61,6 @@ class RecipeVersion {
     required this.ingredients,
     required this.createdAt,
     this.steps = const [],
-    this.stepIngredients,
-    this.tags = const [],
     this.kcal = 0,
     this.protein = 0,
     this.originKind = 'mine',
@@ -87,14 +73,6 @@ class RecipeVersion {
   });
 
   bool get isImport => originKind == 'import';
-
-  /// The ingredient indices the extractor linked to [stepIndex], or null when
-  /// this parse has no links (or none for that step).
-  List<int>? stepIngredientLinks(int stepIndex) {
-    final links = stepIngredients;
-    if (links == null || stepIndex < 0 || stepIndex >= links.length) return null;
-    return links[stepIndex];
-  }
 }
 
 /// What mood a cook belonged to — captured at debrief, never inferred.
@@ -198,6 +176,9 @@ class Dish {
         null => 'Not cooked yet',
       };
 }
+
+const _u = 'https://images.unsplash.com/';
+const _q = '?auto=format&fit=crop&w=900&q=70';
 
 class JournalData {
   /// The demo kitchen's dish ids. The app no longer ships demo recipes; these

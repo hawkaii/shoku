@@ -51,7 +51,7 @@ class StashScreen extends ConsumerWidget {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            const ShokuLabel('collections'),
+            ShokuLabel('collections'),
             const SizedBox(height: ShokuSpace.sm),
             GridView.count(
               crossAxisCount: 2,
@@ -73,7 +73,7 @@ class StashScreen extends ConsumerWidget {
             const SizedBox(height: ShokuSpace.xl),
             Row(
               children: [
-                const ShokuLabel('saved notes'),
+                ShokuLabel('saved notes'),
                 const Spacer(),
                 Text(
                   '${notes.length}',

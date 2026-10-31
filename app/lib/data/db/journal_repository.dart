@@ -176,11 +176,6 @@ class JournalRepository {
         steps: (previous != null && previous.steps.isNotEmpty)
             ? previous.steps
             : dish.steps,
-        // The fork keeps the same steps, so the links still point at the same
-        // ingredients.
-        stepIngredients: previous?.stepIngredients,
-        // And the same tags: a fork of a guess is still a guess.
-        tags: previous?.tags ?? const [],
         kcal: dish.baselineKcal + (changes.length * 18),
         protein: dish.baselineProtein + (changes.length * 2),
         parentVersionId: (previous != null && previous.id.isNotEmpty) ? previous.id : null,
@@ -361,8 +356,6 @@ class JournalRepository {
         steps: _decodeList(row.steps),
         kcal: row.kcal,
         protein: row.protein,
-        stepIngredients: _decodeStepIngredients(row.stepIngredients),
-        tags: _decodeList(row.tags),
         originKind: row.originKind,
         originCreator: row.originCreator,
         originHandle: row.originHandle,
@@ -407,8 +400,6 @@ class JournalRepository {
         steps: Value(jsonEncode(v.steps)),
         kcal: Value(v.kcal),
         protein: Value(v.protein),
-        stepIngredients: Value(_encodeStepIngredients(v.stepIngredients)),
-        tags: Value(jsonEncode(v.tags)),
         originKind: Value(v.originKind),
         originCreator: Value(v.originCreator),
         originHandle: Value(v.originHandle),
@@ -442,23 +433,5 @@ class JournalRepository {
     final decoded = jsonDecode(raw);
     if (decoded is! List) return const [];
     return decoded.map((e) => e.toString()).toList();
-  }
-
-  /// Empty means "this parse has no links", which is not the same as "this step
-  /// uses these ingredients" — both must survive a round trip.
-  static String _encodeStepIngredients(List<List<int>>? links) =>
-      links == null ? '' : jsonEncode(links);
-
-  static List<List<int>>? _decodeStepIngredients(String raw) {
-    if (raw.isEmpty) return null;
-    final decoded = jsonDecode(raw);
-    if (decoded is! List) return null;
-    return [
-      for (final entry in decoded)
-        if (entry is List)
-          [for (final index in entry) if (index is num) index.toInt()]
-        else
-          const <int>[],
-    ];
   }
 }

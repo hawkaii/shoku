@@ -737,21 +737,6 @@ class $VersionRowsTable extends VersionRows
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
-  static const VerificationMeta _stepIngredientsMeta =
-      const VerificationMeta('stepIngredients');
-  @override
-  late final GeneratedColumn<String> stepIngredients = GeneratedColumn<String>(
-      'step_ingredients', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(''));
-  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
-  @override
-  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
-      'tags', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[]'));
   static const VerificationMeta _originKindMeta =
       const VerificationMeta('originKind');
   @override
@@ -827,8 +812,6 @@ class $VersionRowsTable extends VersionRows
         steps,
         kcal,
         protein,
-        stepIngredients,
-        tags,
         originKind,
         originCreator,
         originHandle,
@@ -886,16 +869,6 @@ class $VersionRowsTable extends VersionRows
     if (data.containsKey('protein')) {
       context.handle(_proteinMeta,
           protein.isAcceptableOrUnknown(data['protein']!, _proteinMeta));
-    }
-    if (data.containsKey('step_ingredients')) {
-      context.handle(
-          _stepIngredientsMeta,
-          stepIngredients.isAcceptableOrUnknown(
-              data['step_ingredients']!, _stepIngredientsMeta));
-    }
-    if (data.containsKey('tags')) {
-      context.handle(
-          _tagsMeta, tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta));
     }
     if (data.containsKey('origin_kind')) {
       context.handle(
@@ -978,10 +951,6 @@ class $VersionRowsTable extends VersionRows
           .read(DriftSqlType.int, data['${effectivePrefix}kcal'])!,
       protein: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}protein'])!,
-      stepIngredients: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}step_ingredients'])!,
-      tags: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
       originKind: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}origin_kind'])!,
       originCreator: attachedDatabase.typeMapping
@@ -1023,15 +992,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
   final String steps;
   final int kcal;
   final int protein;
-
-  /// Per-step ingredient indices, JSON. Empty means the parse predates the link.
-  ///
-  /// Local only: this is not on the sync wire, so a version that arrives from
-  /// another device simply has none and renders no ingredient line.
-  final String stepIngredients;
-
-  /// The extraction's tags, JSON. On the wire: the server stores what we send.
-  final String tags;
   final String originKind;
   final String? originCreator;
   final String? originHandle;
@@ -1051,8 +1011,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       required this.steps,
       required this.kcal,
       required this.protein,
-      required this.stepIngredients,
-      required this.tags,
       required this.originKind,
       this.originCreator,
       this.originHandle,
@@ -1074,8 +1032,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
     map['steps'] = Variable<String>(steps);
     map['kcal'] = Variable<int>(kcal);
     map['protein'] = Variable<int>(protein);
-    map['step_ingredients'] = Variable<String>(stepIngredients);
-    map['tags'] = Variable<String>(tags);
     map['origin_kind'] = Variable<String>(originKind);
     if (!nullToAbsent || originCreator != null) {
       map['origin_creator'] = Variable<String>(originCreator);
@@ -1111,8 +1067,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       steps: Value(steps),
       kcal: Value(kcal),
       protein: Value(protein),
-      stepIngredients: Value(stepIngredients),
-      tags: Value(tags),
       originKind: Value(originKind),
       originCreator: originCreator == null && nullToAbsent
           ? const Value.absent()
@@ -1150,8 +1104,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       steps: serializer.fromJson<String>(json['steps']),
       kcal: serializer.fromJson<int>(json['kcal']),
       protein: serializer.fromJson<int>(json['protein']),
-      stepIngredients: serializer.fromJson<String>(json['stepIngredients']),
-      tags: serializer.fromJson<String>(json['tags']),
       originKind: serializer.fromJson<String>(json['originKind']),
       originCreator: serializer.fromJson<String?>(json['originCreator']),
       originHandle: serializer.fromJson<String?>(json['originHandle']),
@@ -1176,8 +1128,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       'steps': serializer.toJson<String>(steps),
       'kcal': serializer.toJson<int>(kcal),
       'protein': serializer.toJson<int>(protein),
-      'stepIngredients': serializer.toJson<String>(stepIngredients),
-      'tags': serializer.toJson<String>(tags),
       'originKind': serializer.toJson<String>(originKind),
       'originCreator': serializer.toJson<String?>(originCreator),
       'originHandle': serializer.toJson<String?>(originHandle),
@@ -1200,8 +1150,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           String? steps,
           int? kcal,
           int? protein,
-          String? stepIngredients,
-          String? tags,
           String? originKind,
           Value<String?> originCreator = const Value.absent(),
           Value<String?> originHandle = const Value.absent(),
@@ -1221,8 +1169,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
         steps: steps ?? this.steps,
         kcal: kcal ?? this.kcal,
         protein: protein ?? this.protein,
-        stepIngredients: stepIngredients ?? this.stepIngredients,
-        tags: tags ?? this.tags,
         originKind: originKind ?? this.originKind,
         originCreator:
             originCreator.present ? originCreator.value : this.originCreator,
@@ -1252,10 +1198,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       steps: data.steps.present ? data.steps.value : this.steps,
       kcal: data.kcal.present ? data.kcal.value : this.kcal,
       protein: data.protein.present ? data.protein.value : this.protein,
-      stepIngredients: data.stepIngredients.present
-          ? data.stepIngredients.value
-          : this.stepIngredients,
-      tags: data.tags.present ? data.tags.value : this.tags,
       originKind:
           data.originKind.present ? data.originKind.value : this.originKind,
       originCreator: data.originCreator.present
@@ -1293,8 +1235,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           ..write('steps: $steps, ')
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
-          ..write('stepIngredients: $stepIngredients, ')
-          ..write('tags: $tags, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
           ..write('originHandle: $originHandle, ')
@@ -1319,8 +1259,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       steps,
       kcal,
       protein,
-      stepIngredients,
-      tags,
       originKind,
       originCreator,
       originHandle,
@@ -1343,8 +1281,6 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           other.steps == this.steps &&
           other.kcal == this.kcal &&
           other.protein == this.protein &&
-          other.stepIngredients == this.stepIngredients &&
-          other.tags == this.tags &&
           other.originKind == this.originKind &&
           other.originCreator == this.originCreator &&
           other.originHandle == this.originHandle &&
@@ -1366,8 +1302,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
   final Value<String> steps;
   final Value<int> kcal;
   final Value<int> protein;
-  final Value<String> stepIngredients;
-  final Value<String> tags;
   final Value<String> originKind;
   final Value<String?> originCreator;
   final Value<String?> originHandle;
@@ -1388,8 +1322,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.steps = const Value.absent(),
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
-    this.stepIngredients = const Value.absent(),
-    this.tags = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
     this.originHandle = const Value.absent(),
@@ -1411,8 +1343,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.steps = const Value.absent(),
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
-    this.stepIngredients = const Value.absent(),
-    this.tags = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
     this.originHandle = const Value.absent(),
@@ -1436,8 +1366,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     Expression<String>? steps,
     Expression<int>? kcal,
     Expression<int>? protein,
-    Expression<String>? stepIngredients,
-    Expression<String>? tags,
     Expression<String>? originKind,
     Expression<String>? originCreator,
     Expression<String>? originHandle,
@@ -1459,8 +1387,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       if (steps != null) 'steps': steps,
       if (kcal != null) 'kcal': kcal,
       if (protein != null) 'protein': protein,
-      if (stepIngredients != null) 'step_ingredients': stepIngredients,
-      if (tags != null) 'tags': tags,
       if (originKind != null) 'origin_kind': originKind,
       if (originCreator != null) 'origin_creator': originCreator,
       if (originHandle != null) 'origin_handle': originHandle,
@@ -1484,8 +1410,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       Value<String>? steps,
       Value<int>? kcal,
       Value<int>? protein,
-      Value<String>? stepIngredients,
-      Value<String>? tags,
       Value<String>? originKind,
       Value<String?>? originCreator,
       Value<String?>? originHandle,
@@ -1506,8 +1430,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       steps: steps ?? this.steps,
       kcal: kcal ?? this.kcal,
       protein: protein ?? this.protein,
-      stepIngredients: stepIngredients ?? this.stepIngredients,
-      tags: tags ?? this.tags,
       originKind: originKind ?? this.originKind,
       originCreator: originCreator ?? this.originCreator,
       originHandle: originHandle ?? this.originHandle,
@@ -1548,12 +1470,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     }
     if (protein.present) {
       map['protein'] = Variable<int>(protein.value);
-    }
-    if (stepIngredients.present) {
-      map['step_ingredients'] = Variable<String>(stepIngredients.value);
-    }
-    if (tags.present) {
-      map['tags'] = Variable<String>(tags.value);
     }
     if (originKind.present) {
       map['origin_kind'] = Variable<String>(originKind.value);
@@ -1602,8 +1518,6 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
           ..write('steps: $steps, ')
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
-          ..write('stepIngredients: $stepIngredients, ')
-          ..write('tags: $tags, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
           ..write('originHandle: $originHandle, ')
@@ -2251,437 +2165,6 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
   }
 }
 
-class $CookTimerRowsTable extends CookTimerRows
-    with TableInfo<$CookTimerRowsTable, CookTimerRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $CookTimerRowsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _dishIdMeta = const VerificationMeta('dishId');
-  @override
-  late final GeneratedColumn<String> dishId = GeneratedColumn<String>(
-      'dish_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _versionIdMeta =
-      const VerificationMeta('versionId');
-  @override
-  late final GeneratedColumn<String> versionId = GeneratedColumn<String>(
-      'version_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _stepIndexMeta =
-      const VerificationMeta('stepIndex');
-  @override
-  late final GeneratedColumn<int> stepIndex = GeneratedColumn<int>(
-      'step_index', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _startedAtMeta =
-      const VerificationMeta('startedAt');
-  @override
-  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
-      'started_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _durationMsMeta =
-      const VerificationMeta('durationMs');
-  @override
-  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
-      'duration_ms', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _pausedMsMeta =
-      const VerificationMeta('pausedMs');
-  @override
-  late final GeneratedColumn<int> pausedMs = GeneratedColumn<int>(
-      'paused_ms', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _pausedAtMeta =
-      const VerificationMeta('pausedAt');
-  @override
-  late final GeneratedColumn<DateTime> pausedAt = GeneratedColumn<DateTime>(
-      'paused_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        dishId,
-        versionId,
-        stepIndex,
-        startedAt,
-        durationMs,
-        pausedMs,
-        pausedAt
-      ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'cook_timer_rows';
-  @override
-  VerificationContext validateIntegrity(Insertable<CookTimerRow> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('dish_id')) {
-      context.handle(_dishIdMeta,
-          dishId.isAcceptableOrUnknown(data['dish_id']!, _dishIdMeta));
-    } else if (isInserting) {
-      context.missing(_dishIdMeta);
-    }
-    if (data.containsKey('version_id')) {
-      context.handle(_versionIdMeta,
-          versionId.isAcceptableOrUnknown(data['version_id']!, _versionIdMeta));
-    } else if (isInserting) {
-      context.missing(_versionIdMeta);
-    }
-    if (data.containsKey('step_index')) {
-      context.handle(_stepIndexMeta,
-          stepIndex.isAcceptableOrUnknown(data['step_index']!, _stepIndexMeta));
-    } else if (isInserting) {
-      context.missing(_stepIndexMeta);
-    }
-    if (data.containsKey('started_at')) {
-      context.handle(_startedAtMeta,
-          startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
-    } else if (isInserting) {
-      context.missing(_startedAtMeta);
-    }
-    if (data.containsKey('duration_ms')) {
-      context.handle(
-          _durationMsMeta,
-          durationMs.isAcceptableOrUnknown(
-              data['duration_ms']!, _durationMsMeta));
-    } else if (isInserting) {
-      context.missing(_durationMsMeta);
-    }
-    if (data.containsKey('paused_ms')) {
-      context.handle(_pausedMsMeta,
-          pausedMs.isAcceptableOrUnknown(data['paused_ms']!, _pausedMsMeta));
-    }
-    if (data.containsKey('paused_at')) {
-      context.handle(_pausedAtMeta,
-          pausedAt.isAcceptableOrUnknown(data['paused_at']!, _pausedAtMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  CookTimerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CookTimerRow(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      dishId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}dish_id'])!,
-      versionId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}version_id'])!,
-      stepIndex: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}step_index'])!,
-      startedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}started_at'])!,
-      durationMs: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}duration_ms'])!,
-      pausedMs: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}paused_ms'])!,
-      pausedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}paused_at']),
-    );
-  }
-
-  @override
-  $CookTimerRowsTable createAlias(String alias) {
-    return $CookTimerRowsTable(attachedDatabase, alias);
-  }
-}
-
-class CookTimerRow extends DataClass implements Insertable<CookTimerRow> {
-  final String id;
-  final String dishId;
-  final String versionId;
-  final int stepIndex;
-  final DateTime startedAt;
-  final int durationMs;
-  final int pausedMs;
-  final DateTime? pausedAt;
-  const CookTimerRow(
-      {required this.id,
-      required this.dishId,
-      required this.versionId,
-      required this.stepIndex,
-      required this.startedAt,
-      required this.durationMs,
-      required this.pausedMs,
-      this.pausedAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['dish_id'] = Variable<String>(dishId);
-    map['version_id'] = Variable<String>(versionId);
-    map['step_index'] = Variable<int>(stepIndex);
-    map['started_at'] = Variable<DateTime>(startedAt);
-    map['duration_ms'] = Variable<int>(durationMs);
-    map['paused_ms'] = Variable<int>(pausedMs);
-    if (!nullToAbsent || pausedAt != null) {
-      map['paused_at'] = Variable<DateTime>(pausedAt);
-    }
-    return map;
-  }
-
-  CookTimerRowsCompanion toCompanion(bool nullToAbsent) {
-    return CookTimerRowsCompanion(
-      id: Value(id),
-      dishId: Value(dishId),
-      versionId: Value(versionId),
-      stepIndex: Value(stepIndex),
-      startedAt: Value(startedAt),
-      durationMs: Value(durationMs),
-      pausedMs: Value(pausedMs),
-      pausedAt: pausedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pausedAt),
-    );
-  }
-
-  factory CookTimerRow.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CookTimerRow(
-      id: serializer.fromJson<String>(json['id']),
-      dishId: serializer.fromJson<String>(json['dishId']),
-      versionId: serializer.fromJson<String>(json['versionId']),
-      stepIndex: serializer.fromJson<int>(json['stepIndex']),
-      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
-      durationMs: serializer.fromJson<int>(json['durationMs']),
-      pausedMs: serializer.fromJson<int>(json['pausedMs']),
-      pausedAt: serializer.fromJson<DateTime?>(json['pausedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'dishId': serializer.toJson<String>(dishId),
-      'versionId': serializer.toJson<String>(versionId),
-      'stepIndex': serializer.toJson<int>(stepIndex),
-      'startedAt': serializer.toJson<DateTime>(startedAt),
-      'durationMs': serializer.toJson<int>(durationMs),
-      'pausedMs': serializer.toJson<int>(pausedMs),
-      'pausedAt': serializer.toJson<DateTime?>(pausedAt),
-    };
-  }
-
-  CookTimerRow copyWith(
-          {String? id,
-          String? dishId,
-          String? versionId,
-          int? stepIndex,
-          DateTime? startedAt,
-          int? durationMs,
-          int? pausedMs,
-          Value<DateTime?> pausedAt = const Value.absent()}) =>
-      CookTimerRow(
-        id: id ?? this.id,
-        dishId: dishId ?? this.dishId,
-        versionId: versionId ?? this.versionId,
-        stepIndex: stepIndex ?? this.stepIndex,
-        startedAt: startedAt ?? this.startedAt,
-        durationMs: durationMs ?? this.durationMs,
-        pausedMs: pausedMs ?? this.pausedMs,
-        pausedAt: pausedAt.present ? pausedAt.value : this.pausedAt,
-      );
-  CookTimerRow copyWithCompanion(CookTimerRowsCompanion data) {
-    return CookTimerRow(
-      id: data.id.present ? data.id.value : this.id,
-      dishId: data.dishId.present ? data.dishId.value : this.dishId,
-      versionId: data.versionId.present ? data.versionId.value : this.versionId,
-      stepIndex: data.stepIndex.present ? data.stepIndex.value : this.stepIndex,
-      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-      durationMs:
-          data.durationMs.present ? data.durationMs.value : this.durationMs,
-      pausedMs: data.pausedMs.present ? data.pausedMs.value : this.pausedMs,
-      pausedAt: data.pausedAt.present ? data.pausedAt.value : this.pausedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CookTimerRow(')
-          ..write('id: $id, ')
-          ..write('dishId: $dishId, ')
-          ..write('versionId: $versionId, ')
-          ..write('stepIndex: $stepIndex, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('durationMs: $durationMs, ')
-          ..write('pausedMs: $pausedMs, ')
-          ..write('pausedAt: $pausedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, dishId, versionId, stepIndex, startedAt,
-      durationMs, pausedMs, pausedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CookTimerRow &&
-          other.id == this.id &&
-          other.dishId == this.dishId &&
-          other.versionId == this.versionId &&
-          other.stepIndex == this.stepIndex &&
-          other.startedAt == this.startedAt &&
-          other.durationMs == this.durationMs &&
-          other.pausedMs == this.pausedMs &&
-          other.pausedAt == this.pausedAt);
-}
-
-class CookTimerRowsCompanion extends UpdateCompanion<CookTimerRow> {
-  final Value<String> id;
-  final Value<String> dishId;
-  final Value<String> versionId;
-  final Value<int> stepIndex;
-  final Value<DateTime> startedAt;
-  final Value<int> durationMs;
-  final Value<int> pausedMs;
-  final Value<DateTime?> pausedAt;
-  final Value<int> rowid;
-  const CookTimerRowsCompanion({
-    this.id = const Value.absent(),
-    this.dishId = const Value.absent(),
-    this.versionId = const Value.absent(),
-    this.stepIndex = const Value.absent(),
-    this.startedAt = const Value.absent(),
-    this.durationMs = const Value.absent(),
-    this.pausedMs = const Value.absent(),
-    this.pausedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CookTimerRowsCompanion.insert({
-    required String id,
-    required String dishId,
-    required String versionId,
-    required int stepIndex,
-    required DateTime startedAt,
-    required int durationMs,
-    this.pausedMs = const Value.absent(),
-    this.pausedAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        dishId = Value(dishId),
-        versionId = Value(versionId),
-        stepIndex = Value(stepIndex),
-        startedAt = Value(startedAt),
-        durationMs = Value(durationMs);
-  static Insertable<CookTimerRow> custom({
-    Expression<String>? id,
-    Expression<String>? dishId,
-    Expression<String>? versionId,
-    Expression<int>? stepIndex,
-    Expression<DateTime>? startedAt,
-    Expression<int>? durationMs,
-    Expression<int>? pausedMs,
-    Expression<DateTime>? pausedAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (dishId != null) 'dish_id': dishId,
-      if (versionId != null) 'version_id': versionId,
-      if (stepIndex != null) 'step_index': stepIndex,
-      if (startedAt != null) 'started_at': startedAt,
-      if (durationMs != null) 'duration_ms': durationMs,
-      if (pausedMs != null) 'paused_ms': pausedMs,
-      if (pausedAt != null) 'paused_at': pausedAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CookTimerRowsCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? dishId,
-      Value<String>? versionId,
-      Value<int>? stepIndex,
-      Value<DateTime>? startedAt,
-      Value<int>? durationMs,
-      Value<int>? pausedMs,
-      Value<DateTime?>? pausedAt,
-      Value<int>? rowid}) {
-    return CookTimerRowsCompanion(
-      id: id ?? this.id,
-      dishId: dishId ?? this.dishId,
-      versionId: versionId ?? this.versionId,
-      stepIndex: stepIndex ?? this.stepIndex,
-      startedAt: startedAt ?? this.startedAt,
-      durationMs: durationMs ?? this.durationMs,
-      pausedMs: pausedMs ?? this.pausedMs,
-      pausedAt: pausedAt ?? this.pausedAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (dishId.present) {
-      map['dish_id'] = Variable<String>(dishId.value);
-    }
-    if (versionId.present) {
-      map['version_id'] = Variable<String>(versionId.value);
-    }
-    if (stepIndex.present) {
-      map['step_index'] = Variable<int>(stepIndex.value);
-    }
-    if (startedAt.present) {
-      map['started_at'] = Variable<DateTime>(startedAt.value);
-    }
-    if (durationMs.present) {
-      map['duration_ms'] = Variable<int>(durationMs.value);
-    }
-    if (pausedMs.present) {
-      map['paused_ms'] = Variable<int>(pausedMs.value);
-    }
-    if (pausedAt.present) {
-      map['paused_at'] = Variable<DateTime>(pausedAt.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CookTimerRowsCompanion(')
-          ..write('id: $id, ')
-          ..write('dishId: $dishId, ')
-          ..write('versionId: $versionId, ')
-          ..write('stepIndex: $stepIndex, ')
-          ..write('startedAt: $startedAt, ')
-          ..write('durationMs: $durationMs, ')
-          ..write('pausedMs: $pausedMs, ')
-          ..write('pausedAt: $pausedAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $MetaRowsTable extends MetaRows with TableInfo<$MetaRowsTable, MetaRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2875,14 +2358,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DishRowsTable dishRows = $DishRowsTable(this);
   late final $VersionRowsTable versionRows = $VersionRowsTable(this);
   late final $CookLogRowsTable cookLogRows = $CookLogRowsTable(this);
-  late final $CookTimerRowsTable cookTimerRows = $CookTimerRowsTable(this);
   late final $MetaRowsTable metaRows = $MetaRowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [dishRows, versionRows, cookLogRows, cookTimerRows, metaRows];
+      [dishRows, versionRows, cookLogRows, metaRows];
 }
 
 typedef $$DishRowsTableCreateCompanionBuilder = DishRowsCompanion Function({
@@ -3357,8 +2839,6 @@ typedef $$VersionRowsTableCreateCompanionBuilder = VersionRowsCompanion
   Value<String> steps,
   Value<int> kcal,
   Value<int> protein,
-  Value<String> stepIngredients,
-  Value<String> tags,
   Value<String> originKind,
   Value<String?> originCreator,
   Value<String?> originHandle,
@@ -3381,8 +2861,6 @@ typedef $$VersionRowsTableUpdateCompanionBuilder = VersionRowsCompanion
   Value<String> steps,
   Value<int> kcal,
   Value<int> protein,
-  Value<String> stepIngredients,
-  Value<String> tags,
   Value<String> originKind,
   Value<String?> originCreator,
   Value<String?> originHandle,
@@ -3444,13 +2922,6 @@ class $$VersionRowsTableFilterComposer
 
   ColumnFilters<int> get protein => $composableBuilder(
       column: $table.protein, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get stepIngredients => $composableBuilder(
-      column: $table.stepIngredients,
-      builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => ColumnFilters(column));
@@ -3536,13 +3007,6 @@ class $$VersionRowsTableOrderingComposer
 
   ColumnOrderings<int> get protein => $composableBuilder(
       column: $table.protein, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get stepIngredients => $composableBuilder(
-      column: $table.stepIngredients,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get tags => $composableBuilder(
-      column: $table.tags, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => ColumnOrderings(column));
@@ -3631,12 +3095,6 @@ class $$VersionRowsTableAnnotationComposer
   GeneratedColumn<int> get protein =>
       $composableBuilder(column: $table.protein, builder: (column) => column);
 
-  GeneratedColumn<String> get stepIngredients => $composableBuilder(
-      column: $table.stepIngredients, builder: (column) => column);
-
-  GeneratedColumn<String> get tags =>
-      $composableBuilder(column: $table.tags, builder: (column) => column);
-
   GeneratedColumn<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => column);
 
@@ -3719,8 +3177,6 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<String> steps = const Value.absent(),
             Value<int> kcal = const Value.absent(),
             Value<int> protein = const Value.absent(),
-            Value<String> stepIngredients = const Value.absent(),
-            Value<String> tags = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
             Value<String?> originHandle = const Value.absent(),
@@ -3742,8 +3198,6 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             steps: steps,
             kcal: kcal,
             protein: protein,
-            stepIngredients: stepIngredients,
-            tags: tags,
             originKind: originKind,
             originCreator: originCreator,
             originHandle: originHandle,
@@ -3765,8 +3219,6 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<String> steps = const Value.absent(),
             Value<int> kcal = const Value.absent(),
             Value<int> protein = const Value.absent(),
-            Value<String> stepIngredients = const Value.absent(),
-            Value<String> tags = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
             Value<String?> originHandle = const Value.absent(),
@@ -3788,8 +3240,6 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             steps: steps,
             kcal: kcal,
             protein: protein,
-            stepIngredients: stepIngredients,
-            tags: tags,
             originKind: originKind,
             originCreator: originCreator,
             originHandle: originHandle,
@@ -4253,228 +3703,6 @@ typedef $$CookLogRowsTableProcessedTableManager = ProcessedTableManager<
     (CookLogRow, $$CookLogRowsTableReferences),
     CookLogRow,
     PrefetchHooks Function({bool dishId})>;
-typedef $$CookTimerRowsTableCreateCompanionBuilder = CookTimerRowsCompanion
-    Function({
-  required String id,
-  required String dishId,
-  required String versionId,
-  required int stepIndex,
-  required DateTime startedAt,
-  required int durationMs,
-  Value<int> pausedMs,
-  Value<DateTime?> pausedAt,
-  Value<int> rowid,
-});
-typedef $$CookTimerRowsTableUpdateCompanionBuilder = CookTimerRowsCompanion
-    Function({
-  Value<String> id,
-  Value<String> dishId,
-  Value<String> versionId,
-  Value<int> stepIndex,
-  Value<DateTime> startedAt,
-  Value<int> durationMs,
-  Value<int> pausedMs,
-  Value<DateTime?> pausedAt,
-  Value<int> rowid,
-});
-
-class $$CookTimerRowsTableFilterComposer
-    extends Composer<_$AppDatabase, $CookTimerRowsTable> {
-  $$CookTimerRowsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get dishId => $composableBuilder(
-      column: $table.dishId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get versionId => $composableBuilder(
-      column: $table.versionId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get stepIndex => $composableBuilder(
-      column: $table.stepIndex, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get startedAt => $composableBuilder(
-      column: $table.startedAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get durationMs => $composableBuilder(
-      column: $table.durationMs, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get pausedMs => $composableBuilder(
-      column: $table.pausedMs, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get pausedAt => $composableBuilder(
-      column: $table.pausedAt, builder: (column) => ColumnFilters(column));
-}
-
-class $$CookTimerRowsTableOrderingComposer
-    extends Composer<_$AppDatabase, $CookTimerRowsTable> {
-  $$CookTimerRowsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get dishId => $composableBuilder(
-      column: $table.dishId, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get versionId => $composableBuilder(
-      column: $table.versionId, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get stepIndex => $composableBuilder(
-      column: $table.stepIndex, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
-      column: $table.startedAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get durationMs => $composableBuilder(
-      column: $table.durationMs, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get pausedMs => $composableBuilder(
-      column: $table.pausedMs, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get pausedAt => $composableBuilder(
-      column: $table.pausedAt, builder: (column) => ColumnOrderings(column));
-}
-
-class $$CookTimerRowsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CookTimerRowsTable> {
-  $$CookTimerRowsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get dishId =>
-      $composableBuilder(column: $table.dishId, builder: (column) => column);
-
-  GeneratedColumn<String> get versionId =>
-      $composableBuilder(column: $table.versionId, builder: (column) => column);
-
-  GeneratedColumn<int> get stepIndex =>
-      $composableBuilder(column: $table.stepIndex, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get startedAt =>
-      $composableBuilder(column: $table.startedAt, builder: (column) => column);
-
-  GeneratedColumn<int> get durationMs => $composableBuilder(
-      column: $table.durationMs, builder: (column) => column);
-
-  GeneratedColumn<int> get pausedMs =>
-      $composableBuilder(column: $table.pausedMs, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get pausedAt =>
-      $composableBuilder(column: $table.pausedAt, builder: (column) => column);
-}
-
-class $$CookTimerRowsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $CookTimerRowsTable,
-    CookTimerRow,
-    $$CookTimerRowsTableFilterComposer,
-    $$CookTimerRowsTableOrderingComposer,
-    $$CookTimerRowsTableAnnotationComposer,
-    $$CookTimerRowsTableCreateCompanionBuilder,
-    $$CookTimerRowsTableUpdateCompanionBuilder,
-    (
-      CookTimerRow,
-      BaseReferences<_$AppDatabase, $CookTimerRowsTable, CookTimerRow>
-    ),
-    CookTimerRow,
-    PrefetchHooks Function()> {
-  $$CookTimerRowsTableTableManager(_$AppDatabase db, $CookTimerRowsTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$CookTimerRowsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CookTimerRowsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CookTimerRowsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String> dishId = const Value.absent(),
-            Value<String> versionId = const Value.absent(),
-            Value<int> stepIndex = const Value.absent(),
-            Value<DateTime> startedAt = const Value.absent(),
-            Value<int> durationMs = const Value.absent(),
-            Value<int> pausedMs = const Value.absent(),
-            Value<DateTime?> pausedAt = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              CookTimerRowsCompanion(
-            id: id,
-            dishId: dishId,
-            versionId: versionId,
-            stepIndex: stepIndex,
-            startedAt: startedAt,
-            durationMs: durationMs,
-            pausedMs: pausedMs,
-            pausedAt: pausedAt,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            required String dishId,
-            required String versionId,
-            required int stepIndex,
-            required DateTime startedAt,
-            required int durationMs,
-            Value<int> pausedMs = const Value.absent(),
-            Value<DateTime?> pausedAt = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              CookTimerRowsCompanion.insert(
-            id: id,
-            dishId: dishId,
-            versionId: versionId,
-            stepIndex: stepIndex,
-            startedAt: startedAt,
-            durationMs: durationMs,
-            pausedMs: pausedMs,
-            pausedAt: pausedAt,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (
-                    e.readTable<$CookTimerRowsTable, CookTimerRow>(table),
-                    BaseReferences<_$AppDatabase, $CookTimerRowsTable,
-                        CookTimerRow>(db, table, e)
-                  ))
-              .toList(),
-          prefetchHooksCallback: null,
-        ));
-}
-
-typedef $$CookTimerRowsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $CookTimerRowsTable,
-    CookTimerRow,
-    $$CookTimerRowsTableFilterComposer,
-    $$CookTimerRowsTableOrderingComposer,
-    $$CookTimerRowsTableAnnotationComposer,
-    $$CookTimerRowsTableCreateCompanionBuilder,
-    $$CookTimerRowsTableUpdateCompanionBuilder,
-    (
-      CookTimerRow,
-      BaseReferences<_$AppDatabase, $CookTimerRowsTable, CookTimerRow>
-    ),
-    CookTimerRow,
-    PrefetchHooks Function()>;
 typedef $$MetaRowsTableCreateCompanionBuilder = MetaRowsCompanion Function({
   required String key,
   required String value,
@@ -4609,8 +3837,6 @@ class $AppDatabaseManager {
       $$VersionRowsTableTableManager(_db, _db.versionRows);
   $$CookLogRowsTableTableManager get cookLogRows =>
       $$CookLogRowsTableTableManager(_db, _db.cookLogRows);
-  $$CookTimerRowsTableTableManager get cookTimerRows =>
-      $$CookTimerRowsTableTableManager(_db, _db.cookTimerRows);
   $$MetaRowsTableTableManager get metaRows =>
       $$MetaRowsTableTableManager(_db, _db.metaRows);
 }
