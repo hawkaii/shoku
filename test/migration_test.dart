@@ -33,10 +33,12 @@ void main() {
     return file;
   }
 
-  test('a v3 database gains the timer table and the step links', () async {
+  test('a v3 database gains the timer table, the step links and the tags',
+      () async {
     final file = await oldDatabase(version: 3, undo: [
       'DROP TABLE cook_timer_rows',
       'ALTER TABLE version_rows DROP COLUMN step_ingredients',
+      'ALTER TABLE version_rows DROP COLUMN tags',
     ]);
 
     final upgraded = AppDatabase(NativeDatabase(file));
@@ -53,14 +55,49 @@ void main() {
     await upgraded.close();
   });
 
-  test('a v4 database gains the step links and keeps its versions', () async {
+  test('a v4 database gains the step links and the tags', () async {
     final file = await oldDatabase(version: 4, undo: [
       'ALTER TABLE version_rows DROP COLUMN step_ingredients',
+      'ALTER TABLE version_rows DROP COLUMN tags',
     ]);
 
     final upgraded = AppDatabase(NativeDatabase(file));
     final versions = await upgraded.select(upgraded.versionRows).get();
     expect(versions, isEmpty);
+    await upgraded.close();
+  });
+
+  test('a v5 database gains the tags column', () async {
+    final file = await oldDatabase(version: 5, undo: [
+      'ALTER TABLE version_rows DROP COLUMN tags',
+    ]);
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    final repo = JournalRepository(upgraded);
+    await repo.upsertDish(Dish(
+      id: 'd1',
+      title: 'Paneer',
+      subtitle: '',
+      coverUrl: '',
+      sourceHandle: '@ravi',
+      status: DishStatus.toCook,
+      minutes: 20,
+      steps: const ['Fry'],
+      versions: [
+        RecipeVersion(
+          id: 'v1',
+          number: 0,
+          changes: const [],
+          ingredients: const ['paneer'],
+          createdAt: DateTime(2026, 1, 1),
+          tags: const ['from video'],
+        ),
+      ],
+      cooks: const [],
+    ));
+
+    final dish = (await repo.loadDishes()).single;
+    expect(dish.versions.single.tags, ['from video']);
     await upgraded.close();
   });
 

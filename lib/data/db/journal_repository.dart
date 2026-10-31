@@ -179,6 +179,8 @@ class JournalRepository {
         // The fork keeps the same steps, so the links still point at the same
         // ingredients.
         stepIngredients: previous?.stepIngredients,
+        // And the same tags: a fork of a guess is still a guess.
+        tags: previous?.tags ?? const [],
         kcal: dish.baselineKcal + (changes.length * 18),
         protein: dish.baselineProtein + (changes.length * 2),
         parentVersionId: (previous != null && previous.id.isNotEmpty) ? previous.id : null,
@@ -360,6 +362,7 @@ class JournalRepository {
         kcal: row.kcal,
         protein: row.protein,
         stepIngredients: _decodeStepIngredients(row.stepIngredients),
+        tags: _decodeList(row.tags),
         originKind: row.originKind,
         originCreator: row.originCreator,
         originHandle: row.originHandle,
@@ -405,6 +408,7 @@ class JournalRepository {
         kcal: Value(v.kcal),
         protein: Value(v.protein),
         stepIngredients: Value(_encodeStepIngredients(v.stepIngredients)),
+        tags: Value(jsonEncode(v.tags)),
         originKind: Value(v.originKind),
         originCreator: Value(v.originCreator),
         originHandle: Value(v.originHandle),

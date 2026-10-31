@@ -43,6 +43,10 @@ class RecipeVersion {
   final int kcal;
   final int protein;
 
+  /// The extraction's own tags. `from video` means the reel was silent and the
+  /// amounts are guesses — the dish says so out loud.
+  final List<String> tags;
+
   /// Which ingredients the extractor says each step uses: parallel to [steps],
   /// each entry a list of indices into [ingredients].
   ///
@@ -70,6 +74,7 @@ class RecipeVersion {
     required this.createdAt,
     this.steps = const [],
     this.stepIngredients,
+    this.tags = const [],
     this.kcal = 0,
     this.protein = 0,
     this.originKind = 'mine',

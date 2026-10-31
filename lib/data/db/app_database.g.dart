@@ -745,6 +745,13 @@ class $VersionRowsTable extends VersionRows
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+      'tags', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
   static const VerificationMeta _originKindMeta =
       const VerificationMeta('originKind');
   @override
@@ -821,6 +828,7 @@ class $VersionRowsTable extends VersionRows
         kcal,
         protein,
         stepIngredients,
+        tags,
         originKind,
         originCreator,
         originHandle,
@@ -884,6 +892,10 @@ class $VersionRowsTable extends VersionRows
           _stepIngredientsMeta,
           stepIngredients.isAcceptableOrUnknown(
               data['step_ingredients']!, _stepIngredientsMeta));
+    }
+    if (data.containsKey('tags')) {
+      context.handle(
+          _tagsMeta, tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta));
     }
     if (data.containsKey('origin_kind')) {
       context.handle(
@@ -968,6 +980,8 @@ class $VersionRowsTable extends VersionRows
           .read(DriftSqlType.int, data['${effectivePrefix}protein'])!,
       stepIngredients: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}step_ingredients'])!,
+      tags: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tags'])!,
       originKind: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}origin_kind'])!,
       originCreator: attachedDatabase.typeMapping
@@ -1015,6 +1029,9 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
   /// Local only: this is not on the sync wire, so a version that arrives from
   /// another device simply has none and renders no ingredient line.
   final String stepIngredients;
+
+  /// The extraction's tags, JSON. On the wire: the server stores what we send.
+  final String tags;
   final String originKind;
   final String? originCreator;
   final String? originHandle;
@@ -1035,6 +1052,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       required this.kcal,
       required this.protein,
       required this.stepIngredients,
+      required this.tags,
       required this.originKind,
       this.originCreator,
       this.originHandle,
@@ -1057,6 +1075,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
     map['kcal'] = Variable<int>(kcal);
     map['protein'] = Variable<int>(protein);
     map['step_ingredients'] = Variable<String>(stepIngredients);
+    map['tags'] = Variable<String>(tags);
     map['origin_kind'] = Variable<String>(originKind);
     if (!nullToAbsent || originCreator != null) {
       map['origin_creator'] = Variable<String>(originCreator);
@@ -1093,6 +1112,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       kcal: Value(kcal),
       protein: Value(protein),
       stepIngredients: Value(stepIngredients),
+      tags: Value(tags),
       originKind: Value(originKind),
       originCreator: originCreator == null && nullToAbsent
           ? const Value.absent()
@@ -1131,6 +1151,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       kcal: serializer.fromJson<int>(json['kcal']),
       protein: serializer.fromJson<int>(json['protein']),
       stepIngredients: serializer.fromJson<String>(json['stepIngredients']),
+      tags: serializer.fromJson<String>(json['tags']),
       originKind: serializer.fromJson<String>(json['originKind']),
       originCreator: serializer.fromJson<String?>(json['originCreator']),
       originHandle: serializer.fromJson<String?>(json['originHandle']),
@@ -1156,6 +1177,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       'kcal': serializer.toJson<int>(kcal),
       'protein': serializer.toJson<int>(protein),
       'stepIngredients': serializer.toJson<String>(stepIngredients),
+      'tags': serializer.toJson<String>(tags),
       'originKind': serializer.toJson<String>(originKind),
       'originCreator': serializer.toJson<String?>(originCreator),
       'originHandle': serializer.toJson<String?>(originHandle),
@@ -1179,6 +1201,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           int? kcal,
           int? protein,
           String? stepIngredients,
+          String? tags,
           String? originKind,
           Value<String?> originCreator = const Value.absent(),
           Value<String?> originHandle = const Value.absent(),
@@ -1199,6 +1222,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
         kcal: kcal ?? this.kcal,
         protein: protein ?? this.protein,
         stepIngredients: stepIngredients ?? this.stepIngredients,
+        tags: tags ?? this.tags,
         originKind: originKind ?? this.originKind,
         originCreator:
             originCreator.present ? originCreator.value : this.originCreator,
@@ -1231,6 +1255,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       stepIngredients: data.stepIngredients.present
           ? data.stepIngredients.value
           : this.stepIngredients,
+      tags: data.tags.present ? data.tags.value : this.tags,
       originKind:
           data.originKind.present ? data.originKind.value : this.originKind,
       originCreator: data.originCreator.present
@@ -1269,6 +1294,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
           ..write('stepIngredients: $stepIngredients, ')
+          ..write('tags: $tags, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
           ..write('originHandle: $originHandle, ')
@@ -1294,6 +1320,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       kcal,
       protein,
       stepIngredients,
+      tags,
       originKind,
       originCreator,
       originHandle,
@@ -1317,6 +1344,7 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           other.kcal == this.kcal &&
           other.protein == this.protein &&
           other.stepIngredients == this.stepIngredients &&
+          other.tags == this.tags &&
           other.originKind == this.originKind &&
           other.originCreator == this.originCreator &&
           other.originHandle == this.originHandle &&
@@ -1339,6 +1367,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
   final Value<int> kcal;
   final Value<int> protein;
   final Value<String> stepIngredients;
+  final Value<String> tags;
   final Value<String> originKind;
   final Value<String?> originCreator;
   final Value<String?> originHandle;
@@ -1360,6 +1389,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
     this.stepIngredients = const Value.absent(),
+    this.tags = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
     this.originHandle = const Value.absent(),
@@ -1382,6 +1412,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.kcal = const Value.absent(),
     this.protein = const Value.absent(),
     this.stepIngredients = const Value.absent(),
+    this.tags = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
     this.originHandle = const Value.absent(),
@@ -1406,6 +1437,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     Expression<int>? kcal,
     Expression<int>? protein,
     Expression<String>? stepIngredients,
+    Expression<String>? tags,
     Expression<String>? originKind,
     Expression<String>? originCreator,
     Expression<String>? originHandle,
@@ -1428,6 +1460,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       if (kcal != null) 'kcal': kcal,
       if (protein != null) 'protein': protein,
       if (stepIngredients != null) 'step_ingredients': stepIngredients,
+      if (tags != null) 'tags': tags,
       if (originKind != null) 'origin_kind': originKind,
       if (originCreator != null) 'origin_creator': originCreator,
       if (originHandle != null) 'origin_handle': originHandle,
@@ -1452,6 +1485,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       Value<int>? kcal,
       Value<int>? protein,
       Value<String>? stepIngredients,
+      Value<String>? tags,
       Value<String>? originKind,
       Value<String?>? originCreator,
       Value<String?>? originHandle,
@@ -1473,6 +1507,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       kcal: kcal ?? this.kcal,
       protein: protein ?? this.protein,
       stepIngredients: stepIngredients ?? this.stepIngredients,
+      tags: tags ?? this.tags,
       originKind: originKind ?? this.originKind,
       originCreator: originCreator ?? this.originCreator,
       originHandle: originHandle ?? this.originHandle,
@@ -1516,6 +1551,9 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     }
     if (stepIngredients.present) {
       map['step_ingredients'] = Variable<String>(stepIngredients.value);
+    }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
     }
     if (originKind.present) {
       map['origin_kind'] = Variable<String>(originKind.value);
@@ -1565,6 +1603,7 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
           ..write('kcal: $kcal, ')
           ..write('protein: $protein, ')
           ..write('stepIngredients: $stepIngredients, ')
+          ..write('tags: $tags, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
           ..write('originHandle: $originHandle, ')
@@ -3319,6 +3358,7 @@ typedef $$VersionRowsTableCreateCompanionBuilder = VersionRowsCompanion
   Value<int> kcal,
   Value<int> protein,
   Value<String> stepIngredients,
+  Value<String> tags,
   Value<String> originKind,
   Value<String?> originCreator,
   Value<String?> originHandle,
@@ -3342,6 +3382,7 @@ typedef $$VersionRowsTableUpdateCompanionBuilder = VersionRowsCompanion
   Value<int> kcal,
   Value<int> protein,
   Value<String> stepIngredients,
+  Value<String> tags,
   Value<String> originKind,
   Value<String?> originCreator,
   Value<String?> originHandle,
@@ -3407,6 +3448,9 @@ class $$VersionRowsTableFilterComposer
   ColumnFilters<String> get stepIngredients => $composableBuilder(
       column: $table.stepIngredients,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tags => $composableBuilder(
+      column: $table.tags, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => ColumnFilters(column));
@@ -3496,6 +3540,9 @@ class $$VersionRowsTableOrderingComposer
   ColumnOrderings<String> get stepIngredients => $composableBuilder(
       column: $table.stepIngredients,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tags => $composableBuilder(
+      column: $table.tags, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => ColumnOrderings(column));
@@ -3587,6 +3634,9 @@ class $$VersionRowsTableAnnotationComposer
   GeneratedColumn<String> get stepIngredients => $composableBuilder(
       column: $table.stepIngredients, builder: (column) => column);
 
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
+
   GeneratedColumn<String> get originKind => $composableBuilder(
       column: $table.originKind, builder: (column) => column);
 
@@ -3670,6 +3720,7 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<int> kcal = const Value.absent(),
             Value<int> protein = const Value.absent(),
             Value<String> stepIngredients = const Value.absent(),
+            Value<String> tags = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
             Value<String?> originHandle = const Value.absent(),
@@ -3692,6 +3743,7 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             kcal: kcal,
             protein: protein,
             stepIngredients: stepIngredients,
+            tags: tags,
             originKind: originKind,
             originCreator: originCreator,
             originHandle: originHandle,
@@ -3714,6 +3766,7 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<int> kcal = const Value.absent(),
             Value<int> protein = const Value.absent(),
             Value<String> stepIngredients = const Value.absent(),
+            Value<String> tags = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
             Value<String?> originHandle = const Value.absent(),
@@ -3736,6 +3789,7 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             kcal: kcal,
             protein: protein,
             stepIngredients: stepIngredients,
+            tags: tags,
             originKind: originKind,
             originCreator: originCreator,
             originHandle: originHandle,

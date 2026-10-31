@@ -13,7 +13,7 @@ import 'package:http/testing.dart';
 
 /// These tests run the real database and the real merge rules; only HTTP is
 /// faked. That is the combination where sync bugs actually live.
-Dish _dish({String id = 'd1', int versions = 1}) => Dish(
+Dish _dish({String id = 'd1', int versions = 1, List<String> tags = const []}) => Dish(
       id: id,
       title: 'Paneer',
       subtitle: '',
@@ -30,6 +30,7 @@ Dish _dish({String id = 'd1', int versions = 1}) => Dish(
             changes: const ['First'],
             ingredients: const ['200 g paneer'],
             createdAt: DateTime(2026, 1, 1),
+            tags: tags,
           ),
       ],
       cooks: const [],
@@ -230,6 +231,69 @@ void main() {
     expect(row['status'], 'signature');
     expect(row['deleted_at'], isNotNull,
         reason: 'a delete is a tombstone the server has to hear about');
+  });
+
+  test('tags are pushed with the version that carries them', () async {
+    await local.seed([_dish(tags: const ['from video'])]);
+    await local.commitCook(
+      dishId: 'd1',
+      mood: CookMood.comfort,
+      rating: 4,
+      note: 'guessed',
+      changes: const ['more garlic'],
+    );
+
+    await SyncService(repository: sync, api: client()).sync();
+
+    final version = (pushedBodies.single['versions'] as List).last as Map;
+    expect(version['tags'], ['from video'],
+        reason: 'the server cannot invent tags; it only stores what we send');
+  });
+
+  test('tags arrive on a pulled version', () async {
+    await SyncService(
+      repository: sync,
+      api: client(pull: {
+        'dishes': [
+          {
+            'id': 'remote-7',
+            'title': 'Silent reel',
+            'subtitle': '',
+            'cover_url': '',
+            'source_handle': '',
+            'status': 'toCook',
+            'minutes': 20,
+            'baseline_kcal': 0,
+            'baseline_protein': 0,
+            'steps': ['Fry'],
+            'created_at': '2026-02-01T10:00:00Z',
+            'updated_at': '2026-02-01T10:00:00Z',
+            'deleted_at': null,
+          },
+        ],
+        'versions': [
+          {
+            'id': 'rv7',
+            'dish_id': 'remote-7',
+            'number': 0,
+            'changes': <String>[],
+            'ingredients': ['salt'],
+            'steps': ['Fry'],
+            'tags': ['from video', 'quick'],
+            'kcal': 0,
+            'protein': 0,
+            'origin_kind': 'import',
+            'created_at': '2026-02-01T10:00:00Z',
+          },
+        ],
+        'cook_logs': <Map<String, dynamic>>[],
+        'cursor': 'c7',
+      }),
+    ).sync();
+
+    final dish =
+        (await local.loadDishes()).firstWhere((d) => d.id == 'remote-7');
+    expect(dish.versions.single.tags, ['from video', 'quick']);
   });
 
   test('step links are local: never pushed, and a pulled version has none',
