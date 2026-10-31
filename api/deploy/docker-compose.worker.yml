@@ -17,6 +17,8 @@ services:
     mem_limit: 3g
     volumes:
       - worker-tmp:/tmp/shoku
+      # Platform session cookies. Read-only, never baked into the image.
+      - ./cookies.txt:/run/cookies.txt:ro
     logging:
       driver: json-file
       options:
