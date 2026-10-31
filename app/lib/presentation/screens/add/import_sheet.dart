@@ -33,7 +33,20 @@ Future<void> showImportSheet(BuildContext context, {String? prefill}) {
 
 class ImportSheet extends ConsumerStatefulWidget {
   final String? prefill;
-  const ImportSheet({super.key, this.prefill});
+
+  /// How long a job may run before the sheet stops calling it "Reading the
+  /// reel" and says, plainly, that it is still working.
+  final Duration slowAfter;
+
+  /// The window passed to [ImportService.watch]. Null uses the service default.
+  final int? watchSeconds;
+
+  const ImportSheet({
+    super.key,
+    this.prefill,
+    this.slowAfter = const Duration(seconds: 60),
+    this.watchSeconds,
+  });
 
   @override
   ConsumerState<ImportSheet> createState() => _ImportSheetState();
@@ -45,6 +58,12 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   ImportProgress? _progress;
   bool _busy = false;
   String? _error;
+
+  /// Shown instead of an error when the window runs out: the job is still on the
+  /// server, so nothing has failed.
+  String? _stillReading;
+  bool _slow = false;
+  Timer? _slowTimer;
   StreamSubscription<ImportProgress>? _sub;
 
   @override
@@ -62,6 +81,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
 
   @override
   void dispose() {
+    _slowTimer?.cancel();
     _sub?.cancel();
     _url.dispose();
     super.dispose();
@@ -78,8 +98,11 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       _busy = true;
       _error = null;
       _progress = null;
+      _stillReading = null;
+      _slow = false;
     });
     await _sub?.cancel();
+    _slowTimer?.cancel();
     final service = ref.read(importServiceProvider);
     final pendingStore = ref.read(pendingImportStoreProvider);
 
@@ -149,25 +172,38 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
 
   void _watch(ImportService service, String jobId, String shortcode) {
     _sub?.cancel();
-    _sub = service.watch(jobId).listen(
+    _slowTimer?.cancel();
+    _slow = false;
+    // A long reel is normal, not broken: after a minute, say so.
+    _slowTimer = Timer(widget.slowAfter, () {
+      if (mounted) setState(() => _slow = true);
+    });
+
+    _sub = service.watch(jobId, seconds: widget.watchSeconds).listen(
       (progress) {
         if (!mounted) return;
-        setState(() => _progress = progress);
+        setState(() {
+          _progress = progress;
+          _stillReading = null;
+        });
         switch (progress.stage) {
           case ImportStage.ready:
+            _slowTimer?.cancel();
             _finish(
               service,
               progress.shortcode.isNotEmpty ? progress.shortcode : shortcode,
             );
           case ImportStage.failed:
             if (progress.reason == 'timed_out') {
-              // We stopped waiting; the worker did not. Keep the note so the
-              // next open picks the finished parse up instead of re-importing.
+              // We stopped waiting; the worker did not. Nothing has failed: the
+              // note stays, and the copy says it can be left.
+              _slowTimer?.cancel();
               setState(() {
                 _busy = false;
-                _error = importReasonText(progress.reason);
+                _stillReading = importReasonText(progress.reason);
               });
             } else {
+              _slowTimer?.cancel();
               _abandon(importReasonText(progress.reason));
             }
           case ImportStage.queued:
@@ -200,6 +236,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     setState(() {
       _busy = true;
       _error = null;
+      _stillReading = null;
+      _slow = false;
       _url.text = pending.url;
     });
     final service = ref.read(importServiceProvider);
@@ -368,13 +406,33 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                   child: CircularProgressIndicator(strokeWidth: 1.6, color: c.accent),
                 ),
                 const SizedBox(width: 8),
-                Text(_progress!.label,
-                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                Flexible(
+                  child: Text(
+                    _slow ? 'Still working — this reel is long' : _progress!.label,
+                    key: const ValueKey('import-stage'),
+                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 4),
-            Text('You can close this — the dish appears when it is ready.',
-                style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+            Text(
+              _slow
+                  ? 'A long one takes a few minutes. You can leave this — the dish appears when it is ready.'
+                  : 'You can close this — the dish appears when it is ready.',
+              key: const ValueKey('import-hint'),
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+            ),
+          ],
+          if (_stillReading != null) ...[
+            const SizedBox(height: ShokuSpace.sm),
+            // Not an error: the job is still on the server and the next open
+            // picks it up. Muted, because nothing has gone wrong.
+            Text(
+              _stillReading!,
+              key: const ValueKey('import-still-reading'),
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+            ),
           ],
           if (_error != null) ...[
             const SizedBox(height: ShokuSpace.sm),
