@@ -14,8 +14,7 @@ bursty, memory-hungry, and useless when nobody is importing.
 
 ```bash
 cd /opt/shoku
-sudo cp deploy/docker-compose.prod.yml docker-compose.yml
-sudo docker compose up -d --pull never
+sudo docker compose -f deploy/docker-compose.prod.yml up -d --pull never
 curl localhost:8000/health
 ```
 
@@ -43,8 +42,7 @@ Same repo, heavier image:
 
 ```bash
 sudo docker build --build-arg EXTRAS="worker,whisper" -t shoku-api:worker .
-sudo cp deploy/docker-compose.worker.yml docker-compose.yml
-sudo docker compose up -d
+sudo docker compose -f deploy/docker-compose.worker.yml up -d
 ```
 
 Its `.env` is the API's, with the two hostnames swapped for the API box's
