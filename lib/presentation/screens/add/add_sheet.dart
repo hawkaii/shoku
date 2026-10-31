@@ -77,8 +77,12 @@ class _AddSheetState extends State<AddSheet> {
             title: 'Share from another app',
             subtitle: 'Instagram → share → Shoku',
             onTap: () {
+              // The link typed above is the link being imported; dropping it
+              // here loses the import before it starts.
+              final typed = _controller.text.trim();
+              final link = typed.isEmpty ? widget.prefill : typed;
               Navigator.of(context).pop();
-              showImportSheet(context, prefill: widget.prefill);
+              showImportSheet(context, prefill: link);
             },
           ),
           const SizedBox(height: ShokuSpace.sm),

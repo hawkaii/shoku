@@ -29,6 +29,7 @@ class ImportService {
       shortcode: response['shortcode'] as String? ?? '',
       stage: _stage(response['state'] as String?),
       cached: response['cached'] == true,
+      reason: response['reason'] as String?,
     );
   }
 
@@ -48,7 +49,7 @@ class ImportService {
     final deadline = DateTime.now().add(Duration(seconds: seconds));
     var delay = const Duration(seconds: 1);
     while (DateTime.now().isBefore(deadline)) {
-      final progress = await poll(jobId);
+      final progress = await pollOnce(jobId);
       yield progress;
       if (progress.stage == ImportStage.ready || progress.stage == ImportStage.failed) {
         return;
@@ -57,7 +58,35 @@ class ImportService {
       // Ease off: 1s, 2s, 4s, then every 5s.
       delay = Duration(seconds: delay.inSeconds >= 5 ? 5 : delay.inSeconds * 2);
     }
+    // Still ours to lose: the record the sheet keeps is what lets a client
+    // timeout be picked up again instead of thrown away.
     yield const ImportProgress(stage: ImportStage.failed, reason: 'timed_out', shortcode: '');
+  }
+
+  /// One poll, retried.
+  ///
+  /// A dropped request says nothing about the import — the worker is on a server
+  /// with its own copy of the job — so a single blip must never be reported as a
+  /// failed import. Three attempts with backoff, then it really is unreachable.
+  static const List<Duration> pollBackoff = [
+    Duration(milliseconds: 400),
+    Duration(milliseconds: 900),
+  ];
+
+  Future<ImportProgress> pollOnce(String jobId) async {
+    Object? lastError;
+    for (var attempt = 0; attempt <= pollBackoff.length; attempt++) {
+      try {
+        return await poll(jobId);
+      } on ApiUnauthenticated {
+        rethrow; // No token will not heal by waiting.
+      } catch (error) {
+        lastError = error;
+        if (attempt == pollBackoff.length) break;
+        await Future<void>.delayed(pollBackoff[attempt]);
+      }
+    }
+    throw lastError!;
   }
 
   /// Turns a cached extraction into a dish in the journal, with the creator
@@ -137,12 +166,14 @@ class ImportStart {
     required this.shortcode,
     required this.stage,
     required this.cached,
+    this.reason,
   });
 
   final String? jobId;
   final String shortcode;
   final ImportStage stage;
   final bool cached;
+  final String? reason;
 }
 
 class ImportProgress {
@@ -171,3 +202,27 @@ class ImportProgress {
         ImportStage.failed => 'Could not read this one',
       };
 }
+
+/// What a failure reason becomes on screen.
+///
+/// Every reason the contract lists has words, and `timed_out` — the client's own
+/// reason for "I stopped waiting" — is not the same event as the server's
+/// `timeout`. Falling through to the generic line hides the one thing the user
+/// can do about it.
+String importReasonText(String? reason) => switch (reason) {
+      'unsupported_url' => 'That link is not a reel or video we can read',
+      'source_blocked' =>
+        'YouTube is blocking our server right now — try again later or paste the recipe',
+      'timeout' => 'That took too long — try again',
+      'timed_out' =>
+        'Still reading — this one is taking longer than usual. Open this again in a minute and it will be here',
+      'gone' => 'That import is no longer on the server — try the link again',
+      'invalid_recipe' => 'We could not find a recipe in that one',
+      'no_audio' => 'That video has nothing to listen to',
+      'no_text' => 'That reel has no caption and no speech we could read',
+      'no_recipe' => 'That video does not show a recipe',
+      'vision_failed' => 'We could not read that video — paste the recipe instead',
+      'taken_down' => 'That recipe was removed',
+      null => 'Could not read this one — paste the recipe instead',
+      _ => 'Could not read this one — paste the recipe instead',
+    };
