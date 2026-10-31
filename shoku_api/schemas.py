@@ -160,6 +160,8 @@ class VersionRowIn(SyncRow):
     protein: int = Field(default=0, ge=0, le=10_000)
     origin_kind: OriginKind = "mine"
     origin_creator: Annotated[str, StringConstraints(max_length=200)] | None = None
+    origin_handle: Annotated[str, StringConstraints(max_length=200)] | None = None
+    origin_platform: Annotated[str, StringConstraints(max_length=32)] | None = None
     origin_url: Url | None = None
     origin_shortcode: Annotated[str, StringConstraints(max_length=64)] | None = None
     parent_version_id: RowId | None = None
@@ -244,6 +246,8 @@ class VersionRowOut(SyncRow):
     protein: int
     origin_kind: str
     origin_creator: str | None
+    origin_handle: str | None
+    origin_platform: str | None
     origin_url: str | None
     origin_shortcode: str | None
     parent_version_id: str | None
