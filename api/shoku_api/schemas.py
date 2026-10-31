@@ -156,6 +156,9 @@ class VersionRowIn(SyncRow):
     steps: list[Annotated[str, StringConstraints(max_length=2000)]] = Field(
         default_factory=list, max_length=200
     )
+    tags: list[Annotated[str, StringConstraints(max_length=40)]] = Field(
+        default_factory=list, max_length=20
+    )
     kcal: int = Field(default=0, ge=0, le=100_000)
     protein: int = Field(default=0, ge=0, le=10_000)
     origin_kind: OriginKind = "mine"
@@ -242,6 +245,7 @@ class VersionRowOut(SyncRow):
     changes: list[str]
     ingredients: list[str]
     steps: list[str]
+    tags: list[str] = Field(default_factory=list)
     kcal: int
     protein: int
     origin_kind: str
