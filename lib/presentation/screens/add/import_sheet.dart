@@ -153,6 +153,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
 
   static String _reasonText(String? reason) => switch (reason) {
         'unsupported_url' => 'That link is not a reel or video we can read',
+        'source_blocked' =>
+          'YouTube is blocking our server right now — try again later or paste the recipe',
         'timeout' => 'That took too long — try again',
         'invalid_recipe' => 'We could not find a recipe in that one',
         'no_audio' => 'That video has nothing to listen to',
