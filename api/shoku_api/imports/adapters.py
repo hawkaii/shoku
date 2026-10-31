@@ -136,15 +136,23 @@ class YtDlpExtractor:
 
         deadline.check("comment")
         try:
+            # The private web endpoint. It needs the CSRF token as a header as
+            # well as the cookie: without it Instagram answers 200 with an
+            # empty list, which looks like "no comments" rather than "refused".
             response = httpx.get(
-                f"https://i.instagram.com/api/v1/media/{media_id}/info/",
+                f"https://www.instagram.com/api/v1/media/{media_id}/comments/"
+                "?can_support_threading=true",
                 headers={
                     "X-IG-App-ID": "936619743392459",
+                    "X-CSRFToken": cookies.get("csrftoken", ""),
+                    "X-IG-WWW-Claim": "0",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Referer": "https://www.instagram.com/",
                     "User-Agent": (
-                        "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/120 Mobile Safari/537.36"
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                        "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                        "Version/17.0 Safari/605.1.15"
                     ),
-                    "Accept": "*/*",
                 },
                 cookies=cookies,
                 timeout=20.0,
@@ -155,17 +163,15 @@ class YtDlpExtractor:
             log.warning("instagram comment fetch failed")
             return ""
 
-        items = payload.get("items") or []
-        if not items:
-            return ""
         texts = [
             (c.get("text") or "").strip()
-            for c in (items[0].get("preview_comments") or [])
+            for c in (payload.get("comments") or [])
         ]
         texts = [t for t in texts if t]
         if not texts:
             return ""
-        # Prefer a comment that actually lists quantities, longest first.
+        # Creators write quantities; commenters write "recipe please". Rank by
+        # how much of the comment actually looks like a method.
         with_qty = [t for t in texts if has_quantities(t)]
         return max(with_qty or texts, key=len)
 
