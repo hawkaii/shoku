@@ -15,8 +15,15 @@ services:
     command: ["python", "-m", "shoku_api.imports.worker"]
     # yt-dlp and whisper are the memory spikes: one job at a time, on purpose.
     mem_limit: 3g
+    environment:
+      # The model cache must outlive the container. Without this the container
+      # re-downloads whisper on every recreate, inside the first import's
+      # 60-second budget, and the job is killed mid-download.
+      HF_HOME: /opt/hf-cache
+      HF_HUB_DISABLE_TELEMETRY: "1"
     volumes:
       - worker-tmp:/tmp/shoku
+      - hf-cache:/opt/hf-cache
       # Platform session cookies. Not baked into the image; writable because
       # yt-dlp rewrites the jar to refresh it.
       - ../cookies.txt:/run/cookies.txt
@@ -28,3 +35,5 @@ services:
 
 volumes:
   worker-tmp:
+  # Kept across `--force-recreate` and rebuilds. Cold once, warm forever after.
+  hf-cache:

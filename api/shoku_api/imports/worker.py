@@ -17,6 +17,17 @@ from .pipeline import ImportWorker
 log = logging.getLogger(__name__)
 
 
+def _warm(transcriber) -> float:
+    """Get the transcriber ready, and say how long it cost.
+
+    Separate from ``main`` so the ordering — warm, then claim — is testable
+    without starting a worker.
+    """
+    started = time.monotonic()
+    transcriber.warm()
+    return time.monotonic() - started
+
+
 def main() -> int:
     logging.basicConfig(
         level=logging.INFO,
@@ -25,6 +36,18 @@ def main() -> int:
 
     settings = get_settings()
     ctx = build_context(settings)
+
+    # Warm before the first claim. A transcriber that loads its model lazily
+    # spends the import budget on a download, the deadline kills the job, and
+    # the next attempt starts again from zero — on every cold container.
+    log.info("warming the transcriber before claiming any job")
+    try:
+        elapsed = _warm(ctx.transcriber)
+    except Exception:  # noqa: BLE001 - refusing to serve is the safe failure
+        log.exception("transcriber warm-up failed; not claiming jobs it cannot serve")
+        return 1
+    log.info("transcriber warm in %.1fs", elapsed)
+
     worker = ImportWorker(ctx)
 
     stopping = False
@@ -38,6 +61,7 @@ def main() -> int:
     signal.signal(signal.SIGINT, _stop)
 
     log.info("worker ready (queue=%s)", settings.queue_backend)
+
     while not stopping:
         try:
             job_id = ctx.queue.dequeue(timeout=5)

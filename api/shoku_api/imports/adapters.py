@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from pathlib import Path
 
 from ..domain.clock import Deadline
@@ -255,10 +256,26 @@ class FasterWhisperTranscriber:
         if self._model is None:
             from faster_whisper import WhisperModel
 
+            started = time.monotonic()
+            # On a cold cache this downloads ~150 MB. It must happen at startup,
+            # never inside an import: the 60-second budget would be spent on the
+            # network, the job would be killed, and the next attempt would start
+            # the download from zero again.
+            log.info("loading whisper model %r", self.model_size)
             self._model = WhisperModel(
                 self.model_size, device="cpu", compute_type=self.compute_type
             )
+            log.info(
+                "whisper model %r loaded in %.1fs", self.model_size, time.monotonic() - started
+            )
         return self._model
+
+    def warm(self) -> None:
+        """Download and load the model now, before any job can claim the budget.
+
+        Idempotent: after this returns, ``transcribe`` pays only inference.
+        """
+        self._model_or_load()
 
     def transcribe(self, audio_path: Path, deadline: Deadline) -> str:
         model = self._model_or_load()
