@@ -123,6 +123,39 @@ def test_duplicate_cook_log_is_ignored(client, dish_payload, version_payload, co
     assert pull(client)["cook_logs"][0]["note"] == "first"
 
 
+def test_version_tags_round_trip(client, dish_payload, version_payload) -> None:
+    """The extraction's labels survive the round trip, in order."""
+    push(client, dishes=[dish_payload()])
+    pushed = push(
+        client, versions=[version_payload(tags=["from video", "weeknight"])]
+    )
+    assert pushed["versions"][0]["result"] == "accepted"
+
+    stored = pull(client)["versions"][0]
+    assert stored["tags"] == ["from video", "weeknight"]
+
+
+def test_a_version_without_tags_pushes_and_returns_empty(
+    client, dish_payload, version_payload
+) -> None:
+    """An older client omits the field entirely; that must keep working."""
+    payload = version_payload()
+    assert "tags" not in payload, "the fixture is the shape an old client sends"
+
+    push(client, dishes=[dish_payload()])
+    pushed = push(client, versions=[payload])
+
+    assert pushed["versions"][0]["result"] == "accepted"
+    assert pull(client)["versions"][0]["tags"] == []
+
+
+def test_empty_tags_are_kept_as_an_empty_list(client, dish_payload, version_payload) -> None:
+    push(client, dishes=[dish_payload()])
+    push(client, versions=[version_payload(tags=[])])
+
+    assert pull(client)["versions"][0]["tags"] == []
+
+
 def test_version_for_unknown_dish_is_a_conflict(client, version_payload) -> None:
     result = push(client, versions=[version_payload(dish_id="nope")])
     assert result["versions"][0]["result"] == "conflict"

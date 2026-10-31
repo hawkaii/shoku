@@ -125,6 +125,11 @@ class RecipeVersion(Base):
     changes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     ingredients: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     steps: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    #: The extraction's own labels, carried onto the version so the app can say
+    #: a recipe was *seen* ("from video") rather than *stated*. Empty for a
+    #: version the user wrote themselves, and for anything synced before this
+    #: field existed — which is why it must stay nullable in the wire sense.
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     kcal: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     protein: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
