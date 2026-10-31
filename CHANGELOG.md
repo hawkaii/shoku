@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.19.1] — 2026-10-31
+
+### Docs
+- V1.19.0 [skip ci] *(changelog)* — [`20346de`](https://github.com/hawkaii/food-finder-app/commit/20346dedcc486ded3d2c9f7578ed5d273047d1e8)
+
+### Fixed
+- Treat a waking worker as a stage, and name a dead one *(import)* — [`0028484`](https://github.com/hawkaii/food-finder-app/commit/00284843a00f0995821e6a2c7815e500b3739c73)
+
 ## [1.19.0] — 2026-10-31
 
 ### Added
