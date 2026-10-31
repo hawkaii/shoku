@@ -50,6 +50,15 @@ class Extractor(Protocol):
 class Transcriber(Protocol):
     def transcribe(self, audio_path: Path, deadline: Deadline) -> str: ...
 
+    def warm(self) -> None:
+        """Get ready before a job exists.
+
+        A real transcriber loads a model; doing that lazily puts the download
+        inside the first import's budget, where the deadline kills the job and
+        the next attempt starts over.
+        """
+        ...
+
 
 class Structurer(Protocol):
     def structure(self, text: str, *, caption_first: bool) -> dict[str, Any]: ...
@@ -69,6 +78,11 @@ class UnconfiguredExtractor:
 class UnconfiguredTranscriber:
     def transcribe(self, audio_path: Path, deadline: Deadline) -> str:
         raise TranscriptionFailed(detail="transcriber is not configured")
+
+    def warm(self) -> None:
+        # Nothing to load. The failure belongs to the job, where the reason
+        # field can carry it, not to startup.
+        return None
 
 
 class UnconfiguredStructurer:

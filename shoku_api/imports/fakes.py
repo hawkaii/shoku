@@ -93,7 +93,11 @@ class FakeTranscriber:
     def __init__(self, text: str = "Fry 200 g paneer in 2 tbsp butter, then simmer.") -> None:
         self.text = text
         self.calls = 0
+        self.warmed = 0
         self.audio_seen: list[Path] = []
+
+    def warm(self) -> None:
+        self.warmed += 1
 
     def transcribe(self, audio_path: Path, deadline: Deadline) -> str:
         self.calls += 1
