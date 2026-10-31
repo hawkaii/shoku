@@ -2,10 +2,12 @@
 
 Two rules, and they are different on purpose:
 
-* **Append-only tables** (``versions``, ``cook_logs``) merge by union of id.
-  An id that already exists is a duplicate, never an update. A cook is a thing
-  that happened; a version is a snapshot of somebody's recipe. Neither may be
-  rewritten by a later push.
+* **Append-only tables** (``versions``, ``cook_logs``, ``photos``) merge by
+  union of id. An id that already exists is a duplicate, never an update. A cook
+  is a thing that happened; a version is a snapshot of somebody's recipe; a
+  photo is an object that was uploaded. None may be rewritten by a later push.
+  The one exception is a photo's tombstone: ``deleted_at`` may go from null to a
+  timestamp exactly once, and nothing else on the row may move.
 * **Dishes** are last-write-wins on ``updated_at``. The server is the clock
   authority: it stores the value it accepted and echoes it back, and it refuses
   timestamps further than ``clock_skew_allowance`` ahead of server time, so a
@@ -13,16 +15,18 @@ Two rules, and they are different on purpose:
 """
 
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from .domain.clock import Clock
 from .domain.cursor import Cursor, TableKey, decode_cursor, encode_cursor
-from .models import CookLog, Dish, RecipeVersion
+from .models import CookLog, Dish, Photo, RecipeVersion
 from .schemas import (
     CookLogRowOut,
     DishRowOut,
+    PhotoRowOut,
     PullResponse,
     PushResponse,
     RowResult,
@@ -34,6 +38,7 @@ SYNCED_TABLES = {
     "dishes": (Dish, Dish.server_received_at),
     "versions": (RecipeVersion, RecipeVersion.server_received_at),
     "cook_logs": (CookLog, CookLog.server_received_at),
+    "photos": (Photo, Photo.server_received_at),
 }
 
 
@@ -46,12 +51,16 @@ class SyncService:
         page_size: int = 500,
         max_page_size: int = 1000,
         clock_skew_seconds: int = 300,
+        photo_public_base: str = "",
     ) -> None:
         self.session = session
         self.clock = clock
         self.page_size = page_size
         self.max_page_size = max_page_size
         self.clock_skew_seconds = clock_skew_seconds
+        #: Used to hand a client a displayable URL for a photo it never
+        #: uploaded itself (a second device, or a reinstall).
+        self.photo_public_base = photo_public_base.rstrip("/")
 
     # ---- pull ------------------------------------------------------------
 
@@ -69,7 +78,10 @@ class SyncService:
         position = self._decode(cursor)
 
         results: dict[str, list] = {}
-        next_keys: dict[str, TableKey] = {}
+        # Start from where the caller already was, so a table that has no new
+        # rows keeps its position instead of restarting from the top.
+        positions: dict[str, TableKey] = dict(position.keys)
+        any_more = False
 
         for name, (model, changed_col) in SYNCED_TABLES.items():
             rows = self._page(
@@ -78,20 +90,34 @@ class SyncService:
             has_more = len(rows) > page
             rows = rows[:page]
             results[name] = rows
-            if has_more and rows:
+            if rows:
+                # Record where this table stopped even when it is exhausted. A
+                # cursor carrying only the tables that have more pages restarts
+                # every finished table from the top on the next call: rows are
+                # duplicated, and a client that predates a newly added table
+                # waits on a `has_more` that never clears.
                 last = rows[-1]
-                next_keys[name] = TableKey(
+                positions[name] = TableKey(
                     changed_at=getattr(last, changed_col.key), row_id=last.id
                 )
+            if has_more:
+                any_more = True
 
         return PullResponse(
             dishes=[DishRowOut.model_validate(r) for r in results["dishes"]],
             versions=[VersionRowOut.model_validate(r) for r in results["versions"]],
             cook_logs=[CookLogRowOut.model_validate(r) for r in results["cook_logs"]],
-            cursor=encode_cursor(Cursor(keys=next_keys)) if next_keys else None,
-            has_more=bool(next_keys),
+            photos=[self._photo_out(r) for r in results["photos"]],
+            cursor=encode_cursor(Cursor(keys=positions)) if any_more else None,
+            has_more=any_more,
             server_time=self.clock.now(),
         )
+
+    def _photo_out(self, row: Photo) -> PhotoRowOut:
+        out = PhotoRowOut.model_validate(row)
+        if not self.photo_public_base:
+            return out
+        return out.model_copy(update={"url": f"{self.photo_public_base}/{quote(row.key)}"})
 
     def _decode(self, cursor: str | None) -> Cursor:
         try:
@@ -128,18 +154,23 @@ class SyncService:
 
     # ---- push ------------------------------------------------------------
 
-    def push(self, uid: str, *, dishes, versions, cook_logs) -> PushResponse:
+    def push(self, uid: str, *, dishes, versions, cook_logs, photos=()) -> PushResponse:
         now = self.clock.now()
 
         dish_results = [self._push_dish(uid, row, now) for row in dishes]
 
         # Dishes land first so a version pushed in the same batch finds its
         # parent; otherwise an offline client would have to order batches.
+        # Photos come last because they reference either a version or a cook.
         version_results = [self._push_version(uid, row, now) for row in versions]
         cook_results = [self._push_cook(uid, row, now) for row in cook_logs]
+        photo_results = [self._push_photo(uid, row, now) for row in photos]
 
         return PushResponse(
-            dishes=dish_results, versions=version_results, cook_logs=cook_results
+            dishes=dish_results,
+            versions=version_results,
+            cook_logs=cook_results,
+            photos=photo_results,
         )
 
     def _push_dish(self, uid: str, row, now: datetime) -> RowResult:
@@ -219,6 +250,70 @@ class SyncService:
         )
         self.session.flush()
         return RowResult(id=row.id, result="accepted", reason="appended")
+
+    def _push_photo(self, uid: str, row, now: datetime) -> RowResult:
+        stored = self.session.get(Photo, row.id)
+        if stored is not None:
+            if stored.user_id != uid:
+                return RowResult(id=row.id, result="conflict", reason="id_taken")
+            return self._tombstone_only(stored, row, now)
+
+        if row.deleted_at is not None and row.deleted_at - now > self._skew():
+            return RowResult(id=row.id, result="conflict", reason="clock_ahead")
+
+        target = self._photo_target(uid, row)
+        if isinstance(target, str):
+            return RowResult(id=row.id, result="conflict", reason=target)
+
+        self.session.add(
+            Photo(
+                id=row.id,
+                user_id=uid,
+                role=row.role,
+                version_id=row.version_id,
+                cook_id=row.cook_id,
+                key=row.key,
+                created_at=row.created_at,
+                deleted_at=row.deleted_at,
+                server_received_at=now,
+            )
+        )
+        self.session.flush()
+        return RowResult(id=row.id, result="accepted", reason="appended")
+
+    def _photo_target(self, uid: str, row) -> str | None:
+        """Check the role against its target. Returns a conflict reason, or None.
+
+        Exactly one target column is set, and ``role`` decides which. A row that
+        carries both, or neither, is refused rather than guessed at — a photo
+        the client cannot place on a screen is a bug that would otherwise hide
+        in the journal forever.
+        """
+        if row.role == "version":
+            if row.version_id is None or row.cook_id is not None:
+                return "bad_target"
+            version = self.session.get(RecipeVersion, row.version_id)
+            if version is None or version.user_id != uid:
+                return "unknown_version"
+            return None
+
+        if row.cook_id is None or row.version_id is not None:
+            return "bad_target"
+        cook = self.session.get(CookLog, row.cook_id)
+        if cook is None or cook.user_id != uid:
+            return "unknown_cook"
+        return None
+
+    def _tombstone_only(self, stored: Photo, row, now: datetime) -> RowResult:
+        """A stored photo accepts one write: its tombstone, from null, once."""
+        if row.deleted_at is not None and stored.deleted_at is None:
+            if row.deleted_at - now > self._skew():
+                return RowResult(id=row.id, result="conflict", reason="clock_ahead")
+            stored.deleted_at = row.deleted_at
+            stored.server_received_at = now
+            self.session.flush()
+            return RowResult(id=row.id, result="accepted", reason="tombstoned")
+        return RowResult(id=row.id, result="ignored", reason="duplicate_append_only")
 
     def _skew(self):
         from datetime import timedelta

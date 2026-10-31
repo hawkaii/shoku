@@ -24,6 +24,12 @@ def _service(session: Session, ctx: AppContext) -> SyncService:
         page_size=settings.sync_page_size,
         max_page_size=settings.sync_max_page_size,
         clock_skew_seconds=settings.clock_skew_allowance_seconds,
+        # Only a deployment with a real bucket can promise a public URL. The
+        # dev storage returns a placeholder, and a device that follows it would
+        # show a broken image instead of its own copy.
+        photo_public_base=(
+            settings.storage_public_base_url if settings.storage_backend == "r2" else ""
+        ),
     )
 
 
@@ -53,6 +59,7 @@ def push(
         dishes=payload.dishes,
         versions=payload.versions,
         cook_logs=payload.cook_logs,
+        photos=payload.photos,
     )
     session.commit()
     return result

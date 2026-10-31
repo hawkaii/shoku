@@ -179,6 +179,51 @@ class CookLog(Base):
     )
 
 
+class Photo(Base):
+    """Append-only, with one permitted mutation: its tombstone.
+
+    A photo is a fact — it was taken, it was uploaded, it hangs off a version or
+    off a night of cooking. The row is never rewritten and its ``key`` never
+    changes; the only write that can land on an existing row is ``deleted_at``,
+    and only once, from null.
+
+    There is deliberately no ``cover`` role. The dish cover lives on
+    ``dishes.cover_url`` and must not gain a second source of truth.
+
+    ``role`` decides which target column is set — exactly one of ``version_id``
+    or ``cook_id``, never both and never neither.
+    """
+
+    __tablename__ = "photos"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    version_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("recipe_versions.id", ondelete="CASCADE"), nullable=True
+    )
+    cook_id: Mapped[str | None] = mapped_column(
+        String(64), ForeignKey("cook_logs.id", ondelete="CASCADE"), nullable=True
+    )
+    role: Mapped[str] = mapped_column(String(16), default="version", nullable=False)
+    #: The object key under ``photos/<uid>/``. The API never proxies bytes, so
+    #: the key is the only thing it needs to know about the object; the public
+    #: URL is derived from the storage base at read time, not stored.
+    key: Mapped[str] = mapped_column(String(512), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+    deleted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    server_received_at: Mapped[datetime] = mapped_column(
+        UTCDateTime, default=utcnow, nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_photos_user_received", "user_id", "server_received_at"),
+        Index("ix_photos_version", "version_id"),
+        Index("ix_photos_cook", "cook_id"),
+    )
+
+
 class ContentCache(Base):
     """Global extracted content, keyed by shortcode.
 

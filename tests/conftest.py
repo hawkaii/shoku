@@ -186,6 +186,19 @@ def _cook_payload(**overrides: Any) -> dict[str, Any]:
     return payload
 
 
+def _photo_payload(**overrides: Any) -> dict[str, Any]:
+    payload = {
+        "id": "p1",
+        "role": "version",
+        "version_id": "v1",
+        "cook_id": None,
+        "key": "photos/user-1/202601/abc123.jpg",
+        "created_at": "2026-01-03T10:00:00Z",
+    }
+    payload.update(overrides)
+    return payload
+
+
 @pytest.fixture
 def dish_payload():
     """Factory: ``dish_payload(title="x")``."""
@@ -200,3 +213,8 @@ def version_payload():
 @pytest.fixture
 def cook_payload():
     return _cook_payload
+
+
+@pytest.fixture
+def photo_payload():
+    return _photo_payload

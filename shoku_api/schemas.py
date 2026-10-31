@@ -75,6 +75,9 @@ DishStatus = Literal["toCook", "cooked", "signature"]
 CookOutcome = Literal["needsWork", "good", "nailedIt"]
 CookMood = Literal["quick", "project", "comfort"]
 OriginKind = Literal["mine", "import"]
+#: Which surface a photo hangs on. ``cover`` is not a role: the dish cover is
+#: ``dishes.cover_url`` and has exactly one source of truth.
+PhotoRole = Literal["version", "debrief"]
 
 RowId = Annotated[str, StringConstraints(min_length=1, max_length=64)]
 Url = Annotated[str, StringConstraints(max_length=2048)]
@@ -156,12 +159,25 @@ class CookLogRowIn(SyncRow):
     rating: int = Field(default=3, ge=1, le=5)
 
 
+class PhotoRowIn(SyncRow):
+    id: RowId
+    role: PhotoRole
+    # Exactly one target, decided by ``role``: a version photo hangs off the
+    # recipe variant it documents, a debrief photo off the night it was cooked.
+    version_id: RowId | None = None
+    cook_id: RowId | None = None
+    key: Annotated[str, StringConstraints(min_length=1, max_length=512)]
+    created_at: datetime
+    deleted_at: datetime | None = None
+
+
 class PushRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dishes: list[DishRowIn] = Field(default_factory=list, max_length=500)
     versions: list[VersionRowIn] = Field(default_factory=list, max_length=1000)
     cook_logs: list[CookLogRowIn] = Field(default_factory=list, max_length=1000)
+    photos: list[PhotoRowIn] = Field(default_factory=list, max_length=2000)
 
 
 class PullRequest(BaseModel):
@@ -227,10 +243,27 @@ class CookLogRowOut(SyncRow):
     rating: int
 
 
+class PhotoRowOut(SyncRow):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: str
+    role: str
+    version_id: str | None
+    cook_id: str | None
+    key: str
+    #: Derived from the storage base at read time, never stored. Null when the
+    #: deployment has no public base configured; a client that uploaded the
+    #: photo already holds the URL presign returned and falls back to it.
+    url: str | None = None
+    created_at: datetime
+    deleted_at: datetime | None
+
+
 class PullResponse(BaseModel):
     dishes: list[DishRowOut]
     versions: list[VersionRowOut]
     cook_logs: list[CookLogRowOut]
+    photos: list[PhotoRowOut] = Field(default_factory=list)
     cursor: str | None
     has_more: bool
     server_time: datetime
@@ -246,6 +279,7 @@ class PushResponse(BaseModel):
     dishes: list[RowResult]
     versions: list[RowResult]
     cook_logs: list[RowResult]
+    photos: list[RowResult] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
