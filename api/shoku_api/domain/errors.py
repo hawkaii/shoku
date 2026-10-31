@@ -89,5 +89,11 @@ class StructuringFailed(PipelineError):
     reason = "invalid_recipe"
 
 
+class SourceBlocked(PipelineError):
+    """The platform refused this server (429, captcha, region). Cookies fix it."""
+
+    reason = "source_blocked"
+
+
 class ContentTakenDown(PipelineError):
     reason = "taken_down"
