@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from ..domain.clock import Clock
 from ..domain.errors import Gone, NotFound
 from ..domain.urls import normalise_url
+from .pipeline import EXTRACTION_VERSION
 from .queue import Queue
 from ..models import ContentCache, ImportJob
 from ..schemas import ImportResponse, ImportStatus
@@ -49,10 +50,16 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
     if cached is not None and cached.deleted_at is not None:
         # A takedown is final for that shortcode. Re-extracting would undo it.
         raise Gone(detail=f"{source.shortcode} was taken down")
-    if cached is not None and cached.structured_json is not None:
+    if (
+        cached is not None
+        and cached.structured_json is not None
+        and cached.extraction_version >= EXTRACTION_VERSION
+    ):
         return ImportResponse(
             job_id=None, state="ready", cached=True, shortcode=source.shortcode
         )
+    # Otherwise a stale parse: fall through and extract again. Serving it would
+    # keep showing a dish the current pipeline would no longer produce.
 
     # One extraction per shortcode at a time, whoever asked for it. Duplicate
     # jobs are how a viral reel melts a worker pool.
