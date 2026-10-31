@@ -79,42 +79,39 @@ class YtDlpExtractor:
         if not has_quantities(caption):
             transcript = self._fetch_subtitles(info, url, workdir, base, deadline)
 
-        audio_path = None
+        media_path = None
         # Only pay for a download when neither the caption nor the subtitles
         # can carry a recipe.
         if not has_quantities(caption) and not transcript:
             deadline.check("download")
-            out = workdir / "audio.%(ext)s"
+            # A single progressive file at a modest size: small enough to sample
+            # frames from, and whisper decodes the container directly.
+            out = workdir / "media.%(ext)s"
             opts = {
                 **base,
-                "format": "bestaudio/best",
+                "format": "best[height<=720][ext=mp4]/best[height<=720]/best",
                 "outtmpl": str(out),
-                "postprocessors": [
-                    {"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "64"}
-                ],
             }
             try:
                 with yt_dlp.YoutubeDL(opts) as ydl:
                     ydl.extract_info(url, download=True)
             except Exception as exc:  # noqa: BLE001
                 raise _translate_extraction_error(exc) from exc
-            audio_path = next(iter(workdir.glob("audio.*")), None)
+            media_path = next(iter(workdir.glob("media.*")), None)
 
         platform = "instagram" if "instagram" in (info.get("webpage_url") or url) else "youtube"
-        handle = info.get("uploader_id") or info.get("channel_id")
-        if handle and not str(handle).startswith("@"):
-            handle = f"@{handle}"
 
         return Extraction(
             caption=caption,
             transcript=transcript,
             comment=comment,
             creator=info.get("uploader") or info.get("channel"),
-            creator_handle=handle,
+            creator_handle=_creator_handle(info),
             platform=platform,
             thumbnail_url=info.get("thumbnail"),
             source_url=info.get("webpage_url") or url,
-            audio_path=audio_path,
+            audio_path=media_path,
+            video_path=media_path,
             duration_seconds=float(duration) if duration else None,
         )
 
@@ -220,6 +217,28 @@ class YtDlpExtractor:
             if path.suffix.lower() in {".vtt", ".srt"}:
                 return _cues_to_text(path.read_text(errors="ignore"))
         return ""
+
+
+_HANDLE_IN_URL = re.compile(r"/([A-Za-z0-9._]{2,30})/?$")
+
+
+def _creator_handle(info: dict) -> str | None:
+    """The account that posted the reel, or nothing.
+
+    ``uploader_id`` is the account's *numeric* id on Instagram ("273008788"),
+    which is not a handle and reads as a bug in the UI. The account name is in
+    the profile URL, so prefer that, then a non-numeric id, and otherwise say
+    nothing — the display name is still attributed.
+    """
+    for key in ("uploader_url", "channel_url"):
+        match = _HANDLE_IN_URL.search(str(info.get(key) or ""))
+        if match and match.group(1).lower() not in {"reel", "p", "video", "watch"}:
+            return f"@{match.group(1)}"
+
+    candidate = info.get("uploader_id") or info.get("channel_id")
+    if candidate and not str(candidate).isdigit():
+        return f"@{str(candidate).lstrip('@')}"
+    return None
 
 
 class FasterWhisperTranscriber:
@@ -416,48 +435,205 @@ class OpenAICompatStructurer:
         self.max_tokens = max_tokens
 
     def structure(self, text: str, *, caption_first: bool) -> dict:
-        import httpx
-
         prompt = self.PROMPT
         if not caption_first:
             prompt += "\n\nThis text comes from speech, so expect filler words."
 
-        response = httpx.post(
-            f"{self.base_url}/chat/completions",
-            headers={"authorization": f"Bearer {self.api_key}"},
-            json={
-                "model": self.model,
-                "temperature": 0,
-                "reasoning_effort": self.reasoning_effort,
-                "max_tokens": self.max_tokens,
-                "response_format": {
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "Recipe",
-                        "strict": True,
-                        "schema": self.SCHEMA,
-                    },
-                },
-                "messages": [
-                    {"role": "system", "content": prompt},
-                    {"role": "user", "content": text[:24000]},
-                ],
-            },
+        return _chat_json(
+            base_url=self.base_url,
+            api_key=self.api_key,
+            model=self.model,
             timeout=self.timeout,
+            reasoning_effort=self.reasoning_effort,
+            max_tokens=self.max_tokens,
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": text[:24000]},
+            ],
+            schema=self.SCHEMA,
         )
-        response.raise_for_status()
-        body = response.json()
-        choice = body["choices"][0]
-        content = choice["message"]["content"]
-        if not content:
-            # The model spent the whole budget reasoning. Say so plainly, so a
-            # truncated run is not mistaken for a badly transcribed reel.
-            usage = body.get("usage") or {}
-            raise StructuringFailed(
-                detail=f"model returned no content (finish={choice.get('finish_reason')}, "
-                f"reasoning_tokens={(usage.get('completion_tokens_details') or {}).get('reasoning_tokens')})"
+
+
+def _chat_json(
+    *,
+    base_url: str,
+    api_key: str,
+    model: str,
+    timeout: float,
+    reasoning_effort: str,
+    max_tokens: int,
+    messages: list[dict],
+    schema: dict,
+) -> dict:
+    """One schema-constrained call, shared by the text and vision structurers.
+
+    Kept in one place so the two cannot diverge: both must pin the reasoning
+    effort and both must be constrained by the schema, or one of them silently
+    starts returning prose.
+    """
+    import httpx
+
+    response = httpx.post(
+        f"{base_url.rstrip('/')}/chat/completions",
+        headers={"authorization": f"Bearer {api_key}"},
+        json={
+            "model": model,
+            "temperature": 0,
+            "reasoning_effort": reasoning_effort,
+            "max_tokens": max_tokens,
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {"name": "Recipe", "strict": True, "schema": schema},
+            },
+            "messages": messages,
+        },
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    body = response.json()
+    choice = body["choices"][0]
+    content = choice["message"]["content"]
+    if not content:
+        # The whole budget went on reasoning. Say so plainly, so a truncated run
+        # is not mistaken for a badly transcribed reel.
+        usage = body.get("usage") or {}
+        raise StructuringFailed(
+            detail=f"model returned no content (finish={choice.get('finish_reason')}, "
+            f"reasoning_tokens={(usage.get('completion_tokens_details') or {}).get('reasoning_tokens')})"
+        )
+    return json.loads(content)
+
+
+class VisionStructurer:
+    """Reads a silent reel: the frames, and the text burned into them.
+
+    Many cooking reels carry no caption and no narration, but still burn the
+    ingredient list onto the video. A model looking at frames can read that,
+    plus the ingredients and the order of the actions.
+
+    It is an approximation by construction — the camera shows *that* turmeric
+    goes in, not that it is a teaspoon — so what it produces is tagged as
+    vision-derived and the amount is a plain guess where none is visible. The
+    user asked for the guess; the tag is what keeps it honest.
+    """
+
+    name = "muse-vision"
+
+    PROMPT = (
+        "You are reading a cooking video that has no narration and possibly no "
+        "caption. The images are frames sampled in order from start to finish.\n"
+        "\n"
+        "What to look for, in this order:\n"
+        "1. Text burned into the video: ingredient lists, quantities, the dish "
+        "name. This is the most reliable source — read it exactly.\n"
+        "2. Ingredients you can actually see being used.\n"
+        "3. The actions, in the order they happen, as imperative steps "
+        "('Add the cumin', not 'cumin is added').\n"
+        "\n"
+        "Because nobody states quantities: use the on-screen amounts when they "
+        "appear, and otherwise give a plausible amount for the number of "
+        "servings you can see. Estimate sensibly rather than leaving everything "
+        "empty — an approximate amount is more useful here than none.\n"
+        "\n"
+        "Never invent a dish that is not being cooked. If the frames show no "
+        "cooking at all, return empty ingredient and step lists.\n"
+        "\n"
+        "kcal and protein are always 0."
+    )
+
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        model: str,
+        timeout: float = 120.0,
+        *,
+        reasoning_effort: str = "minimal",
+        max_tokens: int = 8000,
+        max_frames: int = 16,
+    ) -> None:
+        self.base_url = base_url
+        self.api_key = api_key
+        self.model = model
+        self.timeout = timeout
+        self.reasoning_effort = reasoning_effort
+        self.max_tokens = max_tokens
+        self.max_frames = max_frames
+
+    def structure_frames(self, frames: list[Path], *, hint: str = "") -> dict:
+        import base64
+
+        if not frames:
+            raise StructuringFailed(detail="no frames could be sampled from the video")
+
+        parts: list[dict] = [{"type": "text", "text": self.PROMPT}]
+        if hint.strip():
+            parts.append({"type": "text", "text": f"Caption, if any: {hint[:2000]}"})
+        for frame in frames[: self.max_frames]:
+            encoded = base64.b64encode(frame.read_bytes()).decode()
+            parts.append(
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}}
             )
-        return _merge_duplicate_ingredients(json.loads(content))
+
+        raw = _chat_json(
+            base_url=self.base_url,
+            api_key=self.api_key,
+            model=self.model,
+            timeout=self.timeout,
+            reasoning_effort=self.reasoning_effort,
+            max_tokens=self.max_tokens,
+            messages=[{"role": "user", "content": parts}],
+            schema=OpenAICompatStructurer.SCHEMA,
+        )
+
+        if not raw.get("ingredients") or not raw.get("steps"):
+            # Nothing was cooking. Better a clear reason than a junk dish.
+            raise StructuringFailed(detail="the video shows no readable recipe")
+
+        return _merge_duplicate_ingredients(raw)
+
+
+def sample_frames(
+    video_path: Path,
+    workdir: Path,
+    *,
+    count: int = 16,
+    width: int = 720,
+    duration: float | None = None,
+) -> list[Path]:
+    """Evenly spaced stills across the clip, as JPEGs.
+
+    Evenly spaced rather than scene-detected: a recipe step is usually a short
+    cut, and scene detection finds the editing rhythm rather than the cooking,
+    so a fast-cut reel ends up over-sampling hands and under-sampling food.
+    """
+    import subprocess
+
+    out_dir = workdir / "frames"
+    out_dir.mkdir(exist_ok=True)
+
+    # One frame every `interval` seconds, spread over the whole clip. Without a
+    # duration, fall back to one per two seconds and let the cap do the rest.
+    interval = max(0.5, (duration or count * 2) / count)
+    pattern = out_dir / "frame_%03d.jpg"
+
+    command = [
+        "ffmpeg", "-nostdin", "-y",
+        "-i", str(video_path),
+        "-vf", f"fps=1/{interval:.3f},scale={width}:-2",
+        "-frames:v", str(count),
+        "-q:v", "4",
+        str(pattern),
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise StructuringFailed(
+            detail=f"could not sample frames: {result.stderr.strip()[-200:]}"
+        )
+    frames = sorted(out_dir.glob("frame_*.jpg"))
+    if not frames:
+        raise StructuringFailed(detail="the video produced no frames")
+    return frames
 
 
 def _merge_duplicate_ingredients(recipe: dict) -> dict:

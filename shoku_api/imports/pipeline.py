@@ -33,13 +33,15 @@ from sqlalchemy.orm import Session
 from ..db import session_scope
 from ..domain.captions import has_quantities
 from ..domain.clock import Deadline
-from ..domain.errors import PipelineError
+from ..domain.errors import PipelineError, StructuringFailed
 from ..models import ImportJob
 from ..schemas import ProsePayload, RecipePayload
 from .. import content as content_service
+from .adapters import sample_frames
 
 if TYPE_CHECKING:  # pragma: no cover
     from ..container import AppContext
+    from .interfaces import Extraction
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +54,10 @@ BUDGET_SECONDS = 60.0
 # improvement reach a dish someone imported before the improvement existed.
 #   2: Muse structurer replaces the line-splitting heuristic.
 EXTRACTION_VERSION = 2
+
+# Below this, a "text" is not carrying a recipe: a bare hashtag, a greeting, or
+# the silence that speech recognition returns for a music-only reel.
+MIN_TEXT_CHARS = 20
 
 READY = "ready"
 FAILED = "failed"
@@ -140,12 +146,8 @@ class ImportWorker:
                 text = transcript
                 self._set_stage(job.id, "structuring")
             elif breaker_open:
-                # Degraded: no ASR. It is caption or nothing.
-                if not caption:
-                    raise PipelineError(
-                        reason="caption_only_degraded",
-                        detail="breaker open and the caption is empty",
-                    )
+                # Degraded: speech recognition is out. A caption can still carry
+                # the recipe, and if it cannot, the video itself might.
                 mode = "caption_only_degraded"
                 text = caption
                 self._set_stage(job.id, "caption_only")
@@ -161,9 +163,16 @@ class ImportWorker:
                 self._set_stage(job.id, "structuring")
 
             deadline.check("structure")
-            raw: dict[str, Any] = self.ctx.structurer.structure(
-                text, caption_first=(mode != "transcript")
-            )
+            if len(text.strip()) < MIN_TEXT_CHARS:
+                # Nothing to read anywhere. If there is a video, watch it.
+                raw: dict[str, Any] = self._read_video(job, extraction, caption, deadline)
+                mode = "vision"
+                # Say so on the dish: these amounts were seen, not stated.
+                raw["tags"] = [*raw.get("tags", []), "from video"][:20]
+            else:
+                raw = self.ctx.structurer.structure(
+                    text, caption_first=(mode != "transcript")
+                )
             recipe = RecipePayload.model_validate(raw)
             prose = _build_prose(recipe, caption, extraction.creator)
 
@@ -175,10 +184,59 @@ class ImportWorker:
                 creator_handle=extraction.creator_handle,
                 platform=extraction.platform,
                 thumbnail_url=extraction.thumbnail_url,
-                structuring_model=getattr(self.ctx.structurer, "name", None),
+                structuring_model=(
+                    getattr(self.ctx.vision, "name", None)
+                    if mode == "vision"
+                    else getattr(self.ctx.structurer, "name", None)
+                ),
                 source_url=extraction.source_url or job.source_url,
             )
             return PipelineResult(job_id=job.id, state=READY, mode=mode)
+
+    def _read_video(
+        self,
+        job: ClaimedJob,
+        extraction: Extraction,
+        caption: str,
+        deadline: Deadline,
+    ) -> dict[str, Any]:
+        """Reads a silent reel from sampled frames.
+
+        The last resort: reached only when every text source was empty, because
+        it is the one path that costs a vision call. A reel with a caption must
+        never pay for it.
+        """
+        vision = self.ctx.vision
+        if vision is None:
+            raise PipelineError(
+                reason="no_text",
+                detail="no caption, no speech, and reading frames is turned off",
+            )
+        if extraction.video_path is None:
+            raise PipelineError(
+                reason="no_text", detail="no caption, no speech, and no video to read"
+            )
+
+        self._set_stage(job.id, "watching")
+        try:
+            frames = sample_frames(
+                extraction.video_path,
+                extraction.video_path.parent,
+                count=self.ctx.settings.vision_frames,
+                duration=extraction.duration_seconds,
+            )
+        except StructuringFailed as exc:
+            raise PipelineError(reason="vision_failed", detail=exc.detail) from exc
+        deadline.check("frames")
+
+        try:
+            return vision.structure_frames(frames, hint=caption)
+        except StructuringFailed as exc:
+            # The frames genuinely showed no cooking, or the model was cut off.
+            raise PipelineError(reason="no_recipe", detail=exc.detail) from exc
+        except Exception as exc:  # noqa: BLE001 - network, decode, model
+            log.warning("reading %s from video failed: %s", job.shortcode, exc)
+            raise PipelineError(reason="vision_failed", detail=str(exc)[:200]) from exc
 
     def _persist(
         self,

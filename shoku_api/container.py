@@ -45,6 +45,9 @@ class AppContext:
     assistant_model: AssistantModel
     clock: Clock
     breaker: CircuitBreaker
+    #: Reads a silent reel from frames. None when vision is off or unconfigured,
+    #: which turns "no text" into a clear failure instead of a junk dish.
+    vision: "VisionStructurer | None" = None
 
     # ---- convenience views for services ---------------------------------
 
@@ -118,6 +121,7 @@ def build_context(
     from .imports.adapters import (
         FallbackStructurer,
         FasterWhisperTranscriber,
+        VisionStructurer,
         HeuristicStructurer,
         OpenAICompatStructurer,
         YtDlpExtractor,
@@ -140,6 +144,17 @@ def build_context(
         )
         # The model improves the parse; it must never be able to fail an import.
         ctx.structurer = FallbackStructurer(model, HeuristicStructurer())
+        if settings.vision == "auto":
+            # Same model and budget; it is only the input that differs.
+            ctx.vision = VisionStructurer(
+                settings.structurer_base_url or "https://api.meta.ai/v1",
+                settings.structurer_api_key,
+                settings.structurer_model or "muse-spark-1.3",
+                settings.structurer_timeout,
+                reasoning_effort=settings.structurer_reasoning_effort,
+                max_tokens=settings.structurer_max_tokens,
+                max_frames=settings.vision_frames,
+            )
 
     for name, value in overrides.items():
         if not hasattr(ctx, name):

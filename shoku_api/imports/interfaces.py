@@ -37,6 +37,9 @@ class Extraction:
     thumbnail_url: str | None = None
     source_url: str = ""
     audio_path: Path | None = None
+    #: The video itself, when it was downloaded. Speech recognition can use it,
+    #: and a silent reel can still be read by sampling frames from it.
+    video_path: Path | None = None
     duration_seconds: float | None = None
 
 
