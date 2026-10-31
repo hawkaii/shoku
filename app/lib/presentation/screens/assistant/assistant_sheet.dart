@@ -115,7 +115,7 @@ class _AssistantSheetState extends ConsumerState<AssistantSheet> {
                 const SizedBox(width: ShokuSpace.sm),
                 Text('Ask about this cook', style: ShokuType.h2.copyWith(color: c.ink)),
                 const Spacer(),
-                const ShokuChip('answers only', icon: Icons.lock_outline),
+                ShokuChip('answers only', icon: Icons.lock_outline),
               ],
             ),
             const SizedBox(height: ShokuSpace.md),

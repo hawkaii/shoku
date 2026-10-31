@@ -13,7 +13,7 @@ import '../../widgets/neu_loading_dialog.dart';
 import '../../widgets/neu_error_dialog.dart';
 
 class ScanBillScreen extends ConsumerStatefulWidget {
-  const ScanBillScreen({super.key});
+  const ScanBillScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<ScanBillScreen> createState() => _ScanBillScreenState();

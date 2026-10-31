@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../mock/journal_data.dart';
 import '../db/app_database.dart';
 import '../db/journal_repository.dart';
 
@@ -16,11 +17,10 @@ import '../db/journal_repository.dart';
 ///   * dishes are mutable → last write wins on `updatedAt`
 ///   * deletes are tombstones → applied, never removed
 class SyncRepository {
-  /// The journal repository is part of the signature because callers already
-  /// hold it; the merge rules below read and write the database directly.
-  SyncRepository(this._db, JournalRepository local);
+  SyncRepository(this._db, this._local);
 
   final AppDatabase _db;
+  final JournalRepository _local;
 
   static const _cursorKey = 'sync_cursor';
 
@@ -161,7 +161,6 @@ class SyncRepository {
                 changes: Value(_encode(row['changes'])),
                 ingredients: Value(_encode(row['ingredients'])),
                 steps: Value(_encode(row['steps'])),
-                tags: Value(_encode(row['tags'])),
                 kcal: Value((row['kcal'] as num?)?.toInt() ?? 0),
                 protein: Value((row['protein'] as num?)?.toInt() ?? 0),
                 originKind: Value(row['origin_kind'] as String? ?? 'mine'),
@@ -229,7 +228,6 @@ class SyncRepository {
         'changes': _decode(row.changes),
         'ingredients': _decode(row.ingredients),
         'steps': _decode(row.steps),
-        'tags': _decode(row.tags),
         'kcal': row.kcal,
         'protein': row.protein,
         'origin_kind': row.originKind,

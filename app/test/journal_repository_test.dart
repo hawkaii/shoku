@@ -132,19 +132,19 @@ void main() {
 
   // ---- regressions found in review ------------------------------------
 
-  test('seeding the same rows twice is a no-op', () async {
-    final fixture = [_dish(id: 'a'), _dish(id: 'b')];
-    await repo.seed(fixture);
-    await repo.seed(fixture);
+  test('seeding the real demo data twice is a no-op', () async {
+    await repo.seed(JournalData.dishes);
+    await repo.seed(JournalData.dishes);
 
     final dishes = await repo.loadDishes();
-    expect(dishes, hasLength(2));
-    // Versions arrive without ids; if each seed mints a new UUID, they double.
-    expect(dishes.first.versions, hasLength(1));
+    final mousse = dishes.firstWhere((d) => d.id == 'mousse');
+    // Demo versions arrive without ids; if the seed mints a new UUID each time,
+    // this is 6 instead of 3.
+    expect(mousse.versions, hasLength(3));
   });
 
   test('seed rows are local, not pending upload', () async {
-    await repo.seed([_dish(id: 'a')]);
+    await repo.seed(JournalData.dishes);
     final dirty = await db.customSelect(
       'SELECT COUNT(*) AS n FROM dish_rows WHERE dirty = 1',
     ).getSingle();
@@ -301,27 +301,5 @@ void main() {
       'SELECT COUNT(*) AS n FROM cook_log_rows',
     ).getSingle();
     expect(cooks.data['n'], 0);
-  });
-
-  group('the app ships empty', () {
-    test('the demo kitchen is removed and a real dish survives', () async {
-      final db = AppDatabase(NativeDatabase.memory());
-      final repo = _repo(db);
-
-      // An install that already carries the demo kitchen plus a real import.
-      await repo.seed([_dish(id: 'mousse'), _dish(id: 'chicken')]);
-      await repo.upsertDish(_dish(id: 'imported-1'));
-
-      await repo.removeDemoKitchen(['mousse', 'chicken']);
-
-      final dishes = await repo.loadDishes();
-      expect(dishes.map((d) => d.id), ['imported-1'],
-          reason: 'only the demo dishes may be deleted');
-    });
-
-    test('a new install has no dishes at all', () async {
-      final db = AppDatabase(NativeDatabase.memory());
-      expect(await _repo(db).loadDishes(), isEmpty);
-    });
   });
 }

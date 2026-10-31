@@ -52,11 +52,6 @@ class ShokuApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Keeps the sync controller alive for the whole app, which is what
-    // subscribes it to the auth stream. Without this watch there is no
-    // listener, and a pass that ran too early is never retried.
-    ref.watch(syncControllerProvider);
-
     final mode = ref.watch(themeModeProvider);
     final onboardingDone = ref.watch(onboardingDoneProvider);
 

@@ -10,7 +10,7 @@ import '../../../providers/providers.dart';
 class ShoppingListScreen extends ConsumerWidget {
   final int recipeId;
 
-  const ShoppingListScreen({super.key, required this.recipeId});
+  const ShoppingListScreen({Key? key, required this.recipeId}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -164,7 +164,7 @@ class ShoppingListScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 );
-                              }),
+                              }).toList(),
                             ],
                           ),
                         ),
