@@ -36,7 +36,7 @@ class SavesPlanScreen extends ConsumerWidget {
             children: [
               ShokuStat('$saves', label: 'balance', hero: true, color: c.accent),
               const SizedBox(width: ShokuSpace.xl),
-              ShokuStat('7', label: 'weekly free'),
+              const ShokuStat('7', label: 'weekly free'),
             ],
           ),
           const SizedBox(height: ShokuSpace.xl),

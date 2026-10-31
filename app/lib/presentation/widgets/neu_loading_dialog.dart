@@ -10,10 +10,10 @@ class NeuLoadingDialog extends StatelessWidget {
   final double? progress;
 
   const NeuLoadingDialog({
-    Key? key,
+    super.key,
     this.message = 'Loading...',
     this.progress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

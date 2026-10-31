@@ -14,7 +14,7 @@ import '../../widgets/neu_loading_dialog.dart';
 import '../../widgets/neu_error_dialog.dart';
 
 class IngredientInputScreen extends ConsumerStatefulWidget {
-  const IngredientInputScreen({Key? key}) : super(key: key);
+  const IngredientInputScreen({super.key});
 
   @override
   ConsumerState<IngredientInputScreen> createState() =>

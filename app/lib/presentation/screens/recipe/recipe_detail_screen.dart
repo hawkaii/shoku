@@ -7,6 +7,7 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
+import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
 
 const _ingredients = <String, List<String>>{
@@ -28,9 +29,32 @@ class RecipeDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final item = ref
-        .watch(savedItemsProvider)
-        .firstWhere((i) => i.id == itemId, orElse: () => MockData.items.first);
+    // No demo fallback: an id that is not in the journal is simply not there.
+    SavedItem? item;
+    for (final candidate in ref.watch(savedItemsProvider)) {
+      if (candidate.id == itemId) {
+        item = candidate;
+        break;
+      }
+    }
+    if (item == null) {
+      return Scaffold(
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(ShokuSpace.lg),
+            children: const [
+              ShokuEmptyState(
+                icon: Icons.search_off,
+                title: 'That one is not here',
+                body: 'It may have been removed from your journal.',
+                actionLabel: 'Back',
+                onAction: null,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final ingredients = _ingredients[item.id] ?? const ['See the original reel'];
 
     return Scaffold(
@@ -78,9 +102,9 @@ class RecipeDetailScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Expanded(child: ShokuStat('25m', label: 'total')),
+                  const Expanded(child: ShokuStat('25m', label: 'total')),
                   Container(width: 1, height: 26, color: c.hairline),
-                  Expanded(child: ShokuStat('4', label: 'servings')),
+                  const Expanded(child: ShokuStat('4', label: 'servings')),
                   Container(width: 1, height: 26, color: c.hairline),
                   Expanded(
                     child: ShokuStat(
@@ -94,7 +118,7 @@ class RecipeDetailScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.lg),
-            ShokuLabel('ingredients'),
+            const ShokuLabel('ingredients'),
             const SizedBox(height: ShokuSpace.sm),
             for (final ingredient in ingredients)
               Container(
@@ -126,7 +150,7 @@ class RecipeDetailScreen extends ConsumerWidget {
               ),
 
             const SizedBox(height: ShokuSpace.xl),
-            ShokuLabel('method'),
+            const ShokuLabel('method'),
             const SizedBox(height: ShokuSpace.sm),
             for (var i = 0; i < item.body.length; i++)
               Padding(

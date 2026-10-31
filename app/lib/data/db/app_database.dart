@@ -52,6 +52,8 @@ class VersionRows extends Table {
 
   TextColumn get originKind => text().withDefault(const Constant('mine'))();
   TextColumn get originCreator => text().nullable()();
+  TextColumn get originHandle => text().nullable()();
+  TextColumn get originPlatform => text().nullable()();
   TextColumn get originUrl => text().nullable()();
   TextColumn get originShortcode => text().nullable()();
   TextColumn get parentVersionId => text().nullable()();
@@ -85,6 +87,25 @@ class CookLogRows extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// The kitchen timer, on disk.
+///
+/// One row, device-local. It carries no `dirty` flag on purpose: a timer running
+/// on this phone means nothing to another device or to a server, so it never
+/// enters the sync wire.
+class CookTimerRows extends Table {
+  TextColumn get id => text()();
+  TextColumn get dishId => text()();
+  TextColumn get versionId => text()();
+  IntColumn get stepIndex => integer()();
+  DateTimeColumn get startedAt => dateTime()();
+  IntColumn get durationMs => integer()();
+  IntColumn get pausedMs => integer().withDefault(const Constant(0))();
+  DateTimeColumn get pausedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Small key/value store for database-level facts. The seed marker lives here
 /// rather than in SharedPreferences so that wiping the database also resets it —
 /// the two can never disagree about whether the demo kitchen exists.
@@ -96,7 +117,7 @@ class MetaRows extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, MetaRows])
+@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, CookTimerRows, MetaRows])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ??
@@ -111,7 +132,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -132,10 +153,22 @@ class AppDatabase extends _$AppDatabase {
             // v1 wrote datetimes as unix seconds, which loses milliseconds and
             // can't be read as ISO-8601 text. The only v1 rows in existence are
             // the reproducible demo seed, so rebuild rather than convert.
+            // `createAll` also creates the tables added since.
             await m.deleteTable('cook_log_rows');
             await m.deleteTable('version_rows');
             await m.deleteTable('dish_rows');
             await m.createAll();
+            return;
+          }
+          if (from < 3) {
+            // Provenance for imported versions: the creator's handle and the
+            // platform, so a dish can link back to the reel it came from.
+            await m.addColumn(versionRows, versionRows.originHandle);
+            await m.addColumn(versionRows, versionRows.originPlatform);
+          }
+          if (from < 4) {
+            // The kitchen timer, so a cook survives the app being killed.
+            await m.createTable(cookTimerRows);
           }
         },
         beforeOpen: (details) async {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
@@ -92,6 +94,10 @@ class DishScreen extends ConsumerWidget {
             Text(dish.title, style: ShokuType.display.copyWith(color: c.ink)),
             const SizedBox(height: 4),
             Text(dish.subtitle, style: ShokuType.body.copyWith(color: c.inkMuted)),
+            if (version.isImport) ...[
+              const SizedBox(height: ShokuSpace.md),
+              _ProvenanceCard(version: version),
+            ],
             const SizedBox(height: ShokuSpace.lg),
 
             // ---- The memory: recommended version -------------------------
@@ -116,7 +122,7 @@ class DishScreen extends ConsumerWidget {
                         ShokuChip('altered from original', color: c.reward, filled: true),
                       const Spacer(),
                       Text(
-                        '${dish.cookCount} cooks',
+                        count(dish.cookCount, 'cook'),
                         style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                       ),
                     ],
@@ -220,7 +226,7 @@ class DishScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: ShokuSpace.md),
                   ],
-                  ShokuLabel('ingredients'),
+                  const ShokuLabel('ingredients'),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final ingredient in version.ingredients)
                     Container(
@@ -309,7 +315,7 @@ class DishScreen extends ConsumerWidget {
             ),
 
             const SizedBox(height: ShokuSpace.xl),
-            ShokuLabel('history'),
+            const ShokuLabel('history'),
             const SizedBox(height: ShokuSpace.sm),
             if (dish.cooks.isEmpty)
               Text('Not cooked yet. The first log becomes v1.',
@@ -449,6 +455,110 @@ class _DishUnavailable extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+/// Where an imported version came from: a person, on a platform, at a link.
+///
+/// This is the difference between a recipe that arrived from the internet and
+/// one that belongs to someone — so it names the creator and gives a way back
+/// to the original.
+class _ProvenanceCard extends StatelessWidget {
+  final RecipeVersion version;
+
+  const _ProvenanceCard({required this.version});
+
+  String get _platformLabel => switch ((version.originPlatform ?? '').toLowerCase()) {
+        'instagram' => 'Instagram',
+        'youtube' => 'YouTube',
+        _ => 'the source',
+      };
+
+  Future<void> _open(BuildContext context) async {
+    final raw = version.originUrl;
+    if (raw == null || raw.isEmpty) return;
+    final uri = Uri.tryParse(raw);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final handle = version.originHandle;
+    final name = version.originCreator ?? 'Imported';
+
+    return Container(
+      padding: const EdgeInsets.all(ShokuSpace.md),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(ShokuRadius.card),
+        border: Border.all(color: c.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // A neutral glyph, not the platform's logo: attribution without
+              // pretending to be the app we are linking to.
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: c.surfaceAlt,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: c.hairline),
+                ),
+                child: Icon(Icons.videocam_outlined, size: 16, color: c.inkMuted),
+              ),
+              const SizedBox(width: ShokuSpace.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                    ),
+                    Text(
+                      [if (handle != null && handle.isNotEmpty) handle, _platformLabel].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (version.originUrl != null && version.originUrl!.isNotEmpty) ...[
+            const SizedBox(height: ShokuSpace.sm),
+            const Divider(height: 1),
+            TextButton(
+              onPressed: () => _open(context),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(0, 34),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('View the reel',
+                      style: ShokuType.label.copyWith(color: c.accent)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.north_east, size: 13, color: c.accent),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
