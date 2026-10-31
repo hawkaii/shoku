@@ -52,6 +52,8 @@ class VersionRows extends Table {
 
   TextColumn get originKind => text().withDefault(const Constant('mine'))();
   TextColumn get originCreator => text().nullable()();
+  TextColumn get originHandle => text().nullable()();
+  TextColumn get originPlatform => text().nullable()();
   TextColumn get originUrl => text().nullable()();
   TextColumn get originShortcode => text().nullable()();
   TextColumn get parentVersionId => text().nullable()();
@@ -111,7 +113,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -128,6 +130,12 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (m, from, to) async {
+          if (from < 3) {
+            // Provenance for imported versions: the creator's handle and the
+            // platform, so a dish can link back to the reel it came from.
+            await m.addColumn(versionRows, versionRows.originHandle);
+            await m.addColumn(versionRows, versionRows.originPlatform);
+          }
           if (from < 2) {
             // v1 wrote datetimes as unix seconds, which loses milliseconds and
             // can't be read as ISO-8601 text. The only v1 rows in existence are

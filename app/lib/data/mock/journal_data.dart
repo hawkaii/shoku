@@ -48,6 +48,8 @@ class RecipeVersion {
   /// reel; editing it forks a `mine` version rather than mutating the original.
   final String originKind;
   final String? originCreator;
+  final String? originHandle;
+  final String? originPlatform;
   final String? originUrl;
   final String? originShortcode;
   final String? parentVersionId;
@@ -63,6 +65,8 @@ class RecipeVersion {
     this.protein = 0,
     this.originKind = 'mine',
     this.originCreator,
+    this.originHandle,
+    this.originPlatform,
     this.originUrl,
     this.originShortcode,
     this.parentVersionId,

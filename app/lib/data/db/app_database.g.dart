@@ -751,6 +751,18 @@ class $VersionRowsTable extends VersionRows
   late final GeneratedColumn<String> originCreator = GeneratedColumn<String>(
       'origin_creator', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _originHandleMeta =
+      const VerificationMeta('originHandle');
+  @override
+  late final GeneratedColumn<String> originHandle = GeneratedColumn<String>(
+      'origin_handle', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _originPlatformMeta =
+      const VerificationMeta('originPlatform');
+  @override
+  late final GeneratedColumn<String> originPlatform = GeneratedColumn<String>(
+      'origin_platform', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _originUrlMeta =
       const VerificationMeta('originUrl');
   @override
@@ -802,6 +814,8 @@ class $VersionRowsTable extends VersionRows
         protein,
         originKind,
         originCreator,
+        originHandle,
+        originPlatform,
         originUrl,
         originShortcode,
         parentVersionId,
@@ -868,6 +882,18 @@ class $VersionRowsTable extends VersionRows
           originCreator.isAcceptableOrUnknown(
               data['origin_creator']!, _originCreatorMeta));
     }
+    if (data.containsKey('origin_handle')) {
+      context.handle(
+          _originHandleMeta,
+          originHandle.isAcceptableOrUnknown(
+              data['origin_handle']!, _originHandleMeta));
+    }
+    if (data.containsKey('origin_platform')) {
+      context.handle(
+          _originPlatformMeta,
+          originPlatform.isAcceptableOrUnknown(
+              data['origin_platform']!, _originPlatformMeta));
+    }
     if (data.containsKey('origin_url')) {
       context.handle(_originUrlMeta,
           originUrl.isAcceptableOrUnknown(data['origin_url']!, _originUrlMeta));
@@ -929,6 +955,10 @@ class $VersionRowsTable extends VersionRows
           .read(DriftSqlType.string, data['${effectivePrefix}origin_kind'])!,
       originCreator: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}origin_creator']),
+      originHandle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}origin_handle']),
+      originPlatform: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}origin_platform']),
       originUrl: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}origin_url']),
       originShortcode: attachedDatabase.typeMapping.read(
@@ -964,6 +994,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
   final int protein;
   final String originKind;
   final String? originCreator;
+  final String? originHandle;
+  final String? originPlatform;
   final String? originUrl;
   final String? originShortcode;
   final String? parentVersionId;
@@ -981,6 +1013,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       required this.protein,
       required this.originKind,
       this.originCreator,
+      this.originHandle,
+      this.originPlatform,
       this.originUrl,
       this.originShortcode,
       this.parentVersionId,
@@ -1001,6 +1035,12 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
     map['origin_kind'] = Variable<String>(originKind);
     if (!nullToAbsent || originCreator != null) {
       map['origin_creator'] = Variable<String>(originCreator);
+    }
+    if (!nullToAbsent || originHandle != null) {
+      map['origin_handle'] = Variable<String>(originHandle);
+    }
+    if (!nullToAbsent || originPlatform != null) {
+      map['origin_platform'] = Variable<String>(originPlatform);
     }
     if (!nullToAbsent || originUrl != null) {
       map['origin_url'] = Variable<String>(originUrl);
@@ -1031,6 +1071,12 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       originCreator: originCreator == null && nullToAbsent
           ? const Value.absent()
           : Value(originCreator),
+      originHandle: originHandle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originHandle),
+      originPlatform: originPlatform == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originPlatform),
       originUrl: originUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(originUrl),
@@ -1060,6 +1106,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       protein: serializer.fromJson<int>(json['protein']),
       originKind: serializer.fromJson<String>(json['originKind']),
       originCreator: serializer.fromJson<String?>(json['originCreator']),
+      originHandle: serializer.fromJson<String?>(json['originHandle']),
+      originPlatform: serializer.fromJson<String?>(json['originPlatform']),
       originUrl: serializer.fromJson<String?>(json['originUrl']),
       originShortcode: serializer.fromJson<String?>(json['originShortcode']),
       parentVersionId: serializer.fromJson<String?>(json['parentVersionId']),
@@ -1082,6 +1130,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       'protein': serializer.toJson<int>(protein),
       'originKind': serializer.toJson<String>(originKind),
       'originCreator': serializer.toJson<String?>(originCreator),
+      'originHandle': serializer.toJson<String?>(originHandle),
+      'originPlatform': serializer.toJson<String?>(originPlatform),
       'originUrl': serializer.toJson<String?>(originUrl),
       'originShortcode': serializer.toJson<String?>(originShortcode),
       'parentVersionId': serializer.toJson<String?>(parentVersionId),
@@ -1102,6 +1152,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           int? protein,
           String? originKind,
           Value<String?> originCreator = const Value.absent(),
+          Value<String?> originHandle = const Value.absent(),
+          Value<String?> originPlatform = const Value.absent(),
           Value<String?> originUrl = const Value.absent(),
           Value<String?> originShortcode = const Value.absent(),
           Value<String?> parentVersionId = const Value.absent(),
@@ -1120,6 +1172,10 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
         originKind: originKind ?? this.originKind,
         originCreator:
             originCreator.present ? originCreator.value : this.originCreator,
+        originHandle:
+            originHandle.present ? originHandle.value : this.originHandle,
+        originPlatform:
+            originPlatform.present ? originPlatform.value : this.originPlatform,
         originUrl: originUrl.present ? originUrl.value : this.originUrl,
         originShortcode: originShortcode.present
             ? originShortcode.value
@@ -1147,6 +1203,12 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       originCreator: data.originCreator.present
           ? data.originCreator.value
           : this.originCreator,
+      originHandle: data.originHandle.present
+          ? data.originHandle.value
+          : this.originHandle,
+      originPlatform: data.originPlatform.present
+          ? data.originPlatform.value
+          : this.originPlatform,
       originUrl: data.originUrl.present ? data.originUrl.value : this.originUrl,
       originShortcode: data.originShortcode.present
           ? data.originShortcode.value
@@ -1175,6 +1237,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           ..write('protein: $protein, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
+          ..write('originHandle: $originHandle, ')
+          ..write('originPlatform: $originPlatform, ')
           ..write('originUrl: $originUrl, ')
           ..write('originShortcode: $originShortcode, ')
           ..write('parentVersionId: $parentVersionId, ')
@@ -1197,6 +1261,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
       protein,
       originKind,
       originCreator,
+      originHandle,
+      originPlatform,
       originUrl,
       originShortcode,
       parentVersionId,
@@ -1217,6 +1283,8 @@ class VersionRow extends DataClass implements Insertable<VersionRow> {
           other.protein == this.protein &&
           other.originKind == this.originKind &&
           other.originCreator == this.originCreator &&
+          other.originHandle == this.originHandle &&
+          other.originPlatform == this.originPlatform &&
           other.originUrl == this.originUrl &&
           other.originShortcode == this.originShortcode &&
           other.parentVersionId == this.parentVersionId &&
@@ -1236,6 +1304,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
   final Value<int> protein;
   final Value<String> originKind;
   final Value<String?> originCreator;
+  final Value<String?> originHandle;
+  final Value<String?> originPlatform;
   final Value<String?> originUrl;
   final Value<String?> originShortcode;
   final Value<String?> parentVersionId;
@@ -1254,6 +1324,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.protein = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
+    this.originHandle = const Value.absent(),
+    this.originPlatform = const Value.absent(),
     this.originUrl = const Value.absent(),
     this.originShortcode = const Value.absent(),
     this.parentVersionId = const Value.absent(),
@@ -1273,6 +1345,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     this.protein = const Value.absent(),
     this.originKind = const Value.absent(),
     this.originCreator = const Value.absent(),
+    this.originHandle = const Value.absent(),
+    this.originPlatform = const Value.absent(),
     this.originUrl = const Value.absent(),
     this.originShortcode = const Value.absent(),
     this.parentVersionId = const Value.absent(),
@@ -1294,6 +1368,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     Expression<int>? protein,
     Expression<String>? originKind,
     Expression<String>? originCreator,
+    Expression<String>? originHandle,
+    Expression<String>? originPlatform,
     Expression<String>? originUrl,
     Expression<String>? originShortcode,
     Expression<String>? parentVersionId,
@@ -1313,6 +1389,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       if (protein != null) 'protein': protein,
       if (originKind != null) 'origin_kind': originKind,
       if (originCreator != null) 'origin_creator': originCreator,
+      if (originHandle != null) 'origin_handle': originHandle,
+      if (originPlatform != null) 'origin_platform': originPlatform,
       if (originUrl != null) 'origin_url': originUrl,
       if (originShortcode != null) 'origin_shortcode': originShortcode,
       if (parentVersionId != null) 'parent_version_id': parentVersionId,
@@ -1334,6 +1412,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       Value<int>? protein,
       Value<String>? originKind,
       Value<String?>? originCreator,
+      Value<String?>? originHandle,
+      Value<String?>? originPlatform,
       Value<String?>? originUrl,
       Value<String?>? originShortcode,
       Value<String?>? parentVersionId,
@@ -1352,6 +1432,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
       protein: protein ?? this.protein,
       originKind: originKind ?? this.originKind,
       originCreator: originCreator ?? this.originCreator,
+      originHandle: originHandle ?? this.originHandle,
+      originPlatform: originPlatform ?? this.originPlatform,
       originUrl: originUrl ?? this.originUrl,
       originShortcode: originShortcode ?? this.originShortcode,
       parentVersionId: parentVersionId ?? this.parentVersionId,
@@ -1395,6 +1477,12 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
     if (originCreator.present) {
       map['origin_creator'] = Variable<String>(originCreator.value);
     }
+    if (originHandle.present) {
+      map['origin_handle'] = Variable<String>(originHandle.value);
+    }
+    if (originPlatform.present) {
+      map['origin_platform'] = Variable<String>(originPlatform.value);
+    }
     if (originUrl.present) {
       map['origin_url'] = Variable<String>(originUrl.value);
     }
@@ -1432,6 +1520,8 @@ class VersionRowsCompanion extends UpdateCompanion<VersionRow> {
           ..write('protein: $protein, ')
           ..write('originKind: $originKind, ')
           ..write('originCreator: $originCreator, ')
+          ..write('originHandle: $originHandle, ')
+          ..write('originPlatform: $originPlatform, ')
           ..write('originUrl: $originUrl, ')
           ..write('originShortcode: $originShortcode, ')
           ..write('parentVersionId: $parentVersionId, ')
@@ -2751,6 +2841,8 @@ typedef $$VersionRowsTableCreateCompanionBuilder = VersionRowsCompanion
   Value<int> protein,
   Value<String> originKind,
   Value<String?> originCreator,
+  Value<String?> originHandle,
+  Value<String?> originPlatform,
   Value<String?> originUrl,
   Value<String?> originShortcode,
   Value<String?> parentVersionId,
@@ -2771,6 +2863,8 @@ typedef $$VersionRowsTableUpdateCompanionBuilder = VersionRowsCompanion
   Value<int> protein,
   Value<String> originKind,
   Value<String?> originCreator,
+  Value<String?> originHandle,
+  Value<String?> originPlatform,
   Value<String?> originUrl,
   Value<String?> originShortcode,
   Value<String?> parentVersionId,
@@ -2834,6 +2928,13 @@ class $$VersionRowsTableFilterComposer
 
   ColumnFilters<String> get originCreator => $composableBuilder(
       column: $table.originCreator, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get originHandle => $composableBuilder(
+      column: $table.originHandle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get originPlatform => $composableBuilder(
+      column: $table.originPlatform,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get originUrl => $composableBuilder(
       column: $table.originUrl, builder: (column) => ColumnFilters(column));
@@ -2914,6 +3015,14 @@ class $$VersionRowsTableOrderingComposer
       column: $table.originCreator,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get originHandle => $composableBuilder(
+      column: $table.originHandle,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get originPlatform => $composableBuilder(
+      column: $table.originPlatform,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get originUrl => $composableBuilder(
       column: $table.originUrl, builder: (column) => ColumnOrderings(column));
 
@@ -2992,6 +3101,12 @@ class $$VersionRowsTableAnnotationComposer
   GeneratedColumn<String> get originCreator => $composableBuilder(
       column: $table.originCreator, builder: (column) => column);
 
+  GeneratedColumn<String> get originHandle => $composableBuilder(
+      column: $table.originHandle, builder: (column) => column);
+
+  GeneratedColumn<String> get originPlatform => $composableBuilder(
+      column: $table.originPlatform, builder: (column) => column);
+
   GeneratedColumn<String> get originUrl =>
       $composableBuilder(column: $table.originUrl, builder: (column) => column);
 
@@ -3064,6 +3179,8 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<int> protein = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
+            Value<String?> originHandle = const Value.absent(),
+            Value<String?> originPlatform = const Value.absent(),
             Value<String?> originUrl = const Value.absent(),
             Value<String?> originShortcode = const Value.absent(),
             Value<String?> parentVersionId = const Value.absent(),
@@ -3083,6 +3200,8 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             protein: protein,
             originKind: originKind,
             originCreator: originCreator,
+            originHandle: originHandle,
+            originPlatform: originPlatform,
             originUrl: originUrl,
             originShortcode: originShortcode,
             parentVersionId: parentVersionId,
@@ -3102,6 +3221,8 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             Value<int> protein = const Value.absent(),
             Value<String> originKind = const Value.absent(),
             Value<String?> originCreator = const Value.absent(),
+            Value<String?> originHandle = const Value.absent(),
+            Value<String?> originPlatform = const Value.absent(),
             Value<String?> originUrl = const Value.absent(),
             Value<String?> originShortcode = const Value.absent(),
             Value<String?> parentVersionId = const Value.absent(),
@@ -3121,6 +3242,8 @@ class $$VersionRowsTableTableManager extends RootTableManager<
             protein: protein,
             originKind: originKind,
             originCreator: originCreator,
+            originHandle: originHandle,
+            originPlatform: originPlatform,
             originUrl: originUrl,
             originShortcode: originShortcode,
             parentVersionId: parentVersionId,
