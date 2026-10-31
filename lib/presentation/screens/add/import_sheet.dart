@@ -10,6 +10,7 @@ import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
 import '../../../data/services/pending_import.dart';
 import '../../state/import_providers.dart';
+import '../../state/import_tracker.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/motion.dart';
 
@@ -143,12 +144,15 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
 
       // Written before the first poll, so a kill in the next second still
       // leaves something to come back to.
-      await pendingStore.write(PendingImport(
+      final pending = PendingImport(
         url: url,
         shortcode: started.shortcode,
         jobId: started.jobId,
         startedAt: DateTime.now(),
-      ));
+      );
+      await pendingStore.write(pending);
+      // The Journal shows it too, from the same record, once the sheet closes.
+      await ref.read(importTrackerProvider.notifier).adopt(pending);
       _watch(service, started.jobId!, started.shortcode);
     } on ApiUnauthenticated {
       setState(() {

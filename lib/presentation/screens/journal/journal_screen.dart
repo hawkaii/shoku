@@ -13,6 +13,7 @@ import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/status_badge.dart';
 import '../log/log_sheet.dart';
+import 'import_card.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
@@ -29,12 +30,16 @@ class JournalScreen extends ConsumerWidget {
     // legitimately be empty — don't index into it.
     final status = ref.watch(journalStatusProvider);
     if (status == JournalStatus.failed) {
-      return _JournalError(
-        onRetry: () => ref.read(journalStoreProvider.notifier).retry(),
+      return _withImportCard(
+        _JournalError(
+          onRetry: () => ref.read(journalStoreProvider.notifier).retry(),
+        ),
       );
     }
     if (dishes.isEmpty) {
-      return _JournalLoading(ready: status == JournalStatus.ready);
+      return _withImportCard(
+        _JournalLoading(ready: status == JournalStatus.ready),
+      );
     }
 
     final pinned = dishes.firstWhere(
@@ -42,9 +47,8 @@ class JournalScreen extends ConsumerWidget {
       orElse: () => dishes.first,
     );
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
+    return _withImportCard(
+      ListView(
         padding: const EdgeInsets.fromLTRB(
           ShokuSpace.lg,
           ShokuSpace.sm,
@@ -135,6 +139,20 @@ class JournalScreen extends ConsumerWidget {
                   isLast: i == cooks.length - 1,
                 ),
               ),
+        ],
+      ),
+    );
+  }
+
+  /// The import card sits above the scroll view, so it cannot scroll away and
+  /// the Journal never becomes unreachable behind it.
+  Widget _withImportCard(Widget body) {
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          const JournalImportCard(),
+          Expanded(child: body),
         ],
       ),
     );
