@@ -18,7 +18,7 @@ services:
     volumes:
       - worker-tmp:/tmp/shoku
       # Platform session cookies. Read-only, never baked into the image.
-      - ./cookies.txt:/run/cookies.txt:ro
+      - ../cookies.txt:/run/cookies.txt:ro
     logging:
       driver: json-file
       options:
