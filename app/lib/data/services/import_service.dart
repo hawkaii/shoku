@@ -88,10 +88,7 @@ class ImportService {
       subtitle: (content['creator'] as String?)?.trim().isNotEmpty == true
           ? 'From ${content['creator']}'
           : 'Imported',
-      // The reel's own cover. When the platform doesn't expose one, the
-      // on-brand fallback in ShokuDishImage takes over — never a stock photo
-      // of a different dish.
-      coverUrl: content['thumbnail_url'] as String? ?? '',
+      coverUrl: '',
       sourceHandle: content['creator'] as String? ?? '',
       status: DishStatus.toCook,
       minutes: (recipe['minutes'] as num?)?.toInt() ?? 30,
@@ -110,8 +107,6 @@ class ImportService {
           protein: (recipe['protein'] as num?)?.toInt() ?? 0,
           originKind: 'import',
           originCreator: content['creator'] as String?,
-          originHandle: content['creator_handle'] as String?,
-          originPlatform: content['platform'] as String?,
           originUrl: content['url'] as String?,
           originShortcode: shortcode,
         ),
@@ -163,7 +158,6 @@ class ImportProgress {
         ImportStage.extracting => switch (detail) {
             'transcribing' => 'Reading the audio',
             'structuring' => 'Writing the recipe',
-            'watching' => 'Watching the video',
             'caption_only' => 'Reading the caption',
             _ => 'Reading the reel',
           },

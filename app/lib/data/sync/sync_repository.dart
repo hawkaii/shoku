@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../mock/journal_data.dart';
 import '../db/app_database.dart';
 import '../db/journal_repository.dart';
 
@@ -16,11 +17,10 @@ import '../db/journal_repository.dart';
 ///   * dishes are mutable → last write wins on `updatedAt`
 ///   * deletes are tombstones → applied, never removed
 class SyncRepository {
-  /// The journal repository is part of the signature because callers already
-  /// hold it; the merge rules below read and write the database directly.
-  SyncRepository(this._db, JournalRepository local);
+  SyncRepository(this._db, this._local);
 
   final AppDatabase _db;
+  final JournalRepository _local;
 
   static const _cursorKey = 'sync_cursor';
 
@@ -165,8 +165,6 @@ class SyncRepository {
                 protein: Value((row['protein'] as num?)?.toInt() ?? 0),
                 originKind: Value(row['origin_kind'] as String? ?? 'mine'),
                 originCreator: Value(row['origin_creator'] as String?),
-                originHandle: Value(row['origin_handle'] as String?),
-                originPlatform: Value(row['origin_platform'] as String?),
                 originUrl: Value(row['origin_url'] as String?),
                 originShortcode: Value(row['origin_shortcode'] as String?),
                 parentVersionId: Value(row['parent_version_id'] as String?),
@@ -232,8 +230,6 @@ class SyncRepository {
         'protein': row.protein,
         'origin_kind': row.originKind,
         if (row.originCreator != null) 'origin_creator': row.originCreator,
-        if (row.originHandle != null) 'origin_handle': row.originHandle,
-        if (row.originPlatform != null) 'origin_platform': row.originPlatform,
         if (row.originUrl != null) 'origin_url': row.originUrl,
         if (row.originShortcode != null) 'origin_shortcode': row.originShortcode,
         if (row.parentVersionId != null) 'parent_version_id': row.parentVersionId,

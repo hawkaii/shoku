@@ -10,6 +10,7 @@ import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
 import '../../state/journal_store.dart';
 import '../../state/sync_providers.dart';
+import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 
 /// Import one link, with the wait made visible.
@@ -157,9 +158,6 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         'timeout' => 'That took too long — try again',
         'invalid_recipe' => 'We could not find a recipe in that one',
         'no_audio' => 'That video has nothing to listen to',
-        'no_text' => 'That reel has no caption and no speech we could read',
-        'no_recipe' => 'That video does not show a recipe',
-        'vision_failed' => 'We could not read that video — paste the recipe instead',
         'taken_down' => 'That recipe was removed',
         null => 'Could not read this one — paste the recipe instead',
         _ => 'Could not read this one — paste the recipe instead',

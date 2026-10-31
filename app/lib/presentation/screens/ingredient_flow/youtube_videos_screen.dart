@@ -13,7 +13,8 @@ import '../../widgets/neu_error_dialog.dart';
 class YouTubeVideosScreen extends ConsumerWidget {
   final List<YouTubeVideo> videos;
 
-  const YouTubeVideosScreen({super.key, required this.videos});
+  const YouTubeVideosScreen({Key? key, required this.videos})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,7 +143,7 @@ class YouTubeVideosScreen extends ConsumerWidget {
             // Thumbnail
             if (video.thumbnail != null)
               ClipRRect(
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                   topLeft:
                       Radius.circular(NeuSpacing.borderRadius),
                   topRight:
@@ -169,7 +170,7 @@ class YouTubeVideosScreen extends ConsumerWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
+                        color: Colors.black.withOpacity(0.7),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.play_arrow,

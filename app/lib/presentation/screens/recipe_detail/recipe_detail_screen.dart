@@ -12,7 +12,7 @@ import '../../../providers/providers.dart';
 class RecipeDetailScreen extends ConsumerWidget {
   final int recipeId;
 
-  const RecipeDetailScreen({super.key, required this.recipeId});
+  const RecipeDetailScreen({Key? key, required this.recipeId}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -221,7 +221,7 @@ class RecipeDetailScreen extends ConsumerWidget {
                             ),
                           ),
                         );
-                      }),
+                      }).toList(),
                       const SizedBox(height: NeuSpacing.lg),
                     ],
                   ),

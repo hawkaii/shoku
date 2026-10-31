@@ -41,7 +41,7 @@ class HelpScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ShokuLabel('still stuck'),
+                ShokuLabel('still stuck'),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   'Send the reel link and what you expected. It makes the fix much faster.',

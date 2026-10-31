@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -200,8 +201,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final navigator = Navigator.of(context);
-        if (await _confirmLeave()) navigator.pop();
+        if (await _confirmLeave() && mounted) Navigator.of(context).pop();
       },
       child: Scaffold(
         backgroundColor: c.canvas,
@@ -249,7 +249,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                 ),
               ),
               const SizedBox(height: ShokuSpace.md),
-              const ShokuHairline(),
+              ShokuHairline(),
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: ShokuSpace.lg, vertical: ShokuSpace.sm),

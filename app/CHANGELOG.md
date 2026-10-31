@@ -3,47 +3,6 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
-## [1.13.0] — 2026-10-31
-
-### Docs
-- V1.12.0 [skip ci] *(changelog)* — [`d91beb3`](https://github.com/hawkaii/food-finder-app/commit/d91beb339efaceaca65485d6533d01ef5a467c51)
-
-### Fixed
-- Fill the journal on sign-in instead of waiting for a reload *(sync)* — [`6309fef`](https://github.com/hawkaii/food-finder-app/commit/6309fef1b53e54db31623f89a43643451ed9eaca)
-- Signing in now pulls the journal, and the app says when it is syncing *(sync)* — [`bcabe4f`](https://github.com/hawkaii/food-finder-app/commit/bcabe4f97cfd546028ad0dc469d86c33f4d1791f)
-
-## [1.12.0] — 2026-10-31
-
-### Added
-- Ship an empty app instead of a demo kitchen — [`7d002bc`](https://github.com/hawkaii/food-finder-app/commit/7d002bc758e6f8159acbfcd14d04ff17a1206447)
-
-### Docs
-- V1.11.0 [skip ci] *(changelog)* — [`de2307d`](https://github.com/hawkaii/food-finder-app/commit/de2307d3a08b2fe3b3e17d30030e4bff2660d52c)
-
-## [1.11.0] — 2026-10-31
-
-### Added
-- Say when a reel has nothing to read, and when we are watching it *(import)* — [`c0673d6`](https://github.com/hawkaii/food-finder-app/commit/c0673d60f7bca1664b300a4274dec61c6fc32ffb)
-
-### Docs
-- V1.10.0 [skip ci] *(changelog)* — [`9dda98e`](https://github.com/hawkaii/food-finder-app/commit/9dda98e6c683d2b43f3083b16310b1266301f7a1)
-
-## [1.10.0] — 2026-10-31
-
-### Added
-- Reel thumbnail as cover, creator handle, and a link back to the reel *(dish)* — [`e13d971`](https://github.com/hawkaii/food-finder-app/commit/e13d9718703dca818a8cfcf9b618a48aca635a2b)
-
-### Docs
-- V1.9.3 [skip ci] *(changelog)* — [`f991ef5`](https://github.com/hawkaii/food-finder-app/commit/f991ef527a57cdc76010a1ec97098ca680eaa958)
-
-## [1.9.3] — 2026-10-31
-
-### Docs
-- V1.9.2 [skip ci] *(changelog)* — [`29d80d0`](https://github.com/hawkaii/food-finder-app/commit/29d80d086268bda42b4c21cc089756d63da22e1a)
-
-### Fixed
-- Say when the platform is blocking us instead of 'could not read' *(import)* — [`5b328bc`](https://github.com/hawkaii/food-finder-app/commit/5b328bcd784df2a757b995c4e4fa4b9dbf08727c)
-
 ## [1.9.2] — 2026-10-30
 
 ### Docs
