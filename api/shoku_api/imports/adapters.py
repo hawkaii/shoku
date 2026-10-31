@@ -17,7 +17,7 @@ from pathlib import Path
 
 from ..domain.clock import Deadline
 from .interfaces import Extraction
-from ..domain.errors import SourceBlocked, StructuringFailed
+from ..domain.errors import ExtractionFailed, SourceBlocked, StructuringFailed
 
 log = logging.getLogger("shoku.imports")
 
@@ -54,8 +54,11 @@ class YtDlpExtractor:
         if self.cookies_file:
             base["cookiefile"] = self.cookies_file
 
-        with yt_dlp.YoutubeDL(base) as ydl:
-            info = ydl.extract_info(url, download=False)
+        try:
+            with yt_dlp.YoutubeDL(base) as ydl:
+                info = ydl.extract_info(url, download=False)
+        except Exception as exc:  # noqa: BLE001 - yt-dlp raises its own types
+            raise _translate_extraction_error(exc) from exc
 
         duration = info.get("duration") or 0
         if duration and duration > self.max_seconds:
@@ -85,8 +88,11 @@ class YtDlpExtractor:
                     {"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "64"}
                 ],
             }
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                ydl.extract_info(url, download=True)
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    ydl.extract_info(url, download=True)
+            except Exception as exc:  # noqa: BLE001
+                raise _translate_extraction_error(exc) from exc
             audio_path = next(iter(workdir.glob("audio.*")), None)
 
         platform = "instagram" if "instagram" in (info.get("webpage_url") or url) else "youtube"
@@ -322,6 +328,23 @@ class FallbackStructurer:
 
 _CUE_TIME = re.compile(r"^\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s*-->")
 _CUE_TAG = re.compile(r"<[^>]+>")
+
+
+def _translate_extraction_error(exc: Exception) -> Exception:
+    """Turns yt-dlp's noise into reasons the app can explain.
+
+    A 429 is not this video's fault — the platform is refusing this machine,
+    and retrying the same link will fail identically until cookies or a proxy
+    are added.
+    """
+    text = str(exc)
+    if "429" in text or "Too Many Requests" in text:
+        return SourceBlocked(detail="platform rate-limited this server (429)")
+    if "403" in text or "login required" in text.lower():
+        return SourceBlocked(detail="platform requires a signed-in session")
+    if "Private video" in text or "unavailable" in text.lower():
+        return ExtractionFailed(detail="this post is private or unavailable")
+    return ExtractionFailed(detail=f"could not read this link: {text.splitlines()[0][:160]}")
 
 
 def _cues_to_text(raw: str) -> str:
