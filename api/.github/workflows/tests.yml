@@ -29,18 +29,11 @@ jobs:
         # Catches errors that only appear when a module is imported, which is
         # how annotation mistakes surface in production but not in a test run
         # that happens to import things in a friendlier order.
-        run: python -c "
-import pkgutil, importlib, shoku_api
-failed = []
-for mod in pkgutil.walk_packages(shoku_api.__path__, 'shoku_api.'):
-    try:
-        importlib.import_module(mod.name)
-    except Exception as exc:
-        failed.append(f'{mod.name}: {type(exc).__name__}: {exc}')
-if failed:
-    raise SystemExit('\n'.join(failed))
-print('all modules import')
-"
+        run: >-
+          python -c "import pkgutil, importlib, shoku_api;
+          [importlib.import_module(m.name) for m in
+          pkgutil.walk_packages(shoku_api.__path__, 'shoku_api.')];
+          print('all modules import')"
 
       - name: Test
         run: pytest -q
