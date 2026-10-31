@@ -447,7 +447,7 @@ class _JournalLoading extends StatelessWidget {
             const PlateMark(size: 56),
             const SizedBox(height: ShokuSpace.md),
             Text(
-              ready ? 'Nothing here yet — cook something' : 'Opening your journal',
+              ready ? 'No dishes yet — import a reel to start' : 'Opening your journal',
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
           ],

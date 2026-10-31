@@ -7,6 +7,7 @@ import '../../../data/mock/mock_data.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/cards.dart';
 import '../../widgets/kit/controls.dart';
+import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
 
 class DiscoverScreen extends ConsumerWidget {
@@ -16,6 +17,34 @@ class DiscoverScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
     final items = ref.watch(savedItemsProvider);
+
+    // Nothing saved yet: `items.first` would throw, and a blank screen under a
+    // heading looks broken. Say what the tab is for instead.
+    if (items.isEmpty) {
+      return SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            ShokuSpace.lg,
+            ShokuSpace.sm,
+            ShokuSpace.lg,
+            ShokuSpace.xxl,
+          ),
+          children: [
+            Text('Discover', style: ShokuType.h1.copyWith(color: c.ink)),
+            const SizedBox(height: ShokuSpace.lg),
+            ShokuEmptyState(
+              icon: Icons.explore_outlined,
+              title: 'Nothing saved yet',
+              body: 'Recipes and tips you save from a reel show up here.',
+              actionLabel: 'Import a reel',
+              onAction: () {},
+            ),
+          ],
+        ),
+      );
+    }
+
     final selected = ref.watch(selectedItemProvider) ?? items.first;
     final others = items.where((i) => i.id != selected.id).toList();
 

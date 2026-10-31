@@ -37,11 +37,9 @@ class JournalStore extends StateNotifier<List<Dish>> {
 
   Future<void> _boot() async {
     try {
-      // Seed once, tracked by a database flag rather than by "are there rows" —
-      // a user who deletes everything must not get the demo kitchen back.
-      if (!await _repo.isSeeded()) {
-        await _repo.seed(JournalData.dishes);
-      }
+      // The app ships empty. An install that already carries the demo kitchen
+      // loses it once, and nothing the user imported is touched.
+      await _repo.removeDemoKitchen(JournalData.demoDishIds);
       state = await _repo.loadDishes();
       _loaded = true;
       _onStatus?.call(JournalStatus.ready);
