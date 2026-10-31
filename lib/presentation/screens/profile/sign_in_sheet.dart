@@ -56,7 +56,19 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
     try {
       final auth = AuthService();
       if (_creating) {
-        await auth.signUp(email, password);
+        final response = await auth.signUp(email, password);
+        if (response.session == null) {
+          // Email confirmation is on: the account exists but cannot sign in
+          // yet. Saying so beats closing the sheet as if it worked.
+          if (mounted) {
+            setState(() {
+              _busy = false;
+              _creating = false;
+              _error = 'Check your email to confirm, then sign in';
+            });
+          }
+          return;
+        }
       } else {
         await auth.signInWithPassword(email, password);
       }
@@ -75,6 +87,9 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
     final text = error.toString();
     if (text.contains('Invalid login credentials')) {
       return 'That email and password do not match';
+    }
+    if (text.contains('Email not confirmed')) {
+      return 'That account is not confirmed yet — check your email';
     }
     if (text.contains('already registered')) {
       return 'That email already has an account — sign in instead';
