@@ -18,12 +18,17 @@ class ShokuTabBar extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final VoidCallback? onCenterTap;
 
+  /// Replaces the active tab's marker. The shell passes the sync line, so the
+  /// navigation stays the one place that can say "this is still working".
+  final Widget? activeUnderline;
+
   const ShokuTabBar({
     super.key,
     required this.items,
     required this.index,
     required this.onChanged,
     this.onCenterTap,
+    this.activeUnderline,
   });
 
   @override
@@ -80,15 +85,18 @@ class ShokuTabBar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 3),
-            AnimatedContainer(
-              duration: ShokuMotionConst.tab,
-              width: active ? 14 : 4,
-              height: 3,
-              decoration: BoxDecoration(
-                color: active ? c.accent : Colors.transparent,
-                borderRadius: BorderRadius.circular(2),
+            if (active && activeUnderline != null)
+              activeUnderline!
+            else
+              AnimatedContainer(
+                duration: ShokuMotionConst.tab,
+                width: active ? 14 : 4,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: active ? c.accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
           ],
         ),
       ),

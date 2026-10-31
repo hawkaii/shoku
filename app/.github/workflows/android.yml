@@ -6,6 +6,13 @@ name: Release APK
 on:
   push:
     branches: [main]
+    # A release is a version bump, not a commit. Bumping `version:` in
+    # pubspec.yaml is the act of asking for an APK; code commits on their own
+    # build nothing. That is what stops a busy day from costing 90 minutes of
+    # runner time for binaries nobody installs.
+    paths:
+      - "pubspec.yaml"
+      - ".github/workflows/android.yml"
   workflow_dispatch:
     inputs:
       build_type:
@@ -39,6 +46,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # The Gradle dependency cache is the single biggest cost in an
+          # Android build: without it every run resolves and compiles the whole
+          # toolchain from scratch. Cached, a build drops by several minutes.
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -172,6 +183,13 @@ jobs:
       # [skip ci] marker stops this commit from starting another release.
       - name: Commit changelog
         if: github.ref == 'refs/heads/main'
+        # The APK has already been built and released by this point. A docs
+        # commit must never turn a shipped release red — a red run hides the
+        # failures that actually matter.
+        continue-on-error: true
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
           if git diff --quiet -- CHANGELOG.md; then
@@ -180,7 +198,23 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): v${{ steps.version.outputs.version }} [skip ci]"
-          git pull --rebase --autostash origin main
-          git push origin HEAD:main
+
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+            # Regenerate rather than merge: this file is derived, so the run's
+            # own output always wins over whatever landed upstream meanwhile.
+            printf '%s\n' "$CHANGELOG" > CHANGELOG.md
+            if git diff --quiet -- CHANGELOG.md; then
+              echo "already current upstream"
+              exit 0
+            fi
+            git add CHANGELOG.md
+            git commit -q -m "docs(changelog): v${VERSION} [skip ci]"
+            if git push --quiet origin HEAD:main; then
+              echo "changelog pushed on attempt $attempt"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "::warning::CHANGELOG.md could not be pushed after 3 attempts; the release is unaffected"

@@ -6,13 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
+import '../../../data/models/cook_timer.dart';
+import '../../state/cook_timer_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/step_ingredients.dart';
 import '../../widgets/kit/step_library.dart';
 import '../../widgets/kit/step_text.dart';
 import '../assistant/assistant_sheet.dart';
 import '../log/debrief_sheet.dart';
+import 'timer_card.dart';
 
 /// Step-by-step cook mode: one step, one instructive loop, one floating AI.
 /// Swipeable, so it works with a knuckle when your hands are busy.
@@ -24,40 +28,126 @@ class CookModeScreen extends ConsumerStatefulWidget {
   ConsumerState<CookModeScreen> createState() => _CookModeScreenState();
 }
 
-class _CookModeScreenState extends ConsumerState<CookModeScreen> {
+class _CookModeScreenState extends ConsumerState<CookModeScreen>
+    with WidgetsBindingObserver {
   final _pages = PageController();
   int _step = 0;
   final _changes = <String>[];
-  int? _secondsLeft;
-  Timer? _timer;
+
+  /// A repaint pulse, not a countdown. The number on screen comes from the wall
+  /// clock every time this fires, so a missed or late tick costs a frame, never a
+  /// second.
+  Timer? _ticker;
+  bool _rang = false;
+  bool _adoptedTimer = false;
+  bool _adoptingPage = false;
+  bool _dropScheduled = false;
+  bool _timerCleared = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // The row is read asynchronously; the screen adopts it once it has been
+    // restored, which is how a killed app comes back to the right step.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _ticker?.cancel();
     _pages.dispose();
     super.dispose();
   }
 
-  void _startTimer(int minutes) {
-    _timer?.cancel();
-    setState(() => _secondsLeft = minutes * 60);
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) return;
-      setState(() {
-        if ((_secondsLeft ?? 0) <= 1) {
-          t.cancel();
-          _secondsLeft = 0;
-          HapticFeedback.mediumImpact();
-        } else {
-          _secondsLeft = (_secondsLeft ?? 1) - 1;
-        }
-      });
+  /// Coming back from the background: recompute from the clock on the first
+  /// visible frame rather than up to a second later. If the timer ran out while
+  /// the screen was off, the notification rang and the card catches up here.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) _pulse();
+  }
+
+  /// Keeps at most one ticker alive, and only while there is something to watch.
+  void _ensureTicker(bool running) {
+    if (running && _ticker == null) {
+      _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _pulse());
+    } else if (!running) {
+      _ticker?.cancel();
+      _ticker = null;
+    }
+  }
+
+  void _pulse() {
+    if (!mounted) return;
+    final timer = ref.read(cookTimerProvider);
+    if (timer != null &&
+        !_rang &&
+        !timer.isPaused &&
+        timer.isDoneAt(DateTime.now())) {
+      // Haptic only, and only because this screen is awake. The mirror is
+      // cancelled as well: it has done its job or it never will.
+      _rang = true;
+      HapticFeedback.mediumImpact();
+      unawaited(ref.read(cookTimerProvider.notifier).cancelAlert());
+    }
+    setState(() {});
+  }
+
+  void _startTimer(Dish dish, String versionId, int minutes) {
+    _rang = false;
+    _timerCleared = false;
+    ref.read(cookTimerProvider.notifier).start(
+          dishId: dish.id,
+          versionId: versionId,
+          stepIndex: _step,
+          duration: Duration(minutes: minutes),
+        );
+  }
+
+  /// A timer that survived a kill belongs to a step, so reopening the screen
+  /// lands there rather than at step one with a clock running for no visible
+  /// reason.
+  void _adoptRestoredTimer(
+    CookTimerStore store,
+    CookTimer? timer,
+    int stepCount,
+  ) {
+    if (_adoptedTimer || !store.isRestored) return;
+    _adoptedTimer = true;
+    if (timer == null || timer.stepIndex == _step || timer.stepIndex >= stepCount) {
+      return;
+    }
+    final page = timer.stepIndex;
+    _adoptingPage = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pages.hasClients) {
+        _adoptingPage = false;
+        return;
+      }
+      _pages.jumpToPage(page);
+      setState(() => _step = page);
+      _adoptingPage = false;
     });
   }
 
-  String get _clock {
-    final s = _secondsLeft ?? 0;
-    return '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
+  /// A fork replaces the version the timer was started on. Its step index now
+  /// points at a different instruction, so the timer is dropped and said out
+  /// loud instead of quietly inheriting somebody else's step.
+  void _dropStaleTimer(CookTimer? timer, String dishId, String versionId) {
+    if (timer == null || timer.versionId == versionId || _dropScheduled) return;
+    _dropScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final dropped = await ref
+          .read(cookTimerProvider.notifier)
+          .dropIfVersionChanged(dishId: dishId, versionId: versionId);
+      _dropScheduled = false;
+      if (dropped && mounted) setState(() => _timerCleared = true);
+    });
   }
 
   Future<bool> _confirmLeave() async {
@@ -197,11 +287,24 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
     final steps = dish.steps.isEmpty ? const ['Follow the recipe.'] : dish.steps;
     final isLast = _step == steps.length - 1;
 
+    final versionId = dish.versions.isEmpty ? '' : dish.versions.last.id;
+    final timer = ref.watch(cookTimerProvider);
+    final store = ref.read(cookTimerProvider.notifier);
+    final timerForThisDish = timer != null && timer.dishId == dish.id ? timer : null;
+    final remainingMs = timerForThisDish?.remainingMsAt(DateTime.now()) ?? 0;
+
+    _adoptRestoredTimer(store, timerForThisDish, steps.length);
+    _dropStaleTimer(timerForThisDish, dish.id, versionId);
+    _ensureTicker(
+      timerForThisDish != null && !timerForThisDish.isPaused && remainingMs > 0,
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (await _confirmLeave() && mounted) Navigator.of(context).pop();
+        final navigator = Navigator.of(context);
+        if (await _confirmLeave()) navigator.pop();
       },
       child: Scaffold(
         backgroundColor: c.canvas,
@@ -249,7 +352,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                 ),
               ),
               const SizedBox(height: ShokuSpace.md),
-              ShokuHairline(),
+              const ShokuHairline(),
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: ShokuSpace.lg, vertical: ShokuSpace.sm),
@@ -265,11 +368,15 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                       itemCount: steps.length,
                       onPageChanged: (i) {
                         HapticFeedback.selectionClick();
-                        setState(() {
-                          _step = i;
-                          _timer?.cancel();
-                          _secondsLeft = null;
-                        });
+                        // Leaving the step ends its timer. A ring for a step
+                        // already left is the bug a kitchen notices.
+                        if (!_adoptingPage) {
+                          final timer = ref.read(cookTimerProvider);
+                          if (timer != null && timer.dishId == dish.id) {
+                            unawaited(ref.read(cookTimerProvider.notifier).stop());
+                          }
+                        }
+                        setState(() => _step = i);
                       },
                       itemBuilder: (context, i) => SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(
@@ -290,56 +397,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                               fontSize: 26,
                               ingredients: dish.versions.last.ingredients,
                             ),
-                            const SizedBox(height: ShokuSpace.lg),
-                            if (i == _step && _secondsLeft != null)
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: c.accent,
-                                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                                      border:
-                                          Border.all(color: c.ink, width: ShokuStroke.brutal),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: c.ink,
-                                            offset: ShokuStroke.brutalShadow,
-                                            blurRadius: 0),
-                                      ],
-                                    ),
-                                    child: Text(_clock,
-                                        style: ShokuType.stat.copyWith(
-                                            fontSize: 15, color: c.onAccent)),
-                                  ),
-                                  const SizedBox(width: ShokuSpace.sm),
-                                  Text('running',
-                                      style: ShokuType.label.copyWith(color: c.inkMuted)),
-                                ],
-                              )
-                            else if (_hasTime(steps[i]))
-                              GestureDetector(
-                                onTap: () => _startTimer(_minutesIn(steps[i])),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: c.surface,
-                                    borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                                    border: Border.all(color: c.hairline),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.timer_outlined, size: 15, color: c.ink),
-                                      const SizedBox(width: 6),
-                                      Text('start ${_minutesIn(steps[i])} min timer',
-                                          style: ShokuType.label.copyWith(color: c.ink)),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            const SizedBox(height: ShokuSpace.sm),
+                            // What this step uses, in the recipe's own words.
+                            // Nothing at all when the parse predates the links.
+                            StepIngredientsLine(
+                              ingredients: dish.versions.last.ingredients,
+                              indices:
+                                  dish.versions.last.stepIngredientLinks(i),
+                            ),
                           ],
                         ),
                       ),
@@ -359,6 +424,39 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen> {
                   ],
                 ),
               ),
+
+              // ---- the timer ------------------------------------------------
+              // Below the step text, above the buttons: the reading order the
+              // design asks for, and still visible whichever step is open.
+              if (timerForThisDish != null || _hasTime(steps[_step]))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
+                  child: CookTimerCard(
+                    timer: timerForThisDish,
+                    currentStep: _step,
+                    remainingMs: remainingMs,
+                    alerts: ref.watch(timerAlertPermissionProvider),
+                    suggestedMinutes:
+                        _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
+                    onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),
+                    onPause: () => ref.read(cookTimerProvider.notifier).pause(),
+                    onResume: () => ref.read(cookTimerProvider.notifier).resume(),
+                    onStop: () => ref.read(cookTimerProvider.notifier).stop(),
+                  ),
+                ),
+              if (_timerCleared && timerForThisDish == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.sm),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Timer cleared — this dish has a new version',
+                      style: ShokuType.label.copyWith(color: c.inkMuted),
+                    ),
+                  ),
+                ),
 
               // ---- navigation ---------------------------------------------
               Padding(

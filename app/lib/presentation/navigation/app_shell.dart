@@ -3,13 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/shoku_theme.dart';
 import '../../data/services/share_intake.dart';
 import '../screens/add/add_sheet.dart';
 import '../screens/add/import_sheet.dart';
-import '../state/shoku_providers.dart';
 import '../state/sync_providers.dart';
 import '../widgets/kit/nav.dart';
+import 'sync_underline.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell shell;
@@ -19,7 +18,7 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
   static const _tabs = [
     ShokuTabItem(Icons.menu_book_outlined, Icons.menu_book, 'Journal'),
     ShokuTabItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu, 'Cookbook'),
@@ -32,17 +31,27 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _intake.start(ref);
     WidgetsBinding.instance.addPostFrameCallback((_) => _consumePendingShare());
     // Pull whatever changed while the app was closed. Quiet by design: a
-    // failed sync is a state, not an error the user has to dismiss.
+    // failed sync is a state, not an error the user has to dismiss. The auth
+    // stream owns every attempt after this one.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(syncControllerProvider).syncNow();
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(syncControllerProvider).onResume();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _intake.dispose();
     super.dispose();
   }
@@ -59,12 +68,8 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget build(BuildContext context) {
     ref.listen<String?>(pendingShareProvider, (previous, next) {
       if (next != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _consumePendingShare());
-    // Pull whatever changed while the app was closed. Quiet by design: a
-    // failed sync is a state, not an error the user has to dismiss.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(syncControllerProvider).syncNow();
-    });
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _consumePendingShare());
       }
     });
 
@@ -73,6 +78,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       bottomNavigationBar: ShokuTabBar(
         items: _tabs,
         index: widget.shell.currentIndex,
+        activeUnderline: const SyncUnderline(),
         onChanged: (i) => widget.shell.goBranch(
           i,
           initialLocation: i == widget.shell.currentIndex,

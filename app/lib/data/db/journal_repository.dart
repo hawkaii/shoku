@@ -93,6 +93,31 @@ class JournalRepository {
     return _toDish(row, versionList, cookList);
   }
 
+  /// Deletes the demo kitchen from an install that already has it.
+  ///
+  /// Scoped to the known demo ids and to those alone: everything the user
+  /// created or imported survives. Seeded rows were never pushed, so there is
+  /// nothing to tombstone on the server.
+  Future<void> removeDemoKitchen(List<String> ids) async {
+    // Once is enough: this runs on every boot, and a delete transaction per
+    // launch for four rows that are already gone is pure waste.
+    final done = await (_db.select(_db.metaRows)
+          ..where((m) => m.key.equals('demo_kitchen_removed')))
+        .getSingleOrNull();
+    if (done?.value == '1') return;
+
+    await _db.transaction(() async {
+      for (final id in ids) {
+        await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id))).go();
+        await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id))).go();
+        await (_db.delete(_db.dishRows)..where((d) => d.id.equals(id))).go();
+      }
+      await _db.into(_db.metaRows).insertOnConflictUpdate(
+            MetaRowsCompanion.insert(key: 'demo_kitchen_removed', value: '1'),
+          );
+    });
+  }
+
   /// Whether the demo kitchen has ever been written. Stored in the database so
   /// a wiped database reseeds and a user who deletes every dish does not.
   Future<bool> isSeeded() async {
@@ -151,6 +176,11 @@ class JournalRepository {
         steps: (previous != null && previous.steps.isNotEmpty)
             ? previous.steps
             : dish.steps,
+        // The fork keeps the same steps, so the links still point at the same
+        // ingredients.
+        stepIngredients: previous?.stepIngredients,
+        // And the same tags: a fork of a guess is still a guess.
+        tags: previous?.tags ?? const [],
         kcal: dish.baselineKcal + (changes.length * 18),
         protein: dish.baselineProtein + (changes.length * 2),
         parentVersionId: (previous != null && previous.id.isNotEmpty) ? previous.id : null,
@@ -331,6 +361,8 @@ class JournalRepository {
         steps: _decodeList(row.steps),
         kcal: row.kcal,
         protein: row.protein,
+        stepIngredients: _decodeStepIngredients(row.stepIngredients),
+        tags: _decodeList(row.tags),
         originKind: row.originKind,
         originCreator: row.originCreator,
         originHandle: row.originHandle,
@@ -375,6 +407,8 @@ class JournalRepository {
         steps: Value(jsonEncode(v.steps)),
         kcal: Value(v.kcal),
         protein: Value(v.protein),
+        stepIngredients: Value(_encodeStepIngredients(v.stepIngredients)),
+        tags: Value(jsonEncode(v.tags)),
         originKind: Value(v.originKind),
         originCreator: Value(v.originCreator),
         originHandle: Value(v.originHandle),
@@ -408,5 +442,23 @@ class JournalRepository {
     final decoded = jsonDecode(raw);
     if (decoded is! List) return const [];
     return decoded.map((e) => e.toString()).toList();
+  }
+
+  /// Empty means "this parse has no links", which is not the same as "this step
+  /// uses these ingredients" — both must survive a round trip.
+  static String _encodeStepIngredients(List<List<int>>? links) =>
+      links == null ? '' : jsonEncode(links);
+
+  static List<List<int>>? _decodeStepIngredients(String raw) {
+    if (raw.isEmpty) return null;
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) return null;
+    return [
+      for (final entry in decoded)
+        if (entry is List)
+          [for (final index in entry) if (index is num) index.toInt()]
+        else
+          const <int>[],
+    ];
   }
 }

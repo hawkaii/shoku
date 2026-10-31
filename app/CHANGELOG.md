@@ -3,6 +3,98 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.19.0] — 2026-10-31
+
+### Added
+- Carry tags on the wire, and say when amounts were read off video *(recipe)* — [`2d9a368`](https://github.com/hawkaii/food-finder-app/commit/2d9a368bc057db70753912e3a9d61608af56c760)
+- Show the mood and the rating of each cook again *(journal)* — [`05439c4`](https://github.com/hawkaii/food-finder-app/commit/05439c4177c8b398d1b3b30b3c1cc780c72b131a)
+
+### CI
+- Cache Gradle and stop building commits that cannot change the APK — [`07a7bb5`](https://github.com/hawkaii/food-finder-app/commit/07a7bb591f7bdfb8e16620a4313183a96e6946f0)
+- A release is a version bump, not a commit — [`e9ffabc`](https://github.com/hawkaii/food-finder-app/commit/e9ffabc1f0c978cbeb797aab7c7a9e7491196b47)
+
+### Docs
+- V1.17.1 [skip ci] *(changelog)* — [`152578c`](https://github.com/hawkaii/food-finder-app/commit/152578c33985d48ca092c84249b76a8d6839e57a)
+- V1.18.0 [skip ci] *(changelog)* — [`5d5b300`](https://github.com/hawkaii/food-finder-app/commit/5d5b3006b9ee64338a589f8cc07c07faa2cb6dd9)
+
+## [1.18.0] — 2026-10-31
+
+### Added
+- A public feed of shared reels, and a way to share one *(wall)* — [`af28b47`](https://github.com/hawkaii/food-finder-app/commit/af28b47cf54f264867f5005d7742a4ea0dacccf4)
+
+## [1.17.1] — 2026-10-31
+
+### Docs
+- V1.17.0 [skip ci] *(changelog)* — [`1c357d9`](https://github.com/hawkaii/food-finder-app/commit/1c357d96bfc72baa8535547a8c36956803b123b1)
+
+### Fixed
+- Wait four minutes for a reel the server is still reading *(import)* — [`544cf1c`](https://github.com/hawkaii/food-finder-app/commit/544cf1cf48c4abfd57027c3edb168c223c5279da)
+
+## [1.17.0] — 2026-10-31
+
+### Added
+- Ring a timer with the phone in a pocket *(cook)* — [`3f20c56`](https://github.com/hawkaii/food-finder-app/commit/3f20c56a2c9f5d1d6d5592de3dc0f344c2d921a2)
+
+### CI
+- A changelog push must not fail a shipped release — [`d76b6fb`](https://github.com/hawkaii/food-finder-app/commit/d76b6fb8bf7fcbaf04085ee1c6507e68aa0cec4f)
+
+### Docs
+- V1.15.0 [skip ci] *(changelog)* — [`68a66f1`](https://github.com/hawkaii/food-finder-app/commit/68a66f1ad6d92eadbb49fe9fcaab411fe90b7bd3)
+
+## [1.16.0] — 2026-10-31
+
+### Added
+- Long-press a card to move it or remove it from the journal *(cookbook)* — [`1178f69`](https://github.com/hawkaii/food-finder-app/commit/1178f69bfa4ceae11b7fdeb739b7ecc23d64efaf)
+
+### Fixed
+- Read step links from the recipe payload, where the API puts them *(recipe)* — [`355adf8`](https://github.com/hawkaii/food-finder-app/commit/355adf8663d330282d228480b0ca5b72fb4fcfe4)
+
+## [1.15.0] — 2026-10-31
+
+### Added
+- Show each step's ingredients in the recipe's own words *(recipe)* — [`52acae3`](https://github.com/hawkaii/food-finder-app/commit/52acae3660e73aed7ea3bfb0576915ed4c0627b3)
+
+### Docs
+- V1.14.0 [skip ci] *(changelog)* — [`290b8d3`](https://github.com/hawkaii/food-finder-app/commit/290b8d3753bf8a774873f48ffa814f046c912f97)
+
+## [1.14.1] — 2026-10-31
+
+### Fixed
+- Keep an import alive through a dropped poll and a restart *(import)* — [`3acde63`](https://github.com/hawkaii/food-finder-app/commit/3acde631595c2aed72a9adf82c03b57e61aad140)
+
+## [1.14.0] — 2026-10-31
+
+### Added
+- A timer that survives the app being killed *(cook)* — [`76828bf`](https://github.com/hawkaii/food-finder-app/commit/76828bfb547b4f305dd29d1b39f80841bec3cd49)
+
+### Docs
+- V1.13.0 [skip ci] *(changelog)* — [`e6bb635`](https://github.com/hawkaii/food-finder-app/commit/e6bb635a3e18a9630cd7c8b105bc4eb3cbf32110)
+
+## [1.13.0] — 2026-10-31
+
+### Docs
+- V1.12.0 [skip ci] *(changelog)* — [`d91beb3`](https://github.com/hawkaii/food-finder-app/commit/d91beb339efaceaca65485d6533d01ef5a467c51)
+
+### Fixed
+- Fill the journal on sign-in instead of waiting for a reload *(sync)* — [`6309fef`](https://github.com/hawkaii/food-finder-app/commit/6309fef1b53e54db31623f89a43643451ed9eaca)
+- Signing in now pulls the journal, and the app says when it is syncing *(sync)* — [`bcabe4f`](https://github.com/hawkaii/food-finder-app/commit/bcabe4f97cfd546028ad0dc469d86c33f4d1791f)
+
+## [1.12.0] — 2026-10-31
+
+### Added
+- Ship an empty app instead of a demo kitchen — [`7d002bc`](https://github.com/hawkaii/food-finder-app/commit/7d002bc758e6f8159acbfcd14d04ff17a1206447)
+
+### Docs
+- V1.11.0 [skip ci] *(changelog)* — [`de2307d`](https://github.com/hawkaii/food-finder-app/commit/de2307d3a08b2fe3b3e17d30030e4bff2660d52c)
+
+## [1.11.0] — 2026-10-31
+
+### Added
+- Say when a reel has nothing to read, and when we are watching it *(import)* — [`c0673d6`](https://github.com/hawkaii/food-finder-app/commit/c0673d60f7bca1664b300a4274dec61c6fc32ffb)
+
+### Docs
+- V1.10.0 [skip ci] *(changelog)* — [`9dda98e`](https://github.com/hawkaii/food-finder-app/commit/9dda98e6c683d2b43f3083b16310b1266301f7a1)
+
 ## [1.10.0] — 2026-10-31
 
 ### Added
