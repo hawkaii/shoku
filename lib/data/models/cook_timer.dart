@@ -51,6 +51,24 @@ class CookTimer {
 
   bool get isPaused => pausedAt != null;
 
+  /// The id the mirror notification is scheduled and cancelled under.
+  ///
+  /// Derived from the version and the step so it is stable across process
+  /// restarts: a timer started before a kill can still be cancelled by the app
+  /// that comes back. FNV-1a, masked to a positive 32-bit int.
+  int get notificationId => notificationIdFor(versionId, stepIndex);
+
+  static int notificationIdFor(String versionId, int stepIndex) {
+    var hash = 0x811c9dc5;
+    for (final unit in versionId.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+    hash ^= stepIndex & 0xff;
+    hash = (hash * 0x01000193) & 0xffffffff;
+    return hash & 0x7fffffff;
+  }
+
   int get durationMs => duration.inMilliseconds;
 
   /// Clamps a requested length into something a kitchen can mean.

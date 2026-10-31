@@ -1,7 +1,7 @@
 name: food_finder
 description: Shoku — a cooking journal that remembers every version of a dish.
 publish_to: 'none'
-version: 1.16.0+34
+version: 1.17.0+35
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -61,6 +61,8 @@ dependencies:
   drift_flutter: ^0.3.1
   supabase_flutter: ^2.18.3
   http: ^1.6.0
+  flutter_local_notifications: ^22.3.3
+  timezone: ^0.11.2
 
 dev_dependencies:
   flutter_test:
