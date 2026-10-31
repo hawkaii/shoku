@@ -351,6 +351,45 @@ class ContentResponse(BaseModel):
     extraction_version: int
 
 
+class FeedItem(BaseModel):
+    """One card on the Wall.
+
+    An extraction, deliberately shared — never a user's work. There is no
+    ``user_id`` here and there must never be one: ``content_cache`` does not
+    know who imported a reel, which is exactly what makes the Wall safe to
+    publish. Edits live in ``recipe_versions`` and are not joined.
+    """
+
+    shortcode: str
+    title: str
+    thumbnail_url: str | None = None
+    creator: str | None = None
+    creator_handle: str | None = None
+    platform: str | None = None
+    steps: list[str]
+    tags: list[str]
+    extraction_version: int
+    created_at: datetime
+    url: str
+
+
+class FeedResponse(BaseModel):
+    items: list[FeedItem]
+    cursor: str | None = None
+    has_more: bool = False
+
+
+class ShareResponse(BaseModel):
+    shortcode: str
+    shared: bool
+
+
+class ReportResponse(BaseModel):
+    shortcode: str
+    reported_count: int
+    shared: bool
+
+
 class AssistantRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
