@@ -135,6 +135,9 @@ class ImportService {
           ingredients: ingredients,
           createdAt: DateTime.now(),
           steps: steps,
+          // Parallel to `steps`; null for a parse that predates the extractor's
+          // per-step links. Stored locally only — sync never carries it.
+          stepIngredients: _stepLinks(content['step_ingredients']),
           kcal: (recipe['kcal'] as num?)?.toInt() ?? 0,
           protein: (recipe['protein'] as num?)?.toInt() ?? 0,
           originKind: 'import',
@@ -158,6 +161,22 @@ class ImportService {
         'extracting' => ImportStage.extracting,
         _ => ImportStage.queued,
       };
+
+  /// `step_ingredients` is parallel to `steps`: each entry is a list of indices
+  /// into `ingredients`, or null for a parse that predates it.
+  ///
+  /// Anything that is not a list of numbers is dropped rather than repaired:
+  /// a half-understood link would put the wrong ingredient under a step.
+  static List<List<int>>? _stepLinks(Object? raw) {
+    if (raw is! List) return null;
+    return [
+      for (final entry in raw)
+        if (entry is List)
+          [for (final index in entry) if (index is num) index.toInt()]
+        else
+          const <int>[],
+    ];
+  }
 }
 
 class ImportStart {

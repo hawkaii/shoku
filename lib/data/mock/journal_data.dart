@@ -43,6 +43,15 @@ class RecipeVersion {
   final int kcal;
   final int protein;
 
+  /// Which ingredients the extractor says each step uses: parallel to [steps],
+  /// each entry a list of indices into [ingredients].
+  ///
+  /// Null means the parse predates the link (or arrived through sync, which does
+  /// not carry it). Null renders nothing — the app never guesses which
+  /// ingredient a step meant, because a guessed quantity is the app lying about
+  /// a recipe.
+  final List<List<int>>? stepIngredients;
+
   /// `mine` or `import`. An import is an immutable snapshot of someone else's
   /// reel; editing it forks a `mine` version rather than mutating the original.
   final String originKind;
@@ -60,6 +69,7 @@ class RecipeVersion {
     required this.ingredients,
     required this.createdAt,
     this.steps = const [],
+    this.stepIngredients,
     this.kcal = 0,
     this.protein = 0,
     this.originKind = 'mine',
@@ -72,6 +82,14 @@ class RecipeVersion {
   });
 
   bool get isImport => originKind == 'import';
+
+  /// The ingredient indices the extractor linked to [stepIndex], or null when
+  /// this parse has no links (or none for that step).
+  List<int>? stepIngredientLinks(int stepIndex) {
+    final links = stepIngredients;
+    if (links == null || stepIndex < 0 || stepIndex >= links.length) return null;
+    return links[stepIndex];
+  }
 }
 
 /// What mood a cook belonged to — captured at debrief, never inferred.

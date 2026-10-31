@@ -218,4 +218,70 @@ void main() {
       throwsA(isA<ApiUnauthenticated>()),
     );
   });
+
+  test('step links are local: never pushed, and a pulled version has none',
+      () async {
+    await local.seed([
+      _dish(),
+    ]);
+    await local.commitCook(
+      dishId: 'd1',
+      mood: CookMood.comfort,
+      rating: 5,
+      note: 'good',
+      changes: const ['more garlic'],
+    );
+
+    await SyncService(repository: sync, api: client()).sync();
+
+    final versions = pushedBodies.single['versions'] as List;
+    expect(versions, isNotEmpty);
+    for (final version in versions) {
+      expect((version as Map).containsKey('step_ingredients'), isFalse,
+          reason: 'the links are not part of the wire');
+    }
+
+    await SyncService(
+      repository: sync,
+      api: client(pull: {
+        'dishes': [
+          {
+            'id': 'remote-9',
+            'title': 'From another phone',
+            'subtitle': '',
+            'cover_url': '',
+            'source_handle': '',
+            'status': 'toCook',
+            'minutes': 20,
+            'baseline_kcal': 0,
+            'baseline_protein': 0,
+            'steps': ['Fry'],
+            'created_at': '2026-02-01T10:00:00Z',
+            'updated_at': '2026-02-01T10:00:00Z',
+            'deleted_at': null,
+          },
+        ],
+        'versions': [
+          {
+            'id': 'rv1',
+            'dish_id': 'remote-9',
+            'number': 0,
+            'changes': <String>[],
+            'ingredients': ['salt'],
+            'steps': ['Fry'],
+            'kcal': 0,
+            'protein': 0,
+            'origin_kind': 'import',
+            'created_at': '2026-02-01T10:00:00Z',
+          },
+        ],
+        'cook_logs': <Map<String, dynamic>>[],
+        'cursor': 'c9',
+      }),
+    ).sync();
+
+    final dish = (await local.loadDishes())
+        .firstWhere((d) => d.id == 'remote-9');
+    expect(dish.versions.single.stepIngredients, isNull);
+  });
 }

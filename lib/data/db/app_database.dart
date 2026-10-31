@@ -50,6 +50,12 @@ class VersionRows extends Table {
   IntColumn get kcal => integer().withDefault(const Constant(0))();
   IntColumn get protein => integer().withDefault(const Constant(0))();
 
+  /// Per-step ingredient indices, JSON. Empty means the parse predates the link.
+  ///
+  /// Local only: this is not on the sync wire, so a version that arrives from
+  /// another device simply has none and renders no ingredient line.
+  TextColumn get stepIngredients => text().withDefault(const Constant(''))();
+
   TextColumn get originKind => text().withDefault(const Constant('mine'))();
   TextColumn get originCreator => text().nullable()();
   TextColumn get originHandle => text().nullable()();
@@ -132,7 +138,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -169,6 +175,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 4) {
             // The kitchen timer, so a cook survives the app being killed.
             await m.createTable(cookTimerRows);
+          }
+          if (from < 5) {
+            // Which ingredients each step uses, for the imported version only.
+            await m.addColumn(versionRows, versionRows.stepIngredients);
           }
         },
         beforeOpen: (details) async {
