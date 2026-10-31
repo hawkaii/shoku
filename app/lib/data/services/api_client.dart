@@ -49,13 +49,6 @@ class ApiClient {
   Future<Map<String, dynamic>> delete(String path) async =>
       _decode(await _http.delete(_uri(path), headers: _headers()));
 
-  Future<Map<String, dynamic>> put(String path, [Object? body]) async =>
-      _decode(await _http.put(
-        _uri(path),
-        headers: _headers(),
-        body: jsonEncode(body ?? const <String, dynamic>{}),
-      ));
-
   Map<String, dynamic> _decode(http.Response response) {
     if (response.statusCode == 401) {
       throw const ApiUnauthenticated();

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/feed_item.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/feed_service.dart';
-import 'published_store.dart';
 import 'sync_providers.dart';
 
 /// The Wall's state. Read-only, quietly failing, and never in the way of the
@@ -104,9 +103,4 @@ final feedServiceProvider = Provider<FeedService>(
 
 final feedStoreProvider = StateNotifierProvider<FeedStore, FeedState>(
   (ref) => FeedStore(ref.watch(feedServiceProvider)),
-);
-
-final publishedShortcodesProvider =
-    StateNotifierProvider<PublishedStore, Set<String>>(
-  (ref) => PublishedStore(),
 );
