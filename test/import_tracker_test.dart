@@ -11,6 +11,7 @@ import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/import_service.dart';
 import 'package:food_finder/data/services/pending_import.dart';
+import 'package:food_finder/presentation/navigation/import_scope.dart';
 import 'package:food_finder/presentation/screens/journal/import_card.dart';
 import 'package:food_finder/presentation/state/import_providers.dart';
 import 'package:food_finder/presentation/state/import_tracker.dart';
@@ -59,6 +60,28 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
   tearDown(() async => db.close());
+
+  /// The shell's stand-in: the scope that owns the poller, showing a tab that is
+  /// not the Journal.
+  Widget otherTab(http.Client client) => ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          importServiceProvider.overrideWithValue(ImportService(
+            api: ApiClient(
+              baseUrl: 'https://api.test',
+              tokenProvider: () => 'jwt',
+              httpClient: client,
+            ),
+            repository: JournalRepository(db),
+          )),
+        ],
+        child: MaterialApp(
+          theme: ShokuTheme.light(),
+          home: const ImportTrackerScope(
+            child: Scaffold(body: Center(child: Text('Cookbook'))),
+          ),
+        ),
+      );
 
   Widget card(http.Client client) => ProviderScope(
         overrides: [
@@ -184,6 +207,57 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('import-card-failed')), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a job that settles on another tab still writes its dish',
+      (tester) async {
+    await seedPending();
+
+    var polls = 0;
+    final client = MockClient((request) async {
+      if (request.url.path.startsWith('/v1/imports/')) {
+        polls++;
+        return polls == 1
+            ? http.Response(_poll(stage: 'transcribing'), 200)
+            : http.Response(_poll(state: 'ready'), 200);
+      }
+      return http.Response(_content, 200);
+    });
+
+    await tester.pumpWidget(otherTab(client));
+    await tester.pump();
+    await tester.pump();
+
+    // The card lives on the Journal and nowhere else.
+    expect(find.byKey(const ValueKey('import-card')), findsNothing);
+    expect(find.text('Cookbook'), findsOneWidget);
+
+    await tester.pump(ImportTracker.pollInterval);
+    await tester.pump();
+    await tester.pump();
+
+    expect((await JournalRepository(db).loadDishes()).single.title,
+        'Paneer Tikka',
+        reason: 'the work finishes whether or not the tab is watched');
+    expect(await PendingImportStore().read(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('nothing pending means nothing is polled', (tester) async {
+    var requests = 0;
+    final client = MockClient((request) async {
+      requests++;
+      return http.Response(_poll(), 200);
+    });
+
+    await tester.pumpWidget(otherTab(client));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 30));
+
+    expect(requests, 0, reason: 'no pending import, no traffic');
 
     await tester.pumpWidget(const SizedBox());
   });

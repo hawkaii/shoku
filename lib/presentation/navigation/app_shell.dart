@@ -8,6 +8,7 @@ import '../screens/add/add_sheet.dart';
 import '../screens/add/import_sheet.dart';
 import '../state/sync_providers.dart';
 import '../widgets/kit/nav.dart';
+import 'import_scope.dart';
 import 'sync_underline.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -73,17 +74,21 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
       }
     });
 
-    return Scaffold(
-      body: widget.shell,
-      bottomNavigationBar: ShokuTabBar(
-        items: _tabs,
-        index: widget.shell.currentIndex,
-        activeUnderline: const SyncUnderline(),
-        onChanged: (i) => widget.shell.goBranch(
-          i,
-          initialLocation: i == widget.shell.currentIndex,
+    return ImportTrackerScope(
+      // The import poller's lifetime is the app's, not the Journal's: a job
+      // that settles while another tab is open still lands.
+      child: Scaffold(
+        body: widget.shell,
+        bottomNavigationBar: ShokuTabBar(
+          items: _tabs,
+          index: widget.shell.currentIndex,
+          activeUnderline: const SyncUnderline(),
+          onChanged: (i) => widget.shell.goBranch(
+            i,
+            initialLocation: i == widget.shell.currentIndex,
+          ),
+          onCenterTap: () => showAddSheet(context),
         ),
-        onCenterTap: () => showAddSheet(context),
       ),
     );
   }
