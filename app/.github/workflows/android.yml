@@ -166,11 +166,31 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          gh release create "$TAG" dist/*.apk \
-            --title "Shoku v${VERSION}" \
-            --notes-file /tmp/release.md \
-            --latest \
-            --target "$GITHUB_SHA"
+          # GitHub's API returns a transient 403 often enough to have failed this
+          # step while the identical workflow succeeded either side of it. A
+          # release is not worth losing to one bad response, so retry, and treat
+          # an existing tag as "upload to it" rather than as a failure.
+          for attempt in 1 2 3 4; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              gh release upload "$TAG" dist/*.apk --clobber
+              gh release edit "$TAG" --title "Shoku v${VERSION}" \
+                --notes-file /tmp/release.md --latest
+              echo "updated existing release $TAG"
+              exit 0
+            fi
+            if gh release create "$TAG" dist/*.apk \
+                 --title "Shoku v${VERSION}" \
+                 --notes-file /tmp/release.md \
+                 --latest \
+                 --target "$GITHUB_SHA"; then
+              echo "created release $TAG on attempt $attempt"
+              exit 0
+            fi
+            echo "::warning::release attempt $attempt failed; retrying"
+            sleep $((attempt * 10))
+          done
+          echo "::error::could not publish release $TAG after 4 attempts"
+          exit 1
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
