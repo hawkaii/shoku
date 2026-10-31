@@ -419,7 +419,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
             Text(
               _slow
                   ? 'A long one takes a few minutes. You can leave this — the dish appears when it is ready.'
-                  : 'You can close this — the dish appears when it is ready.',
+                  : (_progress!.waitingHint ??
+                      'You can close this — the dish appears when it is ready.'),
               key: const ValueKey('import-hint'),
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),

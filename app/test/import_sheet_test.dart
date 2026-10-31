@@ -321,6 +321,50 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   });
 
+  testWidgets('a sleeping worker reads as waking the kitchen, not as an error',
+      (tester) async {
+    final client = MockClient((request) async {
+      calls.add('${request.method} ${request.url.path}');
+      if (request.url.path == '/v1/imports') {
+        return http.Response(
+          jsonEncode({
+            'job_id': 'job1',
+            'state': 'extracting',
+            'cached': false,
+            'shortcode': _shortcode,
+          }),
+          202,
+        );
+      }
+      return http.Response(
+        jsonEncode({
+          'job_id': 'job1',
+          'state': 'extracting',
+          'shortcode': _shortcode,
+          'reason': null,
+          'progress_stage': 'starting',
+          'created_at': '2026-10-31T06:20:00Z',
+          'updated_at': '2026-10-31T06:20:01Z',
+        }),
+        200,
+      );
+    });
+
+    await tester.pumpWidget(app(service(client), prefill: _url));
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Waking the kitchen…'), findsOneWidget);
+    expect(find.text('The first one after a pause takes a minute'),
+        findsOneWidget);
+    // Waiting for the worker is a stage: nothing has gone wrong.
+    expect(find.byKey(const ValueKey('import-still-reading')), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
   testWidgets('an expired window says it is still reading and keeps the note',
       (tester) async {
     final client = MockClient((request) async {

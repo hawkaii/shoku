@@ -119,6 +119,54 @@ void main() {
     });
   });
 
+  group('a sleeping worker', () {
+    test('starting is a stage with its own words, not a failure', () {
+      const waking = ImportProgress(
+        stage: ImportStage.extracting,
+        detail: 'starting',
+        shortcode: 'SC',
+      );
+      expect(waking.label, 'Waking the kitchen…');
+      expect(waking.waitingHint, 'The first one after a pause takes a minute');
+      expect(waking.stage, isNot(ImportStage.failed));
+
+      // Whichever job state the server pairs it with, the copy holds.
+      const queued = ImportProgress(
+        stage: ImportStage.queued,
+        detail: 'starting',
+        shortcode: 'SC',
+      );
+      expect(queued.label, 'Waking the kitchen…');
+    });
+
+    test('the other stages read exactly as they did', () {
+      String label(String detail, {ImportStage stage = ImportStage.extracting}) =>
+          ImportProgress(stage: stage, detail: detail, shortcode: 'SC').label;
+
+      expect(label('extracting'), 'Reading the reel');
+      expect(label('transcribing'), 'Reading the audio');
+      expect(label('watching'), 'Watching the video');
+      expect(label('structuring'), 'Writing the recipe');
+      expect(label('caption_only'), 'Reading the caption');
+      expect(
+        const ImportProgress(stage: ImportStage.queued, shortcode: 'SC').label,
+        'Queued',
+      );
+      expect(
+        const ImportProgress(stage: ImportStage.ready, shortcode: 'SC').label,
+        'Ready',
+      );
+    });
+
+    test('a kitchen that would not wake says so, in its own sentence', () {
+      final text = importReasonText('worker_unavailable');
+
+      expect(text, 'The kitchen did not wake up — try again in a minute');
+      expect(text, isNot(importReasonText(null)));
+      expect(text, isNot(contains('Could not read this one')));
+    });
+  });
+
   group('failure copy', () {
     test('a client timeout is not the generic message', () {
       final text = importReasonText('timed_out');

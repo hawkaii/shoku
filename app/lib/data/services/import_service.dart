@@ -220,18 +220,28 @@ class ImportProgress {
   final String? reason;
   final String shortcode;
 
-  String get label => switch (stage) {
-        ImportStage.queued => 'Queued',
-        ImportStage.extracting => switch (detail) {
-            'transcribing' => 'Reading the audio',
-            'structuring' => 'Writing the recipe',
-            'watching' => 'Watching the video',
-            'caption_only' => 'Reading the caption',
-            _ => 'Reading the reel',
+  String get label => switch (detail) {
+        // The worker VM sleeps when idle; the first import after a pause waits
+        // for it to boot. It is a stage, not a failure.
+        'starting' => 'Waking the kitchen…',
+        _ => switch (stage) {
+            ImportStage.queued => 'Queued',
+            ImportStage.extracting => switch (detail) {
+                'transcribing' => 'Reading the audio',
+                'structuring' => 'Writing the recipe',
+                'watching' => 'Watching the video',
+                'caption_only' => 'Reading the caption',
+                _ => 'Reading the reel',
+              },
+            ImportStage.ready => 'Ready',
+            ImportStage.failed => 'Could not read this one',
           },
-        ImportStage.ready => 'Ready',
-        ImportStage.failed => 'Could not read this one',
       };
+
+  /// The second line, when the wait needs explaining rather than filling.
+  String? get waitingHint => detail == 'starting'
+      ? 'The first one after a pause takes a minute'
+      : null;
 }
 
 /// What a failure reason becomes on screen.
@@ -245,6 +255,8 @@ String importReasonText(String? reason) => switch (reason) {
       'source_blocked' =>
         'YouTube is blocking our server right now — try again later or paste the recipe',
       'timeout' => 'That took too long — try again',
+      'worker_unavailable' =>
+        'The kitchen did not wake up — try again in a minute',
       'timed_out' =>
         'Still reading — this can take a few minutes. You can leave this and the dish will be here when it is ready',
       'gone' => 'That import is no longer on the server — try the link again',
