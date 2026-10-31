@@ -40,6 +40,9 @@ class ImportService {
       detail: response['progress_stage'] as String?,
       reason: response['reason'] as String?,
       shortcode: response['shortcode'] as String? ?? '',
+      // Optional: the server fills it once extraction knows the reel's name.
+      // Absent is normal, and never becomes a title made up from the URL.
+      title: (response['title'] as String?)?.trim(),
     );
   }
 
@@ -100,6 +103,14 @@ class ImportService {
   /// Turns a cached extraction into a dish in the journal, with the creator
   /// attached to the version. Imports land as `To cook`.
   Future<Dish?> createDish(String shortcode) async {
+    // One reel, one dish. The sheet, the Journal card and a second tap can all
+    // ask for the same shortcode within seconds; an existing dish wins.
+    for (final dish in await _repository.loadDishes()) {
+      for (final version in dish.versions) {
+        if (version.originShortcode == shortcode) return dish;
+      }
+    }
+
     final content = await _api.get('/v1/content/$shortcode');
     final recipe = content['recipe'] as Map<String, dynamic>?;
     if (recipe == null) return null;
@@ -213,12 +224,16 @@ class ImportProgress {
     this.detail,
     this.reason,
     required this.shortcode,
+    this.title,
   });
 
   final ImportStage stage;
   final String? detail;
   final String? reason;
   final String shortcode;
+
+  /// The reel's own name, when the server has one. Null until it does.
+  final String? title;
 
   String get label => switch (detail) {
         // The worker VM sleeps when idle; the first import after a pause waits

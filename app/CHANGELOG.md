@@ -3,6 +3,21 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.21.1] — 2026-10-31
+
+### Added
+- Show a running import by name until it lands *(journal)* — [`fafad7d`](https://github.com/hawkaii/food-finder-app/commit/fafad7d7e9762e6e84206d36b98e53bf3a3fc2bc)
+
+### CI
+- Retry the release publish instead of losing it to a 403 — [`4bc266b`](https://github.com/hawkaii/food-finder-app/commit/4bc266b09b97c0499797416be62e1a79dc8308cf)
+
+### Docs
+- V1.19.1 [skip ci] *(changelog)* — [`528256a`](https://github.com/hawkaii/food-finder-app/commit/528256a9b2e80ecb4bedec417600f32c5d1c6305)
+- V1.20.0 [skip ci] *(changelog)* — [`a3f4054`](https://github.com/hawkaii/food-finder-app/commit/a3f4054d0cd6e510fbc676c04a2af3a80947073e)
+
+### Fixed
+- Keep the poller alive for the whole app, not just the Journal *(import)* — [`3392627`](https://github.com/hawkaii/food-finder-app/commit/339262729b818286ea813864579a0534d34020a9)
+
 ## [1.20.0] — 2026-10-31
 
 ### Changed
