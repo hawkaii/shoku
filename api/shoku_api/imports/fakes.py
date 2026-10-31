@@ -45,11 +45,13 @@ class FakeExtractor:
         caption: str = DEFAULT_CAPTION,
         creator: str | None = "@ravi",
         with_audio: bool = True,
+        with_video: bool = True,
         fail: bool = False,
     ) -> None:
         self.caption = caption
         self.creator = creator
         self.with_audio = with_audio
+        self.with_video = with_video
         self.fail = fail
         self.calls = 0
         self.audio_path: Path | None = None
@@ -65,11 +67,16 @@ class FakeExtractor:
             audio = workdir / "audio.m4a"
             audio.write_bytes(b"\x00fake-audio")
             self.audio_path = audio
+        video: Path | None = None
+        if self.with_video:
+            video = workdir / "media.mp4"
+            video.write_bytes(b"\x00fake-video")
         return Extraction(
             caption=self.caption,
             creator=self.creator,
             source_url=url,
             audio_path=audio,
+            video_path=video,
         )
 
 
@@ -108,3 +115,30 @@ class FakeStructurer:
         self.texts.append(text)
         self.caption_first.append(caption_first)
         return dict(self.payload)
+
+
+class FakeVision:
+    """Stands in for the frame reader, so the pipeline can be tested offline."""
+
+    name = "fake-vision"
+
+    def __init__(self, result: dict | None = None) -> None:
+        self.result = result or {
+            "title": "Read from the video",
+            "servings": 2,
+            "minutes": 20,
+            "kcal": 0,
+            "protein": 0,
+            "ingredients": [{"name": "paneer", "amount": "200 g", "grams": 200}],
+            "steps": ["Fry the paneer"],
+            "tags": [],
+        }
+        self.calls = 0
+        self.frames_seen: list[Path] = []
+        self.hint = ""
+
+    def structure_frames(self, frames, *, hint: str = "") -> dict:
+        self.calls += 1
+        self.frames_seen = list(frames)
+        self.hint = hint
+        return self.result

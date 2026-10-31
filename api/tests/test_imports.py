@@ -389,3 +389,112 @@ def test_stale_cache_is_re_extracted_instead_of_served(session, ctx):
     # rewrite an identical result.
     row = write(EXTRACTION_VERSION, "Rewritten")
     assert row.structured_json["title"] == "New parse"
+
+
+# ---- silent reels: reading frames ------------------------------------------
+
+
+SILENT = "https://www.instagram.com/reel/silent1/"
+
+
+def _silent_job(client, ctx, monkeypatch, *, vision, transcriber_text=""):
+    """A reel with no caption, no comment, no subtitles and no speech."""
+    from shoku_api.imports import fakes, pipeline
+
+    ctx.extractor = fakes.FakeExtractor(caption="", creator="@ravi")
+    ctx.transcriber = fakes.FakeTranscriber(text=transcriber_text)
+    ctx.vision = vision
+    monkeypatch.setattr(
+        pipeline, "sample_frames", lambda *a, **k: [Path("frame_001.jpg")]
+    )
+    body = start(client, SILENT)
+    return body, ctx
+
+
+def test_a_silent_reel_is_read_from_frames(client, ctx, worker, monkeypatch) -> None:
+    from shoku_api.imports.fakes import FakeVision
+
+    vision = FakeVision()
+    body, _ = _silent_job(client, ctx, monkeypatch, vision=vision)
+    result = worker.process(body["job_id"])
+
+    assert result.mode == "vision"
+    assert vision.calls == 1, "the frames are what carried this import"
+    assert status(client, body["job_id"])["state"] == "ready"
+
+    content = client.get(f"/v1/content/{body['shortcode']}").json()
+    assert content["recipe"]["title"] == "Read from the video"
+    # The dish says it was read, not narrated: an approximation, labelled.
+    assert "from video" in content["recipe"]["tags"]
+
+
+def test_a_silent_reel_without_vision_fails_clearly(
+    client, ctx, worker, monkeypatch
+) -> None:
+    from shoku_api.imports.fakes import FakeStructurer
+
+    structurer = FakeStructurer()
+    body, _ = _silent_job(client, ctx, monkeypatch, vision=None)
+    ctx.structurer = structurer
+    worker.process(body["job_id"])
+
+    job = status(client, body["job_id"])
+    assert job["state"] == "failed"
+    assert job["reason"] == "no_text"
+    assert structurer.calls == 0, "there was no text to structure"
+
+
+def test_frames_are_sampled_evenly_across_the_clip(monkeypatch, tmp_path) -> None:
+    """Even spacing, not the first sixteen frames of the opening shot."""
+    from shoku_api.imports import adapters
+
+    captured = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+
+        class Done:
+            returncode = 0
+            stderr = ""
+
+        (tmp_path / "frames").mkdir(exist_ok=True)
+        (tmp_path / "frames" / "frame_001.jpg").write_bytes(b"jpeg")
+        return Done()
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+
+    frames = adapters.sample_frames(
+        tmp_path / "media.mp4", tmp_path, count=16, duration=30.0
+    )
+
+    command = captured["command"]
+    assert frames and frames[0].name == "frame_001.jpg"
+    assert "fps=1/1.875" in " ".join(command), "30s / 16 frames is one every 1.9s"
+    assert "scale=720" in " ".join(command)
+    assert command[command.index("-frames:v") + 1] == "16"
+
+
+# ---- creator handle --------------------------------------------------------
+
+
+def test_handle_comes_from_the_profile_url_not_the_numeric_id() -> None:
+    from shoku_api.imports.adapters import _creator_handle
+
+    # Instagram reports uploader_id as a numeric account id, which reads as a
+    # bug in the UI ("@273008788").
+    assert (
+        _creator_handle(
+            {
+                "uploader_id": "273008788",
+                "uploader_url": "https://www.instagram.com/kanji_club_/",
+            }
+        )
+        == "@kanji_club_"
+    )
+
+
+def test_handle_is_omitted_rather_than_showing_a_numeric_id() -> None:
+    from shoku_api.imports.adapters import _creator_handle
+
+    assert _creator_handle({"uploader_id": "273008788"}) is None
+    assert _creator_handle({"uploader_id": "someuser"}) == "@someuser"

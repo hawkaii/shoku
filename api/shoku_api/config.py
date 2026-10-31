@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     structurer_reasoning_effort: str = "minimal"
     structurer_max_tokens: int = 8000
     structurer_timeout: float = 120.0
+    #: "auto" reads a silent reel from sampled frames; "off" refuses instead.
+    vision: str = "auto"
+    vision_frames: int = 16
 
     # Assistant.
     assistant_daily_cap: int = 20
