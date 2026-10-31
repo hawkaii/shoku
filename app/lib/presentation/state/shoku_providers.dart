@@ -28,7 +28,9 @@ enum FeedFilter { all, recipes, wisdom }
 
 final feedFilterProvider = StateProvider<FeedFilter>((ref) => FeedFilter.all);
 
-final savedItemsProvider = Provider<List<SavedItem>>((ref) => MockData.items);
+// The demo feed is gone: Discover starts empty and fills with things the user
+// actually saved.
+final savedItemsProvider = Provider<List<SavedItem>>((ref) => const []);
 
 final filteredItemsProvider = Provider<List<SavedItem>>((ref) {
   final filter = ref.watch(feedFilterProvider);
@@ -45,13 +47,13 @@ final filteredItemsProvider = Provider<List<SavedItem>>((ref) {
 
 final selectedItemProvider = StateProvider<SavedItem?>((ref) => null);
 
-final collectionsProvider = Provider<List<StashCollection>>((ref) => MockData.collections);
+final collectionsProvider = Provider<List<StashCollection>>((ref) => const []);
 
-final pantryProvider = Provider<List<PantryItem>>((ref) => MockData.pantry);
+final pantryProvider = Provider<List<PantryItem>>((ref) => const []);
 
 /// Shopping list with local toggle state (mock only).
 class ShoppingNotifier extends StateNotifier<List<ShoppingItem>> {
-  ShoppingNotifier() : super(MockData.shoppingSeed());
+  ShoppingNotifier() : super(const []);
 
   void toggle(int index) {
     final item = state[index];

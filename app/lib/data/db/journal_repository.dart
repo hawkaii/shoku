@@ -93,6 +93,31 @@ class JournalRepository {
     return _toDish(row, versionList, cookList);
   }
 
+  /// Deletes the demo kitchen from an install that already has it.
+  ///
+  /// Scoped to the known demo ids and to those alone: everything the user
+  /// created or imported survives. Seeded rows were never pushed, so there is
+  /// nothing to tombstone on the server.
+  Future<void> removeDemoKitchen(List<String> ids) async {
+    // Once is enough: this runs on every boot, and a delete transaction per
+    // launch for four rows that are already gone is pure waste.
+    final done = await (_db.select(_db.metaRows)
+          ..where((m) => m.key.equals('demo_kitchen_removed')))
+        .getSingleOrNull();
+    if (done?.value == '1') return;
+
+    await _db.transaction(() async {
+      for (final id in ids) {
+        await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id))).go();
+        await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id))).go();
+        await (_db.delete(_db.dishRows)..where((d) => d.id.equals(id))).go();
+      }
+      await _db.into(_db.metaRows).insertOnConflictUpdate(
+            MetaRowsCompanion.insert(key: 'demo_kitchen_removed', value: '1'),
+          );
+    });
+  }
+
   /// Whether the demo kitchen has ever been written. Stored in the database so
   /// a wiped database reseeds and a user who deletes every dish does not.
   Future<bool> isSeeded() async {
