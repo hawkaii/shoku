@@ -79,5 +79,7 @@ void main() {
 
     expect(find.text('Heat the oil'), findsOneWidget);
     expect(find.byKey(const ValueKey('step-ingredients')), findsNothing);
+    // No shortcode, nothing to publish, no affordance at all.
+    expect(find.byKey(const ValueKey('share-wall')), findsNothing);
   });
 }

@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.17.1] — 2026-10-31
+
+### Docs
+- V1.17.0 [skip ci] *(changelog)* — [`1c357d9`](https://github.com/hawkaii/food-finder-app/commit/1c357d96bfc72baa8535547a8c36956803b123b1)
+
+### Fixed
+- Wait four minutes for a reel the server is still reading *(import)* — [`544cf1c`](https://github.com/hawkaii/food-finder-app/commit/544cf1cf48c4abfd57027c3edb168c223c5279da)
+
 ## [1.17.0] — 2026-10-31
 
 ### Added

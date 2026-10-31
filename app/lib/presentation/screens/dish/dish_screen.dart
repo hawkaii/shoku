@@ -15,6 +15,7 @@ import '../../widgets/kit/status_badge.dart';
 import '../../widgets/kit/step_ingredients.dart';
 import '../assistant/assistant_sheet.dart';
 import '../log/debrief_sheet.dart';
+import 'share_row.dart';
 
 class DishScreen extends ConsumerWidget {
   final String dishId;
@@ -99,6 +100,10 @@ class DishScreen extends ConsumerWidget {
             if (version.isImport) ...[
               const SizedBox(height: ShokuSpace.md),
               _ProvenanceCard(version: version),
+              if ((version.originShortcode ?? '').isNotEmpty) ...[
+                const SizedBox(height: ShokuSpace.md),
+                ShareOnWallRow(shortcode: version.originShortcode!),
+              ],
             ],
             const SizedBox(height: ShokuSpace.lg),
 
