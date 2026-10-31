@@ -6,6 +6,17 @@ name: Release APK
 on:
   push:
     branches: [main]
+    # Only build when something that can change the APK changed. Docs, the
+    # changelog commit and CI-only edits used to trigger a full ~9 minute
+    # Android build each, which is most of the minute burn on a busy day.
+    paths:
+      - "lib/**"
+      - "android/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "l10n.yaml"
+      - ".github/workflows/android.yml"
   workflow_dispatch:
     inputs:
       build_type:
@@ -39,6 +50,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          # The Gradle dependency cache is the single biggest cost in an
+          # Android build: without it every run resolves and compiles the whole
+          # toolchain from scratch. Cached, a build drops by several minutes.
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
