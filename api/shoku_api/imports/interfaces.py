@@ -26,6 +26,9 @@ class Extraction:
     #: Spoken words already published by the platform (YouTube subtitles).
     #: When present this replaces ASR entirely — same stage, free and faster.
     transcript: str = ""
+    #: Pinned / first comment. Creators put the real quantities there when the
+    #: caption is truncated, so it is a first-class text source, not a fallback.
+    comment: str = ""
     creator: str | None = None
     #: "@handle" rather than the display name; what the dish should attribute.
     creator_handle: str | None = None

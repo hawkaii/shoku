@@ -102,3 +102,11 @@ def _youtube(parsed, host: str) -> NormalisedSource:
         shortcode=code,
         canonical_url=f"https://www.youtube.com/watch?v={code}",
     )
+
+
+def platform_of(raw: str) -> str:
+    """Which platform a URL belongs to, without fully normalising it."""
+    try:
+        return normalise_url(raw).platform
+    except Exception:  # noqa: BLE001 - callers treat unknown as generic
+        return "unknown"
