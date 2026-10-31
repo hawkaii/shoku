@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     import_queue_name: str = "shoku:imports"
 
     # Import pipeline.
-    import_budget_seconds: float = 60.0
+    import_budget_seconds: float = 180.0
     breaker_window: int = 20
     breaker_threshold: float = 0.6
     breaker_min_samples: int = 5

@@ -47,9 +47,15 @@ if TYPE_CHECKING:  # pragma: no cover
 
 log = logging.getLogger(__name__)
 
-# The hard ceiling. Configuration may shorten it, never lengthen it: a 60 second
-# budget that a config flag can turn into ten minutes is not a budget.
-BUDGET_SECONDS = 60.0
+# The hard ceiling. Configuration may shorten it, never lengthen it: a budget a
+# config flag can turn into ten minutes is not a budget.
+#
+# 180s, not 60. Measured on the worker: speech recognition runs at ~0.86x
+# realtime (base model, beam 5, 4 vCPU), so a 90s reel needs ~75s of ASR after
+# ~8s of download — a 60s ceiling failed every reel longer than about 50
+# seconds, which is most recipe reels. The queue is serial anyway, so the cost
+# of a longer ceiling is a longer wait for the next job, not a risk of overload.
+BUDGET_SECONDS = 180.0
 
 # Bump when a parse produced by the previous version should be redone. A cached
 # reel is served without re-extraction, so this is the only thing that makes an
