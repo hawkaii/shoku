@@ -11,12 +11,21 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml README.md ./
-COPY shoku_api ./shoku_api
+
+# A stub so the project metadata resolves without the real source. Dependencies
+# are what take minutes to install, and they only change when pyproject.toml
+# does — copying the code first made every deploy reinstall all of them.
+RUN mkdir -p shoku_api && touch shoku_api/__init__.py
 
 # "prod" for the API box, "worker,whisper" for the worker VM.
 ARG EXTRAS=prod
 RUN python -m venv /opt/venv \
  && /opt/venv/bin/pip install ".[${EXTRAS}]"
+
+# The real source replaces the stub, so the installed package is not a hollow
+# shadow of the code that ships.
+COPY shoku_api ./shoku_api
+RUN /opt/venv/bin/pip install --no-deps .
 
 
 FROM python:3.12-slim
