@@ -4,7 +4,7 @@ services:
   api:
     image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
     restart: unless-stopped
-    env_file: .env
+    env_file: ../.env
     ports:
       - "8000:8000"
     healthcheck:
