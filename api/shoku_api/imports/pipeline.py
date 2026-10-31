@@ -20,6 +20,8 @@ The worker is deliberately synchronous and single-job: retries, concurrency and
 lease renewal belong to the queue (or a process supervisor), not here.
 """
 
+from __future__ import annotations
+
 import logging
 import tempfile
 from dataclasses import dataclass
