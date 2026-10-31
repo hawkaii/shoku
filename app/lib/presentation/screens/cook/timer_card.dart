@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/models/cook_timer.dart';
+import '../../../data/services/timer_alerts.dart';
 import '../../widgets/kit/motion.dart';
 
 /// The timer, as the cook sees it.
@@ -21,11 +22,16 @@ class CookTimerCard extends StatelessWidget {
     required this.onResume,
     required this.onStop,
     this.currentStep,
+    this.alerts = TimerAlertPermission.unknown,
   });
 
   final CookTimer? timer;
   final int remainingMs;
   final int suggestedMinutes;
+
+  /// Whether the alert that mirrors this timer can be trusted to ring, be late,
+  /// or not ring at all. Whatever it is, it is said out loud.
+  final TimerAlertPermission alerts;
 
   /// Which step is on screen. When the timer belongs to another one, the card
   /// says so rather than looking like it watches whatever you are reading.
@@ -70,51 +76,73 @@ class CookTimerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(ShokuRadius.chip),
         border: Border.all(color: c.hairline),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          Row(
             children: [
-              Text(
-                CookTimer.formatRemaining(remainingMs),
-                key: const ValueKey('timer-clock'),
-                style: ShokuType.stat.copyWith(
-                  fontSize: 22,
-                  color: done ? c.ready : c.ink,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    CookTimer.formatRemaining(remainingMs),
+                    key: const ValueKey('timer-clock'),
+                    style: ShokuType.stat.copyWith(
+                      fontSize: 22,
+                      color: done ? c.ready : c.ink,
+                    ),
+                  ),
+                  Text(
+                    status,
+                    key: const ValueKey('timer-status'),
+                    style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+                  ),
+                ],
               ),
-              Text(
-                status,
-                key: const ValueKey('timer-status'),
-                style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+              const Spacer(),
+              if (done)
+                _TimerButton(
+                  key: const ValueKey('timer-start'),
+                  label: 'Start again',
+                  onTap: onStart,
+                )
+              else
+                _TimerButton(
+                  key: ValueKey(paused ? 'timer-resume' : 'timer-pause'),
+                  label: paused ? 'Resume' : 'Pause',
+                  onTap: paused ? onResume : onPause,
+                ),
+              const SizedBox(width: ShokuSpace.xs),
+              _TimerButton(
+                key: const ValueKey('timer-stop'),
+                label: 'Stop',
+                onTap: onStop,
+                quiet: true,
               ),
             ],
           ),
-          const Spacer(),
-          if (done)
-            _TimerButton(
-              key: const ValueKey('timer-start'),
-              label: 'Start again',
-              onTap: onStart,
-            )
-          else
-            _TimerButton(
-              key: ValueKey(paused ? 'timer-resume' : 'timer-pause'),
-              label: paused ? 'Resume' : 'Pause',
-              onTap: paused ? onResume : onPause,
+          if (alertNote != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              alertNote!,
+              key: const ValueKey('timer-alert-note'),
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11),
             ),
-          const SizedBox(width: ShokuSpace.xs),
-          _TimerButton(
-            key: const ValueKey('timer-stop'),
-            label: 'Stop',
-            onTap: onStop,
-            quiet: true,
-          ),
+          ],
         ],
       ),
     );
   }
+
+  /// The truth about the alert, when it is not simply "yes, on time".
+  String? get alertNote => switch (alerts) {
+        TimerAlertPermission.denied =>
+          'alerts are off — enable notifications for Shoku',
+        TimerAlertPermission.inexact =>
+          'alerts may arrive late — allow exact alarms in settings',
+        _ => null,
+      };
 }
 
 class _TimerButton extends StatelessWidget {

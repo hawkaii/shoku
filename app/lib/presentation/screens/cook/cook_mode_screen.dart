@@ -40,6 +40,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   Timer? _ticker;
   bool _rang = false;
   bool _adoptedTimer = false;
+  bool _adoptingPage = false;
   bool _dropScheduled = false;
   bool _timerCleared = false;
 
@@ -63,11 +64,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   }
 
   /// Coming back from the background: recompute from the clock on the first
-  /// visible frame rather than up to a second later.
-  ///
-  /// Nothing alerts while the app was away — there is no local notification and
-  /// no exact-alarm permission. If the timer ran out with the screen off, this
-  /// is the moment the cook finds out.
+  /// visible frame rather than up to a second later. If the timer ran out while
+  /// the screen was off, the notification rang and the card catches up here.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) _pulse();
@@ -90,10 +88,11 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
         !_rang &&
         !timer.isPaused &&
         timer.isDoneAt(DateTime.now())) {
-      // Haptic only, and only because this screen is awake. A locked phone gets
-      // no alert: there is no local notification and no exact-alarm permission.
+      // Haptic only, and only because this screen is awake. The mirror is
+      // cancelled as well: it has done its job or it never will.
       _rang = true;
       HapticFeedback.mediumImpact();
+      unawaited(ref.read(cookTimerProvider.notifier).cancelAlert());
     }
     setState(() {});
   }
@@ -123,10 +122,15 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
       return;
     }
     final page = timer.stepIndex;
+    _adoptingPage = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_pages.hasClients) return;
+      if (!mounted || !_pages.hasClients) {
+        _adoptingPage = false;
+        return;
+      }
       _pages.jumpToPage(page);
       setState(() => _step = page);
+      _adoptingPage = false;
     });
   }
 
@@ -364,6 +368,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                       itemCount: steps.length,
                       onPageChanged: (i) {
                         HapticFeedback.selectionClick();
+                        // Leaving the step ends its timer. A ring for a step
+                        // already left is the bug a kitchen notices.
+                        if (!_adoptingPage) {
+                          final timer = ref.read(cookTimerProvider);
+                          if (timer != null && timer.dishId == dish.id) {
+                            unawaited(ref.read(cookTimerProvider.notifier).stop());
+                          }
+                        }
                         setState(() => _step = i);
                       },
                       itemBuilder: (context, i) => SingleChildScrollView(
@@ -424,6 +436,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                     timer: timerForThisDish,
                     currentStep: _step,
                     remainingMs: remainingMs,
+                    alerts: ref.watch(timerAlertPermissionProvider),
                     suggestedMinutes:
                         _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
                     onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),

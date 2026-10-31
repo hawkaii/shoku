@@ -1,20 +1,35 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/cook_timer_repository.dart';
 import '../../data/models/cook_timer.dart';
+import '../../data/services/timer_alerts.dart';
 import 'journal_store.dart';
 
 /// Owns the kitchen timer and nothing else: where it started, how long it runs,
 /// when it was paused.
 ///
 /// Every mutation is written to disk before it becomes state, so killing the app
-/// one frame later loses nothing.
+/// one frame later loses nothing. Every start also mirrors itself into a local
+/// notification, and every path that ends the timer cancels that notification by
+/// the same id — a ring for a step the cook left ten minutes ago is the bug that
+/// gets noticed in a kitchen.
 class CookTimerStore extends StateNotifier<CookTimer?> {
-  CookTimerStore(this._repo) : super(null) {
+  CookTimerStore(
+    this._repo, {
+    TimerAlerts alerts = const SilentTimerAlerts(),
+    this.onAlertPermission,
+  })  : _alerts = alerts,
+        super(null) {
     _restore();
   }
 
   final CookTimerRepository _repo;
+  final TimerAlerts _alerts;
+
+  /// Where the card learns whether alerts are on, late, or off.
+  final void Function(TimerAlertPermission)? onAlertPermission;
 
   bool _restored = false;
 
@@ -41,6 +56,9 @@ class CookTimerStore extends StateNotifier<CookTimer?> {
     required Duration duration,
     DateTime? now,
   }) async {
+    // Ends any timer already running, including its notification.
+    await _cancelMirror(state);
+
     final timer = CookTimer(
       dishId: dishId,
       versionId: versionId,
@@ -49,23 +67,57 @@ class CookTimerStore extends StateNotifier<CookTimer?> {
       duration: CookTimer.clampDuration(duration),
     );
     await _persist(timer);
+
+    // Asked here, at the first timer, and never at launch.
+    final permission = await _alerts.ensurePermission();
+    onAlertPermission?.call(permission);
+    if (permission == TimerAlertPermission.allowed ||
+        permission == TimerAlertPermission.inexact) {
+      await _alerts.schedule(
+        timer,
+        exact: permission == TimerAlertPermission.allowed,
+      );
+    }
   }
 
   Future<void> pause({DateTime? now}) async {
     final timer = state;
     if (timer == null) return;
+    // A paused timer has no end time, so nothing may ring for it.
+    await _cancelMirror(timer);
     await _persist(timer.pausedNow(now ?? DateTime.now()));
   }
 
   Future<void> resume({DateTime? now}) async {
     final timer = state;
     if (timer == null) return;
-    await _persist(timer.resumedAt(now ?? DateTime.now()));
+    final resumed = timer.resumedAt(now ?? DateTime.now());
+    await _persist(resumed);
+
+    final permission = await _alerts.ensurePermission();
+    onAlertPermission?.call(permission);
+    if (permission == TimerAlertPermission.allowed ||
+        permission == TimerAlertPermission.inexact) {
+      await _alerts.schedule(
+        resumed,
+        exact: permission == TimerAlertPermission.allowed,
+      );
+    }
   }
 
   Future<void> stop() async {
+    await _cancelMirror(state);
     await _repo.clear();
     state = null;
+  }
+
+  /// The timer ran out in front of the cook. The card keeps its "time's up"
+  /// state, but nothing may ring for it afterwards — an inexact alarm can fire
+  /// minutes late, and a ring for a timer you already watched finish is noise.
+  Future<void> cancelAlert() async {
+    final timer = state;
+    if (timer == null) return;
+    await _alerts.cancel(timer);
   }
 
   /// Drops the timer when the version it belongs to is no longer the one on
@@ -90,12 +142,30 @@ class CookTimerStore extends StateNotifier<CookTimer?> {
     await _repo.write(timer);
     state = timer;
   }
+
+  Future<void> _cancelMirror(CookTimer? timer) async {
+    if (timer == null) return;
+    await _alerts.cancel(timer);
+  }
 }
 
 final cookTimerRepositoryProvider = Provider<CookTimerRepository>(
   (ref) => CookTimerRepository(ref.watch(databaseProvider)),
 );
 
+/// The mirror, as a provider so tests can prove it is scheduled and cancelled.
+final timerAlertsProvider = Provider<TimerAlerts>(
+  (ref) => LocalTimerAlerts(),
+);
+
+final timerAlertPermissionProvider =
+    StateProvider<TimerAlertPermission>((ref) => TimerAlertPermission.unknown);
+
 final cookTimerProvider = StateNotifierProvider<CookTimerStore, CookTimer?>(
-  (ref) => CookTimerStore(ref.watch(cookTimerRepositoryProvider)),
+  (ref) => CookTimerStore(
+    ref.watch(cookTimerRepositoryProvider),
+    alerts: ref.watch(timerAlertsProvider),
+    onAlertPermission: (permission) =>
+        ref.read(timerAlertPermissionProvider.notifier).state = permission,
+  ),
 );

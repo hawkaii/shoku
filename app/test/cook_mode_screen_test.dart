@@ -8,8 +8,11 @@ import 'package:food_finder/data/db/cook_timer_repository.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/data/models/cook_timer.dart';
 import 'package:food_finder/presentation/screens/cook/cook_mode_screen.dart';
+import 'package:food_finder/presentation/state/cook_timer_providers.dart';
 import 'package:food_finder/presentation/state/journal_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
+
+import 'support/fake_timer_alerts.dart';
 
 Dish _dish({String versionId = 'v1'}) => Dish(
       id: 'd1',
@@ -36,6 +39,7 @@ Future<void> _pumpCook(
   WidgetTester tester, {
   required AppDatabase db,
   required Dish dish,
+  FakeTimerAlerts? alerts,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -46,6 +50,7 @@ Future<void> _pumpCook(
       overrides: [
         databaseProvider.overrideWithValue(db),
         dishProvider.overrideWith((ref, id) => dish),
+        timerAlertsProvider.overrideWithValue(alerts ?? FakeTimerAlerts()),
       ],
       child: MaterialApp(
         theme: ShokuTheme.dark(),
@@ -130,6 +135,27 @@ void main() {
     expect(find.text('running'), findsNothing);
     expect(find.text('start 5 min timer'), findsOneWidget);
     expect(await CookTimerRepository(db).read(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('leaving the step ends its timer and its alert', (tester) async {
+    final alerts = FakeTimerAlerts();
+    await _pumpCook(tester, db: db, dish: _dish(), alerts: alerts);
+
+    await tester.tap(find.byKey(const ValueKey('timer-start')));
+    await tester.pump();
+    expect(alerts.scheduled, hasLength(1), reason: 'starting mirrors it');
+
+    await tester.tap(find.text('Next step'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('2/4'), findsOneWidget, reason: 'the page actually moved');
+    expect(find.text('running'), findsNothing);
+    expect(await CookTimerRepository(db).read(), isNull);
+    expect(alerts.cancelled, contains(alerts.scheduledIds.single),
+        reason: 'a ring for a step already left is the bug');
 
     await tester.pumpWidget(const SizedBox());
   });
