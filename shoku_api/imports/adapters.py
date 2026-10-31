@@ -118,13 +118,14 @@ class YtDlpExtractor:
             duration_seconds=float(duration) if duration else None,
         )
 
-    def _instagram_comment(self, media_id: str | None, deadline: Deadline) -> str:
+    def _instagram_comment(self, shortcode: str | None, deadline: Deadline) -> str:
         """The pinned/first comments of a reel.
 
         Creators truncate captions and put the method in comment #1, so this is
         often the only place the quantities exist. It needs a logged-in session;
         without one Instagram answers 401/429 and we simply carry on.
         """
+        media_id = instagram_media_id(shortcode or "")
         if not media_id or not self.cookies_file:
             return ""
         import httpx
@@ -384,6 +385,27 @@ class FallbackStructurer:
 
 _CUE_TIME = re.compile(r"^\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s*-->")
 _CUE_TAG = re.compile(r"<[^>]+>")
+
+
+_IG_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+
+
+def instagram_media_id(shortcode: str) -> str:
+    """Turns a shortcode into the numeric media id.
+
+    Instagram's shortcode *is* the media id written in base64 with its own
+    alphabet, so this is exact rather than a guess — the web page and the media
+    API agree on the result.
+    """
+    if not shortcode:
+        return ""
+    value = 0
+    for char in shortcode:
+        index = _IG_ALPHABET.find(char)
+        if index < 0:
+            return ""
+        value = value * 64 + index
+    return str(value)
 
 
 def _netscape_cookies(path: str) -> dict[str, str]:
