@@ -30,6 +30,9 @@ prod = [
     "psycopg[binary]>=3.2",
     "redis>=5.0",
     "boto3>=1.34",
+    # The API calls the Compute REST API to wake the worker VM. It ships in
+    # prod only: the test suite and a local install never talk to GCP.
+    "httpx>=0.27",
 ]
 # Only the worker image installs these: extracting media and running speech
 # recognition are the heavy, optional half of the system.

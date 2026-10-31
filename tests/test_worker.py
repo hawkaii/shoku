@@ -27,9 +27,19 @@ class Transcriber:
             raise RuntimeError("model could not be fetched")
 
 
+def _ctx(queue, transcriber):
+    from shoku_api.domain.worker_pool import NoWorkerPool
+
+    return types.SimpleNamespace(
+        queue=queue, transcriber=transcriber, worker_pool=NoWorkerPool()
+    )
+
+
 def fake_worker(monkeypatch, ctx) -> None:
     monkeypatch.setattr(
-        worker_module, "get_settings", lambda: types.SimpleNamespace(queue_backend="memory")
+        worker_module,
+        "get_settings",
+        lambda: types.SimpleNamespace(queue_backend="memory", idle_shutdown_seconds=0),
     )
     monkeypatch.setattr(worker_module, "build_context", lambda settings: ctx)
 
@@ -44,7 +54,10 @@ def test_the_worker_warms_before_it_claims_any_job(monkeypatch) -> None:
             # keep going, and this test is about what happened before that.
             raise SystemExit(0)
 
-    fake_worker(monkeypatch, types.SimpleNamespace(queue=Queue(), transcriber=Transcriber(order)))
+    fake_worker(
+        monkeypatch,
+        _ctx(Queue(), Transcriber(order)),
+    )
 
     with pytest.raises(SystemExit):
         worker_module.main()
@@ -62,7 +75,7 @@ def test_a_failed_warm_up_claims_nothing(monkeypatch) -> None:
 
     fake_worker(
         monkeypatch,
-        types.SimpleNamespace(queue=Queue(), transcriber=Transcriber(order, fail=True)),
+        _ctx(Queue(), Transcriber(order, fail=True)),
     )
 
     assert worker_module.main() == 1

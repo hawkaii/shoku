@@ -28,6 +28,21 @@ def _warm(transcriber) -> float:
     return time.monotonic() - started
 
 
+def _should_stop(ctx, *, idle_for: float, limit: float) -> bool:
+    """Whether the worker may stop its VM now.
+
+    Only meaningful in the empty-dequeue branch, i.e. while this process has
+    nothing claimed. The queue is re-read here instead of trusting the poll that
+    just returned None: a job that arrived during the idle window must not be
+    slept through. A cron could not make that call, which is why it lives here.
+    """
+    if limit <= 0 or not getattr(ctx.worker_pool, "can_stop", False):
+        return False
+    if idle_for < limit:
+        return False
+    return ctx.queue.depth() == 0
+
+
 def main() -> int:
     logging.basicConfig(
         level=logging.INFO,
@@ -62,6 +77,9 @@ def main() -> int:
 
     log.info("worker ready (queue=%s)", settings.queue_backend)
 
+    idle_limit = float(settings.idle_shutdown_seconds)
+    idle_since = time.monotonic()
+
     while not stopping:
         try:
             job_id = ctx.queue.dequeue(timeout=5)
@@ -70,7 +88,21 @@ def main() -> int:
             time.sleep(2)
             continue
         if job_id is None:
+            idle_for = time.monotonic() - idle_since
+            if _should_stop(ctx, idle_for=idle_for, limit=idle_limit):
+                log.info(
+                    "idle for %.0fs with an empty queue; stopping the worker instance",
+                    idle_for,
+                )
+                try:
+                    ctx.worker_pool.stop()
+                except Exception:  # noqa: BLE001 - powering down is best effort
+                    log.exception("could not stop the worker instance")
+                # Either the VM is going down or the stop was refused; wait a
+                # full idle window before trying again instead of spinning.
+                idle_since = time.monotonic()
             continue
+        idle_since = time.monotonic()
         try:
             result = worker.process(job_id)
         except Exception:  # noqa: BLE001 - one bad job must not kill the worker

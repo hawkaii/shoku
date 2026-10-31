@@ -64,6 +64,21 @@ class Settings(BaseSettings):
     # leaves the feed. Never below 2 — a threshold of one is an unshare button.
     feed_report_threshold: int = 3
 
+    # Worker VM. Off by default so a laptop never calls GCP; the deployed API
+    # sets SHOKU_AUTOSTART_WORKER=1.
+    autostart_worker: bool = False
+    worker_instance: str = "reel-worker"
+    gcp_project: str = ""
+    gcp_zone: str = "us-central1-a"
+    #: Ten imports arriving together must pay for one boot.
+    worker_wake_debounce_seconds: int = 120
+    #: An idle worker stops its own VM after this long with an empty queue.
+    idle_shutdown_seconds: int = 300
+    #: A job nobody claimed in this long is dead, not merely slow. Its own
+    #: extraction budget starts at claim time, so this only catches wiring
+    #: failures: a worker that never booted, or one that never came back.
+    worker_unclaimed_timeout_seconds: int = 180
+
     # Storage. "dev" returns a placeholder PUT URL and is not usable by a real
     # client; "r2" presigns against Cloudflare R2.
     storage_backend: str = "dev"
