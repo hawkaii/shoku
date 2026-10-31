@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     assistant_daily_cap: int = 20
     assistant_model_name: str = "fake-assistant"
 
+    # The Wall. A report is counted per distinct user; at this many, the row
+    # leaves the feed. Never below 2 — a threshold of one is an unshare button.
+    feed_report_threshold: int = 3
+
     # Storage. "dev" returns a placeholder PUT URL and is not usable by a real
     # client; "r2" presigns against Cloudflare R2.
     storage_backend: str = "dev"

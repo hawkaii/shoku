@@ -16,6 +16,7 @@ from typing import Any
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     Date,
     DateTime,
     ForeignKey,
@@ -248,13 +249,41 @@ class ContentCache(Base):
     structuring_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
     source_url: Mapped[str] = mapped_column(String(2048), default="", nullable=False)
     extraction_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    #: The Wall. False until a user deliberately publishes this extraction, and
+    #: set by exactly one code path (``feed.publish``). Never defaulted true,
+    #: never backfilled: a helper that publishes on import would put everyone's
+    #: journal on the Wall at once.
+    shared: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    #: Distinct users who reported this row. Reaches the threshold and the row
+    #: is unpublished — one account cannot do it alone, however often it taps.
+    reported_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
 
+class ContentReport(Base):
+    """One report per user per extraction.
+
+    The composite key is the whole moderation model: a counter incremented per
+    request would let a single account unshare anything by tapping repeatedly.
+    The row is what makes "distinct users" cheap to enforce.
+    """
+
+    __tablename__ = "content_reports"
+
+    shortcode: Mapped[str] = mapped_column(
+        String(64), ForeignKey("content_cache.shortcode", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (Index("ix_content_reports_shortcode", "shortcode"),)
+
+
 class ImportJob(Base):
     """Server-owned job. Its id is minted here (it is not journal data)."""
-
     __tablename__ = "import_jobs"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
