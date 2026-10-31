@@ -72,7 +72,11 @@ def store_extraction(
         session.flush()
         return row
 
-    if not overwrite:
+    # A row written by an older extraction is a stale parse, not a competing
+    # one: the caller is asking for the current version, so it wins. A takedown
+    # still blocks it upstream, and an equal version is left alone because
+    # re-importing the same reel must not rewrite an identical result.
+    if not overwrite and row.extraction_version >= extraction_version:
         return row
 
     for field, value in payload.items():

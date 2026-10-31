@@ -341,3 +341,51 @@ def test_fallback_reports_the_structurer_that_actually_ran():
     assert active.name == "muse"
     active.structure("250 g paneer\n2 tbsp butter\nMix well", caption_first=True)
     assert active.name == "heuristic"
+
+
+# ---- cache staleness -------------------------------------------------------
+
+
+def test_stale_cache_is_re_extracted_instead_of_served(session, ctx):
+    """An old parse must not outlive the extractor that produced it.
+
+    Serving it would keep showing a dish the current pipeline would no longer
+    write — a fixed importer that appears not to have been fixed.
+    """
+    from shoku_api.content import store_extraction
+    from shoku_api.imports.pipeline import EXTRACTION_VERSION
+    from shoku_api.schemas import ProsePayload, RecipePayload
+
+    recipe = RecipePayload(
+        title="Old parse",
+        servings=2,
+        minutes=10,
+        kcal=0,
+        protein=0,
+        ingredients=[{"name": "paneer"}],
+        steps=["Mix"],
+        tags=[],
+    )
+    prose = ProsePayload(summary="old")
+
+    def write(version, title):
+        return store_extraction(
+            session,
+            shortcode="stale1",
+            recipe=recipe.model_copy(update={"title": title}),
+            prose=prose,
+            creator=None,
+            source_url="https://www.instagram.com/reel/stale1/",
+            extraction_version=version,
+            clock=ctx.clock,
+        )
+
+    write(EXTRACTION_VERSION - 1, "Old parse")
+    row = write(EXTRACTION_VERSION, "New parse")
+
+    assert row.structured_json["title"] == "New parse", "a stale row is replaced"
+
+    # An equal version is left alone: re-importing the same reel must not
+    # rewrite an identical result.
+    row = write(EXTRACTION_VERSION, "Rewritten")
+    assert row.structured_json["title"] == "New parse"

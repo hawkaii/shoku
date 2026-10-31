@@ -22,7 +22,9 @@ def test_import_to_content_to_takedown(client: TestClient, worker, extractor) ->
     assert body["prose"]["summary"].startswith("250 g paneer")
     assert body["creator"] == "@ravi"
     assert body["url"] == "https://www.instagram.com/reel/reel42/"
-    assert body["extraction_version"] == 1
+    from shoku_api.imports.pipeline import EXTRACTION_VERSION
+
+    assert body["extraction_version"] == EXTRACTION_VERSION
 
     assert client.delete(f"/v1/content/{job['shortcode']}").status_code == 204
     assert client.get(f"/v1/content/{job['shortcode']}").status_code == 404

@@ -47,7 +47,11 @@ log = logging.getLogger(__name__)
 # budget that a config flag can turn into ten minutes is not a budget.
 BUDGET_SECONDS = 60.0
 
-EXTRACTION_VERSION = 1
+# Bump when a parse produced by the previous version should be redone. A cached
+# reel is served without re-extraction, so this is the only thing that makes an
+# improvement reach a dish someone imported before the improvement existed.
+#   2: Muse structurer replaces the line-splitting heuristic.
+EXTRACTION_VERSION = 2
 
 READY = "ready"
 FAILED = "failed"
