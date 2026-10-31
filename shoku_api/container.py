@@ -116,6 +116,7 @@ def build_context(
         ),
     )
     from .imports.adapters import (
+        FallbackStructurer,
         FasterWhisperTranscriber,
         HeuristicStructurer,
         OpenAICompatStructurer,
@@ -128,10 +129,14 @@ def build_context(
         ctx.transcriber = FasterWhisperTranscriber(model_size=settings.whisper_model)
     if settings.structurer == "heuristic":
         ctx.structurer = HeuristicStructurer()
-    elif settings.structurer == "openai":
-        ctx.structurer = OpenAICompatStructurer(
-            settings.structurer_base_url, settings.structurer_api_key, settings.structurer_model
+    elif settings.structurer in {"meta", "openai"}:
+        model = OpenAICompatStructurer(
+            settings.structurer_base_url or "https://api.llama.com/v1",
+            settings.structurer_api_key,
+            settings.structurer_model,
         )
+        # The model improves the parse; it must never be able to fail an import.
+        ctx.structurer = FallbackStructurer(model, HeuristicStructurer())
 
     for name, value in overrides.items():
         if not hasattr(ctx, name):

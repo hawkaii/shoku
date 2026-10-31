@@ -284,6 +284,10 @@ class ContentResponse(BaseModel):
     recipe: RecipePayload
     prose: ProsePayload
     creator: str | None
+    #: Attributable provenance: "@handle", the platform, and the reel's cover.
+    creator_handle: str | None = None
+    platform: str | None = None
+    thumbnail_url: str | None = None
     url: str
     extraction_version: int
 

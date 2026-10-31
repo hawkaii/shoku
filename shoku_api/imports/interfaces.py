@@ -27,6 +27,11 @@ class Extraction:
     #: When present this replaces ASR entirely — same stage, free and faster.
     transcript: str = ""
     creator: str | None = None
+    #: "@handle" rather than the display name; what the dish should attribute.
+    creator_handle: str | None = None
+    platform: str | None = None
+    #: The platform's own cover image, when it exposes one.
+    thumbnail_url: str | None = None
     source_url: str = ""
     audio_path: Path | None = None
     duration_seconds: float | None = None

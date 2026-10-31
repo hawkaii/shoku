@@ -164,6 +164,10 @@ class ImportWorker:
                 recipe=recipe,
                 prose=prose,
                 creator=extraction.creator,
+                creator_handle=extraction.creator_handle,
+                platform=extraction.platform,
+                thumbnail_url=extraction.thumbnail_url,
+                structuring_model=getattr(self.ctx.structurer, "name", None),
                 source_url=extraction.source_url or job.source_url,
             )
             return PipelineResult(job_id=job.id, state=READY, mode=mode)
@@ -176,6 +180,10 @@ class ImportWorker:
         prose: ProsePayload,
         creator: str | None,
         source_url: str,
+        creator_handle: str | None = None,
+        platform: str | None = None,
+        thumbnail_url: str | None = None,
+        structuring_model: str | None = None,
     ) -> None:
         with session_scope(self.ctx.session_factory) as session:
             row = session.get(ImportJob, job.id)
@@ -193,6 +201,10 @@ class ImportWorker:
                 recipe=recipe,
                 prose=prose,
                 creator=creator,
+                creator_handle=creator_handle,
+                platform=platform,
+                thumbnail_url=thumbnail_url,
+                structuring_model=structuring_model,
                 source_url=source_url,
                 extraction_version=EXTRACTION_VERSION,
                 clock=self.ctx.clock,

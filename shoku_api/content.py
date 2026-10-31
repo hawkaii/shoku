@@ -29,6 +29,9 @@ def to_response(row: ContentCache) -> ContentResponse:
         recipe=RecipePayload.model_validate(row.structured_json),
         prose=ProsePayload.model_validate(row.prose_json or {}),
         creator=row.creator,
+        creator_handle=row.creator_handle,
+        platform=row.platform,
+        thumbnail_url=row.thumbnail_url,
         url=row.source_url,
         extraction_version=row.extraction_version,
     )
@@ -43,6 +46,10 @@ def store_extraction(
     creator: str | None,
     source_url: str,
     extraction_version: int,
+    creator_handle: str | None = None,
+    platform: str | None = None,
+    thumbnail_url: str | None = None,
+    structuring_model: str | None = None,
     clock: Clock,
     overwrite: bool = False,
 ) -> ContentCache:
@@ -51,6 +58,10 @@ def store_extraction(
         "structured_json": recipe.model_dump(mode="json"),
         "prose_json": prose.model_dump(mode="json"),
         "creator": creator,
+        "creator_handle": creator_handle,
+        "platform": platform,
+        "thumbnail_url": thumbnail_url,
+        "structuring_model": structuring_model,
         "source_url": source_url,
         "extraction_version": extraction_version,
     }

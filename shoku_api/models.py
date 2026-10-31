@@ -129,6 +129,8 @@ class RecipeVersion(Base):
 
     origin_kind: Mapped[str] = mapped_column(String(16), default="mine", nullable=False)
     origin_creator: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    origin_handle: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    origin_platform: Mapped[str | None] = mapped_column(String(32), nullable=True)
     origin_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     origin_shortcode: Mapped[str | None] = mapped_column(String(64), nullable=True)
     parent_version_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -191,6 +193,14 @@ class ContentCache(Base):
     structured_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     prose_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     creator: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    #: The handle ("@ralston"), not the display name. What the dish attributes.
+    creator_handle: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    platform: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    #: The reel's own cover image, when the platform exposes one.
+    thumbnail_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    #: Which model produced this parse. Imports are immutable, so this is a
+    #: fact about the row, not a hint about the current default.
+    structuring_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
     source_url: Mapped[str] = mapped_column(String(2048), default="", nullable=False)
     extraction_version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
