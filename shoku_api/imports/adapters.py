@@ -17,7 +17,7 @@ from pathlib import Path
 
 from ..domain.clock import Deadline
 from .interfaces import Extraction
-from ..domain.errors import StructuringFailed
+from ..domain.errors import SourceBlocked, StructuringFailed
 
 log = logging.getLogger("shoku.imports")
 
@@ -130,7 +130,12 @@ class YtDlpExtractor:
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 ydl.extract_info(url, download=True)
-        except Exception:  # noqa: BLE001 - subtitles are a shortcut, not a requirement
+        except Exception as exc:  # noqa: BLE001 - subtitles are a shortcut
+            if "429" in str(exc) or "Too Many Requests" in str(exc):
+                # The platform is refusing this machine, not this video.
+                raise SourceBlocked(
+                    detail="the platform is rate-limiting this server; add cookies"
+                ) from exc
             log.warning("subtitle fetch failed for %s", url)
             return ""
 
