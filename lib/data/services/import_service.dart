@@ -163,6 +163,7 @@ class ImportProgress {
         ImportStage.extracting => switch (detail) {
             'transcribing' => 'Reading the audio',
             'structuring' => 'Writing the recipe',
+            'watching' => 'Watching the video',
             'caption_only' => 'Reading the caption',
             _ => 'Reading the reel',
           },
