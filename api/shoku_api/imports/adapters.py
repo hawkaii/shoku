@@ -89,10 +89,18 @@ class YtDlpExtractor:
                 ydl.extract_info(url, download=True)
             audio_path = next(iter(workdir.glob("audio.*")), None)
 
+        platform = "instagram" if "instagram" in (info.get("webpage_url") or url) else "youtube"
+        handle = info.get("uploader_id") or info.get("channel_id")
+        if handle and not str(handle).startswith("@"):
+            handle = f"@{handle}"
+
         return Extraction(
             caption=caption,
             transcript=transcript,
             creator=info.get("uploader") or info.get("channel"),
+            creator_handle=handle,
+            platform=platform,
+            thumbnail_url=info.get("thumbnail"),
             source_url=info.get("webpage_url") or url,
             audio_path=audio_path,
             duration_seconds=float(duration) if duration else None,
@@ -182,10 +190,16 @@ class FasterWhisperTranscriber:
 class HeuristicStructurer:
     """Turns caption text into a recipe without a model.
 
+    Fast, free, and literal: it keeps every line that is not an ingredient as a
+    step, in order. It cannot tell that "2 tbsp ghee" belongs to the step above
+    it, which is why it is the fallback rather than the default.
+
     Deliberately dumb and honest: it only extracts quantities it can see, and
     never invents steps. When it cannot find enough, it raises so the job is
     marked failed rather than filing a junk dish.
     """
+
+    name = "heuristic"
 
     def structure(self, text: str, *, caption_first: bool) -> dict:
         lines = [line.strip() for line in re.split(r"[\n•·]", text) if line.strip()]
@@ -205,11 +219,16 @@ class HeuristicStructurer:
             if len(ingredients) >= 40:
                 break
 
+        # Every line that is not an ingredient and not a link is a step. The
+        # old filter required 25+ characters, which silently discarded short
+        # but real instructions ("Mix well", "Serve hot") — most of a long reel.
         steps = [
             line
             for line in lines
-            if len(line) > 25 and not _QUANTITY_LINE.match(line) and not line.lower().startswith("http")
-        ][:20]
+            if not _QUANTITY_LINE.match(line)
+            and not line.lower().startswith("http")
+            and len(line) > 3
+        ][:60]
 
         if len(ingredients) < 2 or not steps:
             # A stable reason the app can turn into a sentence, rather than an
@@ -237,6 +256,8 @@ class OpenAICompatStructurer:
     The response is forced into the strict recipe schema by prompt and then
     validated by the caller — an injection that cannot fit the schema is inert.
     """
+
+    name = "meta"
 
     PROMPT = (
         "You convert cooking text into JSON. Reply with JSON only, matching:\n"
@@ -273,6 +294,30 @@ class OpenAICompatStructurer:
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"]
         return json.loads(content)
+
+
+class FallbackStructurer:
+    """Tries the model, falls back to the heuristic.
+
+    An import must never fail because a model was slow, rate-limited or
+    returned something that does not fit the schema. The fallback is literal
+    but never empty-handed.
+    """
+
+    def __init__(self, primary, fallback) -> None:
+        self._primary = primary
+        self._fallback = fallback
+        self.name = getattr(primary, "name", "model")
+
+    def structure(self, text: str, *, caption_first: bool) -> dict:
+        try:
+            return self._primary.structure(text, caption_first=caption_first)
+        except Exception as exc:  # noqa: BLE001 - the fallback is the point
+            log.warning("structurer %s failed (%s); using heuristic", self.name, exc)
+            result = self._fallback.structure(text, caption_first=caption_first)
+            result.setdefault("tags", [])
+            result["tags"] = list({*result["tags"], "fallback"})
+            return result
 
 
 _CUE_TIME = re.compile(r"^\d{1,2}:\d{2}(?::\d{2})?[.,]\d{3}\s*-->")

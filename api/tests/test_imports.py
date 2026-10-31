@@ -225,3 +225,34 @@ def test_unsupported_url_is_rejected(client) -> None:
 
 def test_worker_is_constructible_without_http(ctx) -> None:
     assert isinstance(ImportWorker(ctx), ImportWorker)
+
+
+# ---- structurer fallback ---------------------------------------------------
+
+
+def test_fallback_structurer_uses_the_heuristic_when_the_model_fails():
+    from shoku_api.imports.adapters import FallbackStructurer, HeuristicStructurer
+
+    class Broken:
+        name = "meta"
+
+        def structure(self, text, *, caption_first):
+            raise RuntimeError("model is down")
+
+    text = "250 g paneer\n2 tbsp butter\nHeat the pan\nAdd the paneer\nServe hot"
+    result = FallbackStructurer(Broken(), HeuristicStructurer()).structure(
+        text, caption_first=True
+    )
+
+    assert len(result["ingredients"]) == 2
+    assert "Serve hot" in result["steps"], "short real steps must survive"
+    assert "fallback" in result["tags"]
+
+
+def test_heuristic_keeps_short_steps_instead_of_dropping_them():
+    from shoku_api.imports.adapters import HeuristicStructurer
+
+    text = "250 g paneer\n2 tbsp butter\nMix well\nServe hot\nGarnish"
+    result = HeuristicStructurer().structure(text, caption_first=True)
+
+    assert result["steps"] == ["Mix well", "Serve hot", "Garnish"]
