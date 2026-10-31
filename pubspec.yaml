@@ -1,7 +1,7 @@
 name: food_finder
 description: Shoku — a cooking journal that remembers every version of a dish.
 publish_to: 'none'
-version: 1.19.0+38
+version: 1.19.1+39
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
