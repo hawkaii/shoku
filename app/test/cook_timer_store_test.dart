@@ -3,7 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/cook_timer_repository.dart';
 import 'package:food_finder/data/models/cook_timer.dart';
+import 'package:food_finder/data/services/timer_alerts.dart';
 import 'package:food_finder/presentation/state/cook_timer_providers.dart';
+
+import 'support/fake_timer_alerts.dart';
 
 void main() {
   late AppDatabase db;
@@ -16,6 +19,17 @@ void main() {
   /// that survives, so every restoration test goes through a new one.
   Future<CookTimerStore> open() async {
     final store = CookTimerStore(CookTimerRepository(db));
+    await pumpEventQueue();
+    return store;
+  }
+
+  Future<CookTimerStore> openWithAlerts(FakeTimerAlerts alerts,
+      {void Function(TimerAlertPermission)? onPermission}) async {
+    final store = CookTimerStore(
+      CookTimerRepository(db),
+      alerts: alerts,
+      onAlertPermission: onPermission,
+    );
     await pumpEventQueue();
     return store;
   }
@@ -167,5 +181,149 @@ void main() {
 
     expect(store.state!.stepIndex, 3);
     expect(store.state!.remainingMsAt(start), 7 * 60 * 1000);
+  });
+
+  group('the alert that mirrors the timer', () {
+    Future<CookTimerStore> started(FakeTimerAlerts alerts) async {
+      final store = await openWithAlerts(alerts);
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 2,
+        duration: const Duration(minutes: 10),
+        now: start,
+      );
+      return store;
+    }
+
+    test('a start schedules one, by a stable id', () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+
+      expect(alerts.scheduled, hasLength(1));
+      expect(alerts.scheduledIds.single, store.state!.notificationId);
+      expect(alerts.scheduledIds.single,
+          CookTimer.notificationIdFor('v1', 2));
+    });
+
+    test('the id is derived from the version and the step', () {
+      expect(CookTimer.notificationIdFor('v1', 2),
+          CookTimer.notificationIdFor('v1', 2));
+      expect(CookTimer.notificationIdFor('v1', 2),
+          isNot(CookTimer.notificationIdFor('v1', 3)));
+      expect(CookTimer.notificationIdFor('v1', 2),
+          isNot(CookTimer.notificationIdFor('v2', 2)));
+      expect(CookTimer.notificationIdFor('v1', 2), greaterThan(0));
+    });
+
+    test('pause cancels it, resume schedules it again', () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+
+      await store.pause(now: start.add(const Duration(minutes: 1)));
+      expect(alerts.cancelled, [store.state!.notificationId]);
+
+      await store.resume(now: start.add(const Duration(minutes: 2)));
+      expect(alerts.scheduled, hasLength(2));
+    });
+
+    test('stop cancels it', () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+      final id = store.state!.notificationId;
+
+      await store.stop();
+      expect(alerts.cancelled.last, id);
+    });
+
+    test('a version fork cancels it', () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+
+      final dropped = await store.dropIfVersionChanged(
+        dishId: 'd1',
+        versionId: 'v2',
+      );
+
+      expect(dropped, isTrue);
+      expect(alerts.cancelled, isNotEmpty);
+      expect(alerts.cancelled.last, CookTimer.notificationIdFor('v1', 2));
+    });
+
+    test('starting again cancels the old one before scheduling the new',
+        () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 3,
+        duration: const Duration(minutes: 2),
+        now: start,
+      );
+
+      expect(alerts.cancelled, [CookTimer.notificationIdFor('v1', 2)]);
+      expect(alerts.scheduledIds.last, CookTimer.notificationIdFor('v1', 3));
+    });
+
+    test('exact permission schedules an exact alarm', () async {
+      final alerts = FakeTimerAlerts();
+      await started(alerts);
+      expect(alerts.scheduledExact.single, isTrue);
+    });
+
+    test('refused exactness schedules an inexact one and says so', () async {
+      final alerts =
+          FakeTimerAlerts(permission: TimerAlertPermission.inexact);
+      var reported = TimerAlertPermission.unknown;
+      final store = await openWithAlerts(
+        alerts,
+        onPermission: (p) => reported = p,
+      );
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 0,
+        duration: const Duration(minutes: 5),
+        now: start,
+      );
+
+      expect(alerts.scheduledExact.single, isFalse);
+      expect(reported, TimerAlertPermission.inexact);
+    });
+
+    test('a denied permission schedules nothing and keeps the timer',
+        () async {
+      final alerts = FakeTimerAlerts(permission: TimerAlertPermission.denied);
+      var reported = TimerAlertPermission.unknown;
+      final store = await openWithAlerts(
+        alerts,
+        onPermission: (p) => reported = p,
+      );
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 0,
+        duration: const Duration(minutes: 5),
+        now: start,
+      );
+
+      expect(alerts.scheduled, isEmpty);
+      expect(reported, TimerAlertPermission.denied);
+      expect(store.state, isNotNull, reason: 'the in-app timer still runs');
+    });
+
+    test('a timer that finishes in front of the cook cancels its alert',
+        () async {
+      final alerts = FakeTimerAlerts();
+      final store = await started(alerts);
+
+      await store.cancelAlert();
+
+      expect(alerts.cancelled, contains(store.state!.notificationId));
+      expect(store.state, isNotNull,
+          reason: 'the card still says the timer is done');
+    });
   });
 }

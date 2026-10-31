@@ -7,6 +7,14 @@
     <!-- Permission for voice input (speech-to-text) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- Cook-mode timers: ring when the phone is in a pocket -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- SCHEDULE_EXACT_ALARM rather than USE_EXACT_ALARM: the latter is
+         granted automatically but Play restricts it to apps whose core purpose
+         is alarms or calendars. Asking can be refused, so the app falls back to
+         an inexact alarm and says so on the timer card. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:label="Shoku"
         android:name="${applicationName}"

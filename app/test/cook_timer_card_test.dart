@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/data/models/cook_timer.dart';
+import 'package:food_finder/data/services/timer_alerts.dart';
 import 'package:food_finder/presentation/screens/cook/timer_card.dart';
 
 final _start = DateTime(2026, 1, 1, 19, 0);
@@ -19,6 +20,7 @@ Widget _harness({
   CookTimer? timer,
   int remainingMs = 10 * 60 * 1000,
   int suggestedMinutes = 5,
+  TimerAlertPermission alerts = TimerAlertPermission.unknown,
   required Map<String, int> taps,
 }) {
   return MaterialApp(
@@ -31,6 +33,7 @@ Widget _harness({
           remainingMs: remainingMs,
           suggestedMinutes: suggestedMinutes,
           currentStep: 2,
+          alerts: alerts,
           onStart: () => taps.update('start', (v) => v + 1, ifAbsent: () => 1),
           onPause: () => taps.update('pause', (v) => v + 1, ifAbsent: () => 1),
           onResume: () => taps.update('resume', (v) => v + 1, ifAbsent: () => 1),
@@ -114,8 +117,7 @@ void main() {
     expect(taps['start'], 1);
   });
 
-  testWidgets('a timer on another step says which step', (tester) async {
-    await tester.pumpWidget(MaterialApp(
+  testWidgets('a timer on another step says which step', (tester) async {    await tester.pumpWidget(MaterialApp(
       theme: ShokuTheme.light(),
       home: Scaffold(
         body: CookTimerCard(
@@ -133,5 +135,42 @@ void main() {
 
     expect(find.text('step 3 · running'), findsOneWidget);
     expect(find.text('04:00'), findsOneWidget);
+  });
+
+  testWidgets('a denied permission is said out loud', (tester) async {
+    await tester.pumpWidget(_harness(
+      timer: _timer(),
+      alerts: TimerAlertPermission.denied,
+      taps: {},
+    ));
+
+    expect(find.byKey(const ValueKey('timer-alert-note')), findsOneWidget);
+    expect(
+      find.textContaining('alerts are off'),
+      findsOneWidget,
+      reason: 'a silent denial is the failure mode',
+    );
+    // The in-app clock keeps working regardless.
+    expect(find.text('10:00'), findsOneWidget);
+  });
+
+  testWidgets('an inexact alarm admits it may be late', (tester) async {
+    await tester.pumpWidget(_harness(
+      timer: _timer(),
+      alerts: TimerAlertPermission.inexact,
+      taps: {},
+    ));
+
+    expect(find.textContaining('may arrive late'), findsOneWidget);
+  });
+
+  testWidgets('an exact alarm says nothing', (tester) async {
+    await tester.pumpWidget(_harness(
+      timer: _timer(),
+      alerts: TimerAlertPermission.allowed,
+      taps: {},
+    ));
+
+    expect(find.byKey(const ValueKey('timer-alert-note')), findsNothing);
   });
 }
