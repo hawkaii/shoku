@@ -6,7 +6,7 @@ import '../../../../core/constants/spacing.dart';
 import '../../../../providers/providers.dart';
 
 class HomeSearchBar extends ConsumerWidget {
-  const HomeSearchBar({Key? key}) : super(key: key);
+  const HomeSearchBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

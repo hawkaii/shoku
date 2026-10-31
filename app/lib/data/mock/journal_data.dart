@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 /// The journal model: a Dish you cook repeatedly, each attempt a version,
 /// each night a cook log. This is the whole product.
@@ -176,9 +175,6 @@ class Dish {
         null => 'Not cooked yet',
       };
 }
-
-const _u = 'https://images.unsplash.com/';
-const _q = '?auto=format&fit=crop&w=900&q=70';
 
 class JournalData {
   /// The demo kitchen's dish ids. The app no longer ships demo recipes; these

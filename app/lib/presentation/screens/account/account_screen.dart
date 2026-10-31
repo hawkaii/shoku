@@ -156,7 +156,7 @@ class AccountScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.xl),
 
           // ---- Appearance ----------------------------------------------
-          ShokuLabel('appearance'),
+          const ShokuLabel('appearance'),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSegmented(
             labels: const ['SYSTEM', 'LIGHT', 'DARK'],
@@ -181,7 +181,7 @@ class AccountScreen extends ConsumerWidget {
             subtitle: 'Save reels by sending a DM',
             onTap: () {},
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.play_circle_outline,
             title: 'View onboarding',
@@ -190,20 +190,20 @@ class AccountScreen extends ConsumerWidget {
               ref.read(onboardingDoneProvider.notifier).state = false;
             },
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.bolt,
             title: 'Saves & plan',
             subtitle: '$saves saves remaining',
             onTap: () => context.push('/saves'),
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.help_outline,
             title: 'Help & feedback',
             onTap: () => context.push('/help'),
           ),
-          ShokuHairline(),
+          const ShokuHairline(),
           ShokuListRow(
             icon: Icons.logout,
             title: 'Sign out',

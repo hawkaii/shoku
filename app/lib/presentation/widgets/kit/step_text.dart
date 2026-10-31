@@ -60,7 +60,7 @@ class StepText extends StatelessWidget {
       }
     }
     final token = RegExp(
-      '(' + _quantity.pattern + r')|\b(' + words.join('|') + r')\b',
+      '(${_quantity.pattern})|\\b(${words.join('|')})\\b',
       caseSensitive: false,
     );
 
