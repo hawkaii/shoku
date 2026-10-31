@@ -7,14 +7,12 @@ import 'package:neubrutalism_ui/neubrutalism_ui.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/text_styles.dart';
 import '../../../core/constants/spacing.dart';
-import '../../../data/models/recipe.dart';
 import '../../../providers/providers.dart';
 
 class YouTubeWebViewScreen extends ConsumerStatefulWidget {
   final String youtubeUrl;
 
-  const YouTubeWebViewScreen({Key? key, required this.youtubeUrl})
-      : super(key: key);
+  const YouTubeWebViewScreen({super.key, required this.youtubeUrl});
 
   @override
   ConsumerState<YouTubeWebViewScreen> createState() =>
@@ -62,196 +60,6 @@ class _YouTubeWebViewScreenState extends ConsumerState<YouTubeWebViewScreen> {
         _showErrorSheet(e.toString());
       }
     }
-  }
-
-  void _showRecipeSummarySheet(Recipe recipe) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.4,
-        maxChildSize: 0.95,
-        builder: (_, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: NeuColors.neuWhite,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(20)),
-            border: Border.all(color: NeuColors.neuBlack, width: 3),
-          ),
-          child: Column(
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              // Content
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(NeuSpacing.md),
-                  children: [
-                    // Title
-                    Text(recipe.title, style: NeuTextStyles.heading2),
-                    const SizedBox(height: NeuSpacing.sm),
-
-                    // Description
-                    if (recipe.description.isNotEmpty) ...[
-                      Text(recipe.description, style: NeuTextStyles.body),
-                      const SizedBox(height: NeuSpacing.md),
-                    ],
-
-                    // Meta info
-                    if (recipe.cookTime != null ||
-                        recipe.servings != null) ...[
-                      Wrap(
-                        spacing: NeuSpacing.sm,
-                        children: [
-                          if (recipe.cookTime != null)
-                            _buildMetaChip(
-                                Icons.timer, '${recipe.cookTime} min'),
-                          if (recipe.servings != null)
-                            _buildMetaChip(Icons.restaurant,
-                                '${recipe.servings} servings'),
-                        ],
-                      ),
-                      const SizedBox(height: NeuSpacing.md),
-                    ],
-
-                    // Ingredients
-                    NeuContainer(
-                      borderRadius: BorderRadius.circular(
-                          NeuSpacing.borderRadius),
-                      color: NeuColors.neuMint,
-                      borderWidth: 3,
-                      borderColor: NeuColors.neuBlack,
-                      offset: const Offset(4, 4),
-                      shadowColor: NeuColors.neuBlack,
-                      child: Padding(
-                        padding: const EdgeInsets.all(NeuSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Ingredients',
-                                style: NeuTextStyles.heading3),
-                            const SizedBox(height: NeuSpacing.sm),
-                            ...recipe.ingredients
-                                .map((i) => Padding(
-                                      padding: const EdgeInsets.only(
-                                          bottom: 4),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text('  - ',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold)),
-                                          Expanded(
-                                            child: Text(i.displayText,
-                                                style: NeuTextStyles
-                                                    .bodySmall),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: NeuSpacing.md),
-
-                    // Steps
-                    NeuContainer(
-                      borderRadius: BorderRadius.circular(
-                          NeuSpacing.borderRadius),
-                      color: NeuColors.neuLavender,
-                      borderWidth: 3,
-                      borderColor: NeuColors.neuBlack,
-                      offset: const Offset(4, 4),
-                      shadowColor: NeuColors.neuBlack,
-                      child: Padding(
-                        padding: const EdgeInsets.all(NeuSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Steps',
-                                style: NeuTextStyles.heading3),
-                            const SizedBox(height: NeuSpacing.sm),
-                            ...recipe.steps.map((s) => Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: NeuSpacing.sm),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 28,
-                                        height: 28,
-                                        decoration: BoxDecoration(
-                                          color: NeuColors.neuBlack,
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '${s.stepNumber}',
-                                            style: NeuTextStyles.bodySmall
-                                                .copyWith(
-                                                    color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                          width: NeuSpacing.sm),
-                                      Expanded(
-                                        child: Text(s.instruction,
-                                            style:
-                                                NeuTextStyles.bodySmall),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: NeuSpacing.lg),
-
-                    // Save button
-                    Center(
-                      child: NeuTextButton(
-                        borderRadius: BorderRadius.circular(
-                            NeuSpacing.borderRadius),
-                        buttonColor: NeuColors.neuYellow,
-                        buttonHeight: 60,
-                        buttonWidth: 220,
-                        enableAnimation: true,
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          ref.invalidate(recipesProvider);
-                          context.go('/recipe/${recipe.id}');
-                        },
-                        text: Text('VIEW RECIPE',
-                            style: NeuTextStyles.button),
-                      ),
-                    ),
-                    const SizedBox(height: NeuSpacing.lg),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _showErrorSheet(String message) {
@@ -304,26 +112,6 @@ class _YouTubeWebViewScreenState extends ConsumerState<YouTubeWebViewScreen> {
       ),
     );
   }
-
-  Widget _buildMetaChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: NeuColors.neuCream,
-        border: Border.all(color: NeuColors.neuBlack, width: 2),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 4),
-          Text(label, style: NeuTextStyles.tag),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final dishName = ref.watch(selectedDishProvider);

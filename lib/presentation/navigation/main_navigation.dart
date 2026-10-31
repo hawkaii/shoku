@@ -9,7 +9,7 @@ import '../../providers/providers.dart';
 class MainNavigation extends ConsumerWidget {
   final Widget child;
 
-  const MainNavigation({Key? key, required this.child}) : super(key: key);
+  const MainNavigation({super.key, required this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
-import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
@@ -167,7 +166,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            ShokuLabel('how did it go'),
+            const ShokuLabel('how did it go'),
             const SizedBox(height: ShokuSpace.sm),
             Row(
               children: [
@@ -212,7 +211,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            ShokuLabel('what did you change'),
+            const ShokuLabel('what did you change'),
             const SizedBox(height: ShokuSpace.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),

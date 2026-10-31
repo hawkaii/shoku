@@ -10,7 +10,7 @@ import '../../widgets/neu_loading_dialog.dart';
 import '../../widgets/neu_error_dialog.dart';
 
 class IngredientsListScreen extends ConsumerStatefulWidget {
-  const IngredientsListScreen({Key? key}) : super(key: key);
+  const IngredientsListScreen({super.key});
 
   @override
   ConsumerState<IngredientsListScreen> createState() =>

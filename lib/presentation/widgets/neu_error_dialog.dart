@@ -10,11 +10,11 @@ class NeuErrorDialog extends StatelessWidget {
   final VoidCallback? onRetry;
 
   const NeuErrorDialog({
-    Key? key,
+    super.key,
     this.title = 'Error',
     required this.message,
     this.onRetry,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -10,7 +10,6 @@ import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
 import '../../state/journal_store.dart';
 import '../../state/sync_providers.dart';
-import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 
 /// Import one link, with the wait made visible.
