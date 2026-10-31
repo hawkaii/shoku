@@ -3,6 +3,11 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.20.0] — 2026-10-31
+
+### Changed
+- The Wall is a feed of imports, not something you post to *(wall)* — [`52beef1`](https://github.com/hawkaii/food-finder-app/commit/52beef12bc28ecdac4ca6f9d71ee335b71570b5c)
+
 ## [1.19.1] — 2026-10-31
 
 ### Docs
