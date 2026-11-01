@@ -115,6 +115,10 @@ OriginKind = Literal["mine", "import"]
 #: Which surface a photo hangs on. ``cover`` is not a role: the dish cover is
 #: ``dishes.cover_url`` and has exactly one source of truth.
 PhotoRole = Literal["version", "debrief"]
+#: Unit-local: counts never convert to weight or volume, so they are named.
+PantryUnit = Literal["g", "kg", "ml", "l", "tbsp", "tsp", "pcs", "bunch", "pack"]
+#: Where an item first came from. Recorded, not editable.
+PantrySource = Literal["photo", "voice", "typed", "manual"]
 
 RowId = Annotated[str, StringConstraints(min_length=1, max_length=64)]
 Url = Annotated[str, StringConstraints(max_length=2048)]
@@ -213,6 +217,23 @@ class PhotoRowIn(SyncRow):
     deleted_at: datetime | None = None
 
 
+class PantryRowIn(SyncRow):
+    id: RowId
+    name: Annotated[str, StringConstraints(min_length=1, max_length=200)]
+    #: Null means "have it, amount unknown" — never zero, never guessed.
+    quantity: float | None = Field(default=None, ge=0, le=1_000_000)
+    unit: PantryUnit | None = None
+    aliases: list[Annotated[str, StringConstraints(max_length=120)]] = Field(
+        default_factory=list, max_length=20
+    )
+    #: The shopping-list flag: a wanted row is not stock.
+    wanted: bool = False
+    source: PantrySource = "typed"
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: datetime | None = None
+
+
 class PushRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -220,6 +241,7 @@ class PushRequest(BaseModel):
     versions: list[VersionRowIn] = Field(default_factory=list, max_length=1000)
     cook_logs: list[CookLogRowIn] = Field(default_factory=list, max_length=1000)
     photos: list[PhotoRowIn] = Field(default_factory=list, max_length=2000)
+    pantry_items: list[PantryRowIn] = Field(default_factory=list, max_length=1000)
 
 
 class PullRequest(BaseModel):
@@ -304,11 +326,27 @@ class PhotoRowOut(SyncRow):
     deleted_at: datetime | None
 
 
+class PantryRowOut(SyncRow):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: str
+    name: str
+    quantity: float | None
+    unit: str | None
+    aliases: list[str]
+    wanted: bool
+    source: str
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: datetime | None
+
+
 class PullResponse(BaseModel):
     dishes: list[DishRowOut]
     versions: list[VersionRowOut]
     cook_logs: list[CookLogRowOut]
     photos: list[PhotoRowOut] = Field(default_factory=list)
+    pantry_items: list[PantryRowOut] = Field(default_factory=list)
     cursor: str | None
     has_more: bool
     server_time: datetime
@@ -325,6 +363,7 @@ class PushResponse(BaseModel):
     versions: list[RowResult]
     cook_logs: list[RowResult]
     photos: list[RowResult] = Field(default_factory=list)
+    pantry_items: list[RowResult] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -395,6 +434,33 @@ class FeedItem(BaseModel):
 
 class FeedResponse(BaseModel):
     items: list[FeedItem]
+    cursor: str | None = None
+    has_more: bool = False
+
+
+class FeedMatch(BaseModel):
+    """Coverage of one card against the caller's pantry. Names only."""
+
+    have: int
+    total: int
+    #: The names not covered, ready to become ``wanted`` pantry rows.
+    missing: list[str]
+
+
+class SuggestionItem(FeedItem):
+    """A Wall card plus what the caller would still need to buy.
+
+    Additive to ``FeedItem``: same fields, same guarantee — no ``user_id`` and
+    no importer, because the match is computed from the caller's own pantry and
+    the card is still just an extraction.
+    """
+
+    ingredients: list[str]
+    match: FeedMatch
+
+
+class SuggestionResponse(BaseModel):
+    items: list[SuggestionItem]
     cursor: str | None = None
     has_more: bool = False
 

@@ -60,6 +60,7 @@ def push(
         versions=payload.versions,
         cook_logs=payload.cook_logs,
         photos=payload.photos,
+        pantry_items=payload.pantry_items,
     )
     session.commit()
     return result

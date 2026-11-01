@@ -22,10 +22,11 @@ from sqlalchemy.orm import Session
 
 from .domain.clock import Clock
 from .domain.cursor import Cursor, TableKey, decode_cursor, encode_cursor
-from .models import CookLog, Dish, Photo, RecipeVersion
+from .models import CookLog, Dish, PantryItem, Photo, RecipeVersion
 from .schemas import (
     CookLogRowOut,
     DishRowOut,
+    PantryRowOut,
     PhotoRowOut,
     PullResponse,
     PushResponse,
@@ -39,6 +40,7 @@ SYNCED_TABLES = {
     "versions": (RecipeVersion, RecipeVersion.server_received_at),
     "cook_logs": (CookLog, CookLog.server_received_at),
     "photos": (Photo, Photo.server_received_at),
+    "pantry_items": (PantryItem, PantryItem.server_received_at),
 }
 
 
@@ -108,6 +110,7 @@ class SyncService:
             versions=[VersionRowOut.model_validate(r) for r in results["versions"]],
             cook_logs=[CookLogRowOut.model_validate(r) for r in results["cook_logs"]],
             photos=[self._photo_out(r) for r in results["photos"]],
+            pantry_items=[PantryRowOut.model_validate(r) for r in results["pantry_items"]],
             cursor=encode_cursor(Cursor(keys=positions)) if any_more else None,
             has_more=any_more,
             server_time=self.clock.now(),
@@ -154,7 +157,9 @@ class SyncService:
 
     # ---- push ------------------------------------------------------------
 
-    def push(self, uid: str, *, dishes, versions, cook_logs, photos=()) -> PushResponse:
+    def push(
+        self, uid: str, *, dishes, versions, cook_logs, photos=(), pantry_items=()
+    ) -> PushResponse:
         now = self.clock.now()
 
         dish_results = [self._push_dish(uid, row, now) for row in dishes]
@@ -165,12 +170,16 @@ class SyncService:
         version_results = [self._push_version(uid, row, now) for row in versions]
         cook_results = [self._push_cook(uid, row, now) for row in cook_logs]
         photo_results = [self._push_photo(uid, row, now) for row in photos]
+        # Last, and with no dependency on anything above it: the pantry is its
+        # own list and nothing references it by id.
+        pantry_results = [self._push_pantry(uid, row, now) for row in pantry_items]
 
         return PushResponse(
             dishes=dish_results,
             versions=version_results,
             cook_logs=cook_results,
             photos=photo_results,
+            pantry_items=pantry_results,
         )
 
     def _push_dish(self, uid: str, row, now: datetime) -> RowResult:
@@ -250,6 +259,43 @@ class SyncService:
         )
         self.session.flush()
         return RowResult(id=row.id, result="accepted", reason="appended")
+
+    def _push_pantry(self, uid: str, row, now: datetime) -> RowResult:
+        """Last-write-wins on ``updated_at``: the pantry is editable.
+
+        Identical in shape to a dish push, and deliberately not shared with it:
+        the two tables agree today but the pantry will grow a unit conversion
+        the dish never has, and a shared helper would drag one into the other.
+        """
+        if row.updated_at - now > self._skew():
+            return RowResult(id=row.id, result="conflict", reason="clock_ahead")
+        if row.deleted_at is not None and row.deleted_at - now > self._skew():
+            return RowResult(id=row.id, result="conflict", reason="clock_ahead")
+
+        stored = self.session.get(PantryItem, row.id)
+        if stored is not None and stored.user_id != uid:
+            return RowResult(id=row.id, result="conflict", reason="id_taken")
+
+        payload = row.model_dump(exclude={"id"})
+
+        if stored is None:
+            self.session.add(
+                PantryItem(id=row.id, user_id=uid, server_received_at=now, **payload)
+            )
+            self.session.flush()
+            return RowResult(id=row.id, result="accepted", reason="created")
+
+        if row.updated_at > stored.updated_at:
+            for field, value in payload.items():
+                setattr(stored, field, value)
+            stored.server_received_at = now
+            self.session.flush()
+            return RowResult(id=row.id, result="accepted", reason="newer")
+
+        if row.updated_at == stored.updated_at:
+            return RowResult(id=row.id, result="ignored", reason="already_applied")
+
+        return RowResult(id=row.id, result="conflict", reason="stale_write")
 
     def _push_photo(self, uid: str, row, now: datetime) -> RowResult:
         stored = self.session.get(Photo, row.id)

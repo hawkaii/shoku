@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ..container import AppContext
 from .. import feed as feed_service
-from ..schemas import FeedResponse
+from ..schemas import FeedResponse, SuggestionResponse
 from .deps import current_user, get_context, get_session
 from ..models import User
 
@@ -28,3 +28,14 @@ def get_feed(
 ) -> FeedResponse:
     """Newest first. Cards carry the extraction and nothing about who imported it."""
     return feed_service.list_feed(session, limit=limit, cursor=cursor)
+
+
+@router.get("/suggestions", response_model=SuggestionResponse)
+def get_suggestions(
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+    cursor: Annotated[str | None, Query(max_length=512)] = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(current_user),
+) -> SuggestionResponse:
+    """Cards the caller can mostly cook, from their own pantry. Names only."""
+    return feed_service.suggestions(session, uid=user.id, limit=limit, cursor=cursor)

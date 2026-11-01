@@ -19,6 +19,7 @@ from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -227,6 +228,47 @@ class Photo(Base):
         Index("ix_photos_user_received", "user_id", "server_received_at"),
         Index("ix_photos_version", "version_id"),
         Index("ix_photos_cook", "cook_id"),
+    )
+
+
+class PantryItem(Base):
+    """The pantry: the first *mutable* synced table.
+
+    Union by ``id`` like the append-only lists, but a row can be edited — the
+    newer ``updated_at`` wins, and ``deleted_at`` is a tombstone rather than a
+    delete, so a removal reaches the other device.
+
+    ``source`` records where the item first came from and is not editable.
+    ``quantity`` is nullable on purpose: "have it, don't know how much" is a real
+    pantry state, and null never counts as an amount.
+    """
+
+    __tablename__ = "pantry_items"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    quantity: Mapped[float | None] = mapped_column(Float, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    #: User-confirmed strings that join a receipt line to this item. Never
+    #: inferred, and never sent to the Wall matcher as anything but names.
+    aliases: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    #: The shopping-list flag: a wanted row is not stock.
+    wanted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    source: Mapped[str] = mapped_column(String(16), default="typed", nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+    deleted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    server_received_at: Mapped[datetime] = mapped_column(
+        UTCDateTime, default=utcnow, nullable=False
+    )
+
+    __table_args__ = (
+        Index("ix_pantry_user_updated", "user_id", "updated_at"),
+        Index("ix_pantry_user_received", "user_id", "server_received_at"),
     )
 
 

@@ -21,15 +21,31 @@ from. Treat a reported row as a queue for a human, not an automatic outcome.
 """
 
 from datetime import datetime, timezone
+from fractions import Fraction
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from .domain.clock import Clock
 from .domain.errors import NotFound, Unavailable
-from .domain.feed_cursor import FeedPosition, decode_feed_cursor, encode_feed_cursor
-from .models import ContentCache, ContentReport
-from .schemas import FeedItem, FeedResponse, RecipePayload
+from .domain.feed_cursor import (
+    FeedPosition,
+    SuggestionPosition,
+    decode_feed_cursor,
+    decode_suggestion_cursor,
+    encode_feed_cursor,
+    encode_suggestion_cursor,
+)
+from .models import ContentCache, ContentReport, PantryItem
+from .pantry import coverage, pantry_tokens
+from .schemas import (
+    FeedItem,
+    FeedMatch,
+    FeedResponse,
+    RecipePayload,
+    SuggestionItem,
+    SuggestionResponse,
+)
 
 
 def _visible():
@@ -99,6 +115,96 @@ def list_feed(
         )
 
     return FeedResponse(items=items, cursor=next_cursor, has_more=has_more)
+
+
+def suggestions(
+    session: Session,
+    *,
+    uid: str,
+    limit: int = 20,
+    cursor: str | None = None,
+) -> SuggestionResponse:
+    """Wall cards this caller can mostly cook, against their own pantry.
+
+    The matching is done here rather than in SQL on purpose: the ingredient list
+    lives inside ``content_cache.structured_json``, and the contract rules out a
+    trigram or full-text index — JSON punctuation dominates trigrams, and
+    similarity over one string is not set containment. With the corpus at tens
+    of rows, a parse and a token intersection per row is cheap; the contract
+    names the table to build if that ever stops being true.
+
+    Nothing user-owned is read except the caller's own pantry, and nothing
+    user-owned is returned: the card is still an extraction.
+    """
+    try:
+        position = decode_suggestion_cursor(cursor)
+    except ValueError:
+        position = None
+
+    stock = session.scalars(
+        select(PantryItem).where(
+            PantryItem.user_id == uid,
+            PantryItem.deleted_at.is_(None),
+            # Wanted rows are the shopping list, not stock.
+            PantryItem.wanted.is_(False),
+        )
+    ).all()
+    have_tokens = pantry_tokens(stock)
+
+    ranked: list[tuple[Fraction, datetime, str, SuggestionItem]] = []
+    for row in session.scalars(select(ContentCache).where(_visible())).all():
+        card = _to_item(row)
+        if card is None:
+            continue
+        recipe = RecipePayload.model_validate(row.structured_json)
+        names = [ingredient.name for ingredient in recipe.ingredients]
+        have, missing = coverage(names, have_tokens)
+        if have == 0:
+            # A card you can cook none of is not a suggestion, it is the Wall.
+            continue
+        ranked.append(
+            (
+                Fraction(have, len(names)),
+                _aware(row.created_at),
+                row.shortcode,
+                SuggestionItem(
+                    **card.model_dump(),
+                    ingredients=names,
+                    match=FeedMatch(have=have, total=len(names), missing=missing),
+                ),
+            )
+        )
+
+    ranked.sort(key=lambda entry: (entry[0], entry[1], entry[2]), reverse=True)
+
+    if position is not None:
+        here = (
+            Fraction(position.have, position.total),
+            position.created_at,
+            position.shortcode,
+        )
+        ranked = [entry for entry in ranked if (entry[0], entry[1], entry[2]) < here]
+
+    has_more = len(ranked) > limit
+    page = ranked[:limit]
+
+    next_cursor = None
+    if has_more and page:
+        last = page[-1]
+        next_cursor = encode_suggestion_cursor(
+            SuggestionPosition(
+                have=last[3].match.have,
+                total=last[3].match.total,
+                created_at=last[1],
+                shortcode=last[2],
+            )
+        )
+
+    return SuggestionResponse(
+        items=[entry[3] for entry in page],
+        cursor=next_cursor,
+        has_more=has_more,
+    )
 
 
 def _aware(value: datetime) -> datetime:
