@@ -118,6 +118,33 @@ class CookTimerRows extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// The pantry: what is in the kitchen, not what a recipe says.
+///
+/// The only *mutable* synced list. Union by id, last-write-wins on [updatedAt],
+/// tombstones for deletes. Recipe ingredients stay verbatim; this is the
+/// confirmed layer beside them.
+class PantryRows extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+
+  /// Null means "have it, amount unknown" — which never counts when deducting.
+  RealColumn get quantity => real().nullable()();
+  TextColumn get unit => text().nullable()();
+
+  /// User-confirmed strings that join a receipt line to this item. JSON list.
+  TextColumn get aliases => text().withDefault(const Constant('[]'))();
+  IntColumn get wanted => integer().withDefault(const Constant(0))();
+  TextColumn get source => text().withDefault(const Constant('manual'))();
+
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  IntColumn get dirty => integer().withDefault(const Constant(1))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Small key/value store for database-level facts. The seed marker lives here
 /// rather than in SharedPreferences so that wiping the database also resets it —
 /// the two can never disagree about whether the demo kitchen exists.
@@ -129,7 +156,7 @@ class MetaRows extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, CookTimerRows, MetaRows])
+@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, CookTimerRows, PantryRows, MetaRows])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ??
@@ -144,7 +171,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -195,6 +222,10 @@ class AppDatabase extends _$AppDatabase {
             // The photo's object key, so a debrief photo travels on the wire
             // while `photo_url` keeps serving the picture to the UI.
             await m.addColumn(cookLogRows, cookLogRows.photoKey);
+          }
+          if (from < 8) {
+            // The pantry, the fifth synced list and the only mutable one.
+            await m.createTable(pantryRows);
           }
         },
         beforeOpen: (details) async {

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../db/app_database.dart';
 import '../db/journal_repository.dart';
+import '../db/pantry_repository.dart';
 
 /// The half of the journal that talks to the server.
 ///
@@ -46,6 +47,8 @@ class SyncRepository {
         await (_db.select(_db.versionRows)..where((v) => v.dirty.equals(1))).get();
     final cooks =
         await (_db.select(_db.cookLogRows)..where((c) => c.dirty.equals(1))).get();
+    final pantry =
+        await (_db.select(_db.pantryRows)..where((p) => p.dirty.equals(1))).get();
 
     return {
       'dishes': [for (final row in dishes) _dishWire(row)],
@@ -57,6 +60,9 @@ class SyncRepository {
         for (final row in cooks)
           if (row.photoKey.isNotEmpty) _photoWire(row),
       ],
+      // The pantry is the only mutable list: LWW on updated_at, tombstones for
+      // deletes, union by id.
+      'pantry_items': [for (final row in pantry) _pantryWire(row)],
     };
   }
 
@@ -69,7 +75,13 @@ class SyncRepository {
   /// next attempt retries it instead of pretending it was saved.
   Future<void> markClean(Map<String, dynamic> pushResponse) async {
     final accepted = <String, Set<String>>{};
-    for (final table in ['dishes', 'versions', 'cook_logs', 'photos']) {
+    for (final table in [
+      'dishes',
+      'versions',
+      'cook_logs',
+      'photos',
+      'pantry_items'
+    ]) {
       final rows = pushResponse[table];
       if (rows is! List) continue;
       accepted[table] = {
@@ -208,6 +220,11 @@ class SyncRepository {
               mode: InsertMode.insertOrIgnore,
             );
       }
+
+      // Mutable, so not insertOrIgnore: LWW on updated_at, tombstone wins.
+      await PantryRepository(_db).applyPull(
+        pull['pantry_items'] as List? ?? const [],
+      );
     });
   }
 
@@ -263,6 +280,19 @@ class SyncRepository {
         'note': row.note,
         'changes': _decode(row.changes),
         'rating': row.rating,
+      };
+
+  Map<String, dynamic> _pantryWire(PantryRow row) => {
+        'id': row.id,
+        'name': row.name,
+        'quantity': row.quantity,
+        'unit': row.unit,
+        'aliases': _decode(row.aliases),
+        'wanted': row.wanted == 1,
+        'source': row.source,
+        'created_at': _iso(row.createdAt),
+        'updated_at': _iso(row.updatedAt),
+        'deleted_at': row.deletedAt == null ? null : _iso(row.deletedAt!),
       };
 
   /// Contract §Photos: one row per photo, role `debrief`, pointing at the cook

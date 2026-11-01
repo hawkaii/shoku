@@ -2722,6 +2722,545 @@ class CookTimerRowsCompanion extends UpdateCompanion<CookTimerRow> {
   }
 }
 
+class $PantryRowsTable extends PantryRows
+    with TableInfo<$PantryRowsTable, PantryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PantryRowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _quantityMeta =
+      const VerificationMeta('quantity');
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+      'quantity', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _aliasesMeta =
+      const VerificationMeta('aliases');
+  @override
+  late final GeneratedColumn<String> aliases = GeneratedColumn<String>(
+      'aliases', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  static const VerificationMeta _wantedMeta = const VerificationMeta('wanted');
+  @override
+  late final GeneratedColumn<int> wanted = GeneratedColumn<int>(
+      'wanted', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+      'source', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('manual'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<int> dirty = GeneratedColumn<int>(
+      'dirty', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        quantity,
+        unit,
+        aliases,
+        wanted,
+        source,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        dirty
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pantry_rows';
+  @override
+  VerificationContext validateIntegrity(Insertable<PantryRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(_quantityMeta,
+          quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    }
+    if (data.containsKey('aliases')) {
+      context.handle(_aliasesMeta,
+          aliases.isAcceptableOrUnknown(data['aliases']!, _aliasesMeta));
+    }
+    if (data.containsKey('wanted')) {
+      context.handle(_wantedMeta,
+          wanted.isAcceptableOrUnknown(data['wanted']!, _wantedMeta));
+    }
+    if (data.containsKey('source')) {
+      context.handle(_sourceMeta,
+          source.isAcceptableOrUnknown(data['source']!, _sourceMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+          _dirtyMeta, dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PantryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PantryRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      quantity: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}quantity']),
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit']),
+      aliases: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}aliases'])!,
+      wanted: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}wanted'])!,
+      source: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}source'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      dirty: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}dirty'])!,
+    );
+  }
+
+  @override
+  $PantryRowsTable createAlias(String alias) {
+    return $PantryRowsTable(attachedDatabase, alias);
+  }
+}
+
+class PantryRow extends DataClass implements Insertable<PantryRow> {
+  final String id;
+  final String name;
+
+  /// Null means "have it, amount unknown" — which never counts when deducting.
+  final double? quantity;
+  final String? unit;
+
+  /// User-confirmed strings that join a receipt line to this item. JSON list.
+  final String aliases;
+  final int wanted;
+  final String source;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int dirty;
+  const PantryRow(
+      {required this.id,
+      required this.name,
+      this.quantity,
+      this.unit,
+      required this.aliases,
+      required this.wanted,
+      required this.source,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.dirty});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<double>(quantity);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    map['aliases'] = Variable<String>(aliases);
+    map['wanted'] = Variable<int>(wanted);
+    map['source'] = Variable<String>(source);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<int>(dirty);
+    return map;
+  }
+
+  PantryRowsCompanion toCompanion(bool nullToAbsent) {
+    return PantryRowsCompanion(
+      id: Value(id),
+      name: Value(name),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      aliases: Value(aliases),
+      wanted: Value(wanted),
+      source: Value(source),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory PantryRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PantryRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      quantity: serializer.fromJson<double?>(json['quantity']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      aliases: serializer.fromJson<String>(json['aliases']),
+      wanted: serializer.fromJson<int>(json['wanted']),
+      source: serializer.fromJson<String>(json['source']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<int>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'quantity': serializer.toJson<double?>(quantity),
+      'unit': serializer.toJson<String?>(unit),
+      'aliases': serializer.toJson<String>(aliases),
+      'wanted': serializer.toJson<int>(wanted),
+      'source': serializer.toJson<String>(source),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<int>(dirty),
+    };
+  }
+
+  PantryRow copyWith(
+          {String? id,
+          String? name,
+          Value<double?> quantity = const Value.absent(),
+          Value<String?> unit = const Value.absent(),
+          String? aliases,
+          int? wanted,
+          String? source,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          int? dirty}) =>
+      PantryRow(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        quantity: quantity.present ? quantity.value : this.quantity,
+        unit: unit.present ? unit.value : this.unit,
+        aliases: aliases ?? this.aliases,
+        wanted: wanted ?? this.wanted,
+        source: source ?? this.source,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        dirty: dirty ?? this.dirty,
+      );
+  PantryRow copyWithCompanion(PantryRowsCompanion data) {
+    return PantryRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      aliases: data.aliases.present ? data.aliases.value : this.aliases,
+      wanted: data.wanted.present ? data.wanted.value : this.wanted,
+      source: data.source.present ? data.source.value : this.source,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('aliases: $aliases, ')
+          ..write('wanted: $wanted, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, quantity, unit, aliases, wanted,
+      source, createdAt, updatedAt, deletedAt, dirty);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PantryRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.aliases == this.aliases &&
+          other.wanted == this.wanted &&
+          other.source == this.source &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class PantryRowsCompanion extends UpdateCompanion<PantryRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<double?> quantity;
+  final Value<String?> unit;
+  final Value<String> aliases;
+  final Value<int> wanted;
+  final Value<String> source;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> dirty;
+  final Value<int> rowid;
+  const PantryRowsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.aliases = const Value.absent(),
+    this.wanted = const Value.absent(),
+    this.source = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PantryRowsCompanion.insert({
+    required String id,
+    required String name,
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.aliases = const Value.absent(),
+    this.wanted = const Value.absent(),
+    this.source = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<PantryRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<double>? quantity,
+    Expression<String>? unit,
+    Expression<String>? aliases,
+    Expression<int>? wanted,
+    Expression<String>? source,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (aliases != null) 'aliases': aliases,
+      if (wanted != null) 'wanted': wanted,
+      if (source != null) 'source': source,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PantryRowsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<double?>? quantity,
+      Value<String?>? unit,
+      Value<String>? aliases,
+      Value<int>? wanted,
+      Value<String>? source,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<int>? dirty,
+      Value<int>? rowid}) {
+    return PantryRowsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      aliases: aliases ?? this.aliases,
+      wanted: wanted ?? this.wanted,
+      source: source ?? this.source,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (aliases.present) {
+      map['aliases'] = Variable<String>(aliases.value);
+    }
+    if (wanted.present) {
+      map['wanted'] = Variable<int>(wanted.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<int>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryRowsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('aliases: $aliases, ')
+          ..write('wanted: $wanted, ')
+          ..write('source: $source, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MetaRowsTable extends MetaRows with TableInfo<$MetaRowsTable, MetaRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2916,13 +3455,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $VersionRowsTable versionRows = $VersionRowsTable(this);
   late final $CookLogRowsTable cookLogRows = $CookLogRowsTable(this);
   late final $CookTimerRowsTable cookTimerRows = $CookTimerRowsTable(this);
+  late final $PantryRowsTable pantryRows = $PantryRowsTable(this);
   late final $MetaRowsTable metaRows = $MetaRowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [dishRows, versionRows, cookLogRows, cookTimerRows, metaRows];
+      [dishRows, versionRows, cookLogRows, cookTimerRows, pantryRows, metaRows];
 }
 
 typedef $$DishRowsTableCreateCompanionBuilder = DishRowsCompanion Function({
@@ -4530,6 +5070,265 @@ typedef $$CookTimerRowsTableProcessedTableManager = ProcessedTableManager<
     ),
     CookTimerRow,
     PrefetchHooks Function()>;
+typedef $$PantryRowsTableCreateCompanionBuilder = PantryRowsCompanion Function({
+  required String id,
+  required String name,
+  Value<double?> quantity,
+  Value<String?> unit,
+  Value<String> aliases,
+  Value<int> wanted,
+  Value<String> source,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> dirty,
+  Value<int> rowid,
+});
+typedef $$PantryRowsTableUpdateCompanionBuilder = PantryRowsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<double?> quantity,
+  Value<String?> unit,
+  Value<String> aliases,
+  Value<int> wanted,
+  Value<String> source,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<int> dirty,
+  Value<int> rowid,
+});
+
+class $$PantryRowsTableFilterComposer
+    extends Composer<_$AppDatabase, $PantryRowsTable> {
+  $$PantryRowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get aliases => $composableBuilder(
+      column: $table.aliases, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get wanted => $composableBuilder(
+      column: $table.wanted, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get dirty => $composableBuilder(
+      column: $table.dirty, builder: (column) => ColumnFilters(column));
+}
+
+class $$PantryRowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PantryRowsTable> {
+  $$PantryRowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get aliases => $composableBuilder(
+      column: $table.aliases, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get wanted => $composableBuilder(
+      column: $table.wanted, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get source => $composableBuilder(
+      column: $table.source, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get dirty => $composableBuilder(
+      column: $table.dirty, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PantryRowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PantryRowsTable> {
+  $$PantryRowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get aliases =>
+      $composableBuilder(column: $table.aliases, builder: (column) => column);
+
+  GeneratedColumn<int> get wanted =>
+      $composableBuilder(column: $table.wanted, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+}
+
+class $$PantryRowsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PantryRowsTable,
+    PantryRow,
+    $$PantryRowsTableFilterComposer,
+    $$PantryRowsTableOrderingComposer,
+    $$PantryRowsTableAnnotationComposer,
+    $$PantryRowsTableCreateCompanionBuilder,
+    $$PantryRowsTableUpdateCompanionBuilder,
+    (PantryRow, BaseReferences<_$AppDatabase, $PantryRowsTable, PantryRow>),
+    PantryRow,
+    PrefetchHooks Function()> {
+  $$PantryRowsTableTableManager(_$AppDatabase db, $PantryRowsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PantryRowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PantryRowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PantryRowsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<double?> quantity = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<String> aliases = const Value.absent(),
+            Value<int> wanted = const Value.absent(),
+            Value<String> source = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> dirty = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryRowsCompanion(
+            id: id,
+            name: name,
+            quantity: quantity,
+            unit: unit,
+            aliases: aliases,
+            wanted: wanted,
+            source: source,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            dirty: dirty,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            Value<double?> quantity = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
+            Value<String> aliases = const Value.absent(),
+            Value<int> wanted = const Value.absent(),
+            Value<String> source = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<int> dirty = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PantryRowsCompanion.insert(
+            id: id,
+            name: name,
+            quantity: quantity,
+            unit: unit,
+            aliases: aliases,
+            wanted: wanted,
+            source: source,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            dirty: dirty,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$PantryRowsTable, PantryRow>(table),
+                    BaseReferences<_$AppDatabase, $PantryRowsTable, PantryRow>(
+                        db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PantryRowsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PantryRowsTable,
+    PantryRow,
+    $$PantryRowsTableFilterComposer,
+    $$PantryRowsTableOrderingComposer,
+    $$PantryRowsTableAnnotationComposer,
+    $$PantryRowsTableCreateCompanionBuilder,
+    $$PantryRowsTableUpdateCompanionBuilder,
+    (PantryRow, BaseReferences<_$AppDatabase, $PantryRowsTable, PantryRow>),
+    PantryRow,
+    PrefetchHooks Function()>;
 typedef $$MetaRowsTableCreateCompanionBuilder = MetaRowsCompanion Function({
   required String key,
   required String value,
@@ -4666,6 +5465,8 @@ class $AppDatabaseManager {
       $$CookLogRowsTableTableManager(_db, _db.cookLogRows);
   $$CookTimerRowsTableTableManager get cookTimerRows =>
       $$CookTimerRowsTableTableManager(_db, _db.cookTimerRows);
+  $$PantryRowsTableTableManager get pantryRows =>
+      $$PantryRowsTableTableManager(_db, _db.pantryRows);
   $$MetaRowsTableTableManager get metaRows =>
       $$MetaRowsTableTableManager(_db, _db.metaRows);
 }

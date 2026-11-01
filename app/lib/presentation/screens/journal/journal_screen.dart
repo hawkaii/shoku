@@ -12,6 +12,7 @@ import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
 import '../../widgets/kit/status_badge.dart';
+import '../add/add_sheet.dart';
 import '../log/log_sheet.dart';
 import 'import_card.dart';
 
@@ -62,6 +63,35 @@ class JournalScreen extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+          // ---- Save a recipe -------------------------------------------
+          ShokuPressable(
+            key: const ValueKey('journal-save-recipe'),
+            onTap: () => showAddSheet(context),
+            child: Container(
+              margin: const EdgeInsets.only(top: ShokuSpace.xs),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: ShokuSpace.md, vertical: ShokuSpace.sm),
+              decoration: BoxDecoration(
+                color: context.colors.surface,
+                borderRadius: BorderRadius.circular(ShokuRadius.card),
+                border: Border.all(color: context.colors.hairline),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.add, size: 16, color: context.colors.accent),
+                  const SizedBox(width: ShokuSpace.sm),
+                  Text('Save a recipe',
+                      style: ShokuType.title.copyWith(
+                          color: context.colors.ink, fontSize: 13)),
+                  const Spacer(),
+                  Icon(Icons.chevron_right,
+                      size: 18, color: context.colors.inkMuted),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: ShokuSpace.md),
+
           // ---- Rhythm header ------------------------------------------
           Row(
             children: [
