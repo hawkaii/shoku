@@ -46,12 +46,14 @@ class FakeExtractor:
         creator: str | None = "@ravi",
         with_audio: bool = True,
         with_video: bool = True,
+        thumbnail: str | None = None,
         fail: bool = False,
     ) -> None:
         self.caption = caption
         self.creator = creator
         self.with_audio = with_audio
         self.with_video = with_video
+        self.thumbnail = thumbnail
         self.fail = fail
         self.calls = 0
         self.audio_path: Path | None = None
@@ -75,6 +77,7 @@ class FakeExtractor:
             caption=self.caption,
             creator=self.creator,
             source_url=url,
+            thumbnail_url=self.thumbnail,
             audio_path=audio,
             video_path=video,
         )
