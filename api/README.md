@@ -4,7 +4,7 @@ The server side of Shoku: journal sync, reel imports, the shared content cache,
 the scoped assistant, and photo uploads.
 
 The client is a Flutter app whose local schema lives in
-`food-finder-app/lib/data/db/app_database.dart`. **Field names here mirror it
+`app/lib/data/db/app_database.dart`. **Field names here mirror it
 exactly** (snake_case). If you change one, change both.
 
 ## Design rules this code follows
