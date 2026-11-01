@@ -9,7 +9,7 @@ namespace.
 import hashlib
 import hmac
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Protocol
 from urllib.parse import quote
 
@@ -163,6 +163,67 @@ class R2Storage:
             CacheControl="public, max-age=31536000, immutable",
         )
         return f"{self._public_base}/{quote(key)}" if self._public_base else None
+
+
+class GcsStorage:
+    """Google Cloud Storage on the same bucket that holds user photos.
+
+    No key file anywhere: ``google.auth.default()`` reads the VM's metadata
+    server identity, and V4 URL signing goes through that identity's
+    ``signBlob`` endpoint, so the bucket credentials can never drift from the
+    machine's. It needs ``roles/iam.serviceAccountTokenCreator`` on the account
+    for the signing half only.
+    """
+
+    can_store = True
+
+    def __init__(
+        self, *, bucket: str, public_base_url: str, project: str | None = None
+    ) -> None:
+        try:
+            from google.auth import default
+            from google.cloud import storage as gcs
+        except ImportError as exc:  # pragma: no cover - prod only
+            raise Unavailable(
+                detail="google-cloud-storage is not installed; install shoku-api[prod]"
+            ) from exc
+        try:
+            credentials, project_id = default()
+        except Exception as exc:  # pragma: no cover - depends on the host
+            raise Unavailable(detail=f"no default credentials: {exc}") from exc
+
+        self._public_base = public_base_url.rstrip("/")
+        self._client = gcs.Client(project=project or project_id, credentials=credentials)
+        self._bucket_name = bucket
+        self._bucket = self._client.bucket(bucket)
+
+    def public_url(self, key: str) -> str | None:
+        return f"{self._public_base}/{quote(key)}" if self._public_base else None
+
+    def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
+        blob = self._bucket.blob(key)
+        url = blob.generate_signed_url(
+            version="v4",
+            expiration=timedelta(seconds=expires_in),
+            method="PUT",
+            content_type=content_type,
+        )
+        return PresignedUpload(
+            key=key,
+            url=url,
+            method="PUT",
+            headers={"Content-Type": content_type},
+            expires_in=expires_in,
+            public_url=self.public_url(key),
+        )
+
+    def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
+        blob = self._bucket.blob(key)
+        # Set before uploading: metadata sent with the write is what a CDN and
+        # the client cache actually see.
+        blob.cache_control = "public, max-age=31536000, immutable"
+        blob.upload_from_string(body, content_type=content_type)
+        return self.public_url(key)
 
 
 def object_key(user_id: str, extension: str | None, now: datetime | None = None) -> str:
