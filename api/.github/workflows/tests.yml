@@ -1,0 +1,39 @@
+name: Tests
+
+# Pinned to 3.12, the version the images actually run. The local venv is 3.14,
+# which defers annotations — a NameError that only exists on 3.12 took the API
+# down once and no local test could see it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  server:
+    name: Server tests (Python 3.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Import every module
+        # Catches errors that only appear when a module is imported, which is
+        # how annotation mistakes surface in production but not in a test run
+        # that happens to import things in a friendlier order.
+        run: >-
+          python -c "import pkgutil, importlib, shoku_api;
+          [importlib.import_module(m.name) for m in
+          pkgutil.walk_packages(shoku_api.__path__, 'shoku_api.')];
+          print('all modules import')"
+
+      - name: Test
+        run: pytest -q

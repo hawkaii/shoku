@@ -1,0 +1,32 @@
+# Production compose, rendered onto the VM by CI.
+# The image is built by GitHub Actions and pushed to GHCR; the VM only pulls.
+
+# Stable project name: container and volume names must not depend on the
+# directory the compose file is invoked from.
+name: shoku
+
+services:
+  api:
+    image: ${SHOKU_IMAGE:-ghcr.io/hawkaii/shoku-api:latest}
+    restart: unless-stopped
+    env_file: ../.env
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # The free e2-micro has 953 MB total and already runs ~300 MB of OS.
+    # These two limits plus a swap file are what keep it from OOM-killing.
+    mem_limit: 256m
+
+  # The queue is the API's only link to the worker VM.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--bind", "0.0.0.0"]
+    ports:
+      - "6379:6379"
+    mem_limit: 64m

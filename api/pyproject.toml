@@ -1,0 +1,74 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shoku-api"
+version = "0.1.0"
+description = "Shoku backend: sync, imports, content cache, assistant, photos."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "sqlalchemy>=2.0.30",
+    "alembic>=1.13",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "pyjwt[crypto]>=2.9",
+    # Downscaling a reel cover at extraction. Small wheel, and both the API
+    # (backfill) and the worker (import) need it.
+    "Pillow>=10.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "httpx>=0.27",
+]
+# Services that need a live dependency. Kept out of `dev` so the test suite
+# installs and runs with no Postgres, no Redis and no network.
+prod = [
+    "psycopg[binary]>=3.2",
+    "redis>=5.0",
+    "boto3>=1.34",
+    # Covers and user photos live in GCS, authenticated by the VM identity and
+    # signed through signBlob. No key file ships with the image.
+    "google-cloud-storage>=2.18",
+    # The API calls the Compute REST API to wake the worker VM. It ships in
+    # prod only: the test suite and a local install never talk to GCP.
+    "httpx>=0.27",
+]
+# Only the worker image installs these: extracting media and running speech
+# recognition are the heavy, optional half of the system.
+# Exactly what the worker needs: a database driver, a queue, a fetcher and an
+# HTTP client. No boto3 — the worker never touches object storage.
+worker = [
+    "psycopg[binary]>=3.2",
+    "redis>=5.0",
+    "yt-dlp[default]>=2024.1.1",
+    "httpx>=0.27",
+    # A static ~30 MB ffmpeg, instead of the 430 MB apt package.
+    "imageio-ffmpeg>=0.5",
+]
+# Speech recognition needs ~1 GB of model + runtime. It does not fit the free
+# e2-micro alongside the API, so it is a separate extra installed only where
+# there is room (see DEPLOY.md).
+whisper = [
+    "faster-whisper>=1.0.1",
+    # faster-whisper still calls av.open(metadata_errors=...), which PyAV 19
+    # removed. Without this pin every transcription dies with a TypeError.
+    "av<19",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["shoku_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error::DeprecationWarning:shoku_api.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

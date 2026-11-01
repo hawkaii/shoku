@@ -1,0 +1,72 @@
+name: shoku
+
+services:
+  api:
+    build: .
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && uvicorn shoku_api.asgi:app --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+    environment:
+      SHOKU_ENVIRONMENT: prod
+      SHOKU_DATABASE_URL: postgresql+psycopg://shoku:shoku@postgres:5432/shoku
+      SHOKU_QUEUE_BACKEND: redis
+      SHOKU_REDIS_URL: redis://redis:6379/0
+      # Replace with a real Firebase-token verifier before exposing the port.
+      SHOKU_AUTH_MODE: ${SHOKU_AUTH_MODE:-dev}
+      SHOKU_STORAGE_BACKEND: ${SHOKU_STORAGE_BACKEND:-dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["python", "-m", "shoku_api.imports.worker"]
+    environment:
+      SHOKU_ENVIRONMENT: prod
+      SHOKU_DATABASE_URL: postgresql+psycopg://shoku:shoku@postgres:5432/shoku
+      SHOKU_QUEUE_BACKEND: redis
+      SHOKU_REDIS_URL: redis://redis:6379/0
+      SHOKU_STORAGE_BACKEND: ${SHOKU_STORAGE_BACKEND:-dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: shoku
+      POSTGRES_PASSWORD: shoku
+      POSTGRES_DB: shoku
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shoku -d shoku"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
