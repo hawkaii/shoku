@@ -17,24 +17,6 @@ api/     FastAPI service, import worker, Muse structuring, sync, feed
 
 ---
 
-## What was built during the hackathon
-
-Everything in this repository, in ten days.
-
-| | |
-|---|---|
-| **Built 26 Oct – 4 Nov 2026** | ~17,300 lines of Dart in `app/lib`, ~6,300 lines of Python in `api/`, 341 files |
-| **`api/`** | The service, the import worker, Muse structuring, sync and the feed |
-| **`app/lib`** | Import pipeline and provenance, the journal's version model, sync, cook mode, the timer, the feed, the image pipeline |
-
-The parts that took the time are the parts that are hard: reading a recipe out of
-a hostile reel (caption, pinned comment, published subtitles, speech, or the
-frames themselves), a schema the model is constrained to, a sync model that
-survives two devices editing the same dish offline, and an import worker that
-wakes itself, does the work and goes back to sleep.
-
----
-
 ## The interesting part: reading a recipe out of a video
 
 A reel is hostile input. Sometimes there is a caption with the whole recipe.
@@ -104,7 +86,7 @@ cd app && flutter pub get && flutter run
 network, Postgres or Redis:
 
 ```bash
-cd api && pytest -q          # 163 tests
+cd api && pytest -q          # 169 tests
 cd app && flutter test       # 161 tests
 ```
 
