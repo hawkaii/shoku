@@ -12,6 +12,7 @@ import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
+import 'feed_detail_sheet.dart';
 
 /// The Wall: reels other people chose to share, ready to read and cook.
 ///
@@ -183,15 +184,22 @@ class _FeedCardState extends ConsumerState<FeedCard> {
     final c = context.colors;
     final item = widget.item;
 
-    return Container(
-      padding: const EdgeInsets.all(ShokuSpace.sm),
-      decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: BorderRadius.circular(ShokuRadius.card),
-        border: Border.all(color: c.hairline),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final imported = ref
+        .watch(importedShortcodesProvider)
+        .contains(widget.item.shortcode);
+
+    return ShokuPressable(
+      key: const ValueKey('feed-card'),
+      onTap: () => showFeedDetail(context, widget.item),
+      child: Container(
+        padding: const EdgeInsets.all(ShokuSpace.sm),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(ShokuRadius.card),
+          border: Border.all(color: c.hairline),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 84,
@@ -245,7 +253,7 @@ class _FeedCardState extends ConsumerState<FeedCard> {
                   alignment: Alignment.centerLeft,
                   child: ShokuPressable(
                     key: const ValueKey('feed-add-to-cookbook'),
-                    onTap: _adding ? null : _addToCookbook,
+                    onTap: imported || _adding ? null : _addToCookbook,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
@@ -255,10 +263,12 @@ class _FeedCardState extends ConsumerState<FeedCard> {
                         border: Border.all(color: c.hairline),
                       ),
                       child: Text(
-                        _adding ? 'Saving…' : 'Add to cookbook',
+                        imported
+                            ? 'In your cookbook'
+                            : (_adding ? 'Saving…' : 'Add to cookbook'),
                         style: ShokuType.label.copyWith(
                           fontSize: 9.5,
-                          color: c.ink,
+                          color: imported ? c.inkMuted : c.ink,
                           letterSpacing: 0.4,
                         ),
                       ),
@@ -269,6 +279,7 @@ class _FeedCardState extends ConsumerState<FeedCard> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
