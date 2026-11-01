@@ -1,11 +1,12 @@
-"""The Wall: only what was published, and nothing about who published it.
+"""The Wall: every imported reel, and nothing about who imported it.
 
 Two properties matter more than any single case here:
 
-* an extraction appears only because someone pressed publish, so nothing
-  arrives by accident;
+* importing a reel lists it. There is no publish step and no per-user filter —
+  the Wall is the extraction cache, minus what was taken down;
 * a card can carry no trace of a user's own work — no dish, no version, no
-  cook, no photo, and no importer.
+  cook, no photo, and no importer. That is the guarantee that makes a global
+  feed safe, so it is tested harder than anything else here.
 """
 
 from datetime import datetime, timezone
@@ -65,41 +66,47 @@ def feed(client: TestClient, **params) -> dict:
     return response.json()
 
 
-def test_an_unshared_row_never_appears(client, session) -> None:
-    add_row(session, "quiet1", title="Never published")
-    add_row(session, "loud1", title="Published")
-    assert client.put("/v1/content/loud1/share").json()["shared"] is True
+def test_every_imported_row_appears_without_being_published(client, session) -> None:
+    """The rule inverted on 31 Oct: importing a reel lists it."""
+    add_row(session, "quiet1", title="Never published", created_at="2026-10-01T10:00:00Z")
+    add_row(session, "loud1", title="Published", created_at="2026-10-02T10:00:00Z")
 
     titles = [item["title"] for item in feed(client)["items"]]
 
-    assert titles == ["Published"]
+    assert titles == ["Published", "Never published"]
 
 
-def test_publishing_is_an_explicit_act_not_a_side_effect_of_import(client, session) -> None:
-    """A row that merely exists must stay invisible until someone publishes it."""
-    add_row(session, "imported1")
-    assert feed(client)["items"] == []
+def test_a_row_is_listed_while_shared_stays_false(client, session) -> None:
+    """``shared`` no longer gates anything; a fresh import is visible anyway.
+
+    The column is kept for this release, so the test pins the fact that it is
+    vestigial rather than deleting the question.
+    """
+    row = add_row(session, "imported1")
+    assert row.shared is False
+
+    assert [item["shortcode"] for item in feed(client)["items"]] == ["imported1"]
 
 
-def test_unpublishing_takes_it_off_the_wall(client, session) -> None:
+def test_unpublishing_no_longer_removes_a_card(client, session) -> None:
+    """The endpoint still writes the column; the feed ignores it."""
     add_row(session, "loud1")
     client.put("/v1/content/loud1/share")
     assert len(feed(client)["items"]) == 1
 
     assert client.delete("/v1/content/loud1/share").json()["shared"] is False
-    assert feed(client)["items"] == []
+    assert len(feed(client)["items"]) == 1, "unshare is vestigial, not a takedown"
 
 
 def test_a_taken_down_row_disappears(client, session) -> None:
     add_row(session, "loud1")
-    client.put("/v1/content/loud1/share")
     assert len(feed(client)["items"]) == 1
 
     assert client.delete("/v1/content/loud1").status_code == 204
-    assert feed(client)["items"] == [], "a takedown must outrank publish"
+    assert feed(client)["items"] == [], "a takedown is the only thing that hides a card"
 
 
-def test_a_shared_row_with_no_parse_never_appears(client, session) -> None:
+def test_a_row_with_no_parse_never_appears(client, session) -> None:
     add_row(session, "empty1", with_parse=False, shared=True)
     assert feed(client)["items"] == []
 
@@ -157,9 +164,9 @@ def test_a_card_carries_the_extraction_and_no_importer(client, session) -> None:
 def test_a_users_own_work_cannot_reach_a_card(client, session, ctx) -> None:
     """The feed never joins a user-owned table, so an edit cannot leak.
 
-    A dish with the same title-ish content, a version that rewrote the steps, a
-    cook and a photo all exist for this user; the card must still be the
-    extraction, because that is the only table it reads.
+    A dish, a version that rewrote the steps, a cook and a photo all exist for
+    this user; the card must still be the extraction, because that is the only
+    table it reads. This is the guarantee that lets the Wall be global.
     """
     add_row(session, "loud1", title="Extracted title")
     client.put("/v1/content/loud1/share")
@@ -210,6 +217,26 @@ def test_a_users_own_work_cannot_reach_a_card(client, session, ctx) -> None:
     assert item["steps"] == ["Fry the paneer.", "Simmer the gravy."]
     assert "Secret method" not in str(item)
     assert "private note" not in str(item)
+
+    # An edit made after the card was already listed must not update it either:
+    # last-write-wins on the dish is exactly the leak this test exists for.
+    client.post(
+        "/v1/sync/push",
+        json={
+            "dishes": [
+                {
+                    "id": "dish-1",
+                    "title": "Renamed after the fact",
+                    "steps": ["Edited method", "Another private step"],
+                    "created_at": "2026-01-01T10:00:00Z",
+                    "updated_at": "2026-02-01T00:00:00Z",
+                }
+            ]
+        },
+    )
+
+    assert feed(client)["items"][0] == item, "an edited dish must not change its card"
+    assert "Renamed after the fact" not in str(feed(client))
 
 
 def test_newest_first_and_paging_does_not_repeat(client, session) -> None:
@@ -266,8 +293,12 @@ def test_a_duplicate_report_does_not_increment(client, session) -> None:
     assert second["reported_count"] == 1, "one account, however many taps, is one report"
 
 
-def test_distinct_users_reach_the_threshold_and_unshare(client, session, ctx, app) -> None:
-    """Two people agreeing is already a moderation signal, not one."""
+def test_distinct_users_reach_the_threshold_and_clear_the_flag(client, session, ctx, app) -> None:
+    """Two people agreeing flips the column — which no longer hides anything.
+
+    Worth pinning: with the feed global, a report marks a row but cannot remove
+    it. Moderation is takedown now.
+    """
     ctx.settings = ctx.settings.model_copy(update={"feed_report_threshold": 2})
     add_row(session, "loud1", shared=True)
 
@@ -278,8 +309,8 @@ def test_distinct_users_reach_the_threshold_and_unshare(client, session, ctx, ap
         result = second.post("/v1/content/loud1/report").json()
 
     assert result["reported_count"] == 2
-    assert result["shared"] is False, "the threshold must unshare it"
-    assert feed(client)["items"] == []
+    assert result["shared"] is False, "the threshold still clears the flag"
+    assert len(feed(client)["items"]) == 1, "but the card stays: only takedown hides"
 
 
 def test_below_the_threshold_it_stays_up(client, session) -> None:
@@ -289,7 +320,7 @@ def test_below_the_threshold_it_stays_up(client, session) -> None:
 
 
 def test_reporting_does_not_delete_the_extraction(client, session, ctx) -> None:
-    """Unshared, not taken down: everyone's own import still works."""
+    """A report is a signal, never a takedown: everyone's own import still works."""
     ctx.settings = ctx.settings.model_copy(update={"feed_report_threshold": 2})
     add_row(session, "loud1", shared=True)
     client.post("/v1/content/loud1/report")
@@ -298,7 +329,7 @@ def test_reporting_does_not_delete_the_extraction(client, session, ctx) -> None:
         second.post("/v1/content/loud1/report")
 
     assert client.get("/v1/content/loud1").status_code == 200
-    assert feed(client)["items"] == []
+    assert len(feed(client)["items"]) == 1
 
 
 def test_reporting_an_unknown_row_is_404(client) -> None:

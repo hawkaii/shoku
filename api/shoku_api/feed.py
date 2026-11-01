@@ -1,23 +1,23 @@
-"""The Wall: deliberately shared extractions, and the moderation around them.
+"""The Wall: every imported reel, and nothing about who imported it.
 
 Two rules decide everything here.
 
-**What is shared is the extraction, never the user's work.** ``content_cache``
-holds the parse of a reel and has never known who imported it. Publishing sets
-one boolean on that row. Dish metadata, recipe versions, cooks and photos live
-in user-owned tables and this module never reads them — a card cannot leak an
-edit because the query has no way to reach one.
+**The Wall is the cache, minus takedowns.** If a reel has a parse and has not
+been taken down, it is listed — importing it is what puts it there. There is no
+publish step and no per-user filter. ``content_cache.shared`` and its two
+endpoints survive this release for compatibility but gate nothing; see the
+module note in ``publish``.
 
-**Publishing is an explicit act.** ``shared`` is set in exactly two functions,
-``publish`` and ``unpublish``, both reached from an authenticated endpoint. It
-is never touched in the import pipeline, never defaulted true and never
-backfilled: a convenience that set it on insert would put every journal anyone
-has ever imported on the Wall.
+**A card carries the extraction only.** ``content_cache`` holds the parse of a
+reel and has never known who imported it. Dish metadata, recipe versions, cooks
+and photos live in user-owned tables and this module never reads them — a card
+cannot leak an edit because the query has no way to reach one. That is what
+makes a global feed safe, and it is the property to defend.
 
-Moderation is two independent things. A takedown (``content.takedown``) erases
-the payload and hides the row from the feed forever. A report counts *distinct
-users*: the ``content_reports`` row is what makes that true, so one account
-cannot unshare anything by tapping repeatedly.
+Moderation is a takedown: it erases the payload and hides the row permanently.
+A report counts *distinct users* and records a signal on the row; it does not
+remove a card, because since the feed went global there is nothing to remove it
+from. Treat a reported row as a queue for a human, not an automatic outcome.
 """
 
 from datetime import datetime, timezone
@@ -35,11 +35,15 @@ from .schemas import FeedItem, FeedResponse, RecipePayload
 def _visible():
     """The only rows the Wall may show.
 
-    Spelled once so no endpoint can forget a clause: published, still holding a
-    parse, and not taken down.
+    Spelled once so no endpoint can forget a clause: it holds a parse, and it
+    has not been taken down.
+
+    There is deliberately **no** ``shared`` clause. The owner decided on 31 Oct
+    that the Wall is a global feed of imported reels — importing one lists it —
+    rather than an opt-in publish. The ``shared`` column and its endpoints are
+    kept but no longer gate visibility.
     """
     return and_(
-        ContentCache.shared.is_(True),
         ContentCache.structured_json.isnot(None),
         ContentCache.deleted_at.is_(None),
     )
@@ -137,7 +141,7 @@ def _shareable(session: Session, shortcode: str) -> ContentCache:
 
 
 def publish(session: Session, shortcode: str) -> ContentCache:
-    """The one place ``shared`` goes true. Idempotent."""
+    """Set ``shared`` true. Vestigial since the feed went global, kept this release."""
     row = _shareable(session, shortcode)
     if not row.shared:
         row.shared = True
@@ -146,7 +150,11 @@ def publish(session: Session, shortcode: str) -> ContentCache:
 
 
 def unpublish(session: Session, shortcode: str) -> ContentCache:
-    """The one place ``shared`` goes false, by a user. Idempotent."""
+    """Set ``shared`` false. Vestigial: it no longer hides a card.
+
+    Deleting a reel from the Wall is a takedown (``content.takedown``), which is
+    an operator action, not a user one.
+    """
     row = session.get(ContentCache, shortcode)
     if row is None:
         raise NotFound(detail=f"no content for {shortcode!r}")
@@ -164,14 +172,17 @@ def report(
     threshold: int,
     clock: Clock,
 ) -> ContentCache:
-    """Count a distinct reporter, and unshare once enough of them agree.
+    """Count a distinct reporter and record the signal on the row.
 
     A repeat report from the same account changes nothing — the primary key on
     ``content_reports`` does that, so the counter is a count of people rather
-    than a count of taps.
+    than a count of taps. At the threshold the ``shared`` flag is cleared, which
+    since the feed went global is bookkeeping: it marks the row for a human and
+    does not remove the card.
     """
     if threshold < 2:
-        # A threshold of one would hand any single account a takedown button.
+        # A threshold of one would hand any single account a moderation signal
+        # on every card it sees.
         raise Unavailable(detail="report threshold must be at least 2")
 
     row = session.get(ContentCache, shortcode)
