@@ -3,14 +3,6 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
-## [1.22.0] — 2026-11-01
-
-### Added
-- Tapping a card opens the reel's extraction *(wall)* — [`b4e71d5`](https://github.com/hawkaii/food-finder-app/commit/b4e71d5da49d265b313ebf1172e68c2485ed96de)
-
-### Docs
-- V1.21.1 [skip ci] *(changelog)* — [`865a007`](https://github.com/hawkaii/food-finder-app/commit/865a007dea245093d35c7846ef69546d9d552316)
-
 ## [1.21.1] — 2026-10-31
 
 ### Added
