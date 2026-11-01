@@ -1,0 +1,245 @@
+name: Release APK
+
+# One release per merge to main. Work in progress is tested in Chrome locally
+# (see README) and gated by the Checks workflow on the pull request, so main
+# never burns runner minutes on a build nobody asked for.
+on:
+  push:
+    branches: [main]
+    # A release is a version bump, not a commit. Bumping `version:` in
+    # pubspec.yaml is the act of asking for an APK; code commits on their own
+    # build nothing. That is what stops a busy day from costing 90 minutes of
+    # runner time for binaries nobody installs.
+    paths:
+      - "app/pubspec.yaml"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Flutter build mode"
+        type: choice
+        options: [debug, release]
+        default: debug
+
+permissions:
+  contents: write
+
+# Let a release finish rather than leaving a half-published tag behind.
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        # The Flutter project lives in app/ inside the monorepo; every shell
+        # step below is relative to it.
+        working-directory: app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history and tags, for the changelog
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          # The Gradle dependency cache is the single biggest cost in an
+          # Android build: without it every run resolves and compiles the whole
+          # toolchain from scratch. Cached, a build drops by several minutes.
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve version and tag
+        id: version
+        run: |
+          set -euo pipefail
+          pubspec_version=$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)
+          version="${pubspec_version%%+*}"
+          if [ -z "$version" ]; then
+            echo "::error::No version field in pubspec.yaml"
+            exit 1
+          fi
+          tag="v${version}"
+          # Re-running the same version keeps the tag stable; a rebuild gets a
+          # build-metadata suffix instead of silently replacing an existing APK.
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            tag="v${version}+build.${{ github.run_number }}"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "Releasing ${tag}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Test
+        run: flutter test --reporter expanded
+
+      - name: Build APK
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          args=("--$BUILD_TYPE")
+          if [ -n "${API_BASE_URL}" ]; then
+            echo "Using API_BASE_URL=${API_BASE_URL}"
+            args+=("--dart-define=API_BASE_URL=${API_BASE_URL}")
+          fi
+          flutter build apk "${args[@]}"
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-${BUILD_TYPE}.apk \
+             "dist/shoku-${VERSION}-${BUILD_TYPE}.apk"
+
+      # git-cliff-action exposes the rendered changelog as an output rather
+      # than writing files itself.
+      - name: Generate changelog
+        id: changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: app/cliff.toml
+          args: --tag ${{ steps.version.outputs.tag }}
+
+      - name: Write CHANGELOG.md
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
+        run: printf '%s\n' "$CHANGELOG" > CHANGELOG.md
+
+      - name: Generate release notes
+        id: notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: app/cliff.toml
+          args: --unreleased --tag ${{ steps.version.outputs.tag }} --strip header
+
+      - name: Save release notes
+        env:
+          NOTES: ${{ steps.notes.outputs.content }}
+        run: printf '%s\n' "$NOTES" > /tmp/notes.md
+
+      - name: Build release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+        run: |
+          set -euo pipefail
+          apk=$(ls dist/*.apk)
+          size=$(du -h "$apk" | cut -f1)
+          sha=$(sha256sum "$apk" | cut -d' ' -f1)
+          {
+            cat /tmp/notes.md
+            echo
+            echo "---"
+            echo
+            echo "### Install"
+            echo
+            echo "Download \`$(basename "$apk")\` below and open it on the phone."
+            echo "Debug-signed, so Android will ask you to allow installs from your"
+            echo "browser or file manager once."
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | \`${VERSION}\` |"
+            echo "| Build | \`${BUILD_TYPE}\` |"
+            echo "| Size | ${size} |"
+            echo "| Commit | [\`${GITHUB_SHA:0:7}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}) |"
+            echo "| SHA-256 | \`${sha}\` |"
+          } > /tmp/release.md
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          # GitHub's API returns a transient 403 often enough to have failed this
+          # step while the identical workflow succeeded either side of it. A
+          # release is not worth losing to one bad response, so retry, and treat
+          # an existing tag as "upload to it" rather than as a failure.
+          for attempt in 1 2 3 4; do
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              gh release upload "$TAG" dist/*.apk --clobber
+              gh release edit "$TAG" --title "Shoku v${VERSION}" \
+                --notes-file /tmp/release.md --latest
+              echo "updated existing release $TAG"
+              exit 0
+            fi
+            if gh release create "$TAG" dist/*.apk \
+                 --title "Shoku v${VERSION}" \
+                 --notes-file /tmp/release.md \
+                 --latest \
+                 --target "$GITHUB_SHA"; then
+              echo "created release $TAG on attempt $attempt"
+              exit 0
+            fi
+            echo "::warning::release attempt $attempt failed; retrying"
+            sleep $((attempt * 10))
+          done
+          echo "::error::could not publish release $TAG after 4 attempts"
+          exit 1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: shoku-apk-${{ steps.version.outputs.version }}
+          path: app/dist/*.apk
+          retention-days: 30
+
+      # Keep the repo's CHANGELOG.md in step with the published release. The
+      # [skip ci] marker stops this commit from starting another release.
+      - name: Commit changelog
+        if: github.ref == 'refs/heads/main'
+        # The APK has already been built and released by this point. A docs
+        # commit must never turn a shipped release red — a red run hides the
+        # failures that actually matter.
+        continue-on-error: true
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.content }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already current"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+            # Regenerate rather than merge: this file is derived, so the run's
+            # own output always wins over whatever landed upstream meanwhile.
+            printf '%s\n' "$CHANGELOG" > CHANGELOG.md
+            if git diff --quiet -- CHANGELOG.md; then
+              echo "already current upstream"
+              exit 0
+            fi
+            git add CHANGELOG.md
+            git commit -q -m "docs(changelog): v${VERSION} [skip ci]"
+            if git push --quiet origin HEAD:main; then
+              echo "changelog pushed on attempt $attempt"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "::warning::CHANGELOG.md could not be pushed after 3 attempts; the release is unaffected"
