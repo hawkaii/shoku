@@ -169,19 +169,27 @@ class GcsStorage:
     """Google Cloud Storage on the same bucket that holds user photos.
 
     No key file anywhere: ``google.auth.default()`` reads the VM's metadata
-    server identity, and V4 URL signing goes through that identity's
-    ``signBlob`` endpoint, so the bucket credentials can never drift from the
-    machine's. It needs ``roles/iam.serviceAccountTokenCreator`` on the account
-    for the signing half only.
+    server identity, and V4 URL signing goes through ``signBlob`` on that same
+    identity, so the bucket credentials can never drift from the machine's.
+
+    The identity itself cannot sign — Compute credentials deliberately hold only
+    a token — so presigning impersonates the account once and signs with that.
+    It costs one extra IAM permission, ``roles/iam.serviceAccountTokenCreator``,
+    and no secret.
     """
 
     can_store = True
 
     def __init__(
-        self, *, bucket: str, public_base_url: str, project: str | None = None
+        self,
+        *,
+        bucket: str,
+        public_base_url: str,
+        project: str | None = None,
+        service_account: str | None = None,
     ) -> None:
         try:
-            from google.auth import default
+            from google.auth import default, impersonated_credentials
             from google.cloud import storage as gcs
         except ImportError as exc:  # pragma: no cover - prod only
             raise Unavailable(
@@ -194,19 +202,36 @@ class GcsStorage:
 
         self._public_base = public_base_url.rstrip("/")
         self._client = gcs.Client(project=project or project_id, credentials=credentials)
-        self._bucket_name = bucket
         self._bucket = self._client.bucket(bucket)
+
+        #: None means "cannot presign, but can still store server-side".
+        self._signer = None
+        self._signer_email: str | None = None
+        email = service_account or _metadata_service_account()
+        if email:
+            self._signer = impersonated_credentials.Credentials(
+                source_credentials=credentials,
+                target_principal=email,
+                target_scopes=["https://www.googleapis.com/auth/devstorage.read_write"],
+                lifetime=3600,
+            )
+            self._signer_email = email
 
     def public_url(self, key: str) -> str | None:
         return f"{self._public_base}/{quote(key)}" if self._public_base else None
 
     def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
-        blob = self._bucket.blob(key)
-        url = blob.generate_signed_url(
+        if self._signer is None:  # pragma: no cover - depends on the host
+            raise Unavailable(
+                detail="cannot sign upload URLs: no service account to impersonate"
+            )
+        url = self._bucket.blob(key).generate_signed_url(
             version="v4",
             expiration=timedelta(seconds=expires_in),
             method="PUT",
             content_type=content_type,
+            credentials=self._signer,
+            service_account_email=self._signer_email,
         )
         return PresignedUpload(
             key=key,
@@ -224,6 +249,27 @@ class GcsStorage:
         blob.cache_control = "public, max-age=31536000, immutable"
         blob.upload_from_string(body, content_type=content_type)
         return self.public_url(key)
+
+
+def _metadata_service_account(timeout: float = 5.0) -> str | None:
+    """The VM's own service-account email, needed to impersonate ourselves.
+
+    ``credentials.service_account_email`` is the alias ``"default"``, which is
+    not a principal, so the real address comes from the metadata server.
+    """
+    import httpx  # noqa: PLC0415 - optional at import time
+
+    url = (
+        "http://metadata.google.internal/computeMetadata/v1/instance/"
+        "service-accounts/default/email"
+    )
+    try:
+        response = httpx.get(url, headers={"Metadata-Flavor": "Google"}, timeout=timeout)
+        response.raise_for_status()
+    except Exception:  # noqa: BLE001 - a host without metadata is not an error
+        return None
+    email = response.text.strip()
+    return email or None
 
 
 def object_key(user_id: str, extension: str | None, now: datetime | None = None) -> str:
