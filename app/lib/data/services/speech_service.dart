@@ -1,0 +1,84 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Read-aloud, per device.
+///
+/// Off by default: an app that starts talking in a kitchen is an app you turn
+/// off. The toggle is remembered on this phone, not synced — it is a preference
+/// about this room, not about the recipe.
+class SpeechService {
+  SpeechService({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
+
+  static const _key = 'read_aloud';
+
+  final FlutterTts _tts;
+
+  Future<bool> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_key) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> remember(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_key, enabled);
+    } catch (_) {
+      // A toggle that does not persist still works for this session.
+    }
+  }
+
+  /// Reads an answer or a step. Never called for a diff or a notice.
+  Future<void> speak(String text) async {
+    if (text.trim().isEmpty) return;
+    try {
+      await _tts.stop();
+      await _tts.setSpeechRate(0.48);
+      await _tts.speak(text);
+    } catch (_) {
+      // No engine here (web, a silent phone): the text is still on screen.
+    }
+  }
+
+  Future<void> stop() async {
+    try {
+      await _tts.stop();
+    } catch (_) {}
+  }
+}
+
+class ReadAloud extends StateNotifier<bool> {
+  ReadAloud(this._speech) : super(false) {
+    _restore();
+  }
+
+  final SpeechService _speech;
+
+  Future<void> _restore() async {
+    final enabled = await _speech.load();
+    if (!mounted) return;
+    state = enabled;
+  }
+
+  Future<void> toggle() async {
+    state = !state;
+    await _speech.remember(state);
+    if (!state) await _speech.stop();
+  }
+
+  Future<void> speak(String text) async {
+    if (state) await _speech.speak(text);
+  }
+
+  Future<void> stop() => _speech.stop();
+}
+
+final speechServiceProvider = Provider<SpeechService>((ref) => SpeechService());
+
+final readAloudProvider = StateNotifierProvider<ReadAloud, bool>(
+  (ref) => ReadAloud(ref.watch(speechServiceProvider)),
+);

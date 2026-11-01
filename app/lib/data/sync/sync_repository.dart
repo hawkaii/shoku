@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../db/app_database.dart';
 import '../db/journal_repository.dart';
@@ -50,6 +51,12 @@ class SyncRepository {
       'dishes': [for (final row in dishes) _dishWire(row)],
       'versions': [for (final row in versions) _versionWire(row)],
       'cook_logs': [for (final row in cooks) _cookWire(row)],
+      // A debrief photo is one append-only row, keyed by the object we uploaded.
+      // Its id is derived from the cook so a retry cannot insert it twice.
+      'photos': [
+        for (final row in cooks)
+          if (row.photoKey.isNotEmpty) _photoWire(row),
+      ],
     };
   }
 
@@ -62,7 +69,7 @@ class SyncRepository {
   /// next attempt retries it instead of pretending it was saved.
   Future<void> markClean(Map<String, dynamic> pushResponse) async {
     final accepted = <String, Set<String>>{};
-    for (final table in ['dishes', 'versions', 'cook_logs']) {
+    for (final table in ['dishes', 'versions', 'cook_logs', 'photos']) {
       final rows = pushResponse[table];
       if (rows is! List) continue;
       accepted[table] = {
@@ -256,6 +263,18 @@ class SyncRepository {
         'note': row.note,
         'changes': _decode(row.changes),
         'rating': row.rating,
+      };
+
+  /// Contract §Photos: one row per photo, role `debrief`, pointing at the cook
+  /// it belongs to. The id is deterministic from the cook, so a retried push
+  /// cannot duplicate it.
+  Map<String, dynamic> _photoWire(CookLogRow row) => {
+        'id': const Uuid().v5(Namespace.url.value, 'photo:${row.id}'),
+        'role': 'debrief',
+        'cook_id': row.id,
+        'key': row.photoKey,
+        'created_at': _iso(row.cookedAt),
+        'deleted_at': null,
       };
 
   static String _iso(DateTime value) => value.toUtc().toIso8601String();

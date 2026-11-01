@@ -42,6 +42,31 @@ class StrictModel(BaseModel):
     )
 
 
+def check_step_ingredients(
+    steps: list[str], ingredient_count: int, links: list[list[int]] | None
+) -> None:
+    """The one place step↔ingredient links are judged true.
+
+    Shared by the extraction payload and by an applied edit (``version_ops``):
+    both produce the same field for the same client, so a link that would be
+    rejected on the wire must not be produced by the assistant either.
+    """
+    if links is None:
+        return
+    if len(links) != len(steps):
+        raise ValueError(
+            "step_ingredients needs one entry per step: "
+            f"{len(links)} for {len(steps)} steps"
+        )
+    for step, cited in enumerate(links):
+        for index in cited:
+            if not 0 <= index < ingredient_count:
+                raise ValueError(
+                    f"step {step} cites ingredient {index}, "
+                    f"but there are {ingredient_count}"
+                )
+
+
 class Ingredient(StrictModel):
     name: NameText
     amount: AmountText | None = None
@@ -68,20 +93,7 @@ class RecipePayload(StrictModel):
 
     @model_validator(mode="after")
     def _citations_point_at_real_ingredients(self) -> "RecipePayload":
-        if self.step_ingredients is None:
-            return self
-        if len(self.step_ingredients) != len(self.steps):
-            raise ValueError(
-                "step_ingredients needs one entry per step: "
-                f"{len(self.step_ingredients)} for {len(self.steps)} steps"
-            )
-        for step, cited in enumerate(self.step_ingredients):
-            for index in cited:
-                if not 0 <= index < len(self.ingredients):
-                    raise ValueError(
-                        f"step {step} cites ingredient {index}, "
-                        f"but there are {len(self.ingredients)}"
-                    )
+        check_step_ingredients(self.steps, len(self.ingredients), self.step_ingredients)
         return self
 
 
@@ -398,17 +410,53 @@ class ReportResponse(BaseModel):
     shared: bool
 
 
+class AssistantTurn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["user", "assistant"]
+    text: Annotated[str, StringConstraints(min_length=1, max_length=1200)]
+
+
 class AssistantRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dish_id: Annotated[str, StringConstraints(min_length=1, max_length=64)]
     version_id: Annotated[str, StringConstraints(min_length=1, max_length=64)] | None = None
     question: Annotated[str, StringConstraints(min_length=1, max_length=1000)]
+    #: Deduplicates the cap reservation: a retried POST is metered once.
+    request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)]
+    #: The client's own last exchanges, so a follow-up to "clarify" has context.
+    history: list[AssistantTurn] = Field(default_factory=list, max_length=4)
+
+
+class AssistantEdit(BaseModel):
+    """One line of the diff card. ``appliable`` is what actually gets written."""
+
+    op: Literal["add", "change", "remove"]
+    field: Literal["ingredients", "steps"]
+    index: int
+    text: str | None = None
+    previous: str | None = None
+
+
+class AssistantAppliable(BaseModel):
+    ingredients: list[str]
+    steps: list[str]
+    #: Recomputed against the arrays above, same rules as the content payload.
+    step_ingredients: list[list[int]] | None = None
+    changes: list[str]
+    #: The head the client must still hold before it applies this.
+    base_version_id: str
 
 
 class AssistantResponse(BaseModel):
+    intent: Literal["answer", "clarify", "edit"]
     answer: str
     remaining: int
+    #: Next midnight UTC, so the client can say when the cap comes back.
+    reset_at: datetime
+    edits: list[AssistantEdit] = Field(default_factory=list)
+    appliable: AssistantAppliable | None = None
 
 
 class PresignRequest(BaseModel):

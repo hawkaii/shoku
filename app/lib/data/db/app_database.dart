@@ -83,6 +83,9 @@ class CookLogRows extends Table {
   IntColumn get versionNumber => integer()();
   DateTimeColumn get cookedAt => dateTime()();
   TextColumn get photoUrl => text().withDefault(const Constant(''))();
+
+  /// The object key the API owns, for the sync wire. `photoUrl` is for display.
+  TextColumn get photoKey => text().withDefault(const Constant(''))();
   TextColumn get photoState =>
       text().withDefault(const Constant('none'))(); // none|local|synced
   TextColumn get outcome => text()();
@@ -141,7 +144,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -187,6 +190,11 @@ class AppDatabase extends _$AppDatabase {
             // The extraction's tags, so a silent reel can say its amounts were
             // guesses — and so the server stores what only we can send.
             await m.addColumn(versionRows, versionRows.tags);
+          }
+          if (from < 7) {
+            // The photo's object key, so a debrief photo travels on the wire
+            // while `photo_url` keeps serving the picture to the UI.
+            await m.addColumn(cookLogRows, cookLogRows.photoKey);
           }
         },
         beforeOpen: (details) async {

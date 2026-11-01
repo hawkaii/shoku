@@ -59,6 +59,12 @@ class Settings(BaseSettings):
     # Assistant.
     assistant_daily_cap: int = 20
     assistant_model_name: str = "fake-assistant"
+    #: Muse endpoint for the assistant. Empty means "reuse the structurer's",
+    #: which is the same provider and the same key in every deployment so far.
+    assistant_base_url: str = ""
+    assistant_api_key: str = ""
+    assistant_model: str = ""
+    assistant_timeout: float = 60.0
 
     # The Wall. A report is counted per distinct user; at this many, the row
     # leaves the feed. Never below 2 — a threshold of one is an unshare button.

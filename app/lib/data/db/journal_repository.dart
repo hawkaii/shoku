@@ -158,6 +158,7 @@ class JournalRepository {
     required String note,
     required List<String> changes,
     String? photoUrl,
+    String? photoKey,
   }) async {
     return _db.transaction(() async {
       final dish = await loadDish(dishId);
@@ -192,7 +193,10 @@ class JournalRepository {
         versionNumber: nextNumber,
         versionId: version.id,
         photoUrl: photoUrl ?? dish.coverUrl,
-        photoState: _photoState(photoUrl ?? dish.coverUrl),
+        photoKey: photoKey ?? '',
+        photoState: photoKey != null && photoKey.isNotEmpty
+            ? 'synced'
+            : _photoState(photoUrl ?? dish.coverUrl),
         outcome: rating >= 5
             ? CookOutcome.nailedIt
             : rating >= 3
@@ -219,6 +223,57 @@ class JournalRepository {
         ),
       );
       return nextNumber;
+    });
+  }
+
+  /// Applies an assistant edit as **one** local version.
+  ///
+  /// [baseVersionId] is a precondition, not a hint: if the head has moved since
+  /// the server computed these arrays, nothing is written and the caller offers
+  /// Recompute. The server assigns no ids and no numbers — this does, exactly as
+  /// a cook would.
+  Future<int?> applyEditVersion({
+    required String dishId,
+    required String baseVersionId,
+    required List<String> ingredients,
+    required List<String> steps,
+    required List<List<int>> stepIngredients,
+    required List<String> changes,
+  }) async {
+    return _db.transaction(() async {
+      final dish = await loadDish(dishId);
+      if (dish == null || dish.versions.isEmpty) return null;
+
+      final head = dish.versions.last;
+      if (head.id != baseVersionId) return null; // stale: never write
+
+      final now = DateTime.now();
+      final version = RecipeVersion(
+        id: _uuid.v4(),
+        number: head.number + 1,
+        changes: changes.isEmpty ? const ['Changed by chat'] : changes,
+        ingredients: ingredients,
+        createdAt: now,
+        steps: steps,
+        stepIngredients: stepIngredients,
+        // Honesty, not decoration: the dossier and the history both say where
+        // this version came from, and `chat` is how they know.
+        tags: [...head.tags.where((t) => t != 'chat'), 'chat'],
+        kcal: dish.baselineKcal,
+        protein: dish.baselineProtein,
+        parentVersionId: baseVersionId,
+      );
+
+      await _db.into(_db.versionRows).insert(_versionCompanion(dishId, version));
+      // The dish's own steps follow its head, because cook mode reads them.
+      await (_db.update(_db.dishRows)..where((d) => d.id.equals(dishId))).write(
+        DishRowsCompanion(
+          steps: Value(jsonEncode(steps)),
+          updatedAt: Value(now),
+          dirty: const Value(1),
+        ),
+      );
+      return version.number;
     });
   }
 
@@ -378,6 +433,7 @@ class JournalRepository {
         versionNumber: row.versionNumber,
         versionId: row.versionId,
         photoUrl: row.photoUrl,
+        photoKey: row.photoKey,
         photoState: row.photoState,
         outcome: CookOutcome.values.firstWhere(
           (o) => o.name == row.outcome,
@@ -428,6 +484,7 @@ class JournalRepository {
         versionNumber: c.versionNumber,
         cookedAt: c.cookedAt,
         photoUrl: Value(c.photoUrl),
+        photoKey: Value(c.photoKey),
         photoState: Value(c.photoState.isEmpty ? _photoState(c.photoUrl) : c.photoState),
         outcome: c.outcome.name,
         mood: c.mood.name,

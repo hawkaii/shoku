@@ -110,6 +110,10 @@ class CookLog {
   final String? versionId;
   final String photoUrl;
 
+  /// The object key the API owns, for the sync wire. Empty when the photo never
+  /// left the phone.
+  final String photoKey;
+
   /// `none` | `local` | `synced`. Sync uses this to decide what still needs
   /// uploading; a local file path is not a remote URL.
   final String photoState;
@@ -125,6 +129,7 @@ class CookLog {
     required this.versionNumber,
     this.versionId,
     this.photoState = '',
+    this.photoKey = '',
     required this.photoUrl,
     required this.outcome,
     required this.note,

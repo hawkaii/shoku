@@ -69,6 +69,7 @@ class JournalStore extends StateNotifier<List<Dish>> {
     required String note,
     required List<String> changes,
     String? photoUrl,
+    String? photoKey,
   }) async {
     final version = await _repo.commitCook(
       dishId: dishId,
@@ -77,10 +78,34 @@ class JournalStore extends StateNotifier<List<Dish>> {
       note: note,
       changes: changes,
       photoUrl: photoUrl,
+      photoKey: photoKey,
     );
     state = await _repo.loadDishes();
     unawaited(_onChanged?.call() ?? Future<void>.value());
     return version;
+  }
+
+  /// Applies an assistant edit. Returns the new version number, or null when
+  /// the local head moved and the edit must be recomputed.
+  Future<int?> applyEditVersion({
+    required String dishId,
+    required String baseVersionId,
+    required List<String> ingredients,
+    required List<String> steps,
+    required List<List<int>> stepIngredients,
+    required List<String> changes,
+  }) async {
+    final number = await _repo.applyEditVersion(
+      dishId: dishId,
+      baseVersionId: baseVersionId,
+      ingredients: ingredients,
+      steps: steps,
+      stepIngredients: stepIngredients,
+      changes: changes,
+    );
+    state = await _repo.loadDishes();
+    if (number != null) unawaited(_onChanged?.call() ?? Future<void>.value());
+    return number;
   }
 
   Future<void> setStatus(String dishId, DishStatus status) async {

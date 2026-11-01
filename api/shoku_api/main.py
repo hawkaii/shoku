@@ -58,7 +58,7 @@ def create_app(
     async def _shoku_error(_request: Request, exc: ShokuError) -> JSONResponse:
         return JSONResponse(
             status_code=exc.http_status,
-            content={"error": exc.reason, "detail": exc.detail},
+            content={"error": exc.reason, "detail": exc.detail, **exc.extra},
         )
 
     return app

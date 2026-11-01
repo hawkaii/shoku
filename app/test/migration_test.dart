@@ -39,6 +39,7 @@ void main() {
       'DROP TABLE cook_timer_rows',
       'ALTER TABLE version_rows DROP COLUMN step_ingredients',
       'ALTER TABLE version_rows DROP COLUMN tags',
+      'ALTER TABLE cook_log_rows DROP COLUMN photo_key',
     ]);
 
     final upgraded = AppDatabase(NativeDatabase(file));
@@ -59,6 +60,7 @@ void main() {
     final file = await oldDatabase(version: 4, undo: [
       'ALTER TABLE version_rows DROP COLUMN step_ingredients',
       'ALTER TABLE version_rows DROP COLUMN tags',
+      'ALTER TABLE cook_log_rows DROP COLUMN photo_key',
     ]);
 
     final upgraded = AppDatabase(NativeDatabase(file));
@@ -70,6 +72,7 @@ void main() {
   test('a v5 database gains the tags column', () async {
     final file = await oldDatabase(version: 5, undo: [
       'ALTER TABLE version_rows DROP COLUMN tags',
+      'ALTER TABLE cook_log_rows DROP COLUMN photo_key',
     ]);
 
     final upgraded = AppDatabase(NativeDatabase(file));
@@ -98,6 +101,17 @@ void main() {
 
     final dish = (await repo.loadDishes()).single;
     expect(dish.versions.single.tags, ['from video']);
+    await upgraded.close();
+  });
+
+  test('a v6 database gains the photo key column', () async {
+    final file = await oldDatabase(version: 6, undo: [
+      'ALTER TABLE cook_log_rows DROP COLUMN photo_key',
+    ]);
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    final cooks = await upgraded.select(upgraded.cookLogRows).get();
+    expect(cooks, isEmpty);
     await upgraded.close();
   });
 

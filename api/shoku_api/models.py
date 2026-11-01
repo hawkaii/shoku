@@ -313,6 +313,26 @@ class ImportJob(Base):
     )
 
 
+class AssistantAsk(Base):
+    """One metered ask, keyed by the client's ``request_id``.
+
+    The primary key is the whole idempotency story: a POST that is retried after
+    a dropped response finds its own row and does not consume the cap twice. The
+    row is deleted when the model call fails, so a failed ask costs nothing.
+    """
+
+    __tablename__ = "assistant_asks"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    request_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (Index("ix_assistant_asks_user_day", "user_id", "day"),)
+
+
 class AssistantUsage(Base):
     """Per-user, per-UTC-day counter for the assistant cap."""
 

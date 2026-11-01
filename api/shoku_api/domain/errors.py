@@ -11,10 +11,18 @@ class ShokuError(Exception):
     reason = "error"
     http_status = 400
 
-    def __init__(self, reason: str | None = None, detail: str | None = None) -> None:
+    def __init__(
+        self,
+        reason: str | None = None,
+        detail: str | None = None,
+        extra: dict | None = None,
+    ) -> None:
         if reason is not None:
             self.reason = reason
         self.detail = detail or self.reason
+        #: Extra fields merged into the error body. Used where the client needs
+        #: something beyond the reason — a 429 has to say when it lifts.
+        self.extra = extra or {}
         super().__init__(self.detail)
 
 

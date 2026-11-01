@@ -18,7 +18,12 @@ from .auth import AuthVerifier, build_verifier
 from .config import Settings
 from .db import build_engine, build_session_factory
 from .domain.errors import Unavailable
-from .assistant import AssistantDeps, AssistantModel, UnconfiguredAssistantModel
+from .assistant import (
+    AssistantDeps,
+    AssistantModel,
+    MuseAssistant,
+    UnconfiguredAssistantModel,
+)
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
 from .domain.worker_pool import (
@@ -131,6 +136,18 @@ def build_context(
         )
         storage = DevStorage(settings.storage_public_base_url)
 
+    assistant_model: AssistantModel = UnconfiguredAssistantModel()
+    assistant_key = settings.assistant_api_key or settings.structurer_api_key
+    if assistant_key:
+        assistant_model = MuseAssistant(
+            settings.assistant_base_url or settings.structurer_base_url,
+            assistant_key,
+            settings.assistant_model or settings.structurer_model,
+            settings.assistant_timeout,
+            reasoning_effort=settings.structurer_reasoning_effort,
+            max_tokens=settings.structurer_max_tokens,
+        )
+
     queue: Queue
     if settings.queue_backend == "redis":
         queue = RedisQueue(settings.redis_url, settings.import_queue_name)
@@ -172,7 +189,7 @@ def build_context(
         transcriber=UnconfiguredTranscriber(),
         structurer=UnconfiguredStructurer(),
         storage=storage,
-        assistant_model=UnconfiguredAssistantModel(),
+        assistant_model=assistant_model,
         clock=SystemClock(),
         worker_pool=worker_pool,
         waker=waker,

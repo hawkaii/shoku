@@ -1665,6 +1665,14 @@ class $CookLogRowsTable extends CookLogRows
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant(''));
+  static const VerificationMeta _photoKeyMeta =
+      const VerificationMeta('photoKey');
+  @override
+  late final GeneratedColumn<String> photoKey = GeneratedColumn<String>(
+      'photo_key', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _photoStateMeta =
       const VerificationMeta('photoState');
   @override
@@ -1721,6 +1729,7 @@ class $CookLogRowsTable extends CookLogRows
         versionNumber,
         cookedAt,
         photoUrl,
+        photoKey,
         photoState,
         outcome,
         mood,
@@ -1771,6 +1780,10 @@ class $CookLogRowsTable extends CookLogRows
     if (data.containsKey('photo_url')) {
       context.handle(_photoUrlMeta,
           photoUrl.isAcceptableOrUnknown(data['photo_url']!, _photoUrlMeta));
+    }
+    if (data.containsKey('photo_key')) {
+      context.handle(_photoKeyMeta,
+          photoKey.isAcceptableOrUnknown(data['photo_key']!, _photoKeyMeta));
     }
     if (data.containsKey('photo_state')) {
       context.handle(
@@ -1827,6 +1840,8 @@ class $CookLogRowsTable extends CookLogRows
           .read(DriftSqlType.dateTime, data['${effectivePrefix}cooked_at'])!,
       photoUrl: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}photo_url'])!,
+      photoKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}photo_key'])!,
       photoState: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}photo_state'])!,
       outcome: attachedDatabase.typeMapping
@@ -1857,6 +1872,9 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
   final int versionNumber;
   final DateTime cookedAt;
   final String photoUrl;
+
+  /// The object key the API owns, for the sync wire. `photoUrl` is for display.
+  final String photoKey;
   final String photoState;
   final String outcome;
   final String mood;
@@ -1871,6 +1889,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
       required this.versionNumber,
       required this.cookedAt,
       required this.photoUrl,
+      required this.photoKey,
       required this.photoState,
       required this.outcome,
       required this.mood,
@@ -1889,6 +1908,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
     map['version_number'] = Variable<int>(versionNumber);
     map['cooked_at'] = Variable<DateTime>(cookedAt);
     map['photo_url'] = Variable<String>(photoUrl);
+    map['photo_key'] = Variable<String>(photoKey);
     map['photo_state'] = Variable<String>(photoState);
     map['outcome'] = Variable<String>(outcome);
     map['mood'] = Variable<String>(mood);
@@ -1909,6 +1929,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
       versionNumber: Value(versionNumber),
       cookedAt: Value(cookedAt),
       photoUrl: Value(photoUrl),
+      photoKey: Value(photoKey),
       photoState: Value(photoState),
       outcome: Value(outcome),
       mood: Value(mood),
@@ -1929,6 +1950,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
       versionNumber: serializer.fromJson<int>(json['versionNumber']),
       cookedAt: serializer.fromJson<DateTime>(json['cookedAt']),
       photoUrl: serializer.fromJson<String>(json['photoUrl']),
+      photoKey: serializer.fromJson<String>(json['photoKey']),
       photoState: serializer.fromJson<String>(json['photoState']),
       outcome: serializer.fromJson<String>(json['outcome']),
       mood: serializer.fromJson<String>(json['mood']),
@@ -1948,6 +1970,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
       'versionNumber': serializer.toJson<int>(versionNumber),
       'cookedAt': serializer.toJson<DateTime>(cookedAt),
       'photoUrl': serializer.toJson<String>(photoUrl),
+      'photoKey': serializer.toJson<String>(photoKey),
       'photoState': serializer.toJson<String>(photoState),
       'outcome': serializer.toJson<String>(outcome),
       'mood': serializer.toJson<String>(mood),
@@ -1965,6 +1988,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
           int? versionNumber,
           DateTime? cookedAt,
           String? photoUrl,
+          String? photoKey,
           String? photoState,
           String? outcome,
           String? mood,
@@ -1979,6 +2003,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
         versionNumber: versionNumber ?? this.versionNumber,
         cookedAt: cookedAt ?? this.cookedAt,
         photoUrl: photoUrl ?? this.photoUrl,
+        photoKey: photoKey ?? this.photoKey,
         photoState: photoState ?? this.photoState,
         outcome: outcome ?? this.outcome,
         mood: mood ?? this.mood,
@@ -1997,6 +2022,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
           : this.versionNumber,
       cookedAt: data.cookedAt.present ? data.cookedAt.value : this.cookedAt,
       photoUrl: data.photoUrl.present ? data.photoUrl.value : this.photoUrl,
+      photoKey: data.photoKey.present ? data.photoKey.value : this.photoKey,
       photoState:
           data.photoState.present ? data.photoState.value : this.photoState,
       outcome: data.outcome.present ? data.outcome.value : this.outcome,
@@ -2017,6 +2043,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
           ..write('versionNumber: $versionNumber, ')
           ..write('cookedAt: $cookedAt, ')
           ..write('photoUrl: $photoUrl, ')
+          ..write('photoKey: $photoKey, ')
           ..write('photoState: $photoState, ')
           ..write('outcome: $outcome, ')
           ..write('mood: $mood, ')
@@ -2036,6 +2063,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
       versionNumber,
       cookedAt,
       photoUrl,
+      photoKey,
       photoState,
       outcome,
       mood,
@@ -2053,6 +2081,7 @@ class CookLogRow extends DataClass implements Insertable<CookLogRow> {
           other.versionNumber == this.versionNumber &&
           other.cookedAt == this.cookedAt &&
           other.photoUrl == this.photoUrl &&
+          other.photoKey == this.photoKey &&
           other.photoState == this.photoState &&
           other.outcome == this.outcome &&
           other.mood == this.mood &&
@@ -2069,6 +2098,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
   final Value<int> versionNumber;
   final Value<DateTime> cookedAt;
   final Value<String> photoUrl;
+  final Value<String> photoKey;
   final Value<String> photoState;
   final Value<String> outcome;
   final Value<String> mood;
@@ -2084,6 +2114,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
     this.versionNumber = const Value.absent(),
     this.cookedAt = const Value.absent(),
     this.photoUrl = const Value.absent(),
+    this.photoKey = const Value.absent(),
     this.photoState = const Value.absent(),
     this.outcome = const Value.absent(),
     this.mood = const Value.absent(),
@@ -2100,6 +2131,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
     required int versionNumber,
     required DateTime cookedAt,
     this.photoUrl = const Value.absent(),
+    this.photoKey = const Value.absent(),
     this.photoState = const Value.absent(),
     required String outcome,
     required String mood,
@@ -2121,6 +2153,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
     Expression<int>? versionNumber,
     Expression<DateTime>? cookedAt,
     Expression<String>? photoUrl,
+    Expression<String>? photoKey,
     Expression<String>? photoState,
     Expression<String>? outcome,
     Expression<String>? mood,
@@ -2137,6 +2170,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
       if (versionNumber != null) 'version_number': versionNumber,
       if (cookedAt != null) 'cooked_at': cookedAt,
       if (photoUrl != null) 'photo_url': photoUrl,
+      if (photoKey != null) 'photo_key': photoKey,
       if (photoState != null) 'photo_state': photoState,
       if (outcome != null) 'outcome': outcome,
       if (mood != null) 'mood': mood,
@@ -2155,6 +2189,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
       Value<int>? versionNumber,
       Value<DateTime>? cookedAt,
       Value<String>? photoUrl,
+      Value<String>? photoKey,
       Value<String>? photoState,
       Value<String>? outcome,
       Value<String>? mood,
@@ -2170,6 +2205,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
       versionNumber: versionNumber ?? this.versionNumber,
       cookedAt: cookedAt ?? this.cookedAt,
       photoUrl: photoUrl ?? this.photoUrl,
+      photoKey: photoKey ?? this.photoKey,
       photoState: photoState ?? this.photoState,
       outcome: outcome ?? this.outcome,
       mood: mood ?? this.mood,
@@ -2201,6 +2237,9 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
     }
     if (photoUrl.present) {
       map['photo_url'] = Variable<String>(photoUrl.value);
+    }
+    if (photoKey.present) {
+      map['photo_key'] = Variable<String>(photoKey.value);
     }
     if (photoState.present) {
       map['photo_state'] = Variable<String>(photoState.value);
@@ -2238,6 +2277,7 @@ class CookLogRowsCompanion extends UpdateCompanion<CookLogRow> {
           ..write('versionNumber: $versionNumber, ')
           ..write('cookedAt: $cookedAt, ')
           ..write('photoUrl: $photoUrl, ')
+          ..write('photoKey: $photoKey, ')
           ..write('photoState: $photoState, ')
           ..write('outcome: $outcome, ')
           ..write('mood: $mood, ')
@@ -3866,6 +3906,7 @@ typedef $$CookLogRowsTableCreateCompanionBuilder = CookLogRowsCompanion
   required int versionNumber,
   required DateTime cookedAt,
   Value<String> photoUrl,
+  Value<String> photoKey,
   Value<String> photoState,
   required String outcome,
   required String mood,
@@ -3883,6 +3924,7 @@ typedef $$CookLogRowsTableUpdateCompanionBuilder = CookLogRowsCompanion
   Value<int> versionNumber,
   Value<DateTime> cookedAt,
   Value<String> photoUrl,
+  Value<String> photoKey,
   Value<String> photoState,
   Value<String> outcome,
   Value<String> mood,
@@ -3935,6 +3977,9 @@ class $$CookLogRowsTableFilterComposer
 
   ColumnFilters<String> get photoUrl => $composableBuilder(
       column: $table.photoUrl, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get photoKey => $composableBuilder(
+      column: $table.photoKey, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get photoState => $composableBuilder(
       column: $table.photoState, builder: (column) => ColumnFilters(column));
@@ -4003,6 +4048,9 @@ class $$CookLogRowsTableOrderingComposer
   ColumnOrderings<String> get photoUrl => $composableBuilder(
       column: $table.photoUrl, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get photoKey => $composableBuilder(
+      column: $table.photoKey, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get photoState => $composableBuilder(
       column: $table.photoState, builder: (column) => ColumnOrderings(column));
 
@@ -4068,6 +4116,9 @@ class $$CookLogRowsTableAnnotationComposer
 
   GeneratedColumn<String> get photoUrl =>
       $composableBuilder(column: $table.photoUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get photoKey =>
+      $composableBuilder(column: $table.photoKey, builder: (column) => column);
 
   GeneratedColumn<String> get photoState => $composableBuilder(
       column: $table.photoState, builder: (column) => column);
@@ -4140,6 +4191,7 @@ class $$CookLogRowsTableTableManager extends RootTableManager<
             Value<int> versionNumber = const Value.absent(),
             Value<DateTime> cookedAt = const Value.absent(),
             Value<String> photoUrl = const Value.absent(),
+            Value<String> photoKey = const Value.absent(),
             Value<String> photoState = const Value.absent(),
             Value<String> outcome = const Value.absent(),
             Value<String> mood = const Value.absent(),
@@ -4156,6 +4208,7 @@ class $$CookLogRowsTableTableManager extends RootTableManager<
             versionNumber: versionNumber,
             cookedAt: cookedAt,
             photoUrl: photoUrl,
+            photoKey: photoKey,
             photoState: photoState,
             outcome: outcome,
             mood: mood,
@@ -4172,6 +4225,7 @@ class $$CookLogRowsTableTableManager extends RootTableManager<
             required int versionNumber,
             required DateTime cookedAt,
             Value<String> photoUrl = const Value.absent(),
+            Value<String> photoKey = const Value.absent(),
             Value<String> photoState = const Value.absent(),
             required String outcome,
             required String mood,
@@ -4188,6 +4242,7 @@ class $$CookLogRowsTableTableManager extends RootTableManager<
             versionNumber: versionNumber,
             cookedAt: cookedAt,
             photoUrl: photoUrl,
+            photoKey: photoKey,
             photoState: photoState,
             outcome: outcome,
             mood: mood,
