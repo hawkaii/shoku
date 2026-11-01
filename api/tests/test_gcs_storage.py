@@ -175,3 +175,33 @@ def test_a_missing_library_is_not_a_crash_but_an_unavailable(monkeypatch) -> Non
 
     with pytest.raises(Unavailable):
         GcsStorage(bucket="b", public_base_url=BASE)
+
+
+def test_a_broken_bucket_does_not_stop_the_app(monkeypatch) -> None:
+    """Imports must outlive a storage misconfiguration.
+
+    Losing a cover costs a monogram; refusing to start costs every import, so
+    the container degrades to a backend that stores nothing rather than raising.
+    """
+    from shoku_api.config import Settings
+    from shoku_api.container import build_context
+    from shoku_api.photos import DevStorage
+
+    for name in list(sys.modules):
+        if name == "google" or name.startswith("google."):
+            monkeypatch.delitem(sys.modules, name, raising=False)
+
+    settings = Settings(
+        environment="test",
+        database_url="sqlite://",
+        queue_backend="memory",
+        auth_mode="dev",
+        storage_backend="gcs",
+        storage_bucket="whatever",
+    )
+
+    ctx = build_context(settings)
+    ctx.engine.dispose()
+
+    assert isinstance(ctx.storage, DevStorage)
+    assert ctx.storage.can_store is False

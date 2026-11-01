@@ -9,12 +9,15 @@ provider.
 from dataclasses import dataclass
 from typing import Any
 
+import logging
+
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .auth import AuthVerifier, build_verifier
 from .config import Settings
 from .db import build_engine, build_session_factory
+from .domain.errors import Unavailable
 from .assistant import AssistantDeps, AssistantModel, UnconfiguredAssistantModel
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
@@ -37,6 +40,8 @@ from .imports.interfaces import (
 from .imports.queue import InMemoryQueue, Queue, RedisQueue
 from .imports.service import ImportDeps
 from .photos import DevStorage, GcsStorage, PhotoDeps, R2Storage, Storage
+
+log = logging.getLogger("shoku.container")
 
 
 @dataclass
@@ -97,21 +102,33 @@ def build_context(
     engine = engine or build_engine(settings)
 
     storage: Storage
-    if settings.storage_backend == "r2":
-        storage = R2Storage(
-            account_id=settings.r2_account_id,
-            access_key_id=settings.r2_access_key_id,
-            secret_access_key=settings.r2_secret_access_key,
-            bucket=settings.storage_bucket,
-            public_base_url=settings.storage_public_base_url,
+    try:
+        if settings.storage_backend == "r2":
+            storage = R2Storage(
+                account_id=settings.r2_account_id,
+                access_key_id=settings.r2_access_key_id,
+                secret_access_key=settings.r2_secret_access_key,
+                bucket=settings.storage_bucket,
+                public_base_url=settings.storage_public_base_url,
+            )
+        elif settings.storage_backend == "gcs":
+            storage = GcsStorage(
+                bucket=settings.storage_bucket,
+                public_base_url=settings.storage_public_base_url,
+                project=settings.gcp_project or None,
+            )
+        else:
+            storage = DevStorage(settings.storage_public_base_url)
+    except Unavailable as exc:
+        # A bucket that cannot be reached must not take the API or the worker
+        # down with it: importing a reel matters, storing its picture does not.
+        # Degrade to the dev backend, which cannot store, so nothing pretends
+        # an upload worked.
+        log.warning(
+            "storage backend %r unavailable (%s); running without storage",
+            settings.storage_backend,
+            exc.detail,
         )
-    elif settings.storage_backend == "gcs":
-        storage = GcsStorage(
-            bucket=settings.storage_bucket,
-            public_base_url=settings.storage_public_base_url,
-            project=settings.gcp_project or None,
-        )
-    else:
         storage = DevStorage(settings.storage_public_base_url)
 
     queue: Queue

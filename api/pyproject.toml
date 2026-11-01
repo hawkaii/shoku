@@ -42,12 +42,15 @@ prod = [
 ]
 # Only the worker image installs these: extracting media and running speech
 # recognition are the heavy, optional half of the system.
-# Exactly what the worker needs: a database driver, a queue, a fetcher and an
-# HTTP client. No boto3 — the worker never touches object storage.
+# Exactly what the worker needs: a database driver, a queue, a fetcher, an
+# HTTP client, and the bucket client for copying a reel cover at extraction.
 worker = [
     "psycopg[binary]>=3.2",
     "redis>=5.0",
     "yt-dlp[default]>=2024.1.1",
+    # The worker copies a reel cover at extraction time, so it needs the bucket
+    # client too. Without it the images are simply not copied.
+    "google-cloud-storage>=2.18",
     "httpx>=0.27",
     # A static ~30 MB ffmpeg, instead of the 430 MB apt package.
     "imageio-ffmpeg>=0.5",
