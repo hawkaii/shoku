@@ -1,0 +1,24 @@
+# secrets — never commit these
+.env
+.env.*
+!.env.example
+cookies.txt
+*.jks
+*.keystore
+key.properties
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# flutter / dart
+app/.dart_tool/
+app/build/
+app/.flutter-plugins*
+app/android/.gradle/
+app/android/local.properties
+
+# os
+.DS_Store
