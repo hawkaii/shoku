@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
+import '../../../data/services/api_client.dart';
+import '../../../data/services/photo_service.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
@@ -31,40 +36,81 @@ class LogSheet extends ConsumerStatefulWidget {
 class _LogSheetState extends ConsumerState<LogSheet> {
   CookOutcome? _outcome;
   bool _saving = false;
+  File? _photo;
   final _controller = TextEditingController();
+  final _note = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+    _note.dispose();
     super.dispose();
   }
 
-  bool get _canSave => _outcome != null;
+  List<String> get _changes => _controller.text
+      .split(RegExp(r'[,;\n]'))
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
+  /// Locked only when there is nothing to record. A note alone is a log; so is
+  /// a photo, so is one change.
+  bool get _canSave =>
+      _outcome != null ||
+      _changes.isNotEmpty ||
+      _note.text.trim().isNotEmpty ||
+      _photo != null;
+
+  Future<void> _pickPhoto() async {
+    HapticFeedback.selectionClick();
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1800,
+      imageQuality: 85,
+    );
+    if (picked != null && mounted) setState(() => _photo = File(picked.path));
+  }
 
   Future<void> _save() async {
-    if (_saving || _outcome == null) return;
+    if (_saving || !_canSave) return;
     setState(() => _saving = true);
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final changes = _controller.text
-        .split(RegExp(r'[,;\n]'))
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-    final rating = switch (_outcome!) {
+    final changes = _changes;
+    final rating = switch (_outcome) {
       CookOutcome.nailedIt => 5,
       CookOutcome.good => 4,
       CookOutcome.needsWork => 2,
+      null => 3,
     };
+
+    // The photo goes to the bucket directly, then travels as a row. A path on
+    // this phone is never a URL and must never be stored as one.
+    String? photoKey;
+    String? photoUrl;
+    if (_photo != null) {
+      try {
+        final uploaded = await PhotoService(
+          api: ApiClient(),
+        ).upload(_photo!, role: 'debrief');
+        photoKey = uploaded.key;
+        photoUrl = uploaded.url;
+      } catch (_) {
+        photoKey = null;
+        photoUrl = null;
+      }
+    }
 
     try {
       final version = await ref.read(journalStoreProvider.notifier).commitCook(
             dishId: widget.dish.id,
             mood: CookMood.comfort,
             rating: rating,
-            note: '',
+            note: _note.text.trim(),
             changes: changes,
+            photoUrl: photoUrl,
+            photoKey: photoKey,
           );
       HapticFeedback.mediumImpact();
       navigator.pop();
@@ -72,7 +118,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
         SnackBar(
           content: Text(version == null
               ? 'Could not save that cook'
-              : 'Logged as v$version · ${_outcome!.label}'),
+              : 'Logged as v$version${_outcome == null ? '' : ' · ${_outcome!.label}'}'),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -87,11 +133,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final changes = _controller.text
-        .split(RegExp(r'[,;\n]'))
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
+    final changes = _changes;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -126,7 +168,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
 
             // Photo slot
             GestureDetector(
-              onTap: () => HapticFeedback.selectionClick(),
+              onTap: _pickPhoto,
               child: Container(
                 height: 150,
                 width: double.infinity,
@@ -140,11 +182,14 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      ShokuDishImage(
-                        url: widget.dish.coverUrl,
-                        title: widget.dish.title,
-                        radius: ShokuRadius.card,
-                      ),
+                      if (_photo != null)
+                        Image.file(_photo!, fit: BoxFit.cover)
+                      else
+                        ShokuDishImage(
+                          url: widget.dish.coverUrl,
+                          title: widget.dish.title,
+                          radius: ShokuRadius.card,
+                        ),
                       Container(color: c.ink.withValues(alpha: 0.18)),
                       Center(
                         child: Column(
@@ -153,7 +198,9 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                             Icon(Icons.photo_camera_outlined, color: c.canvas, size: 22),
                             const SizedBox(height: 4),
                             Text(
-                              'SNAP TONIGHT’S RESULT',
+                              _photo == null
+                                  ? 'SNAP TONIGHT’S RESULT'
+                                  : 'PHOTO READY TO UPLOAD',
                               style: ShokuType.label.copyWith(color: c.canvas, fontSize: 9),
                             ),
                           ],
@@ -211,6 +258,30 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
+            const ShokuLabel('a note for you'),
+            const SizedBox(height: ShokuSpace.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),
+              decoration: BoxDecoration(
+                color: c.surface,
+                borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                border: Border.all(color: c.hairline),
+              ),
+              child: TextField(
+                controller: _note,
+                onChanged: (_) => setState(() {}),
+                style: ShokuType.bodySmall.copyWith(color: c.ink),
+                cursorColor: c.accent,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'The pan ran hot, so I pulled it early',
+                  hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                ),
+              ),
+            ),
+            const SizedBox(height: ShokuSpace.lg),
+
             const ShokuLabel('what did you change'),
             const SizedBox(height: ShokuSpace.sm),
             Container(
@@ -263,9 +334,11 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                   ),
                   child: Center(
                     child: Text(
-                      changes.isEmpty
-                          ? 'Save as v${widget.dish.currentVersion}'
-                          : 'Save & upgrade to v${widget.dish.currentVersion + 1}',
+                      _photo != null
+                          ? 'Save with photo'
+                          : changes.isEmpty
+                              ? 'Save tonight'
+                              : 'Save & upgrade to v${widget.dish.currentVersion + 1}',
                       style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                     ),
                   ),

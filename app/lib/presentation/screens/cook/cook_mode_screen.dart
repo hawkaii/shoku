@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/models/cook_timer.dart';
+import '../../../data/services/speech_service.dart';
 import '../../state/cook_timer_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
@@ -14,7 +15,7 @@ import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/step_ingredients.dart';
 import '../../widgets/kit/step_library.dart';
 import '../../widgets/kit/step_text.dart';
-import '../assistant/assistant_sheet.dart';
+import '../assistant/recipe_chat_sheet.dart';
 import '../log/debrief_sheet.dart';
 import 'timer_card.dart';
 
@@ -220,63 +221,6 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
     return leave ?? false;
   }
 
-  Future<void> _addChange() async {
-    final controller = TextEditingController();
-    final value = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.colors.canvas,
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          ShokuSpace.lg,
-          ShokuSpace.lg,
-          ShokuSpace.lg,
-          MediaQuery.of(context).viewInsets.bottom + ShokuSpace.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('What did you change?',
-                style: ShokuType.h2.copyWith(color: context.colors.ink)),
-            const SizedBox(height: ShokuSpace.sm),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              style: ShokuType.body.copyWith(color: context.colors.ink),
-              decoration: InputDecoration(
-                hintText: 'more lime, 2 minutes less, air-fried instead',
-                hintStyle: ShokuType.bodySmall.copyWith(color: context.colors.inkMuted),
-              ),
-            ),
-            const SizedBox(height: ShokuSpace.lg),
-            ShokuPressable(
-              onTap: () => Navigator.of(context).pop(controller.text.trim()),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                decoration: BoxDecoration(
-                  gradient: ShokuGradients.crimsonPress,
-                  borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                  border: Border.all(color: context.colors.ink, width: ShokuStroke.brutal),
-                ),
-                child: Center(
-                  child: Text('Add to this cook',
-                      style: ShokuType.title
-                          .copyWith(color: context.colors.onAccent, fontSize: 14)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (value != null && value.isNotEmpty) {
-      HapticFeedback.selectionClick();
-      setState(() => _changes.add(value));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -377,6 +321,12 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           }
                         }
                         setState(() => _step = i);
+                        // Steps read aloud, when the cook asked for it. Never
+                        // the timer, never an answer.
+                        final speech = ref.read(readAloudProvider);
+                        if (speech && i < steps.length) {
+                          ref.read(readAloudProvider.notifier).speak(steps[i]);
+                        }
                       },
                       itemBuilder: (context, i) => SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(
@@ -413,10 +363,10 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                       right: ShokuSpace.lg,
                       bottom: ShokuSpace.md,
                       child: _AiFab(
-                        onTap: () => showAssistantSheet(
+                        onTap: () => showRecipeChat(
                           context,
                           dish: dish,
-                          onLogChange: _addChange,
+                          stepIndex: _step,
                         ),
                         badge: _changes.isEmpty ? null : '${_changes.length}',
                       ),

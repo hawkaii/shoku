@@ -13,7 +13,7 @@ import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/status_badge.dart';
 import '../../widgets/kit/step_ingredients.dart';
-import '../assistant/assistant_sheet.dart';
+import '../assistant/recipe_chat_sheet.dart';
 import '../log/debrief_sheet.dart';
 
 class DishScreen extends ConsumerWidget {
@@ -65,7 +65,7 @@ class DishScreen extends ConsumerWidget {
                 StatusBadge(status: dish.status, cookCount: dish.cookCount),
                 const Spacer(),
                 ShokuPressable(
-                  onTap: () => showAssistantSheet(context, dish: dish),
+                  onTap: () => showRecipeChat(context, dish: dish),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                     decoration: BoxDecoration(
@@ -99,6 +99,14 @@ class DishScreen extends ConsumerWidget {
             if (version.isImport) ...[
               const SizedBox(height: ShokuSpace.md),
               _ProvenanceCard(version: version),
+            ],
+            if (version.tags.contains('chat')) ...[
+              const SizedBox(height: ShokuSpace.sm),
+              Text(
+                'v${version.number} came from your message at ${_clock(version.createdAt)}',
+                key: const ValueKey('chat-version-note'),
+                style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+              ),
             ],
             const SizedBox(height: ShokuSpace.lg),
 
@@ -404,7 +412,9 @@ class DishScreen extends ConsumerWidget {
                                       style: ShokuType.stat
                                           .copyWith(fontSize: 11, color: c.accent)),
                                   const SizedBox(width: ShokuSpace.xs),
-                                  Text('· ${_date(log.cookedAt)}',
+                                  Text(
+                                      '· ${_date(log.cookedAt)}'
+                                      '${_chatEdited(dish, log.versionNumber) ? ' · from a chat edit' : ''}',
                                       style: ShokuType.stat.copyWith(
                                           fontSize: 11, color: c.inkMuted)),
                                   const Spacer(),
@@ -474,6 +484,16 @@ class _SmallAction extends StatelessWidget {
     );
   }
 }
+
+bool _chatEdited(Dish dish, int versionNumber) {
+  for (final version in dish.versions) {
+    if (version.number == versionNumber) return version.tags.contains('chat');
+  }
+  return false;
+}
+
+String _clock(DateTime d) =>
+    '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
 String _date(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')} ${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]}';

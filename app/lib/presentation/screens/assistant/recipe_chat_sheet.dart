@@ -8,9 +8,9 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
-import '../../../data/services/api_client.dart';
 import '../../../data/services/assistant_service.dart';
 import '../../../data/services/speech_service.dart';
+import '../../state/assistant_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/foundation.dart';
@@ -43,28 +43,25 @@ class _Turn {
       : kind = _Kind.answer,
         reply = null,
         question = null;
-  const _Turn.diff(this.reply, this.question)
-      : kind = _Kind.diff,
-        text = '',
-        ;
   const _Turn.notice(this.text)
       : kind = _Kind.notice,
         reply = null,
         question = null;
+  const _Turn.diff(this.reply, this.question)
+      : kind = _Kind.diff,
+        text = '';
 
   final _Kind kind;
   final String text;
   final AssistantReply? reply;
   final String? question;
-
-  bool get isDiff => kind == _Kind.diff;
 }
 
 /// The ask sheet: questions, answers, and one recipe change at a time.
 ///
 /// Nothing here writes the journal directly. An edit arrives as arrays the
-/// server computed against a specific version, and Apply writes exactly one
-/// version through the store — the same door a cook uses.
+/// server computed against one specific version; Apply writes exactly one
+/// version through the store, the same door a cook uses.
 class RecipeChatSheet extends ConsumerStatefulWidget {
   const RecipeChatSheet({super.key, required this.dish, this.stepIndex});
 
@@ -87,7 +84,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   bool _cap = false;
   bool _offline = false;
 
-  /// The one unresolved diff. Two at once would mean two truths about the head.
+  /// The one unresolved diff. Two at once would be two truths about the head.
   _Turn? _diff;
   bool _stale = false;
 
@@ -97,30 +94,25 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     super.dispose();
   }
 
-  String get _scope => widget.stepIndex == null
-      ? ''
-      : 'About step ${widget.stepIndex! + 1}: ';
+  String get _scope =>
+      widget.stepIndex == null ? '' : 'About step ${widget.stepIndex! + 1}: ';
 
   bool get _blocked => _cap || _offline;
 
-  bool get _canSend =>
-      !_thinking && !_applying && _diff == null && !_blocked;
+  bool get _canSend => !_thinking && !_applying && _diff == null && !_blocked;
 
   Future<void> _send(String raw) async {
     final question = raw.trim();
-    if (question.isEmpty) return;
+    if (question.isEmpty || !_canSend) return;
 
-    if (_blocked || _diff != null) return;
     setState(() {
       _turns.add(_Turn.mine(question));
       _thinking = true;
       _error = null;
     });
 
-    final service = AssistantService(api: ApiClient());
     try {
-      final reply = await service
-          .ask(
+      final reply = await ref.read(assistantServiceProvider).ask(
             dishId: widget.dish.id,
             versionId: widget.dish.versions.isEmpty
                 ? null
@@ -128,8 +120,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             question: '$_scope$question',
             requestId: _uuid.v4(),
             history: _history,
-          )
-          .timeout(const Duration(seconds: 30));
+          ).timeout(const Duration(seconds: 30));
 
       if (!mounted) return;
       HapticFeedback.selectionClick();
@@ -151,8 +142,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           _stale = false;
         }
       });
+
       if (reply.isEdit) {
-        // A change is a decision; do not read it out loud unasked.
+        // A change is a decision, not a paragraph: never read it out unasked.
         await ref.read(speechServiceProvider).stop();
       } else {
         await ref.read(readAloudProvider.notifier).speak(reply.answer);
@@ -179,9 +171,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   }
 
   Future<void> _apply() async {
-    final turn = _diff;
-    final appliable = turn?.reply?.appliable;
-    if (turn == null || appliable == null) return;
+    final appliable = _diff?.reply?.appliable;
+    if (appliable == null) return;
 
     setState(() {
       _applying = true;
@@ -190,17 +181,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     HapticFeedback.mediumImpact();
 
     try {
-      final head = ref.read(dishProvider(widget.dish.id))?.versions.last;
-      // The precondition: the arrays were computed against a version we still
-      // have. If the head moved, nothing is written.
-      if (head == null || head.id != appliable.baseVersionId) {
-        setState(() {
-          _applying = false;
-          _stale = true;
-        });
-        return;
-      }
-
+      // The precondition is checked inside the write, in the same transaction:
+      // these arrays were computed against one version, and if the head has
+      // moved since, nothing is written and the card offers Recompute.
       final number = await ref
           .read(journalStoreProvider.notifier)
           .applyEditVersion(
@@ -246,6 +229,12 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     if (question != null) await _send(question);
   }
 
+  void _openVersion(int number) {
+    ref.read(inspectedVersionProvider(widget.dish.id).notifier).state = number;
+    Navigator.of(context).pop();
+    context.push('/dish/${widget.dish.id}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -282,10 +271,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 Icon(Icons.auto_awesome, size: 18, color: c.accent),
                 const SizedBox(width: ShokuSpace.sm),
                 Expanded(
-                  child: Text(
-                    'Ask about this cook',
-                    style: ShokuType.h2.copyWith(color: c.ink),
-                  ),
+                  child: Text('Ask about this cook',
+                      style: ShokuType.h2.copyWith(color: c.ink)),
                 ),
                 GestureDetector(
                   key: const ValueKey('read-aloud-toggle'),
@@ -310,8 +297,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 ],
               ),
             ),
-            if (_appliedVersion != null)
-              _appliedBar(context, _appliedVersion!),
+            if (_appliedVersion != null) _appliedBar(context, _appliedVersion!),
             const SizedBox(height: ShokuSpace.sm),
             MicField(
               controller: _input,
@@ -340,11 +326,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                     border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                   ),
                   child: Center(
-                    child: Text(
-                      'Ask',
-                      style: ShokuType.title
-                          .copyWith(color: c.onAccent, fontSize: 14),
-                    ),
+                    child: Text('Ask',
+                        style: ShokuType.title
+                            .copyWith(color: c.onAccent, fontSize: 14)),
                   ),
                 ),
               ),
@@ -371,17 +355,14 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 color: c.ink,
                 borderRadius: BorderRadius.circular(ShokuRadius.card),
               ),
-              child: Text(
-                turn.text,
-                key: const ValueKey('mine-bubble'),
-                style: ShokuType.bodySmall.copyWith(color: c.canvas),
-              ),
+              child: Text(turn.text,
+                  key: const ValueKey('mine-bubble'),
+                  style: ShokuType.bodySmall.copyWith(color: c.canvas)),
             ),
           ),
         _Kind.answer => _AnswerBubble(text: turn.text),
         _Kind.notice => _ChatNotice(text: turn.text),
         _Kind.diff => _DiffCard(
-            key: const ValueKey('recipe-diff'),
             turn: turn,
             dish: widget.dish,
             applying: _applying,
@@ -390,16 +371,6 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             onApply: _apply,
             onDiscard: _discard,
             onRecompute: _recompute,
-            onOpen: (number) {
-              ref.read(inspectedVersionProvider(widget.dish.id).notifier).state =
-                  number;
-              Navigator.of(context).pop();
-              if (!context.mounted) return;
-              context.push('/dish/${widget.dish.id}');
-            },
-            onUndo: () {
-              Navigator.of(context).pop();
-            },
           ),
       },
     );
@@ -416,11 +387,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           borderRadius: BorderRadius.circular(ShokuRadius.card),
           border: Border.all(color: c.hairline),
         ),
-        child: Text(
-          'THINKING',
-          key: const ValueKey('chat-thinking'),
-          style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
-        ),
+        child: Text('THINKING',
+            key: const ValueKey('chat-thinking'),
+            style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
       ),
     );
   }
@@ -433,23 +402,24 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
         children: [
           Icon(Icons.check, size: 14, color: c.ready),
           const SizedBox(width: 6),
-          Text(
-            'V$number · APPLIED',
-            key: const ValueKey('chat-applied'),
-            style: ShokuType.label.copyWith(fontSize: 9.5, color: c.ready),
-          ),
+          Text('V$number · APPLIED',
+              key: const ValueKey('chat-applied'),
+              style: ShokuType.label.copyWith(fontSize: 9.5, color: c.ready)),
           const Spacer(),
           TextButton(
-            onPressed: () => ref
-                .read(inspectedVersionProvider(widget.dish.id).notifier)
-                .state = number,
+            key: const ValueKey('chat-open-version'),
+            onPressed: () => _openVersion(number),
             child: const Text('Open v2'),
           ),
           TextButton(
-            onPressed: ref.read(readAloudProvider.notifier).state == false
-                ? null
-                : null,
-            child: const Text(''),
+            key: const ValueKey('chat-undo'),
+            onPressed: () {
+              setState(() => _appliedVersion = null);
+              // Undo is just another ask: the server returns the inverse arrays
+              // and nothing is tombstoned.
+              _send('undo that');
+            },
+            child: const Text('Undo'),
           ),
         ],
       ),
@@ -487,9 +457,8 @@ class _AnswerBubbleState extends ConsumerState<_AnswerBubble> {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.82,
-        ),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
         padding: const EdgeInsets.all(ShokuSpace.md),
         decoration: BoxDecoration(
           color: c.surface,
@@ -501,21 +470,16 @@ class _AnswerBubbleState extends ConsumerState<_AnswerBubble> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Expanded(
-              child: Text(
-                widget.text,
-                key: const ValueKey('answer-bubble'),
-                style: ShokuType.bodySmall.copyWith(color: c.ink),
-              ),
+              child: Text(widget.text,
+                  key: const ValueKey('answer-bubble'),
+                  style: ShokuType.bodySmall.copyWith(color: c.ink)),
             ),
             const SizedBox(width: ShokuSpace.sm),
             GestureDetector(
               onTap: _speak,
               behavior: HitTestBehavior.opaque,
-              child: Icon(
-                _speaking ? Icons.stop : Icons.volume_up,
-                size: 16,
-                color: c.inkMuted,
-              ),
+              child: Icon(_speaking ? Icons.stop : Icons.volume_up,
+                  size: 16, color: c.inkMuted),
             ),
           ],
         ),
@@ -534,11 +498,9 @@ class _ChatNotice extends StatelessWidget {
     final c = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
-      child: Text(
-        text,
-        key: const ValueKey('chat-notice'),
-        style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-      ),
+      child: Text(text,
+          key: const ValueKey('chat-notice'),
+          style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
     );
   }
 }
@@ -546,7 +508,6 @@ class _ChatNotice extends StatelessWidget {
 /// The change, as a card: what it does, then the decision. One at a time.
 class _DiffCard extends StatelessWidget {
   const _DiffCard({
-    super.key,
     required this.turn,
     required this.dish,
     required this.applying,
@@ -555,8 +516,6 @@ class _DiffCard extends StatelessWidget {
     required this.onApply,
     required this.onDiscard,
     required this.onRecompute,
-    required this.onOpen,
-    required this.onUndo,
   });
 
   final _Turn turn;
@@ -567,17 +526,14 @@ class _DiffCard extends StatelessWidget {
   final VoidCallback onApply;
   final VoidCallback onDiscard;
   final VoidCallback onRecompute;
-  final void Function(int number) onOpen;
-  final VoidCallback onUndo;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final reply = turn.reply!;
     final next = dish.versions.isEmpty ? 1 : dish.versions.last.number + 1;
-    final edits = reply.edits;
-    final shown = edits.take(4).toList();
-    final more = edits.length - shown.length;
+    final shown = reply.edits.take(4).toList();
+    final more = reply.edits.length - shown.length;
 
     return Container(
       key: const ValueKey('recipe-diff'),
@@ -601,28 +557,22 @@ class _DiffCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            reply.answer,
-            key: const ValueKey('diff-summary'),
-            style: ShokuType.bodySmall.copyWith(color: c.ink),
-          ),
+          Text(reply.answer,
+              key: const ValueKey('diff-summary'),
+              style: ShokuType.bodySmall.copyWith(color: c.ink)),
           const SizedBox(height: ShokuSpace.sm),
           for (final edit in shown) _delta(context, edit),
           if (more > 0)
-            Text(
-              '+$more more',
-              style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
-            ),
+            Text('+$more more',
+                style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
           const SizedBox(height: ShokuSpace.sm),
-          Text(
-            'Creates v$next — from this message',
-            style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
-          ),
+          Text('Creates v$next — from this message',
+              style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
           const SizedBox(height: ShokuSpace.sm),
           if (stale)
             _buttons(context, [
-              ('Recompute', onRecompute),
-              ('Discard', onDiscard),
+              ('Recompute', onRecompute, 'diff-recompute'),
+              ('Discard', onDiscard, 'diff-discard'),
             ])
           else if (error != null) ...[
             Row(
@@ -630,18 +580,16 @@ class _DiffCard extends StatelessWidget {
                 ShokuChip('NOT APPLIED', color: c.danger),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
-                    'Nothing changed in your recipe.',
-                    key: const ValueKey('diff-error'),
-                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                  ),
+                  child: Text('Nothing changed in your recipe.',
+                      key: const ValueKey('diff-error'),
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                 ),
               ],
             ),
             const SizedBox(height: ShokuSpace.sm),
             _buttons(context, [
-              ('Try again', onApply),
-              ('Discard', onDiscard),
+              ('Try again', onApply, 'diff-retry'),
+              ('Discard', onDiscard, 'diff-discard'),
             ]),
           ] else
             Row(
@@ -671,7 +619,7 @@ class _DiffCard extends StatelessWidget {
 
   Widget _delta(BuildContext context, AssistantEdit edit) {
     final c = context.colors;
-    final marker = switch (edit.op) {
+    final (marker, colour) = switch (edit.op) {
       'add' => ('+', c.ready),
       'remove' => ('−', c.danger),
       _ => ('~', c.reward),
@@ -683,33 +631,27 @@ class _DiffCard extends StatelessWidget {
         children: [
           SizedBox(
             width: 14,
-            child: Text(
-              marker.$1,
-              style: ShokuType.stat.copyWith(fontSize: 13, color: marker.$2),
-            ),
+            child: Text(marker,
+                style: ShokuType.stat.copyWith(fontSize: 13, color: colour)),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  edit.text,
-                  style: ShokuType.bodySmall.copyWith(
-                    color: c.ink,
-                    decoration: edit.op == 'remove'
-                        ? TextDecoration.lineThrough
-                        : null,
-                  ),
-                ),
+                Text(edit.text,
+                    style: ShokuType.bodySmall.copyWith(
+                      color: c.ink,
+                      decoration: edit.op == 'remove'
+                          ? TextDecoration.lineThrough
+                          : null,
+                    )),
                 if (edit.previous != null && edit.previous!.isNotEmpty)
-                  Text(
-                    edit.previous!,
-                    style: ShokuType.label.copyWith(
-                      fontSize: 9,
-                      color: c.inkMuted,
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
+                  Text(edit.previous!,
+                      style: ShokuType.label.copyWith(
+                        fontSize: 9,
+                        color: c.inkMuted,
+                        decoration: TextDecoration.lineThrough,
+                      )),
               ],
             ),
           ),
@@ -718,13 +660,15 @@ class _DiffCard extends StatelessWidget {
     );
   }
 
-  Widget _buttons(BuildContext context, List<(String, VoidCallback)> actions) {
+  Widget _buttons(
+      BuildContext context, List<(String, VoidCallback, String)> actions) {
     return Row(
       children: [
         for (var i = 0; i < actions.length; i++) ...[
           if (i > 0) const SizedBox(width: ShokuSpace.sm),
           Expanded(
             child: _Action(
+              key: ValueKey(actions[i].$3),
               label: actions[i].$1,
               onTap: applying ? null : actions[i].$2,
               primary: i == 0,
@@ -765,13 +709,11 @@ class _Action extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Text(
-            label,
-            style: ShokuType.title.copyWith(
-              color: primary ? c.onAccent : c.ink,
-              fontSize: 12.5,
-            ),
-          ),
+          child: Text(label,
+              style: ShokuType.title.copyWith(
+                color: primary ? c.onAccent : c.ink,
+                fontSize: 12.5,
+              )),
         ),
       ),
     );

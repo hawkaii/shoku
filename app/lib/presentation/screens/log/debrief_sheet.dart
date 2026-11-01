@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../data/services/api_client.dart';
+import '../../../data/services/photo_service.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/dish_image.dart';
@@ -72,6 +74,23 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
+    // The photo is uploaded first and stored as a key; a path on this phone is
+    // not a URL and must never be written as one.
+    String? photoKey;
+    String? photoUrl;
+    if (_photo != null) {
+      try {
+        final uploaded = await PhotoService(
+          api: ApiClient(),
+        ).upload(_photo!, role: 'debrief');
+        photoKey = uploaded.key;
+        photoUrl = uploaded.url;
+      } catch (_) {
+        photoKey = null;
+        photoUrl = null;
+      }
+    }
+
     try {
       final version = await ref.read(journalStoreProvider.notifier).commitCook(
             dishId: widget.dish.id,
@@ -79,7 +98,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             rating: _rating,
             note: _note.text.trim(),
             changes: _changes,
-            photoUrl: _photo?.path,
+            photoUrl: photoUrl,
+            photoKey: photoKey,
           );
       HapticFeedback.mediumImpact();
       navigator.pop();

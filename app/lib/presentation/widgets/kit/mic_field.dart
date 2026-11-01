@@ -11,11 +11,15 @@ class MicField extends StatefulWidget {
   final String hint;
   final int maxLines;
 
+  /// Composer-off: cap reached, offline, or a change waiting on an answer.
+  final bool enabled;
+
   const MicField({
     super.key,
     required this.controller,
     this.hint = 'Type or hold the mic',
     this.maxLines = 3,
+    this.enabled = true,
   });
 
   @override
@@ -79,6 +83,7 @@ class _MicFieldState extends State<MicField> {
           Expanded(
             child: TextField(
               controller: widget.controller,
+              enabled: widget.enabled,
               maxLines: widget.maxLines,
               minLines: 1,
               style: ShokuType.bodySmall.copyWith(color: c.ink),
@@ -94,9 +99,9 @@ class _MicFieldState extends State<MicField> {
           ShokuPressable(
             onTap: () {},
             child: GestureDetector(
-              onLongPressStart: (_) => _start(),
-              onLongPressEnd: (_) => _stop(),
-              onTap: _available ? _start : null,
+              onLongPressStart: widget.enabled ? (_) => _start() : null,
+              onLongPressEnd: widget.enabled ? (_) => _stop() : null,
+              onTap: widget.enabled && _available ? _start : null,
               child: AnimatedContainer(
                 duration: ShokuMotion.toggle,
                 width: 34,
