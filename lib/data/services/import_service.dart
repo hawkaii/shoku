@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../db/journal_repository.dart';
 import '../mock/journal_data.dart';
+import '../models/recipe_content.dart';
 import '../services/api_client.dart';
 import 'package:uuid/uuid.dart';
 
@@ -98,6 +99,15 @@ class ImportService {
       }
     }
     throw lastError!;
+  }
+
+  /// The reel as the server read it, without writing anything.
+  ///
+  /// The Wall's detail view reads this and nothing else: no dish, no version, no
+  /// rating — only what `/v1/content/{shortcode}` returned.
+  Future<RecipeContent?> fetchContent(String shortcode) async {
+    final content = await _api.get('/v1/content/$shortcode');
+    return RecipeContent.fromJson(content);
   }
 
   /// Turns a cached extraction into a dish in the journal, with the creator

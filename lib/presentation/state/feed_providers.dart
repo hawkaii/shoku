@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/feed_item.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/feed_service.dart';
+import 'journal_providers.dart';
 import 'sync_providers.dart';
 
 /// The Wall's state. Read-only, quietly failing, and never in the way of the
@@ -96,6 +97,17 @@ class FeedStore extends StateNotifier<FeedState> {
     }
   }
 }
+
+/// Shortcodes already sitting in this phone's journal, so the Wall can say
+/// "in your cookbook" instead of offering a second copy.
+final importedShortcodesProvider = Provider<Set<String>>((ref) {
+  final dishes = ref.watch(dishesProvider);
+  return {
+    for (final dish in dishes)
+      for (final version in dish.versions)
+        if ((version.originShortcode ?? '').isNotEmpty) version.originShortcode!,
+  };
+});
 
 final feedServiceProvider = Provider<FeedService>(
   (ref) => FeedService(api: ApiClient(auth: ref.watch(authServiceProvider))),

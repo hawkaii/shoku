@@ -165,6 +165,8 @@ void main() {
     expect((await JournalRepository(db).loadDishes()).single.title,
         'Paneer Tikka');
     expect(find.textContaining('Saved Paneer Tikka'), findsOneWidget);
+    // The button is inside the card's tap target; it must win the tap.
+    expect(find.byKey(const ValueKey('feed-detail-title')), findsNothing);
   });
 
   testWidgets('a feed that fails is a quiet retry, not a dialog',
