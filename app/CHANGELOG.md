@@ -1,144 +1,150 @@
-## [1.22.1] - 2026-11-01
+# Changelog
 
-### 🚀 Features
+What changed in each Shoku build, newest first. Generated from commit history
+by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
-- *(ui)* Shoku design language — kitchen ticket theme, 13-component kit, 5-tab shell, 10 screens, mock data
-- *(ui)* Paper palette, crimson accent, gradient system; food-only notes
-- Cook journal IA — dish/version/cook-log model, photo timeline, motion system, 4-tab shell
-- Onboarding v2 (persisted, interactive share demo), back/exit handling, share-sheet intent, bundled fonts
-- Cook mode, debrief commit, version memory, wall, nutrition lens, share intake, interactive onboarding
-- *(visual)* Plate-and-knife diagram language, drawn step diagrams, floating AI in cook mode, onboarding arrow
-- *(brand)* Plate mark as launcher + in-app, app-level exit guard, auto-publish every build
-- To-cook/cooked status badges, two-state cookbook filter, real cook photo, nutrition coming soon, 360px overflow fixes
-- *(journal)* Persist the journal in drift, with a sync-ready schema
-- *(auth)* Supabase sign-in, API client with bearer token, account row in profile
-- *(sync)* Push/pull sync engine, launch+post-write triggers, import a reel end to end
-- *(dish)* Reel thumbnail as cover, creator handle, and a link back to the reel
-- *(import)* Say when a reel has nothing to read, and when we are watching it
-- Ship an empty app instead of a demo kitchen
-- *(cook)* A timer that survives the app being killed
-- *(recipe)* Show each step's ingredients in the recipe's own words
-- *(cookbook)* Long-press a card to move it or remove it from the journal
-- *(cook)* Ring a timer with the phone in a pocket
-- *(wall)* A public feed of shared reels, and a way to share one
-- *(recipe)* Carry tags on the wire, and say when amounts were read off video
-- *(journal)* Show the mood and the rating of each cook again
-- *(journal)* Show a running import by name until it lands
-- *(wall)* Tapping a card opens the reel's extraction
-- Shoku backend — sync, imports, content cache, assistant, photos
-- Backend rewrite — routes, imports pipeline, sync, alembic, 60 tests
-- *(auth)* Verify Supabase JWTs against the project JWKS
-- *(imports)* Real yt-dlp extractor, faster-whisper transcriber, heuristic structurer + redis queue
-- *(imports)* Use published YouTube subtitles instead of ASR when available
-- *(api)* CORS for the Flutter web build
-- *(provenance)* Thumbnail, platform and creator handle; model structurer with heuristic fallback
-- *(imports)* Provenance columns + explain platform blocks instead of internal_error
-- *(imports)* Read the pinned comment when the caption has no recipe
-- *(imports)* Decode shortcode to media id so the comments endpoint works
-- *(structurer)* Meta Muse with schema-constrained decoding
-- *(imports)* Read silent reels from frames; never show a numeric handle
-- *(sync)* Photos as a fourth append-only table
-- *(content)* A step can name the ingredients it uses
-- *(feed)* The Wall publishes an extraction, never a users work
-- *(imports)* Re-parse cached reels so they carry step_ingredients
-- *(sync)* A version carries the extraction tags
-- *(worker)* A queued job wakes the VM, an idle worker stops it
-- *(feed)* The Wall is every imported reel, minus takedowns
-- *(thumbnails)* Copy a reel cover into our storage, once
-- *(storage)* Google Cloud Storage backend, signed by the VM identity
+## [1.23.0] — 2026-11-01
 
-### 🐛 Bug Fixes
+### Added
+- Shoku design language — kitchen ticket theme, 13-component kit, 5-tab shell, 10 screens, mock data *(ui)* — [`6c6b7ff`](https://github.com/hawkaii/food-finder-app/commit/6c6b7ffa07f1aa19a1720c7bdded3749e1088515)
+- Paper palette, crimson accent, gradient system; food-only notes *(ui)* — [`9281d7b`](https://github.com/hawkaii/food-finder-app/commit/9281d7b954f2a779e0dd441fe1f21125f6109e69)
+- Cook journal IA — dish/version/cook-log model, photo timeline, motion system, 4-tab shell — [`6479b96`](https://github.com/hawkaii/food-finder-app/commit/6479b96f75649b8250a89b3f05f15c4cb1420043)
+- Onboarding v2 (persisted, interactive share demo), back/exit handling, share-sheet intent, bundled fonts — [`025d63f`](https://github.com/hawkaii/food-finder-app/commit/025d63f1d845d83d1475f850127e14f56fa6a8c8)
+- Cook mode, debrief commit, version memory, wall, nutrition lens, share intake, interactive onboarding — [`d311189`](https://github.com/hawkaii/food-finder-app/commit/d311189dae2dda4e6f83c535799e8d70822546a6)
+- Plate-and-knife diagram language, drawn step diagrams, floating AI in cook mode, onboarding arrow *(visual)* — [`66338f6`](https://github.com/hawkaii/food-finder-app/commit/66338f606a5bce00c38df04e2657508fd9af512b)
+- Plate mark as launcher + in-app, app-level exit guard, auto-publish every build *(brand)* — [`5154f03`](https://github.com/hawkaii/food-finder-app/commit/5154f0363a153834168f48bf6de2d9ede95d9cd6)
+- To-cook/cooked status badges, two-state cookbook filter, real cook photo, nutrition coming soon, 360px overflow fixes — [`35301ea`](https://github.com/hawkaii/food-finder-app/commit/35301ea9c677dd6cb740172055961c7177b1f926)
+- Persist the journal in drift, with a sync-ready schema *(journal)* — [`692cbb3`](https://github.com/hawkaii/food-finder-app/commit/692cbb347cb0e69317a74754e3699478d71479ba)
+- Shoku backend — sync, imports, content cache, assistant, photos — [`45b831f`](https://github.com/hawkaii/food-finder-app/commit/45b831fb2a1bb46ce964be8410c3fb33526a58f6)
+- Backend rewrite — routes, imports pipeline, sync, alembic, 60 tests — [`901a9e5`](https://github.com/hawkaii/food-finder-app/commit/901a9e5a74c74862436e6a2342badca481f304a6)
+- Verify Supabase JWTs against the project JWKS *(auth)* — [`38eb79e`](https://github.com/hawkaii/food-finder-app/commit/38eb79e142f13247e3760cc3fc3fe8d92bc1f8fc)
+- Real yt-dlp extractor, faster-whisper transcriber, heuristic structurer + redis queue *(imports)* — [`a33028b`](https://github.com/hawkaii/food-finder-app/commit/a33028b5fd896bf286abc1503cacff67b1377a4a)
+- Supabase sign-in, API client with bearer token, account row in profile *(auth)* — [`6ba70d9`](https://github.com/hawkaii/food-finder-app/commit/6ba70d949a4f7a9197c94fb9ec9740e25a666edb)
+- Push/pull sync engine, launch+post-write triggers, import a reel end to end *(sync)* — [`14b86c5`](https://github.com/hawkaii/food-finder-app/commit/14b86c5538c6b63cf5bc7c5a2d287698cf3b7e57)
+- Use published YouTube subtitles instead of ASR when available *(imports)* — [`4c59640`](https://github.com/hawkaii/food-finder-app/commit/4c596407d2dec3d601d07667cedc56cf7d76bfdd)
+- CORS for the Flutter web build *(api)* — [`b147b31`](https://github.com/hawkaii/food-finder-app/commit/b147b31d99745ca4e9ff30329c2e3ebb48f739fc)
+- Thumbnail, platform and creator handle; model structurer with heuristic fallback *(provenance)* — [`944b7f2`](https://github.com/hawkaii/food-finder-app/commit/944b7f2c6048b259cbc49e6b917a092bdc4179f1)
+- Reel thumbnail as cover, creator handle, and a link back to the reel *(dish)* — [`65a7900`](https://github.com/hawkaii/food-finder-app/commit/65a7900e7508d36ee9bc70846979b27d1c5f1f62)
+- Provenance columns + explain platform blocks instead of internal_error *(imports)* — [`23bc29d`](https://github.com/hawkaii/food-finder-app/commit/23bc29d983162103a5ac163a3e5810b24cda2f05)
+- Read the pinned comment when the caption has no recipe *(imports)* — [`7152025`](https://github.com/hawkaii/food-finder-app/commit/7152025bf8b8337e19aea763d8a433d56ec42ed1)
+- Decode shortcode to media id so the comments endpoint works *(imports)* — [`6af604b`](https://github.com/hawkaii/food-finder-app/commit/6af604bed8e957db96784c862c48d150954874f3)
+- Meta Muse with schema-constrained decoding *(structurer)* — [`7e00ebc`](https://github.com/hawkaii/food-finder-app/commit/7e00ebc47ed45fa964ccea2673f6515c6f849205)
+- Read silent reels from frames; never show a numeric handle *(imports)* — [`977547e`](https://github.com/hawkaii/food-finder-app/commit/977547e9c547c0373160550e184ae2af452ee58a)
+- Say when a reel has nothing to read, and when we are watching it *(import)* — [`598601f`](https://github.com/hawkaii/food-finder-app/commit/598601fec7136b12cc5a1f5c6bc0369b9e54609c)
+- Ship an empty app instead of a demo kitchen — [`a22f068`](https://github.com/hawkaii/food-finder-app/commit/a22f068a986b0a7c46a2ec24599476dbb1588f48)
+- Photos as a fourth append-only table *(sync)* — [`552cd47`](https://github.com/hawkaii/food-finder-app/commit/552cd47d9116ccf7f402e52f8071a46f4c23cfc7)
+- A step can name the ingredients it uses *(content)* — [`5d50729`](https://github.com/hawkaii/food-finder-app/commit/5d507292f36cdcee81ba25a657df6cb9c7731450)
+- A timer that survives the app being killed *(cook)* — [`d0caf94`](https://github.com/hawkaii/food-finder-app/commit/d0caf94c18419ec23897d8f0937a15c8d92fce91)
+- The Wall publishes an extraction, never a users work *(feed)* — [`e47fa5a`](https://github.com/hawkaii/food-finder-app/commit/e47fa5adba8d6ee3a393080d8c3b329ec62ee4c6)
+- Re-parse cached reels so they carry step_ingredients *(imports)* — [`79885d8`](https://github.com/hawkaii/food-finder-app/commit/79885d8108bfe05e5d414664dbf69368c8dbf007)
+- Show each step's ingredients in the recipe's own words *(recipe)* — [`3cd33be`](https://github.com/hawkaii/food-finder-app/commit/3cd33be49554c513c0dbefd3381d505446ecc743)
+- Long-press a card to move it or remove it from the journal *(cookbook)* — [`43bbe27`](https://github.com/hawkaii/food-finder-app/commit/43bbe27734ce54a6832e82ee38dcc24c858c0bc8)
+- Ring a timer with the phone in a pocket *(cook)* — [`7e21db8`](https://github.com/hawkaii/food-finder-app/commit/7e21db868caf8f0b05507f5a4673c312db0856ea)
+- A version carries the extraction tags *(sync)* — [`7fd4833`](https://github.com/hawkaii/food-finder-app/commit/7fd4833058003b72953b1e818b22d75d5eb89938)
+- A public feed of shared reels, and a way to share one *(wall)* — [`c1c0ba4`](https://github.com/hawkaii/food-finder-app/commit/c1c0ba46ccaa62e153acd77db95a2d19756a097e)
+- Show the mood and the rating of each cook again *(journal)* — [`0357213`](https://github.com/hawkaii/food-finder-app/commit/0357213deec25e53d3e3168fc3d66a2303d9aef9)
+- Carry tags on the wire, and say when amounts were read off video *(recipe)* — [`b3bdc6a`](https://github.com/hawkaii/food-finder-app/commit/b3bdc6a9ecc4ad325e315c32de2335a30877ea0e)
+- A queued job wakes the VM, an idle worker stops it *(worker)* — [`ae085e3`](https://github.com/hawkaii/food-finder-app/commit/ae085e37ff42efe46680e742c73bf390e364aa54)
+- Show a running import by name until it lands *(journal)* — [`9042083`](https://github.com/hawkaii/food-finder-app/commit/904208321af9e1793e7b1ea5c32f96a0df52e790)
+- The Wall is every imported reel, minus takedowns *(feed)* — [`22e38cd`](https://github.com/hawkaii/food-finder-app/commit/22e38cde5e3e414f40be772ec391683657031e7d)
+- Tapping a card opens the reel's extraction *(wall)* — [`7dadfed`](https://github.com/hawkaii/food-finder-app/commit/7dadfed2ab3259ddd0b31f46038c57711fb1534f)
+- Copy a reel cover into our storage, once *(thumbnails)* — [`7fa9428`](https://github.com/hawkaii/food-finder-app/commit/7fa94285faaa395b6243c2ecaf3984a746398d29)
+- Google Cloud Storage backend, signed by the VM identity *(storage)* — [`1ca742b`](https://github.com/hawkaii/food-finder-app/commit/1ca742b0de3742420229f2c3fdde63177d910b14)
+- Intent-routed ask with a closed op whitelist *(assistant)* — [`2baf8e8`](https://github.com/hawkaii/food-finder-app/commit/2baf8e8fcc7051eaec51d3ea69ea5b3cd3fc6342)
+- A chat that can change a recipe, one version at a time *(assistant)* — [`cf1ac3e`](https://github.com/hawkaii/food-finder-app/commit/cf1ac3ebf36c2eff84f6cacce946a3851a2e221a)
 
-- *(brand)* Regenerate launcher icons from one render so no size is blank
-- *(ci)* Write CHANGELOG.md from the git-cliff output, bump action majors
-- *(journal)* Make every cook path persist, and migrate timestamps to text
-- *(import)* Report the server's reason instead of 'could not reach server'
-- *(theme)* Follow the device theme instead of forcing light
-- *(import)* Say when the platform is blocking us instead of 'could not read'
-- *(sync)* Fill the journal on sign-in instead of waiting for a reload
-- *(sync)* Signing in now pulls the journal, and the app says when it is syncing
-- *(import)* Keep an import alive through a dropped poll and a restart
-- *(recipe)* Read step links from the recipe payload, where the API puts them
-- *(import)* Wait four minutes for a reel the server is still reading
-- *(import)* Treat a waking worker as a stage, and name a dead one
-- *(import)* Keep the poller alive for the whole app, not just the Journal
-- *(ui)* A photo slot is never a grey box, and the Wall header stops repeating itself
-- *(worker)* Treat an empty blocking pop as no job, and never die on a bad one
-- *(queue)* Catch redis.exceptions.TimeoutError, not the builtin
-- *(imports)* Fail with invalid_recipe, not internal_error, when text has no recipe
-- *(imports)* Give yt-dlp a JS runtime; YouTube refuses to extract without one
-- *(imports)* Report a platform block as source_blocked, not invalid_recipe
-- *(worker)* Mount cookies relative to the compose file's parent
-- *(worker)* Cookies must be writable — yt-dlp refreshes the jar
-- *(imports)* Call the comments endpoint with the CSRF header Instagram requires
-- *(structurer)* Provenance names the parser that actually ran
-- *(imports)* A stale parse is re-extracted, not served forever
-- *(imports)* Defer annotations so Python 3.12 can import the pipeline
-- *(imports)* Fall back to the video when the text yields no recipe
-- *(sync)* Accept origin_handle and origin_platform on version rows
-- *(worker)* Load the speech model before the first job, on a volume
-- *(imports)* A 180s ceiling, because 60s failed every reel over ~50s
-- *(storage)* Sign presigned URLs by impersonating the machine identity
+### Build
+- Split api and worker images; worker (yt-dlp + whisper) moves to its own VM — [`54c2896`](https://github.com/hawkaii/food-finder-app/commit/54c2896e466f557b579bee494805aa4f22611115)
+- Multi-stage image, drop apt ffmpeg (1 GB -> 430 MB), slim worker extra — [`e95bbf3`](https://github.com/hawkaii/food-finder-app/commit/e95bbf3a92629e5b2239e2b44005eef6ca88bcd2)
+- Install node only in the worker image — [`3946cbe`](https://github.com/hawkaii/food-finder-app/commit/3946cbe33f19593c98fc2174877b0cc48efb24d7)
+- Separate dev/prod compose so a git pull cannot clobber the deployed one — [`d014d6f`](https://github.com/hawkaii/food-finder-app/commit/d014d6f1c196d65f47b9adeb4eb6789476d76ea1)
+- Pin the compose project name so restarts don't collide — [`3a1a394`](https://github.com/hawkaii/food-finder-app/commit/3a1a39419377da9b09bc79bf954e99642860ea8f)
+- Mount the cookies file read-only *(worker)* — [`23939d2`](https://github.com/hawkaii/food-finder-app/commit/23939d233beb24879f33d1334b24d0eaae34a253)
+- Install dependencies before copying code — [`7f930cf`](https://github.com/hawkaii/food-finder-app/commit/7f930cfd4e09ec77174e2c97891a93ff36b9ae12)
 
-### 📚 Documentation
+### CI
+- Build debug APK on GitHub Actions — [`6132e3c`](https://github.com/hawkaii/food-finder-app/commit/6132e3cdadf1bc122fbd11b9a6cf05f54fde9204)
+- Git-cliff changelog, APK only on main, checks on pull requests *(release)* — [`9656b95`](https://github.com/hawkaii/food-finder-app/commit/9656b9595ff4854a892f1e518cb71d1e55660c9d)
+- Build image to GHCR and deploy to the VM over SSH — [`43acef8`](https://github.com/hawkaii/food-finder-app/commit/43acef85a2d686741fd97220aabba279155c2ff5)
+- Run the tests on 3.12, the version the images use — [`afb5029`](https://github.com/hawkaii/food-finder-app/commit/afb502980bc4e89dba696855a49063a4c6cf2909)
+- Make the import check a valid one-liner — [`e2982a1`](https://github.com/hawkaii/food-finder-app/commit/e2982a1573454ae9c493ac9c6c67f34b3ddb11b4)
+- A changelog push must not fail a shipped release — [`507a9db`](https://github.com/hawkaii/food-finder-app/commit/507a9db00cb5274d6a3ce1e9b7144a691eded779)
+- Cache Gradle and stop building commits that cannot change the APK — [`e556075`](https://github.com/hawkaii/food-finder-app/commit/e55607544713606e636f3b6be44754307cff2d1b)
+- A release is a version bump, not a commit — [`49eaf3d`](https://github.com/hawkaii/food-finder-app/commit/49eaf3d7a56e3973ace22913cbfcd450164f63ec)
+- Retry the release publish instead of losing it to a 403 — [`2d57e7c`](https://github.com/hawkaii/food-finder-app/commit/2d57e7cec5cdc053bf2a3691a1f967da6b60fef7)
+- Restore the APK workflow for the monorepo *(release)* — [`22c28d8`](https://github.com/hawkaii/food-finder-app/commit/22c28d8a4d66f72eba43f14d3807d7ee29a2320c)
 
-- *(changelog)* V1.5.1 [skip ci]
-- *(changelog)* V1.6.0 [skip ci]
-- *(changelog)* V1.6.1 [skip ci]
-- *(changelog)* V1.7.0 [skip ci]
-- *(changelog)* V1.9.0 [skip ci]
-- *(changelog)* V1.9.1 [skip ci]
-- *(changelog)* V1.9.2 [skip ci]
-- *(changelog)* V1.9.3 [skip ci]
-- *(changelog)* V1.10.0 [skip ci]
-- *(changelog)* V1.11.0 [skip ci]
-- *(changelog)* V1.12.0 [skip ci]
-- *(changelog)* V1.13.0 [skip ci]
-- *(changelog)* V1.14.0 [skip ci]
-- *(changelog)* V1.15.0 [skip ci]
-- *(changelog)* V1.17.0 [skip ci]
-- *(changelog)* V1.17.1 [skip ci]
-- *(changelog)* V1.18.0 [skip ci]
-- *(changelog)* V1.19.0 [skip ci]
-- *(changelog)* V1.19.1 [skip ci]
-- *(changelog)* V1.20.0 [skip ci]
-- *(changelog)* V1.21.1 [skip ci]
-- *(changelog)* V1.22.0 [skip ci]
-- README, MIT licence and a root gitignore
+### Changed
+- The Wall is a feed of imports, not something you post to *(wall)* — [`deac286`](https://github.com/hawkaii/food-finder-app/commit/deac286d7066c0369fea0a21f04e77bc85865edd)
 
-### 🚜 Refactor
+### Chores
+- Name the app Shoku on the launcher — [`9fc3ffa`](https://github.com/hawkaii/food-finder-app/commit/9fc3ffa6a8e294c68c689af16be7dc6800749b69)
+- Downsize VM to e2-custom-4-8192 and add start/stop helper *(worker)* — [`51a8991`](https://github.com/hawkaii/food-finder-app/commit/51a8991644da2d620071157e4de0b7ffbb4d6a23)
 
-- *(wall)* The Wall is a feed of imports, not something you post to
+### Docs
+- V1.5.1 [skip ci] *(changelog)* — [`89a228d`](https://github.com/hawkaii/food-finder-app/commit/89a228da7f5e6374225c8c39980eb98a24b3ab8d)
+- V1.6.0 [skip ci] *(changelog)* — [`ca75864`](https://github.com/hawkaii/food-finder-app/commit/ca758646a0ce4dbf5908149d445dd57d9a70ddf8)
+- V1.6.1 [skip ci] *(changelog)* — [`71bfdbb`](https://github.com/hawkaii/food-finder-app/commit/71bfdbb2b7ca6f80e4a24ccf5c1103a139eaa2ce)
+- V1.7.0 [skip ci] *(changelog)* — [`40d4206`](https://github.com/hawkaii/food-finder-app/commit/40d4206d5a267e1d171f6eb31f1ab235ff833c67)
+- V1.9.0 [skip ci] *(changelog)* — [`ede9e73`](https://github.com/hawkaii/food-finder-app/commit/ede9e73e6cf7e53f9b9bbad3c7817147a38521aa)
+- V1.9.1 [skip ci] *(changelog)* — [`faaa4e2`](https://github.com/hawkaii/food-finder-app/commit/faaa4e2017afeb190d3038b1b4833988eb667a0f)
+- V1.9.2 [skip ci] *(changelog)* — [`ded74f6`](https://github.com/hawkaii/food-finder-app/commit/ded74f67d2eabacbb0011f46c64e554097c13986)
+- V1.9.3 [skip ci] *(changelog)* — [`8238ad3`](https://github.com/hawkaii/food-finder-app/commit/8238ad3825811c09f95a261945a5cfd2567faec6)
+- V1.10.0 [skip ci] *(changelog)* — [`d35f498`](https://github.com/hawkaii/food-finder-app/commit/d35f498c9ff5652ed749b09616d95fcd968ed757)
+- V1.11.0 [skip ci] *(changelog)* — [`b2bd5c2`](https://github.com/hawkaii/food-finder-app/commit/b2bd5c25f00faf00050da46dc6f2601b0b3685fb)
+- V1.12.0 [skip ci] *(changelog)* — [`373ba06`](https://github.com/hawkaii/food-finder-app/commit/373ba062cd960e65f09bac6f7a919ad5d6a3a665)
+- V1.13.0 [skip ci] *(changelog)* — [`8e012cb`](https://github.com/hawkaii/food-finder-app/commit/8e012cb0febc68e0d3dd4b9bb0412f87436b6457)
+- V1.14.0 [skip ci] *(changelog)* — [`29c0070`](https://github.com/hawkaii/food-finder-app/commit/29c0070bc1916b11f6ba0fe2a3ebf23de921e542)
+- V1.15.0 [skip ci] *(changelog)* — [`85b11e5`](https://github.com/hawkaii/food-finder-app/commit/85b11e550c32fe1a69327002ade0653cba0ed3b7)
+- V1.17.0 [skip ci] *(changelog)* — [`5ba4ef2`](https://github.com/hawkaii/food-finder-app/commit/5ba4ef2fb4d04e3115a65b03c48f38ada8bf251b)
+- V1.17.1 [skip ci] *(changelog)* — [`e6a9e96`](https://github.com/hawkaii/food-finder-app/commit/e6a9e961519ef8ca1335c59085e83441cd8cb079)
+- V1.18.0 [skip ci] *(changelog)* — [`8e9bb13`](https://github.com/hawkaii/food-finder-app/commit/8e9bb132149367fef5a63e39f936f04d900fe284)
+- V1.19.0 [skip ci] *(changelog)* — [`9b9ceba`](https://github.com/hawkaii/food-finder-app/commit/9b9ceba965638f6b8f85601c2d37c83de959d3b0)
+- V1.19.1 [skip ci] *(changelog)* — [`195ebb0`](https://github.com/hawkaii/food-finder-app/commit/195ebb0bbb87ddb57a5712fb3a4e0afe7a82bd2d)
+- V1.20.0 [skip ci] *(changelog)* — [`6bf9f2f`](https://github.com/hawkaii/food-finder-app/commit/6bf9f2f4621c4812957ce9f3f262200e6b0f5a96)
+- V1.21.1 [skip ci] *(changelog)* — [`708896a`](https://github.com/hawkaii/food-finder-app/commit/708896a6b1b36f6ae167f82bffaf8501316854c2)
+- V1.22.0 [skip ci] *(changelog)* — [`a32ebb6`](https://github.com/hawkaii/food-finder-app/commit/a32ebb6d7d87dee430ce1eb820ab262191c5a1ac)
+- README, MIT licence and a root gitignore — [`d25939d`](https://github.com/hawkaii/food-finder-app/commit/d25939d30ca9f4fa26582bac0f4f626adf9bf252)
+- The monorepo layout, and the two traps it introduces *(deploy)* — [`efcb55a`](https://github.com/hawkaii/food-finder-app/commit/efcb55aaed8645f7c99335a9539e1f21a4b458e7)
+- A Play Store readiness audit, and the client path it refers to — [`9425818`](https://github.com/hawkaii/food-finder-app/commit/9425818cc7011167202f9e2793db79251616f540)
+- Cut the line-count summary from the README — [`8083764`](https://github.com/hawkaii/food-finder-app/commit/8083764198dd625c4963c4086c3865f03a35957b)
 
-### 🧪 Testing
+### Fixed
+- Regenerate launcher icons from one render so no size is blank *(brand)* — [`4f1ff6d`](https://github.com/hawkaii/food-finder-app/commit/4f1ff6d3731abcd69406384f20f5bce4682d2f6f)
+- Write CHANGELOG.md from the git-cliff output, bump action majors *(ci)* — [`3d05930`](https://github.com/hawkaii/food-finder-app/commit/3d059301d54f6e53e83b310022f89e94b9423645)
+- Make every cook path persist, and migrate timestamps to text *(journal)* — [`d268d87`](https://github.com/hawkaii/food-finder-app/commit/d268d8703d93f35c89fb8a9422be83662458d2b8)
+- Treat an empty blocking pop as no job, and never die on a bad one *(worker)* — [`b6fc372`](https://github.com/hawkaii/food-finder-app/commit/b6fc37283df1b71bb9508cc9ebf7feb8d9f6df32)
+- Catch redis.exceptions.TimeoutError, not the builtin *(queue)* — [`288241c`](https://github.com/hawkaii/food-finder-app/commit/288241c4c0fbf26dd1af654bdcd8f8394bfb293f)
+- Fail with invalid_recipe, not internal_error, when text has no recipe *(imports)* — [`4f4162f`](https://github.com/hawkaii/food-finder-app/commit/4f4162ffc8177afc4bbf56a574a4d741426d6e06)
+- Report the server's reason instead of 'could not reach server' *(import)* — [`956238c`](https://github.com/hawkaii/food-finder-app/commit/956238ccda8f84a3af31a894b6040b596731e3fb)
+- Follow the device theme instead of forcing light *(theme)* — [`d4c0ea9`](https://github.com/hawkaii/food-finder-app/commit/d4c0ea980423beb2c2efcc40ba2bf2dc4f0d99a9)
+- Give yt-dlp a JS runtime; YouTube refuses to extract without one *(imports)* — [`ee47a6d`](https://github.com/hawkaii/food-finder-app/commit/ee47a6da968da31ae3bf472e20ae8956a5701b95)
+- Report a platform block as source_blocked, not invalid_recipe *(imports)* — [`dded96f`](https://github.com/hawkaii/food-finder-app/commit/dded96f9d5f4fcfa2376a422d8833b15962af42b)
+- Say when the platform is blocking us instead of 'could not read' *(import)* — [`b35660a`](https://github.com/hawkaii/food-finder-app/commit/b35660a09332726371a6c3279b71d9cf98826f82)
+- Mount cookies relative to the compose file's parent *(worker)* — [`946c6db`](https://github.com/hawkaii/food-finder-app/commit/946c6db80eed89bc92713183ea67891969b9564d)
+- Cookies must be writable — yt-dlp refreshes the jar *(worker)* — [`e38d7b6`](https://github.com/hawkaii/food-finder-app/commit/e38d7b6efb8a4a61f84b0a4286ca6db268af91ca)
+- Call the comments endpoint with the CSRF header Instagram requires *(imports)* — [`13f491d`](https://github.com/hawkaii/food-finder-app/commit/13f491da0cf29be240e0c648213f5c77cc96c09a)
+- Provenance names the parser that actually ran *(structurer)* — [`b115e09`](https://github.com/hawkaii/food-finder-app/commit/b115e0940b5a5ead0b29c9b65d68b21634b1c574)
+- A stale parse is re-extracted, not served forever *(imports)* — [`3ac2be3`](https://github.com/hawkaii/food-finder-app/commit/3ac2be39a33b682e258a25b7de3c035e4ff15e80)
+- Defer annotations so Python 3.12 can import the pipeline *(imports)* — [`bbeb2cb`](https://github.com/hawkaii/food-finder-app/commit/bbeb2cb5501794e8338caa6cda829469aa70022f)
+- Fall back to the video when the text yields no recipe *(imports)* — [`126de04`](https://github.com/hawkaii/food-finder-app/commit/126de046602917209a8c05f1ed8eae40906329fd)
+- Fill the journal on sign-in instead of waiting for a reload *(sync)* — [`be8c7a6`](https://github.com/hawkaii/food-finder-app/commit/be8c7a6ad21bf947413a4be233f6dc4236f7eb7d)
+- Signing in now pulls the journal, and the app says when it is syncing *(sync)* — [`cf380d7`](https://github.com/hawkaii/food-finder-app/commit/cf380d7482690aa4f8cdce563ce5713c4fad38c8)
+- Keep an import alive through a dropped poll and a restart *(import)* — [`7d215a5`](https://github.com/hawkaii/food-finder-app/commit/7d215a5ba7322adc8c9ff5eacdbaeea84c61118c)
+- Accept origin_handle and origin_platform on version rows *(sync)* — [`7cda969`](https://github.com/hawkaii/food-finder-app/commit/7cda9690ef74635aee0547a9130fe632bc6f938b)
+- Read step links from the recipe payload, where the API puts them *(recipe)* — [`7ff2a94`](https://github.com/hawkaii/food-finder-app/commit/7ff2a942b3e4fddd1cf1bc44d6a919b031b37533)
+- Load the speech model before the first job, on a volume *(worker)* — [`f31dd05`](https://github.com/hawkaii/food-finder-app/commit/f31dd0508b903ad2c7006c7ab9bb79d095c251b6)
+- A 180s ceiling, because 60s failed every reel over ~50s *(imports)* — [`f649ca2`](https://github.com/hawkaii/food-finder-app/commit/f649ca2caf1277538bf2176cb72fd40ffbb3cdda)
+- Wait four minutes for a reel the server is still reading *(import)* — [`4bd6f1f`](https://github.com/hawkaii/food-finder-app/commit/4bd6f1f43d7e3239284142568bb9911f02fc91fe)
+- Treat a waking worker as a stage, and name a dead one *(import)* — [`c91acc2`](https://github.com/hawkaii/food-finder-app/commit/c91acc237da3c1140cfdcd3809626bffe1283ec8)
+- Keep the poller alive for the whole app, not just the Journal *(import)* — [`c92e29e`](https://github.com/hawkaii/food-finder-app/commit/c92e29e865141404066f896d1acad4e9ec48f5b7)
+- A photo slot is never a grey box, and the Wall header stops repeating itself *(ui)* — [`971382f`](https://github.com/hawkaii/food-finder-app/commit/971382fb7edf26e5759bab91a5e5294db31687f0)
+- Sign presigned URLs by impersonating the machine identity *(storage)* — [`f9136f7`](https://github.com/hawkaii/food-finder-app/commit/f9136f7dd3638394c79b3a2a697c450ffdd757e4)
+- The worker ships the bucket client, and a bad bucket degrades *(storage)* — [`99f8346`](https://github.com/hawkaii/food-finder-app/commit/99f8346bdcacfb8241196606cec92e9841f8f805)
+- Compose env file sits two levels up in the monorepo *(deploy)* — [`0dd4b97`](https://github.com/hawkaii/food-finder-app/commit/0dd4b9730428007f964d454c3e79f5e2af1e7c11)
 
-- Settle onboarding animations before asserting
-- Assert onboarding CTA instead of animated copy
+### Tests
+- Settle onboarding animations before asserting — [`d781cb0`](https://github.com/hawkaii/food-finder-app/commit/d781cb06105946cd4793a6ee594fd1c689aa32de)
+- Assert onboarding CTA instead of animated copy — [`e27c04f`](https://github.com/hawkaii/food-finder-app/commit/e27c04fe53cd9a32197cbc370cebcbd078905140)
 
-### ⚙️ Miscellaneous Tasks
 
-- Build debug APK on GitHub Actions
-- Name the app Shoku on the launcher
-- *(release)* Git-cliff changelog, APK only on main, checks on pull requests
-- A changelog push must not fail a shipped release
-- Cache Gradle and stop building commits that cannot change the APK
-- A release is a version bump, not a commit
-- Retry the release publish instead of losing it to a 403
-- Build image to GHCR and deploy to the VM over SSH
-- *(worker)* Downsize VM to e2-custom-4-8192 and add start/stop helper
-- Run the tests on 3.12, the version the images use
-- Make the import check a valid one-liner
-
-### 💼 Other
-
-- One repo for the app, the api and the deploy
-- Nutrition flow changes before backup
-- App, with its full history
-- Split api and worker images; worker (yt-dlp + whisper) moves to its own VM
-- Multi-stage image, drop apt ffmpeg (1 GB -> 430 MB), slim worker extra
-- Install node only in the worker image
-- Separate dev/prod compose so a git pull cannot clobber the deployed one
-- Pin the compose project name so restarts don't collide
-- *(worker)* Mount the cookies file read-only
-- Install dependencies before copying code
-- Api, with its full history
