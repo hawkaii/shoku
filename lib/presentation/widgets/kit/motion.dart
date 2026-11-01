@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Motion system: tactile, fast, earned. Every action is acknowledged within
@@ -102,14 +104,23 @@ class ShokuEntrance extends StatefulWidget {
 
 class _ShokuEntranceState extends State<ShokuEntrance> {
   bool _visible = false;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     final delay = ShokuMotion.stagger * (widget.index.clamp(0, 7));
-    Future<void>.delayed(delay, () {
+    // A Timer, not a bare delay: an item scrolled away or a list torn down must
+    // not leave a rebuild scheduled behind it.
+    _timer = Timer(delay, () {
       if (mounted) setState(() => _visible = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override

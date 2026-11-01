@@ -80,7 +80,7 @@ class _WallScreenState extends ConsumerState<WallScreen> {
                         const SizedBox(height: 2),
                         Text(
                           feed.items.isEmpty
-                              ? 'Reels people chose to share'
+                              ? 'Reels people imported'
                               : count(feed.items.length, 'reel') +
                                   (feed.hasMore ? ' · more below' : ''),
                           style:
@@ -88,8 +88,6 @@ class _WallScreenState extends ConsumerState<WallScreen> {
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    const ShokuChip('shared', icon: Icons.public),
                   ],
                 ),
               ),
@@ -105,11 +103,11 @@ class _WallScreenState extends ConsumerState<WallScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   ShokuSpace.lg,
                   0,
                   ShokuSpace.lg,
-                  ShokuSpace.xl,
+                  ShokuSpace.tabBarClearance(context),
                 ),
                 sliver: SliverList.builder(
                   itemCount: feed.items.length + 1,
@@ -430,7 +428,7 @@ class _FeedFooter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.lg),
       child: Center(
         child: Text(
-          'That is everything shared today',
+          'That is every reel for now',
           style: ShokuType.label.copyWith(color: c.inkMuted),
         ),
       ),

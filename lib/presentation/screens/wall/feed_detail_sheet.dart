@@ -225,7 +225,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                           ),
                           child: Center(
                             child: Text(
-                              'Open the reel',
+                              'View the reel',
                               style: ShokuType.title
                                   .copyWith(color: c.ink, fontSize: 13),
                             ),

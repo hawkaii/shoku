@@ -148,6 +148,9 @@ void main() {
     expect(find.text('Finish with lime'), findsOneWidget);
     expect(find.text('Paneer Tikka (as read)'), findsOneWidget);
     expect(find.text('25 min · 2 ingredients · 3 steps'), findsOneWidget);
+    // One label for one action, everywhere in the app.
+    expect(find.text('View the reel'), findsOneWidget);
+    expect(find.text('Open the reel'), findsNothing);
     expect(calls, contains('GET /v1/content/$_shortcode'));
   });
 
