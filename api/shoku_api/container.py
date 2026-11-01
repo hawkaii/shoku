@@ -36,7 +36,7 @@ from .imports.interfaces import (
 )
 from .imports.queue import InMemoryQueue, Queue, RedisQueue
 from .imports.service import ImportDeps
-from .photos import DevStorage, PhotoDeps, R2Storage, Storage
+from .photos import DevStorage, GcsStorage, PhotoDeps, R2Storage, Storage
 
 
 @dataclass
@@ -104,6 +104,12 @@ def build_context(
             secret_access_key=settings.r2_secret_access_key,
             bucket=settings.storage_bucket,
             public_base_url=settings.storage_public_base_url,
+        )
+    elif settings.storage_backend == "gcs":
+        storage = GcsStorage(
+            bucket=settings.storage_bucket,
+            public_base_url=settings.storage_public_base_url,
+            project=settings.gcp_project or None,
         )
     else:
         storage = DevStorage(settings.storage_public_base_url)
