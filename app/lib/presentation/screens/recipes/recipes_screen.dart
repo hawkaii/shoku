@@ -27,11 +27,11 @@ class RecipesScreen extends ConsumerWidget {
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           ShokuSpace.lg,
           ShokuSpace.sm,
           ShokuSpace.lg,
-          ShokuSpace.xxxl,
+          ShokuSpace.tabBarClearance(context),
         ),
         children: [
           Row(

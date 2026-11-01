@@ -47,15 +47,21 @@ class JournalScreen extends ConsumerWidget {
       orElse: () => dishes.first,
     );
 
+    // A CustomScrollView because the cook-log empty card is the one thing on
+    // screen and must be laid out with SliverFillRemaining: it may not be cut
+    // in half by the tab bar (§12.3).
     return _withImportCard(
-      ListView(
-        padding: const EdgeInsets.fromLTRB(
-          ShokuSpace.lg,
-          ShokuSpace.sm,
-          ShokuSpace.lg,
-          ShokuSpace.xxxl,
-        ),
-        children: [
+      CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              ShokuSpace.lg,
+              ShokuSpace.sm,
+              ShokuSpace.lg,
+              0,
+            ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
           // ---- Rhythm header ------------------------------------------
           Row(
             children: [
@@ -126,19 +132,48 @@ class JournalScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: ShokuSpace.sm),
-
+                ],
+              ),
+            ),
+          ),
           if (cooks.isEmpty)
-            _EmptyJournal(onStart: () => showLogSheet(context, dishes.first))
-          else
-            for (var i = 0; i < cooks.length; i++)
-              ShokuEntrance(
-                index: i,
-                child: _TimelineEntry(
-                  log: cooks[i],
-                  dish: dishes.firstWhere((d) => d.cooks.any((k) => k.id == cooks[i].id)),
-                  isLast: i == cooks.length - 1,
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: ShokuSpace.lg,
+                  right: ShokuSpace.lg,
+                  bottom: ShokuSpace.tabBarClearance(context),
+                ),
+                child: _EmptyJournal(
+                  onStart: () => showLogSheet(context, dishes.first),
                 ),
               ),
+            )
+          else ...{
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                ShokuSpace.lg,
+                0,
+                ShokuSpace.lg,
+                ShokuSpace.tabBarClearance(context),
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => ShokuEntrance(
+                    index: i,
+                    child: _TimelineEntry(
+                      log: cooks[i],
+                      dish: dishes
+                          .firstWhere((d) => d.cooks.any((k) => k.id == cooks[i].id)),
+                      isLast: i == cooks.length - 1,
+                    ),
+                  ),
+                  childCount: cooks.length,
+                ),
+              ),
+            ),
+          },
         ],
       ),
     );

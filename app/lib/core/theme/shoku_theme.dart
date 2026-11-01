@@ -94,6 +94,17 @@ class ShokuSpace {
   static const double xxl = 32;
   static const double xxxl = 48;
 
+  /// The tab bar's own height, before the device's bottom inset.
+  static const double tabBar = 64;
+
+  /// How much room every tab root must leave at the end of its scrollable.
+  ///
+  /// One number, computed per device (§12.3): the bar, the gesture inset, and
+  /// one gap. A hand-picked value in one list is how a card ends up half under
+  /// the bar on somebody's phone.
+  static double tabBarClearance(BuildContext context) =>
+      tabBar + MediaQuery.viewPaddingOf(context).bottom + lg;
+
   const ShokuSpace._();
 }
 
