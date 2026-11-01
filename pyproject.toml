@@ -17,6 +17,9 @@ dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "pyjwt[crypto]>=2.9",
+    # Downscaling a reel cover at extraction. Small wheel, and both the API
+    # (backfill) and the worker (import) need it.
+    "Pillow>=10.4",
 ]
 
 [project.optional-dependencies]

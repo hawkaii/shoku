@@ -32,16 +32,31 @@ class Storage(Protocol):
         self, key: str, *, content_type: str, expires_in: int
     ) -> PresignedUpload: ...
 
+    def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
+        """Store bytes server-side and return their public URL.
+
+        ``None`` means this backend cannot serve the object publicly — the dev
+        placeholder, or a deployment with no bucket. Callers treat that as "we
+        hold no copy" rather than inventing a URL that will 404.
+        """
+        ...
+
 
 class DevStorage:
     """Deterministic placeholder URL for local development.
 
-    Exercisable but not uploadable: nothing can PUT to it. A real deployment
-    sets ``SHOKU_STORAGE_BACKEND=r2``.
+    Exercisable but not uploadable: nothing can PUT to it, and ``put`` reports
+    that it stored nothing. A real deployment sets ``SHOKU_STORAGE_BACKEND=r2``.
     """
+
+    #: This backend cannot hold an object, so nothing should claim it did.
+    can_store = False
 
     def __init__(self, public_base_url: str) -> None:
         self._base = public_base_url.rstrip("/")
+
+    def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
+        return None
 
     def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
         return PresignedUpload(
@@ -57,9 +72,16 @@ class DevStorage:
 class FakeStorage:
     """Records presigns so tests can assert on the key namespace."""
 
+    can_store = True
+
     def __init__(self, public_base_url: str = "https://media.test") -> None:
         self._base = public_base_url.rstrip("/")
         self.keys: list[str] = []
+        self.written: dict[str, bytes] = {}
+
+    def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
+        self.written[key] = body
+        return f"{self._base}/{quote(key)}"
 
     def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
         self.keys.append(key)
@@ -123,6 +145,24 @@ class R2Storage:
             expires_in=expires_in,
             public_url=f"{self._public_base}/{quote(key)}" if self._public_base else None,
         )
+
+    def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
+        """Server-side upload: the one path where bytes pass through us.
+
+        Used for a reel's cover, which has to be fetched from a link that is
+        already expiring. User photos still go straight to the bucket on a
+        presigned PUT; this is not a second upload path for them.
+        """
+        self._client.put_object(
+            Bucket=self._bucket,
+            Key=key,
+            Body=body,
+            ContentType=content_type,
+            # The key is the SHA of these bytes, so the same URL is always the
+            # same image. Cache it for a year rather than re-uploading hot.
+            CacheControl="public, max-age=31536000, immutable",
+        )
+        return f"{self._public_base}/{quote(key)}" if self._public_base else None
 
 
 def object_key(user_id: str, extension: str | None, now: datetime | None = None) -> str:

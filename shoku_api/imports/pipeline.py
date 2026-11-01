@@ -38,6 +38,7 @@ from ..domain.clock import Deadline
 from ..domain.errors import PipelineError, StructuringFailed
 from ..models import ImportJob
 from ..schemas import ProsePayload, RecipePayload
+from ..thumbnails import stable_cover
 from .. import content as content_service
 from .adapters import sample_frames
 
@@ -273,6 +274,10 @@ class ImportWorker:
         thumbnail_url: str | None = None,
         structuring_model: str | None = None,
     ) -> None:
+        # Copy the cover before opening the session: the image fetch is network
+        # work, and holding a connection for it serves nobody. It cannot raise.
+        thumbnail_url = self._stable_cover(job.shortcode, thumbnail_url)
+
         with session_scope(self.ctx.session_factory) as session:
             row = session.get(ImportJob, job.id)
             if row is None:
@@ -304,6 +309,22 @@ class ImportWorker:
             row.updated_at = self.ctx.clock.now()
 
     # ---- plumbing --------------------------------------------------------
+
+    def _stable_cover(self, shortcode: str, original: str | None) -> str | None:
+        """Put a permanent copy of the reel's cover in our storage.
+
+        The platform URL expires, so it is only ever a source. If anything goes
+        wrong the original is kept: a missing image is a monogram, and the
+        client already draws one.
+        """
+        if not original:
+            return original
+        try:
+            stable = stable_cover(self.ctx.storage, original, shortcode=shortcode)
+        except Exception:  # noqa: BLE001 - the import is worth more than the picture
+            log.warning("cover copy for %s raised; keeping the platform URL", shortcode)
+            return original
+        return stable or original
 
     def _claim(self, job_id: str) -> ClaimedJob | None:
         now = self.ctx.clock.now()
