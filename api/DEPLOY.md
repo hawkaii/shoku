@@ -13,8 +13,13 @@ bursty, memory-hungry, and useless when nobody is importing.
 ## API box
 
 ```bash
-cd /opt/shoku
-sudo docker compose -f deploy/docker-compose.prod.yml up -d --pull never
+git clone https://github.com/hawkaii/shoku /opt/shoku     # public: no deploy key
+cd /opt/shoku/api
+sudo docker build --build-arg EXTRAS=prod -t shoku-api:api .
+cd deploy
+# --env-file matters: compose resolves ${...} substitution from the project
+# directory, which is api/deploy, not the repo root where .env lives.
+sudo docker compose --env-file ../../.env -f docker-compose.prod.yml up -d --pull never
 curl localhost:8000/health
 ```
 
@@ -41,9 +46,16 @@ sudo docker build --build-arg EXTRAS=prod -t shoku-api:api .
 Same repo, heavier image:
 
 ```bash
+git clone https://github.com/hawkaii/shoku /opt/shoku
+cd /opt/shoku/api
 sudo docker build --build-arg EXTRAS="worker,whisper" -t shoku-api:worker .
-sudo docker compose -f deploy/docker-compose.worker.yml up -d
+cd deploy
+sudo docker compose --env-file ../../.env -f docker-compose.worker.yml up -d
 ```
+
+`cookies.txt` belongs at `api/cookies.txt` — the compose file mounts `../cookies.txt`
+relative to `api/deploy`. If it is missing, Docker creates a *directory* there and
+yt-dlp silently runs without cookies.
 
 Its `.env` is the API's, with the two hostnames swapped for the API box's
 **private** IP (they share the VPC, so this never leaves Google's network):
