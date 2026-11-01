@@ -1,9 +1,10 @@
 """The GCS backend: no key file, and a presigned URL that actually works.
 
 These tests fake the google client rather than reaching the network. What is
-worth pinning is the shape: a PUT-presigned V4 URL under our key, a public URL
-built from the configured base, and the cache headers that make a copied cover
-cheap to re-read.
+worth pinning is the shape: a PUT-presigned V4 URL under our key, signed by an
+impersonated copy of the VM's own identity (compute credentials cannot sign at
+all), a public URL built from the configured base, and the cache headers that
+make a copied cover cheap to re-read.
 """
 
 import sys
@@ -14,6 +15,7 @@ import pytest
 from shoku_api.photos import GcsStorage
 
 BASE = "https://storage.googleapis.com/shoku-media-test"
+SIGNER = "reel-board@test.iam.gserviceaccount.com"
 
 
 class Blob:
@@ -25,7 +27,7 @@ class Blob:
 
     def generate_signed_url(self, **kwargs):
         self.signed = kwargs
-        return f"https://storage.googleapis.com/shoku-media-test/{self.name}?X-Goog-Signature=abc"
+        return f"{BASE}/{self.name}?X-Goog-Signature=abc"
 
     def upload_from_string(self, body: bytes, content_type: str) -> None:
         self.uploaded = (body, content_type)
@@ -39,22 +41,36 @@ class Bucket:
         return self.blobs.setdefault(name, Blob(name))
 
 
+class Impersonated:
+    """Stands in for google.auth.impersonated_credentials.Credentials."""
+
+    instances: list["Impersonated"] = []
+
+    def __init__(self, **kwargs) -> None:
+        self.kwargs = kwargs
+        Impersonated.instances.append(self)
+
+
 @pytest.fixture
 def gcs(monkeypatch):
     """Install fake google modules and return (storage, bucket)."""
     bucket = Bucket()
+    Impersonated.instances = []
 
     class Client:
         def __init__(self, project=None, credentials=None) -> None:
             self.project = project
+            self.credentials = credentials
 
         def bucket(self, name: str) -> Bucket:
             assert name == "shoku-media-test"
             return bucket
 
     storage_module = types.SimpleNamespace(Client=Client)
-    auth_module = types.SimpleNamespace(default=lambda: (object(), "shoku-project"))
-
+    auth_module = types.SimpleNamespace(
+        default=lambda: ("base-credentials", "shoku-project"),
+        impersonated_credentials=types.SimpleNamespace(Credentials=Impersonated),
+    )
     google = types.ModuleType("google")
     cloud = types.ModuleType("google.cloud")
     cloud.storage = storage_module
@@ -65,24 +81,72 @@ def gcs(monkeypatch):
     monkeypatch.setitem(sys.modules, "google.cloud", cloud)
     monkeypatch.setitem(sys.modules, "google.cloud.storage", storage_module)
 
-    return GcsStorage(bucket="shoku-media-test", public_base_url=BASE), bucket
+    storage = GcsStorage(
+        bucket="shoku-media-test", public_base_url=BASE, service_account=SIGNER
+    )
+    return storage, bucket
 
 
-def test_a_presigned_put_is_a_v4_url_for_our_key(gcs) -> None:
+def test_presigning_impersonates_the_machine_identity(gcs) -> None:
+    """Compute credentials hold a token and cannot sign; the copy can."""
     storage, bucket = gcs
 
-    upload = storage.presign_put("photos/user-1/202601/x.jpg", content_type="image/jpeg", expires_in=900)
+    upload = storage.presign_put(
+        "photos/user-1/202601/x.jpg", content_type="image/jpeg", expires_in=900
+    )
+
+    signer = Impersonated.instances[0]
+    assert signer.kwargs["target_principal"] == SIGNER
+    assert signer.kwargs["source_credentials"] == "base-credentials"
 
     blob = bucket.blobs["photos/user-1/202601/x.jpg"]
-    assert upload.method == "PUT"
-    assert upload.key == "photos/user-1/202601/x.jpg"
-    assert upload.url.startswith("https://")
-    assert "X-Goog-Signature" in upload.url
     assert blob.signed["version"] == "v4"
     assert blob.signed["method"] == "PUT"
     assert blob.signed["content_type"] == "image/jpeg"
+    assert blob.signed["credentials"] is signer
+    assert blob.signed["service_account_email"] == SIGNER
     assert blob.signed["expiration"].total_seconds() == 900
+
+    assert upload.method == "PUT"
+    assert upload.key == "photos/user-1/202601/x.jpg"
+    assert "X-Goog-Signature" in upload.url
     assert upload.public_url == f"{BASE}/photos/user-1/202601/x.jpg"
+
+
+def test_without_an_identity_presigning_fails_loudly(monkeypatch) -> None:
+    """Better a clear 503 than a URL nothing can upload to."""
+    from shoku_api.domain.errors import Unavailable
+
+    bucket = Bucket()
+
+    class Client:
+        def __init__(self, project=None, credentials=None) -> None:
+            pass
+
+        def bucket(self, name):
+            return bucket
+
+    storage_module = types.SimpleNamespace(Client=Client)
+    auth_module = types.SimpleNamespace(
+        default=lambda: ("base", "p"),
+        impersonated_credentials=types.SimpleNamespace(Credentials=Impersonated),
+    )
+    google = types.ModuleType("google")
+    cloud = types.ModuleType("google.cloud")
+    cloud.storage = storage_module
+    google.auth = auth_module
+    for name, module in {
+        "google": google,
+        "google.auth": auth_module,
+        "google.cloud": cloud,
+        "google.cloud.storage": storage_module,
+    }.items():
+        monkeypatch.setitem(sys.modules, name, module)
+
+    storage = GcsStorage(bucket="shoku-media-test", public_base_url=BASE)
+
+    with pytest.raises(Unavailable):
+        storage.presign_put("photos/x.jpg", content_type="image/jpeg", expires_in=900)
 
 
 def test_a_server_side_put_sets_immutable_cache_headers(gcs) -> None:
