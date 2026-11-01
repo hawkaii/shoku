@@ -11,7 +11,7 @@ on:
     # build nothing. That is what stops a busy day from costing 90 minutes of
     # runner time for binaries nobody installs.
     paths:
-      - "pubspec.yaml"
+      - "app/pubspec.yaml"
       - ".github/workflows/android.yml"
   workflow_dispatch:
     inputs:
@@ -34,6 +34,11 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        # The Flutter project lives in app/ inside the monorepo; every shell
+        # step below is relative to it.
+        working-directory: app
 
     steps:
       - name: Checkout
@@ -196,7 +201,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: shoku-apk-${{ steps.version.outputs.version }}
-          path: dist/*.apk
+          path: app/dist/*.apk
           retention-days: 30
 
       # Keep the repo's CHANGELOG.md in step with the published release. The

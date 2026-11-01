@@ -19,6 +19,9 @@ jobs:
   verify:
     name: Analyze, test, web
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
     timeout-minutes: 20
 
     steps:
