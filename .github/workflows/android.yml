@@ -19,7 +19,9 @@ on:
         description: "Flutter build mode"
         type: choice
         options: [debug, release]
-        default: debug
+        # A manual run is for testing the pipeline, and the pipeline ships
+        # release builds now; debug stays one click away for a bisect.
+        default: release
 
 permissions:
   contents: write
@@ -94,19 +96,66 @@ jobs:
       - name: Build APK
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
-          BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+          # Push builds are releases. Only a human running this by hand can ask
+          # for a debug build, and they have to say so.
+          BUILD_TYPE: ${{ inputs.build_type || 'release' }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          args=("--$BUILD_TYPE")
+
+          defines=()
           if [ -n "${API_BASE_URL}" ]; then
             echo "Using API_BASE_URL=${API_BASE_URL}"
-            args+=("--dart-define=API_BASE_URL=${API_BASE_URL}")
+            defines+=("--dart-define=API_BASE_URL=${API_BASE_URL}")
           fi
-          flutter build apk "${args[@]}"
+
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-${BUILD_TYPE}.apk \
-             "dist/shoku-${VERSION}-${BUILD_TYPE}.apk"
+          if [ "$BUILD_TYPE" = "release" ]; then
+            # One APK per ABI: a phone downloads only its own ~20 MB instead of
+            # a universal ~60 MB that carries two other architectures.
+            flutter build apk --release --split-per-abi "${defines[@]}"
+            for apk in build/app/outputs/flutter-apk/app-*-release.apk; do
+              # app-arm64-v8a-release.apk -> shoku-<version>-arm64-v8a.apk
+              abi=$(basename "$apk" .apk)
+              abi=${abi#app-}
+              abi=${abi%-release}
+              cp "$apk" "dist/shoku-${VERSION}-${abi}.apk"
+            done
+
+            # The owner tests on a debug build. It is built every release, next
+            # to the real one, because debugging a release APK is not a thing.
+            flutter build apk --debug "${defines[@]}"
+            cp build/app/outputs/flutter-apk/app-debug.apk \
+               "dist/shoku-${VERSION}-debug.apk"
+          else
+            flutter build apk --debug "${defines[@]}"
+            cp build/app/outputs/flutter-apk/app-debug.apk \
+               "dist/shoku-${VERSION}-debug.apk"
+          fi
+          ls -lh dist
+
+      # The size report is measured by CI, not claimed in a commit message.
+      # `--analyze-size` refuses `--split-per-abi`, so it is one extra arm64
+      # build whose JSON travels with the release.
+      - name: Size report
+        if: ${{ (inputs.build_type || 'release') == 'release' }}
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          set -euo pipefail
+          defines=()
+          if [ -n "${API_BASE_URL}" ]; then
+            defines+=("--dart-define=API_BASE_URL=${API_BASE_URL}")
+          fi
+          mkdir -p dist/size
+          flutter build apk --release --analyze-size \
+            --target-platform android-arm64 "${defines[@]}" \
+            2>&1 | tee dist/size/size-report.txt
+          # Flutter writes the machine-readable report next to the build
+          # outputs; take every JSON it produced rather than guessing a name.
+          find build/app/outputs -name "*.json" -newermt "-20 minutes" \
+            -exec cp {} dist/size/ \; 2>/dev/null || true
+          ls -lh dist/size
 
       # git-cliff-action exposes the rendered changelog as an output rather
       # than writing files itself.
@@ -138,12 +187,9 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           TAG: ${{ steps.version.outputs.tag }}
-          BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+          BUILD_TYPE: ${{ inputs.build_type || 'release' }}
         run: |
           set -euo pipefail
-          apk=$(ls dist/*.apk)
-          size=$(du -h "$apk" | cut -f1)
-          sha=$(sha256sum "$apk" | cut -d' ' -f1)
           {
             cat /tmp/notes.md
             echo
@@ -151,18 +197,31 @@ jobs:
             echo
             echo "### Install"
             echo
-            echo "Download \`$(basename "$apk")\` below and open it on the phone."
-            echo "Debug-signed, so Android will ask you to allow installs from your"
-            echo "browser or file manager once."
+            echo "Download the APK for your phone below and open it. If you are not"
+            echo "sure which one, \`arm64-v8a\` is every phone made since about 2017."
+            echo "The \`debug\` APK is the development build the owner tests with;"
+            echo "both are debug-signed, so either installs over the other."
+            echo "Android will ask you to allow installs from your browser or file"
+            echo "manager once."
+            echo
+            echo "| Asset | ABI | Size | SHA-256 |"
+            echo "|---|---|---|---|"
+            for apk in dist/*.apk; do
+              name=$(basename "$apk")
+              abi=${name#"shoku-${VERSION}-"}
+              abi=${abi%.apk}
+              size=$(du -h "$apk" | cut -f1)
+              sha=$(sha256sum "$apk" | cut -d' ' -f1)
+              echo "| \`${name}\` | ${abi} | ${size} | \`${sha}\` |"
+            done
             echo
             echo "| | |"
             echo "|---|---|"
             echo "| Version | \`${VERSION}\` |"
             echo "| Build | \`${BUILD_TYPE}\` |"
-            echo "| Size | ${size} |"
             echo "| Commit | [\`${GITHUB_SHA:0:7}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}) |"
-            echo "| SHA-256 | \`${sha}\` |"
           } > /tmp/release.md
+          cat /tmp/release.md
 
       - name: Publish release
         env:
@@ -201,7 +260,9 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: shoku-apk-${{ steps.version.outputs.version }}
-          path: app/dist/*.apk
+          path: |
+            app/dist/*.apk
+            app/dist/size/*
           retention-days: 30
 
       # Keep the repo's CHANGELOG.md in step with the published release. The

@@ -7,6 +7,7 @@ import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/mock/sample_recipe.dart';
 import 'package:food_finder/main.dart';
+import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/screens/journal/journal_screen.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
@@ -32,6 +33,7 @@ void main() {
 
     await tester.pumpWidget(ProviderScope(
       overrides: [
+        authReadyProvider.overrideWith((ref) async {}),
         databaseProvider.overrideWithValue(db),
         onboardingDoneProvider.overrideWith((ref) => true),
       ],

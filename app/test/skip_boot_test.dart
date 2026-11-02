@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/main.dart';
+import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,7 +19,10 @@ void main() {
     addTearDown(db.close);
 
     await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      overrides: [
+        authReadyProvider.overrideWith((ref) async {}),
+        databaseProvider.overrideWithValue(db),
+      ],
       child: const ShokuApp(),
     ));
     await tester.pump(const Duration(milliseconds: 600));

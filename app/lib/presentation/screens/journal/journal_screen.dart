@@ -539,7 +539,13 @@ class _FridgeButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final items = ref.watch(pantryStoreProvider).where((i) => !i.wanted).length;
+    // Count only: a stepper or a rename on the fridge page changes the list
+    // many times, and none of those should repaint the journal's header.
+    final items = ref.watch(
+      pantryStoreProvider.select(
+        (items) => items.where((i) => !i.wanted).length,
+      ),
+    );
     return GestureDetector(
       key: const ValueKey('fridge-button'),
       onTap: () => context.go('/pantry'),

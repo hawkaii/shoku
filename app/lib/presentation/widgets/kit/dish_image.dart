@@ -49,6 +49,7 @@ class ShokuDishImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = _provider;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
 
     final image = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
@@ -57,7 +58,25 @@ class ShokuDishImage extends StatelessWidget {
         children: [
           _MonogramWell(title: title),
           if (provider != null)
-            ShokuPhoto(provider: provider, fit: fit, deadline: deadline),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // A 1080 px photo in a 72 px slot costs nine times the memory
+                // and buys nothing: decode at the size it is painted, never at
+                // the size it was uploaded.
+                final ratio = dpr.isFinite && dpr > 0 ? dpr : 1.0;
+                final width = constraints.maxWidth.isFinite
+                    ? (constraints.maxWidth * ratio).round()
+                    : null;
+                final height = constraints.maxHeight.isFinite
+                    ? (constraints.maxHeight * ratio).round()
+                    : null;
+                return ShokuPhoto(
+                  provider: ResizeImage.resizeIfNeeded(width, height, provider),
+                  fit: fit,
+                  deadline: deadline,
+                );
+              },
+            ),
           // 1px keyline locks the photo into the paper grid.
           IgnorePointer(
             child: DecoratedBox(
