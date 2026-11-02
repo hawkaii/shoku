@@ -23,13 +23,15 @@ class BotOrb extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final state = ref.watch(botControllerProvider);
+    // The orb must not build the bot controller: that controller reads the
+    // assistant thread and the pantry at construction, and doing it while the
+    // Journal is still booting is what left the Journal looking empty on a
+    // release web build. The sheet creates the controller when it opens.
     final offline = ref.watch(botOfflineProvider);
-    final hasDraft = state.draft.trim().isNotEmpty;
     final style = botOrbStyle(
-      unread: state.unread,
+      unread: false,
       offline: offline,
-      draft: hasDraft,
+      draft: false,
     );
 
     return Semantics(
