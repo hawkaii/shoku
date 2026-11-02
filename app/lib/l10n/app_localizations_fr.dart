@@ -1114,21 +1114,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dishSampleGate =>
-      'Sign in to import your own reels and talk to the recipe.';
+      'Connectez-vous pour importer vos propres reels et parler à la recette.';
 
   @override
   String dishCookCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count cooks',
-      one: '1 cook',
+      other: '$count cuissons',
+      many: '$count de cuissons',
+      one: '1 cuisson',
     );
     return '$_temp0';
   }
 
   @override
-  String get dishFromVideoNote => 'read from the video — amounts may be off';
+  String get dishFromVideoNote =>
+      'lu dans la vidéo — les quantités peuvent être fausses';
 
   @override
   String dishVersionGone(int from, int to) {
@@ -1139,34 +1141,35 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String toString = toNumberFormat.format(to);
 
-    return 'v$fromString is gone — showing v$toString';
+    return 'v$fromString n\'existe plus — affichage de v$toString';
   }
 
   @override
-  String get dishStartCookMode => 'Start cook mode';
+  String get dishStartCookMode => 'Lancer le mode cuisine';
 
   @override
-  String get dishReadRecipe => 'Read this recipe';
+  String get dishReadRecipe => 'Lire cette recette';
 
   @override
-  String get dishMore => 'More';
+  String get dishMore => 'Plus';
 
   @override
-  String get dishMenuCooked => 'I just cooked this';
+  String get dishMenuCooked => 'Je viens de le cuisiner';
 
   @override
-  String get dishMarkToCook => 'Mark as to cook';
+  String get dishMarkToCook => 'Marquer à cuisiner';
 
   @override
-  String get dishSetUpFridge => 'Set up your fridge';
+  String get dishSetUpFridge => 'Configurer votre frigo';
 
   @override
   String dishAddMissingToList(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Add $count missing to list',
-      one: 'Add 1 missing to list',
+      other: 'Ajouter $count manquants à la liste',
+      many: 'Ajouter $count de manquants à la liste',
+      one: 'Ajouter 1 manquant à la liste',
     );
     return '$_temp0';
   }
@@ -1176,8 +1179,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count added to your list',
-      one: '1 added to your list',
+      other: '$count ajoutés à votre liste',
+      many: '$count d\'ajoutés à votre liste',
+      one: '1 ajouté à votre liste',
     );
     return '$_temp0';
   }
@@ -1187,8 +1191,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ingredients',
-      one: '1 ingredient',
+      other: '$count ingrédients',
+      many: '$count d\'ingrédients',
+      one: '1 ingrédient',
     );
     return '$_temp0';
   }
@@ -1198,14 +1203,15 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count missing',
-      one: '1 missing',
+      other: '$count manquants',
+      many: '$count de manquants',
+      one: '1 manquant',
     );
     return '$_temp0';
   }
 
   @override
-  String get dishPickVersion => 'Pick a version';
+  String get dishPickVersion => 'Choisissez une version';
 
   @override
   String dishVersionShowing(int version) {
@@ -1213,7 +1219,7 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'v$versionString · showing';
+    return 'v$versionString · affichée';
   }
 
   @override
@@ -1221,8 +1227,9 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count steps',
-      one: '1 step',
+      other: '$count étapes',
+      many: '$count d\'étapes',
+      one: '1 étape',
     );
     return '$_temp0';
   }
@@ -1233,14 +1240,15 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String stepString = stepNumberFormat.format(step);
 
-    return 'Ask about step $stepString';
+    return 'Demander à propos de l\'étape $stepString';
   }
 
   @override
-  String get dishHistory => 'HISTORY';
+  String get dishHistory => 'HISTORIQUE';
 
   @override
-  String get dishNotCookedYet => 'Not cooked yet. The first log becomes v1.';
+  String get dishNotCookedYet =>
+      'Pas encore cuisiné. La première cuisson devient la v1.';
 
   @override
   String dishHistoryEntry(int version, String outcome) {
@@ -1252,62 +1260,63 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get dishWhatAltered => 'What altered';
+  String get dishWhatAltered => 'Ce qui a été modifié';
 
   @override
-  String get dishFromChatEdit => 'from a chat edit';
+  String get dishFromChatEdit => 'depuis une modification du chat';
 
   @override
-  String get dishNoNote => 'No note';
+  String get dishNoNote => 'Aucune note';
 
   @override
-  String get dishUnavailableTitle => 'This dish is not here';
+  String get dishUnavailableTitle => 'Ce plat n\'est pas ici';
 
   @override
   String get dishUnavailableBody =>
-      'It may still be loading, or it was removed.';
+      'Il est peut-être encore en chargement, ou il a été supprimé.';
 
   @override
-  String get dishBackToJournal => 'Back to the journal';
+  String get dishBackToJournal => 'Retour au journal';
 
   @override
-  String get dishImported => 'Imported';
+  String get dishImported => 'Importé';
 
   @override
-  String get dishTheSource => 'the source';
+  String get dishTheSource => 'la source';
 
   @override
-  String get dishViewReel => 'View the reel';
+  String get dishViewReel => 'Voir le reel';
 
   @override
-  String get logTitle => 'Log tonight’s cook';
+  String get logTitle => 'Enregistrer la cuisson du soir';
 
   @override
-  String get logSnapResult => 'SNAP TONIGHT’S RESULT';
+  String get logSnapResult => 'PHOTOGRAPHIEZ LE RÉSULTAT DU SOIR';
 
   @override
-  String get logPhotoReady => 'PHOTO READY TO UPLOAD';
+  String get logPhotoReady => 'PHOTO PRÊTE À ENVOYER';
 
   @override
-  String get logHowDidItGo => 'how did it go';
+  String get logHowDidItGo => 'comment ça s\'est passé';
 
   @override
-  String get logNoteLabel => 'a note for you';
+  String get logNoteLabel => 'une note pour vous';
 
   @override
-  String get logNoteHint => 'The pan ran hot, so I pulled it early';
+  String get logNoteHint => 'La poêle a trop chauffé, je l\'ai retiré plus tôt';
 
   @override
-  String get logChangeLabel => 'what did you change';
+  String get logChangeLabel => 'qu\'avez-vous changé';
 
   @override
-  String get logChangeHint => 'More lime, 2 minutes less, air-fried instead';
+  String get logChangeHint =>
+      'Plus de citron vert, 2 minutes de moins, à la friteuse à air';
 
   @override
-  String get logSaveWithPhoto => 'Save with photo';
+  String get logSaveWithPhoto => 'Enregistrer avec photo';
 
   @override
-  String get logSaveTonight => 'Save tonight';
+  String get logSaveTonight => 'Enregistrer ce soir';
 
   @override
   String logSaveUpgrade(int version) {
@@ -1315,11 +1324,11 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Save & upgrade to v$versionString';
+    return 'Enregistrer et passer en v$versionString';
   }
 
   @override
-  String get logSaveFailed => 'Could not save that cook';
+  String get logSaveFailed => 'Cette cuisson n\'a pas pu être enregistrée';
 
   @override
   String logSaved(int version) {
@@ -1327,7 +1336,7 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Logged as v$versionString';
+    return 'Enregistré en v$versionString';
   }
 
   @override
@@ -1336,11 +1345,11 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Logged as v$versionString · $outcome';
+    return 'Enregistré en v$versionString · $outcome';
   }
 
   @override
-  String get debriefTitle => 'How did it go?';
+  String get debriefTitle => 'Comment ça s\'est passé ?';
 
   @override
   String debriefSubtitle(String title, int version) {
@@ -1348,49 +1357,53 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return '$title · becomes v$versionString';
+    return '$title · devient v$versionString';
   }
 
   @override
-  String get debriefAddPhoto => 'ADD PHOTO';
+  String get debriefAddPhoto => 'AJOUTER UNE PHOTO';
 
   @override
-  String get debriefChangePhoto => 'CHANGE PHOTO';
+  String get debriefChangePhoto => 'CHANGER LA PHOTO';
 
   @override
-  String get debriefRating => 'rating';
+  String get debriefRating => 'note';
 
   @override
-  String get debriefMoodLabel => 'what kind of cook was it';
+  String get debriefMoodLabel => 'quel genre de cuisson c\'était';
 
   @override
-  String get debriefChangesLabel => 'what altered from the original';
+  String get debriefChangesLabel =>
+      'ce qui a été modifié par rapport à l\'original';
 
   @override
-  String get debriefNoChanges => 'Nothing yet — add what you did differently.';
+  String get debriefNoChanges =>
+      'Rien pour l\'instant — ajoutez ce que vous avez fait autrement.';
 
   @override
-  String get debriefChangeHint => 'e.g. 2 tbsp honey instead of 3';
+  String get debriefChangeHint => 'ex. 2 c. à s. de miel au lieu de 3';
 
   @override
-  String get debriefNoteLabel => 'what was missing';
+  String get debriefNoteLabel => 'ce qui manquait';
 
   @override
-  String get debriefNoteHint => '“needed more acid, next time add lime”';
+  String get debriefNoteHint =>
+      '« il manquait de l\'acidité, la prochaine fois ajoutez du citron vert »';
 
   @override
-  String get debriefPantryLabel => 'used from pantry';
+  String get debriefPantryLabel => 'pris dans le frigo';
 
   @override
-  String get debriefDeduct => 'Deduct what matches';
+  String get debriefDeduct => 'Déduire ce qui correspond';
 
   @override
   String debriefSkipped(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count lines not deducted',
-      one: '1 line not deducted',
+      other: '$count lignes non déduites',
+      many: '$count de lignes non déduites',
+      one: '1 ligne non déduite',
     );
     return '$_temp0';
   }
@@ -1401,7 +1414,7 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Save as v$versionString';
+    return 'Enregistrer en v$versionString';
   }
 
   @override
@@ -1410,11 +1423,11 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Save & upgrade to v$versionString';
+    return 'Enregistrer et passer en v$versionString';
   }
 
   @override
-  String get debriefSaveFailed => 'Could not save this cook';
+  String get debriefSaveFailed => 'Cette cuisson n\'a pas pu être enregistrée';
 
   @override
   String debriefSaved(int version, String mood) {
@@ -1422,11 +1435,11 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String versionString = versionNumberFormat.format(version);
 
-    return 'Saved as v$versionString · $mood';
+    return 'Enregistré en v$versionString · $mood';
   }
 
   @override
-  String get wallSubtitleEmpty => 'Reels people imported';
+  String get wallSubtitleEmpty => 'Les reels que les gens ont importés';
 
   @override
   String wallReelCount(int count) {
@@ -1434,59 +1447,62 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count reels',
+      many: '$count de reels',
       one: '1 reel',
     );
     return '$_temp0';
   }
 
   @override
-  String get wallMoreBelow => 'more below';
+  String get wallMoreBelow => 'plus bas';
 
   @override
-  String get wallReelGone => 'That reel is no longer on the server';
+  String get wallReelGone => 'Ce reel n\'est plus sur le serveur';
 
   @override
   String wallSavedToCookbook(String title) {
-    return 'Saved $title to your cookbook';
+    return '$title enregistré dans vos recettes';
   }
 
   @override
-  String get wallInCookbook => 'In your cookbook';
+  String get wallInCookbook => 'Dans vos recettes';
 
   @override
-  String get wallSaving => 'Saving…';
+  String get wallSaving => 'Enregistrement…';
 
   @override
-  String get wallAddToCookbook => 'Add to cookbook';
+  String get wallAddToCookbook => 'Ajouter aux recettes';
 
   @override
-  String get wallLoadFailed => 'The Wall did not load';
+  String get wallLoadFailed => 'Le Mur n\'a pas pu se charger';
 
   @override
-  String get wallEmptyTitle => 'Nothing has been imported yet';
+  String get wallEmptyTitle => 'Rien n\'a encore été importé';
 
   @override
-  String get wallEmptyBody => 'Import a reel and it lands here, for everyone.';
+  String get wallEmptyBody =>
+      'Importez un reel et il arrive ici, pour tout le monde.';
 
   @override
-  String get wallImportReel => 'Import a reel';
+  String get wallImportReel => 'Importer un reel';
 
   @override
-  String get wallLoadMoreFailed => 'Could not load more — try again';
+  String get wallLoadMoreFailed => 'Impossible de charger la suite — réessayez';
 
   @override
-  String get wallMoreReels => 'More reels';
+  String get wallMoreReels => 'Plus de reels';
 
   @override
-  String get wallEndOfFeed => 'That is every reel for now';
+  String get wallEndOfFeed => 'C\'est tout pour le moment';
 
   @override
   String wallStepsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count steps',
-      one: '1 step',
+      other: '$count étapes',
+      many: '$count d\'étapes',
+      one: '1 étape',
     );
     return '$_temp0';
   }
@@ -1496,149 +1512,153 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ingredients',
-      one: '1 ingredient',
+      other: '$count ingrédients',
+      many: '$count d\'ingrédients',
+      one: '1 ingrédient',
     );
     return '$_temp0';
   }
 
   @override
-  String get wallMethod => 'method';
+  String get wallMethod => 'méthode';
 
   @override
-  String get wallReelLoadFailed => 'This reel did not load';
+  String get wallReelLoadFailed => 'Ce reel n\'a pas pu se charger';
 
   @override
-  String get actionMarkCooked => 'Mark as cooked';
+  String get actionMarkCooked => 'Marquer comme cuisiné';
 
   @override
-  String get actionMoveBackToCook => 'Move back to To cook';
+  String get actionMoveBackToCook => 'Remettre dans À cuisiner';
 
   @override
-  String get actionNeverCooked => 'Never cooked';
+  String get actionNeverCooked => 'Jamais cuisiné';
 
   @override
   String actionCookedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Cooked $count times',
-      one: 'Cooked 1 time',
+      other: 'Cuisiné $count fois',
+      many: 'Cuisiné $count de fois',
+      one: 'Cuisiné 1 fois',
     );
     return '$_temp0';
   }
 
   @override
   String get actionStatusCookedBody =>
-      'It moves to Cooked. You can put it back.';
+      'Il passe dans Cuisinés. Vous pouvez le remettre.';
 
   @override
   String get actionStatusToCookBody =>
-      'It moves to To cook, ready to make again.';
+      'Il passe dans À cuisiner, prêt à refaire.';
 
   @override
-  String get actionDeleteBody => 'Leaves your journal. Asks first.';
+  String get actionDeleteBody => 'Quitte votre journal. Demande avant.';
 
   @override
-  String get actionKeep => 'Keep it';
+  String get actionKeep => 'Le garder';
 
   @override
-  String get actionRemoveTitle => 'Remove this dish?';
+  String get actionRemoveTitle => 'Retirer ce plat ?';
 
   @override
   String actionRemoveBody(String title) {
-    return '$title leaves your journal, along with its versions and its cooks. The reel is still out there if you want to import it again — this copy is not coming back.';
+    return '$title quitte votre journal, avec ses versions et ses cuissons. Le reel est toujours là si vous voulez l\'importer à nouveau — cette copie ne reviendra pas.';
   }
 
   @override
-  String get actionRemove => 'Remove';
+  String get actionRemove => 'Retirer';
 
   @override
-  String get profileSubtitle => 'The record of what you have actually cooked.';
+  String get profileSubtitle =>
+      'Le registre de ce que vous avez vraiment cuisiné.';
 
   @override
-  String get profileAccount => 'account';
+  String get profileAccount => 'compte';
 
   @override
-  String get profileComingSoon => 'Coming soon';
+  String get profileComingSoon => 'Bientôt';
 
   @override
   String get profileNutritionBody =>
-      'A future lens on how your versions change a dish.';
+      'Un futur regard sur la façon dont vos versions changent un plat.';
 
   @override
-  String get profileSoon => 'soon';
+  String get profileSoon => 'bientôt';
 
   @override
-  String get profileAppearance => 'appearance';
+  String get profileAppearance => 'apparence';
 
   @override
-  String get profileThemeSystem => 'SYSTEM';
+  String get profileThemeSystem => 'SYSTÈME';
 
   @override
-  String get profileThemeLight => 'LIGHT';
+  String get profileThemeLight => 'CLAIR';
 
   @override
-  String get profileThemeDark => 'DARK';
+  String get profileThemeDark => 'SOMBRE';
 
   @override
-  String get profileHowItWorks => 'How Shoku works';
+  String get profileHowItWorks => 'Comment fonctionne Shoku';
 
   @override
-  String get profileHowItWorksBody => 'The share gesture, in three steps';
+  String get profileHowItWorksBody => 'Le geste de partage, en trois étapes';
 
   @override
-  String get profileResetJournal => 'Reset journal';
+  String get profileResetJournal => 'Réinitialiser le journal';
 
   @override
-  String get profileFooter => 'Shoku · evening kitchen';
+  String get profileFooter => 'Shoku · cuisine du soir';
 
   @override
-  String get helpTitle => 'Help & feedback';
+  String get helpTitle => 'Aide et retours';
 
   @override
-  String get helpSubtitle => 'Short answers to the things people ask first.';
+  String get helpSubtitle => 'Des réponses courtes aux premières questions.';
 
   @override
-  String get helpStillStuck => 'still stuck';
+  String get helpStillStuck => 'toujours bloqué';
 
   @override
   String get helpStillStuckBody =>
-      'Send the reel link and what you expected. It makes the fix much faster.';
+      'Envoyez le lien du reel et ce que vous attendiez. La correction va bien plus vite.';
 
   @override
   String get nutritionTitle => 'Nutrition';
 
   @override
-  String get nutritionComingSoon => 'COMING SOON';
+  String get nutritionComingSoon => 'BIENTÔT';
 
   @override
-  String get nutritionHeadline => 'A lens on how your cooking changes.';
+  String get nutritionHeadline =>
+      'Un regard sur la façon dont votre cuisine change.';
 
   @override
   String get nutritionBody =>
-      'Your journal works without it. When it lands, it will read only the meals you cook here.';
+      'Votre journal fonctionne sans. Quand elle arrivera, elle ne lira que les repas que vous cuisinez ici.';
 
   @override
-  String get nutritionBackToYou => 'Back to You';
+  String get nutritionBackToYou => 'Retour à Vous';
 
   @override
-  String get exitTitle => 'Leave Shoku?';
+  String get exitTitle => 'Quitter Shoku ?';
 
   @override
-  String get exitBody => 'Your journal is saved. Nothing is lost.';
+  String get exitBody => 'Votre journal est enregistré. Rien n\'est perdu.';
 
   @override
-  String get exitKeepCooking => 'Keep cooking';
+  String get exitKeepCooking => 'Continuer à cuisiner';
 
   @override
-  String get exitExit => 'Exit';
+  String get exitExit => 'Quitter';
 
   @override
   String get orbAssistant => 'Assistant';
 
   @override
-  String get orbAskAboutStep => 'Ask about this step';
+  String get orbAskAboutStep => 'Demander à propos de cette étape';
 
   @override
   String timerStart(int minutes) {
@@ -1646,17 +1666,17 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String minutesString = minutesNumberFormat.format(minutes);
 
-    return 'start $minutesString min timer';
+    return 'lancer un minuteur de $minutesString min';
   }
 
   @override
-  String get timerTimesUp => 'time\'s up';
+  String get timerTimesUp => 'temps écoulé';
 
   @override
-  String get timerPaused => 'paused';
+  String get timerPaused => 'en pause';
 
   @override
-  String get timerRunning => 'running';
+  String get timerRunning => 'en cours';
 
   @override
   String timerOnStep(int step, String state) {
@@ -1664,42 +1684,44 @@ class AppLocalizationsFr extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String stepString = stepNumberFormat.format(step);
 
-    return 'step $stepString · $state';
+    return 'étape $stepString · $state';
   }
 
   @override
-  String get timerStartAgain => 'Start again';
+  String get timerStartAgain => 'Relancer';
 
   @override
-  String get timerResume => 'Resume';
+  String get timerResume => 'Reprendre';
 
   @override
   String get timerPause => 'Pause';
 
   @override
-  String get timerStop => 'Stop';
+  String get timerStop => 'Arrêter';
 
   @override
   String get timerAlertsOff =>
-      'alerts are off — enable notifications for Shoku';
+      'les alertes sont coupées — activez les notifications pour Shoku';
 
   @override
   String get timerAlertsLate =>
-      'alerts may arrive late — allow exact alarms in settings';
+      'les alertes peuvent arriver en retard — autorisez les alarmes exactes dans les réglages';
 
   @override
-  String get cookLeaveTitle => 'Leave this cook?';
+  String get cookLeaveTitle => 'Quitter cette cuisson ?';
 
   @override
-  String get cookLeaveBody => 'You are part-way through. Nothing is saved yet.';
+  String get cookLeaveBody =>
+      'Vous êtes à mi-chemin. Rien n\'est encore enregistré.';
 
   @override
   String cookLeaveChanges(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count changes in this cook will be discarded.',
-      one: '1 change in this cook will be discarded.',
+      other: '$count changements de cette cuisson seront perdus.',
+      many: '$count de changements de cette cuisson seront perdus.',
+      one: '1 changement de cette cuisson sera perdu.',
     );
     return '$_temp0';
   }
@@ -1709,54 +1731,57 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count changed',
-      one: '1 changed',
+      other: '$count modifiés',
+      many: '$count de modifiés',
+      one: '1 modifié',
     );
     return '$_temp0';
   }
 
   @override
   String cookStepLabel(String step) {
-    return 'step $step';
+    return 'étape $step';
   }
 
   @override
-  String get cookTimerCleared => 'Timer cleared — this dish has a new version';
+  String get cookTimerCleared =>
+      'Minuteur effacé — ce plat a une nouvelle version';
 
   @override
-  String get cookBack => 'Back';
+  String get cookBack => 'Retour';
 
   @override
-  String get cookFinishLog => 'Finish & log';
+  String get cookFinishLog => 'Terminer et enregistrer';
 
   @override
-  String get cookNextStep => 'Next step';
+  String get cookNextStep => 'Étape suivante';
 
   @override
-  String get cookNoSteps => 'Follow the recipe.';
+  String get cookNoSteps => 'Suivez la recette.';
 
   @override
-  String get micHint => 'Type or hold the mic';
+  String get micHint => 'Tapez ou maintenez le micro';
 
   @override
-  String get micListening => 'Listening…';
+  String get micListening => 'Écoute…';
 
   @override
-  String get searchHint => 'Search recipes, notes, handles';
+  String get searchHint => 'Recherchez recettes, notes, comptes';
 
   @override
   String hudStreakDays(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '${count}d',
-      one: '1d',
+      other: '${count}j',
+      many: '${count}j',
+      one: '1j',
     );
     return '$_temp0';
   }
 
   @override
   String hudLevel(String level) {
-    return 'LVL $level';
+    return 'NIV $level';
   }
 }
