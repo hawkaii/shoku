@@ -18,6 +18,12 @@ recipe line.
 """
 
 import re
+from fractions import Fraction
+
+#: Below this share of a recipe's ingredients, a card is a shopping trip rather
+#: than a suggestion. A product decision, not a technical one: 1 of 5 is not a
+#: recipe you can cook tonight, and leading with it wastes the shelf.
+MIN_COVERAGE = Fraction(2, 5)
 
 _PARENTHETICAL = re.compile(r"\([^)]*\)")
 _NOT_A_NAME = re.compile(r"[^a-z0-9\s'-]")
@@ -75,6 +81,11 @@ def pantry_tokens(items) -> set[str]:
         for alias in item.aliases or ():
             every |= tokens(str(alias))
     return every
+
+
+def covers_enough(have: int, total: int) -> bool:
+    """Whether a card clears the floor. Exact arithmetic, not a float compare."""
+    return total > 0 and Fraction(have, total) >= MIN_COVERAGE
 
 
 def coverage(ingredient_names, have: set[str]) -> tuple[int, list[str]]:

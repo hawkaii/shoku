@@ -37,7 +37,7 @@ from .domain.feed_cursor import (
     encode_suggestion_cursor,
 )
 from .models import ContentCache, ContentReport, PantryItem
-from .pantry import coverage, pantry_tokens
+from .pantry import coverage, covers_enough, pantry_tokens
 from .schemas import (
     FeedItem,
     FeedMatch,
@@ -151,7 +151,8 @@ def suggestions(
     ).all()
     have_tokens = pantry_tokens(stock)
 
-    ranked: list[tuple[Fraction, datetime, str, SuggestionItem]] = []
+    # coverage, absolute matches, then recency, then shortcode — in that order.
+    ranked: list[tuple[Fraction, int, datetime, str, SuggestionItem]] = []
     for row in session.scalars(select(ContentCache).where(_visible())).all():
         card = _to_item(row)
         if card is None:
@@ -159,12 +160,14 @@ def suggestions(
         recipe = RecipePayload.model_validate(row.structured_json)
         names = [ingredient.name for ingredient in recipe.ingredients]
         have, missing = coverage(names, have_tokens)
-        if have == 0:
-            # A card you can cook none of is not a suggestion, it is the Wall.
+        if not covers_enough(have, len(names)):
+            # Owner's floor: a card you own a fifth of is a shopping trip. With a
+            # sparse pantry the shelf is honestly empty, not misleadingly full.
             continue
         ranked.append(
             (
                 Fraction(have, len(names)),
+                have,
                 _aware(row.created_at),
                 row.shortcode,
                 SuggestionItem(
@@ -175,15 +178,18 @@ def suggestions(
             )
         )
 
-    ranked.sort(key=lambda entry: (entry[0], entry[1], entry[2]), reverse=True)
+    ranked.sort(key=lambda entry: (entry[0], entry[1], entry[2], entry[3]), reverse=True)
 
     if position is not None:
         here = (
             Fraction(position.have, position.total),
+            position.have,
             position.created_at,
             position.shortcode,
         )
-        ranked = [entry for entry in ranked if (entry[0], entry[1], entry[2]) < here]
+        ranked = [
+            entry for entry in ranked if (entry[0], entry[1], entry[2], entry[3]) < here
+        ]
 
     has_more = len(ranked) > limit
     page = ranked[:limit]
@@ -193,15 +199,15 @@ def suggestions(
         last = page[-1]
         next_cursor = encode_suggestion_cursor(
             SuggestionPosition(
-                have=last[3].match.have,
-                total=last[3].match.total,
-                created_at=last[1],
-                shortcode=last[2],
+                have=last[4].match.have,
+                total=last[4].match.total,
+                created_at=last[2],
+                shortcode=last[3],
             )
         )
 
     return SuggestionResponse(
-        items=[entry[3] for entry in page],
+        items=[entry[4] for entry in page],
         cursor=next_cursor,
         has_more=has_more,
     )

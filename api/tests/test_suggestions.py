@@ -10,7 +10,15 @@ from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from shoku_api.models import ContentCache, PantryItem
-from shoku_api.pantry import coverage, normalise, pantry_tokens, singular, tokens
+from shoku_api.pantry import (
+    MIN_COVERAGE,
+    coverage,
+    covers_enough,
+    normalise,
+    pantry_tokens,
+    singular,
+    tokens,
+)
 
 
 def add_card(session, shortcode, ingredients, *, title=None, created_at="2026-10-01T10:00:00Z", deleted=False):
@@ -210,7 +218,8 @@ def test_a_card_carries_no_user_data(client, session) -> None:
 
 
 def test_order_is_coverage_then_newest_then_shortcode(client, session) -> None:
-    # Coverage first (1.0 > 2/3 > 1/3), then newest, then shortcode descending.
+    # Coverage first (1.0 then 2/3), then newest, then shortcode descending.
+    # low12345678 is 1/3 and correctly fails the 0.4 floor.
     add_card(session, "high1234567", ["a", "b"], created_at="2026-10-01T10:00:00Z")
     add_card(session, "tie1abcdefg", ["a", "b", "x"], created_at="2026-10-02T10:00:00Z")
     add_card(session, "tie2abcdefg", ["a", "b", "y"], created_at="2026-10-02T10:00:00Z")
@@ -220,7 +229,7 @@ def test_order_is_coverage_then_newest_then_shortcode(client, session) -> None:
 
     codes = [item["shortcode"] for item in suggest(client)["items"]]
 
-    assert codes == ["high1234567", "tie2abcdefg", "tie1abcdefg", "low12345678"]
+    assert codes == ["high1234567", "tie2abcdefg", "tie1abcdefg"]
 
 
 def test_limit_and_cursor_page_without_repeating(client, session) -> None:
@@ -253,3 +262,71 @@ def test_a_corrupt_cursor_starts_over(client, session) -> None:
 
 def test_suggestions_require_an_identity(anonymous: TestClient) -> None:
     assert anonymous.get("/v1/feed/suggestions").status_code == 401
+
+
+# ---- the 0.4 floor --------------------------------------------------------
+
+
+def test_the_floor_excludes_cards_you_mostly_cannot_cook(client, session) -> None:
+    """1-of-5 and 3-of-23 are shopping trips; 4-of-6 is dinner."""
+    add_card(session, "oneoffive01", ["salt", "butter", "onion", "ghee", "paneer"])   # 4/5
+    add_card(session, "sparse002ab", ["salt", "x1", "x2", "x3", "x4"])                 # 1/5
+    add_card(
+        session,
+        "chole003abc",
+        ["salt", "butter", "ghee"] + [f"y{i}" for i in range(20)],                     # 3/23
+    )
+    add_card(session, "fourofsix56", ["salt", "butter", "onion", "ghee", "paneer", "cream"])  # 4/6
+    for name in ["salt", "butter", "onion", "ghee"]:
+        add_pantry(session, "user-1", name)
+
+    codes = [item["shortcode"] for item in suggest(client)["items"]]
+
+    assert "sparse002ab" not in codes, "1 of 5 is not a suggestion"
+    assert "chole003abc" not in codes, "3 of 23 is a shopping trip"
+    assert "fourofsix56" in codes, "4 of 6 clears the floor"
+    assert codes.index("oneoffive01") < codes.index("fourofsix56")
+
+
+def test_absolute_matches_break_a_coverage_tie_and_the_floor_sets_the_edge(
+    client, session
+) -> None:
+    """4-of-6 and 2-of-3 are both 2/3; the four is the better suggestion.
+
+    4-of-12 is a third of a recipe and never reaches the shelf at all.
+    """
+    add_card(session, "twoofthree1", ["salt", "butter", "chicken"])                    # 2/3
+    add_card(session, "fourofsixB1", ["salt", "butter", "onion", "ghee", "z1", "z2"])  # 4/6
+    add_card(
+        session,
+        "fourofsix12",
+        ["salt", "butter", "onion", "ghee"] + [f"w{i}" for i in range(8)],              # 4/12
+    )
+    for name in ["salt", "butter", "onion", "ghee"]:
+        add_pantry(session, "user-1", name)
+
+    codes = [item["shortcode"] for item in suggest(client)["items"]]
+
+    assert codes[0] == "fourofsixB1", "4 of 6 outranks 2 of 3 on absolute matches"
+    assert "fourofsix12" not in codes, "4 of 12 is below the floor"
+
+
+def test_an_empty_pantry_is_an_empty_shelf_not_an_error(client, session) -> None:
+    add_card(session, "abc12345678", ["butter", "paneer"])
+
+    response = client.get("/v1/feed/suggestions")
+
+    assert response.status_code == 200
+    assert response.json()["items"] == []
+    assert response.json()["has_more"] is False
+
+
+def test_the_floor_is_expressed_exactly() -> None:
+    from fractions import Fraction
+
+    assert MIN_COVERAGE == Fraction(2, 5)
+    assert covers_enough(2, 5) is True, "exactly 0.4 passes"
+    assert covers_enough(1, 5) is False
+    assert covers_enough(4, 6) is True
+    assert covers_enough(0, 3) is False
+    assert covers_enough(1, 0) is False
