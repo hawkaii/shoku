@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/services/share_intake.dart';
 import '../screens/add/import_sheet.dart';
+import '../state/journal_store.dart';
 import '../state/sync_providers.dart';
 import '../widgets/kit/bot_orb.dart';
 import '../widgets/kit/nav.dart';
@@ -46,7 +47,12 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // failed sync is a state, not an error the user has to dismiss. The auth
     // stream owns every attempt after this one.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(syncControllerProvider).syncNow();
+      if (!mounted) return;
+      // A local re-read, not a sync: if the store finished its first boot
+      // before this branch mounted, the Journal still starts from the rows the
+      // database actually holds.
+      ref.read(journalStoreProvider.notifier).reload();
+      ref.read(syncControllerProvider).syncNow();
     });
     // On web the session is restored from storage *after* the first frame, so
     // the first pass can reach the API with no token. One more look a few

@@ -38,13 +38,27 @@ class JournalScreen extends ConsumerWidget {
         ),
       );
     }
+    // While the first read is in flight there is no branch yet. Deciding "empty"
+    // now is what leaves a Journal built on an empty list looking empty after
+    // the sample lands: it is a decision made before the answer, and it has to
+    // be re-made from the loaded state.
+    if (dishes.isEmpty && status == JournalStatus.loading) {
+      return _withImportCard(
+        const Column(
+          children: [
+            _SaveRecipeRow(),
+            Expanded(child: _JournalLoading()),
+          ],
+        ),
+      );
+    }
     if (dishes.isEmpty) {
       // A brand-new user has no dishes and still needs a way to import.
       return _withImportCard(
-        Column(
+        const Column(
           children: [
-            const _SaveRecipeRow(),
-            Expanded(child: _JournalLoading(ready: status == JournalStatus.ready)),
+            _SaveRecipeRow(),
+            Expanded(child: _JournalLoading(ready: true)),
           ],
         ),
       );
