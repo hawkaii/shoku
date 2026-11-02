@@ -504,6 +504,10 @@ class AssistantRequest(BaseModel):
         default_factory=list, max_length=20
     )
     question: Annotated[str, StringConstraints(min_length=1, max_length=1000)]
+    #: The language the answer should be in. Optional: when absent the
+    #: ``Accept-Language`` header decides, and when neither is usable the answer
+    #: is English. Never echoed in the response.
+    locale: Annotated[str, StringConstraints(max_length=16)] | None = None
     #: Deduplicates the cap reservation: a retried POST is metered once.
     request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)]
     #: The client's own last exchanges, so a follow-up to "clarify" has context.

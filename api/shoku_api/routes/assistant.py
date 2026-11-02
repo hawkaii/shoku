@@ -1,6 +1,8 @@
 """Scoped assistant endpoint."""
 
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 
 from ..container import AppContext
@@ -18,7 +20,12 @@ def ask(
     session: Session = Depends(get_session),
     ctx: AppContext = Depends(get_context),
     user: User = Depends(current_user),
+    accept_language: Annotated[str | None, Header()] = None,
 ) -> AssistantResponse:
     return assistant_service.ask(
-        session, ctx.assistant_deps, uid=user.id, request=payload
+        session,
+        ctx.assistant_deps,
+        uid=user.id,
+        request=payload,
+        accept_language=accept_language,
     )
