@@ -300,8 +300,10 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
             ),
           ),
         for (final turn in state.turns.reversed) _turn(context, turn),
+        // Reversed list: the last child is at the top. The starters are
+        // written in reading order, so reverse them to keep it.
         if (state.turns.isEmpty && !state.thinking)
-          for (final starter in starters) _starter(context, starter),
+          for (final starter in starters.reversed) _starter(context, starter),
       ],
     );
   }

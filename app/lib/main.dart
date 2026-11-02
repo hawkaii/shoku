@@ -5,11 +5,9 @@ import 'core/theme/shoku_theme.dart';
 import 'data/services/prefs.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/navigation/back_guard.dart';
-import 'presentation/screens/onboarding/onboarding_screen.dart';
 import 'presentation/state/journal_store.dart';
 import 'presentation/state/shoku_providers.dart';
 import 'presentation/state/sync_providers.dart';
-import 'presentation/widgets/kit/plate_mark.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,30 +44,29 @@ class ShokuApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
 
-    // The session opens behind a splash, not in front of the first frame:
-    // Supabase can spend a network round trip restoring and refreshing a token,
-    // and a blank window is a worse answer than the mark on paper.
+    // One app, one Navigator, from the first frame. The gate decides which
+    // route is allowed to build; swapping MaterialApps would dispose the
+    // route builders of the app that is still on screen, which is a crash
+    // rather than a transition.
     final auth = ref.watch(authReadyProvider);
-    if (auth.isLoading) {
-      return MaterialApp(
-        title: 'Shoku',
-        debugShowCheckedModeBanner: false,
-        theme: ShokuTheme.light(),
-        darkTheme: ShokuTheme.dark(),
-        themeMode: mode,
-        home: const _Splash(),
-      );
-    }
-
+    final onboarded = ref.watch(onboardingDoneProvider);
+    AppGate.authReady = !auth.isLoading;
+    AppGate.onboarded = onboarded;
+    ref.listen(authReadyProvider, (previous, next) {
+      AppGate.authReady = !next.isLoading;
+      appRouter.refresh();
+    });
+    ref.listen(onboardingDoneProvider, (previous, next) {
+      AppGate.onboarded = next;
+      appRouter.refresh();
+    });
     // Keeps the sync controller alive for the whole app, which is what
     // subscribes it to the auth stream. Without this watch there is no
     // listener, and a pass that ran too early is never retried.
     ref.watch(syncControllerProvider);
 
-    final onboardingDone = ref.watch(onboardingDoneProvider);
-
-    if (!onboardingDone) {
-      return MaterialApp(
+    return ShokuBackGuard(
+      child: MaterialApp.router(
         title: 'Shoku',
         debugShowCheckedModeBanner: false,
         theme: ShokuTheme.light(),
@@ -79,37 +76,8 @@ class ShokuApp extends ConsumerWidget {
           data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
           child: child ?? const SizedBox.shrink(),
         ),
-        home: const OnboardingScreen(),
-      );
-    }
-
-    return ShokuBackGuard(
-      child: MaterialApp.router(
-      title: 'Shoku',
-      debugShowCheckedModeBanner: false,
-      theme: ShokuTheme.light(),
-      darkTheme: ShokuTheme.dark(),
-      themeMode: mode,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
-        child: child ?? const SizedBox.shrink(),
+        routerConfig: appRouter,
       ),
-      routerConfig: appRouter,
-      ),
-    );
-  }
-}
-
-/// The first frame: the mark, on paper, while the session opens behind it.
-class _Splash extends StatelessWidget {
-  const _Splash();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return Scaffold(
-      backgroundColor: c.canvas,
-      body: const Center(child: PlateMark(size: 64)),
     );
   }
 }
