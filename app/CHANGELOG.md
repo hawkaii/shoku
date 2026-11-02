@@ -3,6 +3,30 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.24.0] — 2026-11-02
+
+### Added
+- Pantry sync and Wall suggestions *(pantry)* — [`b908fd5`](https://github.com/hawkaii/food-finder-app/commit/b908fd52a7d5a747f3ae0225fc071dc6df8fde74)
+- The kitchen's own shelf, and a way to fill it *(pantry)* — [`3923f36`](https://github.com/hawkaii/food-finder-app/commit/3923f36d2014c1a01775f14083069a76837ca01a)
+- Read a receipt on the device, and never upload it *(pantry)* — [`4754a82`](https://github.com/hawkaii/food-finder-app/commit/4754a82260d2ad4b5797205b756699e4d712f7d3)
+- Deduct what was used, and cook from what is on the shelf *(pantry)* — [`48bf97c`](https://github.com/hawkaii/food-finder-app/commit/48bf97c2bf1410cb93df324e73b92e6e1550d892)
+- The centre button opens the pantry *(nav)* — [`0dbb8ef`](https://github.com/hawkaii/food-finder-app/commit/0dbb8efb8e1bb082835668a92e37799fe68f646a)
+- A 0.4 coverage floor, and absolute matches break ties *(suggestions)* — [`0a4f77d`](https://github.com/hawkaii/food-finder-app/commit/0a4f77d57c5ecd32cf26da3a2092deb03891c1b5)
+- Parse a receipt's unreadable lines in one batched call *(pantry)* — [`2e09e5c`](https://github.com/hawkaii/food-finder-app/commit/2e09e5cbc8f4e0e895783812ef28d6de306c2053)
+- A destination, row editing, an add page, and a shelf that fills *(fridge)* — [`d14baa5`](https://github.com/hawkaii/food-finder-app/commit/d14baa5dc5858a1efcb93e928a9fd746b7ee5db7)
+- Send the lines the device could not read to the model fallback *(pantry)* — [`fb8d687`](https://github.com/hawkaii/food-finder-app/commit/fb8d6870c353d4a110398c20b9560c9b100271e9)
+
+### Chores
+- V1.24.0 — the fridge *(release)* — [`d4c8ede`](https://github.com/hawkaii/food-finder-app/commit/d4c8ede2ba7ea5056a6b7b86d39e123d3676b114)
+
+### Docs
+- V1.23.0 [skip ci] *(changelog)* — [`80a321b`](https://github.com/hawkaii/food-finder-app/commit/80a321b557139b50f47c6a1a3125f00100d9aacd)
+
+### Fixed
+- Import the pantry screen the route points at *(nav)* — [`1f658f7`](https://github.com/hawkaii/food-finder-app/commit/1f658f7d4779cc217cdb9bb74a6867a36ce090a3)
+- Default a deduction to what the line says, not to the stock *(pantry)* — [`e0b736c`](https://github.com/hawkaii/food-finder-app/commit/e0b736c197a2d78831c49c4e3ca39c07f9591037)
+- Pull on a restored web session, and give the fridge two doors *(sync,fridge)* — [`f619b0a`](https://github.com/hawkaii/food-finder-app/commit/f619b0ae0fe4a1d9d7bacc7200a6662b0b86bede)
+
 ## [1.23.0] — 2026-11-01
 
 ### Added
