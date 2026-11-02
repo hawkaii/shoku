@@ -55,6 +55,13 @@ class Forbidden(ShokuError):
     http_status = 403
 
 
+class InvalidPayload(ShokuError):
+    """Well-formed JSON we still will not act on: too large, not the image it claims."""
+
+    reason = "invalid_payload"
+    http_status = 422
+
+
 class Conflict(ShokuError):
     reason = "conflict"
     http_status = 409

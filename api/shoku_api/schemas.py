@@ -547,6 +547,26 @@ class PantryParseItem(BaseModel):
     unit: PantryUnit | None = None
 
 
+#: The client downscales to <= 1600 px on the long edge, so a receipt is a few
+#: hundred KB. These are the only formats the phone produces.
+PantryImageMime = Literal["image/jpeg", "image/png", "image/webp"]
+
+#: 8 MB decoded, with room for the base64 expansion in the field itself.
+MAX_IMAGE_BYTES = 8 * 1024 * 1024
+
+
+class PantryParseImageRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)]
+    mime_type: PantryImageMime
+    #: Base64 of the receipt image. Never stored; see the module note in
+    #: ``pantry_parse``.
+    image_base64: Annotated[
+        str, StringConstraints(min_length=16, max_length=12_000_000)
+    ]
+
+
 class PantryParseResponse(BaseModel):
     items: list[PantryParseItem]
     remaining: int

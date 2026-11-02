@@ -19,9 +19,12 @@ from .config import Settings
 from .db import build_engine, build_session_factory
 from .domain.errors import Unavailable
 from .pantry_parse import (
+    MusePantryImageParser,
     MusePantryParser,
+    PantryImageParser,
     PantryParseDeps,
     PantryParser,
+    UnconfiguredPantryImageParser,
     UnconfiguredPantryParser,
 )
 from .assistant import (
@@ -68,6 +71,7 @@ class AppContext:
     storage: Storage
     assistant_model: AssistantModel
     pantry_parser: PantryParser
+    pantry_image_parser: PantryImageParser
     clock: Clock
     breaker: CircuitBreaker
     #: Starts the worker VM when a job is queued, and stops it when idle.
@@ -102,6 +106,7 @@ class AppContext:
     def pantry_parse_deps(self) -> PantryParseDeps:
         return PantryParseDeps(
             parser=self.pantry_parser,
+            image_parser=self.pantry_image_parser,
             clock=self.clock,
             daily_cap=self.settings.pantry_parse_daily_cap,
         )
@@ -153,6 +158,7 @@ def build_context(
 
     assistant_model: AssistantModel = UnconfiguredAssistantModel()
     pantry_parser: PantryParser = UnconfiguredPantryParser()
+    pantry_image_parser: PantryImageParser = UnconfiguredPantryImageParser()
     assistant_key = settings.assistant_api_key or settings.structurer_api_key
     if assistant_key:
         # One provider, two schemas. The receipt parser is not a second vendor.
@@ -168,6 +174,9 @@ def build_context(
         )
         pantry_parser = MusePantryParser(
             base_url, assistant_key, model, settings.assistant_timeout
+        )
+        pantry_image_parser = MusePantryImageParser(
+            base_url, assistant_key, model, settings.assistant_timeout * 2
         )
 
     queue: Queue
@@ -213,6 +222,7 @@ def build_context(
         storage=storage,
         assistant_model=assistant_model,
         pantry_parser=pantry_parser,
+        pantry_image_parser=pantry_image_parser,
         clock=SystemClock(),
         worker_pool=worker_pool,
         waker=waker,
