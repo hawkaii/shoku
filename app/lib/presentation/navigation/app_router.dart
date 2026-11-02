@@ -6,6 +6,7 @@ import '../screens/cook/cook_mode_screen.dart';
 import '../screens/dish/dish_screen.dart';
 import '../screens/journal/journal_screen.dart';
 import '../screens/nutrition/nutrition_coming_soon_screen.dart';
+import '../screens/pantry/pantry_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/recipes/recipes_screen.dart';
 import '../screens/wall/wall_screen.dart';
