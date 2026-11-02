@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/models/pantry_item.dart';
 import '../../state/pantry_providers.dart';
@@ -87,6 +89,8 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -101,7 +105,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
         children: [
           Row(
             children: [
-              Text('Edit item', style: ShokuType.h2.copyWith(color: c.ink)),
+              Text(l10n.pantryEditTitle, style: ShokuType.h2.copyWith(color: c.ink)),
               const Spacer(),
               ShokuPressable(
                 key: const ValueKey('pantry-edit-delete'),
@@ -111,14 +115,14 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
                     horizontal: ShokuSpace.sm,
                     vertical: ShokuSpace.xs,
                   ),
-                  child: Text('Delete',
+                  child: Text(l10n.pantryDelete,
                       style: ShokuType.bodySmall.copyWith(color: c.danger)),
                 ),
               ),
             ],
           ),
           const SizedBox(height: ShokuSpace.md),
-          ShokuLabel('name', color: c.inkMuted),
+          ShokuLabel(l10n.pantryNameLabel, color: c.inkMuted),
           const SizedBox(height: ShokuSpace.xs),
           _fieldBox(
             child: TextField(
@@ -133,7 +137,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
             ),
           ),
           const SizedBox(height: ShokuSpace.md),
-          ShokuLabel('amount', color: c.inkMuted),
+          ShokuLabel(l10n.pantryAmountLabel, color: c.inkMuted),
           const SizedBox(height: ShokuSpace.xs),
           Row(
             children: [
@@ -158,8 +162,10 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
               Expanded(
                 child: Text(
                   _quantity == null
-                      ? 'Leave it blank if you know you have it but not how much.'
-                      : 'Saved as ${_plainAmount(_quantity)} ${_unit?.label ?? ''}',
+                      ? l10n.pantryAmountHelp
+                      : l10n.pantrySavedAs(
+                          pantryAmount(
+                              l10n, locale, _quantity, _unit)),
                   style:
                       ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
                 ),
@@ -188,7 +194,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
                       ),
                     ),
                     child: Text(
-                      unit.label,
+                      unitLabel(l10n, unit),
                       style: ShokuType.label.copyWith(
                         fontSize: 10,
                         color: _unit == unit ? c.accent : c.inkMuted,
@@ -211,7 +217,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
                 border: Border.all(color: c.ink, width: ShokuStroke.brutal),
               ),
               child: Center(
-                child: Text('Save',
+                child: Text(l10n.pantrySave,
                     style: ShokuType.title
                         .copyWith(color: c.onAccent, fontSize: 14)),
               ),

@@ -809,6 +809,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not read this one — paste the recipe instead'**
   String get reasonUnknown;
+
+  /// No description provided for @pantryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge'**
+  String get pantryTitle;
+
+  /// No description provided for @pantryItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no items} =1{1 item} other{{count} items}}'**
+  String pantryItemCount(int count);
+
+  /// No description provided for @pantrySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Search your fridge} =1{Search 1 item} other{Search {count} items}}'**
+  String pantrySearchHint(int count);
+
+  /// No description provided for @pantrySelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{none selected} =1{1 selected} other{{count} selected}}'**
+  String pantrySelectedCount(int count);
+
+  /// No description provided for @pantryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get pantryEdit;
+
+  /// No description provided for @pantryShelfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'cook from your fridge'**
+  String get pantryShelfLabel;
+
+  /// No description provided for @pantryToBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'to buy'**
+  String get pantryToBuy;
+
+  /// No description provided for @pantryInFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'in the fridge'**
+  String get pantryInFridge;
+
+  /// No description provided for @pantryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the fridge yet. Photograph a receipt, or just tell me what’s in it.'**
+  String get pantryEmpty;
+
+  /// No description provided for @pantryAddItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get pantryAddItems;
+
+  /// No description provided for @pantryHowMuch.
+  ///
+  /// In en, this message translates to:
+  /// **'How much?'**
+  String get pantryHowMuch;
+
+  /// No description provided for @pantryAmountExample.
+  ///
+  /// In en, this message translates to:
+  /// **'2 kg'**
+  String get pantryAmountExample;
+
+  /// No description provided for @pantryCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get pantryCancel;
+
+  /// No description provided for @pantryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pantryDone;
+
+  /// No description provided for @pantryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get pantryDelete;
+
+  /// No description provided for @pantrySelectItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Select items'**
+  String get pantrySelectItems;
+
+  /// No description provided for @pantryDeleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Delete 1} other{Delete {count}}}'**
+  String pantryDeleteCount(int count);
+
+  /// No description provided for @pantryDeletedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item deleted} other{{count} items deleted}}'**
+  String pantryDeletedCount(int count);
+
+  /// No description provided for @pantrySetAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'set amount'**
+  String get pantrySetAmount;
+
+  /// No description provided for @pantryLessItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Less {name}'**
+  String pantryLessItem(String name);
+
+  /// No description provided for @pantryMoreItem.
+  ///
+  /// In en, this message translates to:
+  /// **'More {name}'**
+  String pantryMoreItem(String name);
+
+  /// No description provided for @shelfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to suggest yet — add a few items and I will match walls and your own dishes.'**
+  String get shelfEmpty;
+
+  /// No description provided for @shelfBuyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 to buy} other{+{count} to buy}}'**
+  String shelfBuyCount(int count);
+
+  /// No description provided for @shelfScore.
+  ///
+  /// In en, this message translates to:
+  /// **'{have} of {total}'**
+  String shelfScore(int have, int total);
+
+  /// No description provided for @pantryEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get pantryEditTitle;
+
+  /// No description provided for @pantryNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'name'**
+  String get pantryNameLabel;
+
+  /// No description provided for @pantryAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'amount'**
+  String get pantryAmountLabel;
+
+  /// No description provided for @pantryAmountHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it blank if you know you have it but not how much.'**
+  String get pantryAmountHelp;
+
+  /// No description provided for @pantrySavedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as {amount}'**
+  String pantrySavedAs(String amount);
+
+  /// No description provided for @pantrySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get pantrySave;
+
+  /// No description provided for @unitG.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get unitG;
+
+  /// No description provided for @unitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get unitKg;
+
+  /// No description provided for @unitMl.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get unitMl;
+
+  /// No description provided for @unitL.
+  ///
+  /// In en, this message translates to:
+  /// **'l'**
+  String get unitL;
+
+  /// No description provided for @unitTbsp.
+  ///
+  /// In en, this message translates to:
+  /// **'tbsp'**
+  String get unitTbsp;
+
+  /// No description provided for @unitTsp.
+  ///
+  /// In en, this message translates to:
+  /// **'tsp'**
+  String get unitTsp;
+
+  /// No description provided for @unitPcs.
+  ///
+  /// In en, this message translates to:
+  /// **'pcs'**
+  String get unitPcs;
+
+  /// No description provided for @unitBunch.
+  ///
+  /// In en, this message translates to:
+  /// **'bunch'**
+  String get unitBunch;
+
+  /// No description provided for @unitPack.
+  ///
+  /// In en, this message translates to:
+  /// **'pack'**
+  String get unitPack;
+
+  /// No description provided for @pantryAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the fridge'**
+  String get pantryAddTitle;
+
+  /// No description provided for @pantryAddIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a receipt, say what is in the kitchen, or type it. Nothing enters the fridge until you have seen the list.'**
+  String get pantryAddIntro;
+
+  /// No description provided for @pantryDoorPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get pantryDoorPhoto;
+
+  /// No description provided for @pantryDoorVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get pantryDoorVoice;
+
+  /// No description provided for @pantryDoorType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get pantryDoorType;
+
+  /// No description provided for @pantryReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get pantryReview;
+
+  /// No description provided for @pantryToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'to add'**
+  String get pantryToAdd;
+
+  /// No description provided for @pantryAiReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the rest…'**
+  String get pantryAiReading;
+
+  /// No description provided for @pantryAmountUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'amount unknown'**
+  String get pantryAmountUnknown;
+
+  /// No description provided for @pantryCouldNotRead.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Couldn’t read (1)} other{Couldn’t read ({count})}}'**
+  String pantryCouldNotRead(int count);
+
+  /// No description provided for @pantryConfirmAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{Add {checked} of 1} other{Add {checked} of {total}}}'**
+  String pantryConfirmAdd(int checked, int total);
+
+  /// No description provided for @pantryNoteOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt reader needs a connection. Type it or say it instead.'**
+  String get pantryNoteOffline;
+
+  /// No description provided for @pantryNoteUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing readable in that picture — type it instead.'**
+  String get pantryNoteUnreadable;
+
+  /// No description provided for @pantryCapReached.
+  ///
+  /// In en, this message translates to:
+  /// **'AI reads used up for today — type them instead'**
+  String get pantryCapReached;
+
+  /// No description provided for @pantryPhotoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo or screenshot'**
+  String get pantryPhotoButton;
+
+  /// No description provided for @pantryPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph a receipt and the reader types it out. Nothing enters the fridge until you have seen the list.'**
+  String get pantryPhotoHint;
+
+  /// No description provided for @pantryReadingReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the receipt…'**
+  String get pantryReadingReceipt;
+
+  /// No description provided for @pantryBackTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the fridge'**
+  String get pantryBackTooltip;
+
+  /// No description provided for @pantryTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2 kg rice, one per line'**
+  String get pantryTypeHint;
+
+  /// No description provided for @pantryVoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the mic and say what is in the kitchen'**
+  String get pantryVoiceHint;
+
+  /// No description provided for @pantryWhatIsIt.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it?'**
+  String get pantryWhatIsIt;
+
+  /// No description provided for @pantryVisionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The reader uses Meta’s model'**
+  String get pantryVisionTitle;
+
+  /// No description provided for @pantryVisionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo is sent to Meta’s model to read it. It is used for that one call and is not stored. The lines land in the review below, where you can fix anything before it enters the fridge.'**
+  String get pantryVisionBody;
+
+  /// No description provided for @pantryGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get pantryGotIt;
+
+  /// No description provided for @pantryScreenshotOrPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot or photo'**
+  String get pantryScreenshotOrPhoto;
+
+  /// No description provided for @pantryCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get pantryCamera;
+
+  /// No description provided for @pantryInFridgeSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item in the fridge} other{{count} items in the fridge}}'**
+  String pantryInFridgeSnack(int count);
 }
 
 class _AppLocalizationsDelegate

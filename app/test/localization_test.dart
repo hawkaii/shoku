@@ -5,9 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
+import 'package:food_finder/data/models/pantry_item.dart';
 import 'package:food_finder/l10n/app_localizations.dart';
 import 'package:food_finder/main.dart';
 import 'package:food_finder/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:food_finder/presentation/screens/pantry/pantry_edit_sheet.dart';
 import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/state/locale_provider.dart';
 import 'package:food_finder/presentation/widgets/kit/status_badge.dart';
@@ -111,6 +113,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('COCINADO 2×'), findsOneWidget);
+  });
+
+  testWidgets('the fridge editor reads in Spanish', (tester) async {
+    final item = PantryItem(
+      id: 'rice',
+      name: 'rice',
+      quantity: 2,
+      unit: PantryUnit.kg,
+      createdAt: DateTime(2026, 11, 1),
+      updatedAt: DateTime(2026, 11, 1),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: ShokuTheme.light(),
+          locale: const Locale('es'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: shokuSupportedLocalesForTest,
+          home: Scaffold(body: PantryEditSheet(item: item)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Editar artículo'), findsOneWidget);
+    expect(find.text('Guardado como 2 kg'), findsOneWidget);
+    expect(find.text('manojo'), findsOneWidget);
   });
 }
 

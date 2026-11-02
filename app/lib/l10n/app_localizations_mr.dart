@@ -445,4 +445,312 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get reasonUnknown => 'हे वाचता आले नाही — रेसिपी पेस्ट करा';
+
+  @override
+  String get pantryTitle => 'फ्रिज';
+
+  @override
+  String pantryItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count वस्तू',
+      one: '1 वस्तू',
+      zero: 'काही वस्तू नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantrySearchHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count वस्तू शोधा',
+      one: '1 वस्तू शोधा',
+      zero: 'तुमच्या फ्रिजमध्ये शोधा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantrySelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count निवडले',
+      one: '1 निवडले',
+      zero: 'काहीही निवडले नाही',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryEdit => 'बदला';
+
+  @override
+  String get pantryShelfLabel => 'तुमच्या फ्रिजमधून शिजवा';
+
+  @override
+  String get pantryToBuy => 'खरेदी करायचे';
+
+  @override
+  String get pantryInFridge => 'फ्रिजमध्ये';
+
+  @override
+  String get pantryEmpty =>
+      'फ्रिजमध्ये अजून काहीही नाही. पावतीचा फोटो घ्या, किंवा त्यात काय आहे ते सांगा.';
+
+  @override
+  String get pantryAddItems => 'वस्तू जोडा';
+
+  @override
+  String get pantryHowMuch => 'किती?';
+
+  @override
+  String get pantryAmountExample => '2 kg';
+
+  @override
+  String get pantryCancel => 'रद्द करा';
+
+  @override
+  String get pantryDone => 'झाले';
+
+  @override
+  String get pantryDelete => 'काढा';
+
+  @override
+  String get pantrySelectItems => 'वस्तू निवडा';
+
+  @override
+  String pantryDeleteCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString काढा',
+      one: '1 काढा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryDeletedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count वस्तू काढल्या',
+      one: '1 वस्तू काढली',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantrySetAmount => 'प्रमाण ठरवा';
+
+  @override
+  String pantryLessItem(String name) {
+    return '$name कमी';
+  }
+
+  @override
+  String pantryMoreItem(String name) {
+    return '$name जास्त';
+  }
+
+  @override
+  String get shelfEmpty =>
+      'अजून सूचना नाहीत — काही वस्तू जोडा, मी वॉल आणि तुमची पदार्थ जुळवीन.';
+
+  @override
+  String shelfBuyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count खरेदी करायचे',
+      one: '+1 खरेदी करायचे',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shelfScore(int have, int total) {
+    final intl.NumberFormat haveNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String haveString = haveNumberFormat.format(have);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return '$totalString पैकी $haveString';
+  }
+
+  @override
+  String get pantryEditTitle => 'वस्तू बदला';
+
+  @override
+  String get pantryNameLabel => 'नाव';
+
+  @override
+  String get pantryAmountLabel => 'प्रमाण';
+
+  @override
+  String get pantryAmountHelp =>
+      'वस्तू आहे हे माहीत असेल पण किती नाही, तर रिकामे ठेवा.';
+
+  @override
+  String pantrySavedAs(String amount) {
+    return '$amount म्हणून जतन';
+  }
+
+  @override
+  String get pantrySave => 'जतन करा';
+
+  @override
+  String get unitG => 'g';
+
+  @override
+  String get unitKg => 'kg';
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get unitL => 'l';
+
+  @override
+  String get unitTbsp => 'मोठा चमचा';
+
+  @override
+  String get unitTsp => 'लहान चमचा';
+
+  @override
+  String get unitPcs => 'नग';
+
+  @override
+  String get unitBunch => 'गड्डी';
+
+  @override
+  String get unitPack => 'पॅक';
+
+  @override
+  String get pantryAddTitle => 'फ्रिजमध्ये जोडा';
+
+  @override
+  String get pantryAddIntro =>
+      'पावतीचा फोटो घ्या, स्वयंपाकघरात काय आहे ते सांगा, किंवा लिहा. तुम्ही यादी पाहेपर्यंत काहीही फ्रिजमध्ये जात नाही.';
+
+  @override
+  String get pantryDoorPhoto => 'फोटो';
+
+  @override
+  String get pantryDoorVoice => 'आवाज';
+
+  @override
+  String get pantryDoorType => 'लिहा';
+
+  @override
+  String get pantryReview => 'तपासा';
+
+  @override
+  String get pantryToAdd => 'जोडायचे';
+
+  @override
+  String get pantryAiReading => 'उरलेले वाचत आहोत…';
+
+  @override
+  String get pantryAmountUnknown => 'प्रमाण अज्ञात';
+
+  @override
+  String pantryCouldNotRead(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'वाचता आले नाही ($count)',
+      one: 'वाचता आले नाही (1)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pantryConfirmAdd(int checked, int total) {
+    final intl.NumberFormat checkedNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String checkedString = checkedNumberFormat.format(checked);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString पैकी $checkedString जोडा',
+      one: '1 पैकी $checkedString जोडा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pantryNoteOffline =>
+      'पावती वाचण्यासाठी कनेक्शन हवे. लिहा किंवा बोला.';
+
+  @override
+  String get pantryNoteUnreadable =>
+      'त्या फोटोत वाचण्यासारखे काही नव्हते — लिहा.';
+
+  @override
+  String get pantryCapReached => 'आजची AI वाचने संपली — लिहा.';
+
+  @override
+  String get pantryPhotoButton => 'फोटो किंवा स्क्रीनशॉट';
+
+  @override
+  String get pantryPhotoHint =>
+      'पावतीचा फोटो घ्या आणि वाचणारा ती लिहील. तुम्ही यादी पाहेपर्यंत काहीही फ्रिजमध्ये जात नाही.';
+
+  @override
+  String get pantryReadingReceipt => 'पावती वाचली जात आहे…';
+
+  @override
+  String get pantryBackTooltip => 'फ्रिजवर परत';
+
+  @override
+  String get pantryTypeHint => '2 kg भात, एका ओळीत एक';
+
+  @override
+  String get pantryVoiceHint =>
+      'माइक दाबून धरा आणि स्वयंपाकघरात काय आहे ते सांगा';
+
+  @override
+  String get pantryWhatIsIt => 'हे काय आहे?';
+
+  @override
+  String get pantryVisionTitle => 'वाचणारा Meta चा मॉडेल वापरतो';
+
+  @override
+  String get pantryVisionBody =>
+      'फोटो वाचण्यासाठी Meta च्या मॉडेलला पाठवला जातो. तो फक्त त्या एका कॉलसाठी वापरला जातो आणि साठवला जात नाही. ओळी खालील तपासणीत येतात, जिथे फ्रिजमध्ये जाण्यापूर्वी तुम्ही काहीही दुरुस्त करू शकता.';
+
+  @override
+  String get pantryGotIt => 'समजले';
+
+  @override
+  String get pantryScreenshotOrPhoto => 'स्क्रीनशॉट किंवा फोटो';
+
+  @override
+  String get pantryCamera => 'कॅमेरा';
+
+  @override
+  String pantryInFridgeSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'फ्रिजमध्ये $count वस्तू',
+      one: 'फ्रिजमध्ये 1 वस्तू',
+    );
+    return '$_temp0';
+  }
 }

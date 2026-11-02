@@ -202,5 +202,173 @@
   "reasonNoRecipe": "That video does not show a recipe",
   "reasonVisionFailed": "We could not read that video — paste the recipe instead",
   "reasonTakenDown": "That recipe was removed",
-  "reasonUnknown": "Could not read this one — paste the recipe instead"
+  "reasonUnknown": "Could not read this one — paste the recipe instead",
+  "pantryTitle": "Fridge",
+  "pantryItemCount": "{count, plural, =0{no items} =1{1 item} other{{count} items}}",
+  "@pantryItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantrySearchHint": "{count, plural, =0{Search your fridge} =1{Search 1 item} other{Search {count} items}}",
+  "@pantrySearchHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantrySelectedCount": "{count, plural, =0{none selected} =1{1 selected} other{{count} selected}}",
+  "@pantrySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantryEdit": "Edit",
+  "pantryShelfLabel": "cook from your fridge",
+  "pantryToBuy": "to buy",
+  "pantryInFridge": "in the fridge",
+  "pantryEmpty": "Nothing in the fridge yet. Photograph a receipt, or just tell me what’s in it.",
+  "pantryAddItems": "Add items",
+  "pantryHowMuch": "How much?",
+  "pantryAmountExample": "2 kg",
+  "pantryCancel": "Cancel",
+  "pantryDone": "Done",
+  "pantryDelete": "Delete",
+  "pantrySelectItems": "Select items",
+  "pantryDeleteCount": "{count, plural, =1{Delete 1} other{Delete {count}}}",
+  "@pantryDeleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "pantryDeletedCount": "{count, plural, =1{1 item deleted} other{{count} items deleted}}",
+  "@pantryDeletedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantrySetAmount": "set amount",
+  "pantryLessItem": "Less {name}",
+  "@pantryLessItem": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pantryMoreItem": "More {name}",
+  "@pantryMoreItem": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shelfEmpty": "Nothing to suggest yet — add a few items and I will match walls and your own dishes.",
+  "shelfBuyCount": "{count, plural, =1{+1 to buy} other{+{count} to buy}}",
+  "@shelfBuyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shelfScore": "{have} of {total}",
+  "@shelfScore": {
+    "placeholders": {
+      "have": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "pantryEditTitle": "Edit item",
+  "pantryNameLabel": "name",
+  "pantryAmountLabel": "amount",
+  "pantryAmountHelp": "Leave it blank if you know you have it but not how much.",
+  "pantrySavedAs": "Saved as {amount}",
+  "@pantrySavedAs": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pantrySave": "Save",
+  "unitG": "g",
+  "unitKg": "kg",
+  "unitMl": "ml",
+  "unitL": "l",
+  "unitTbsp": "tbsp",
+  "unitTsp": "tsp",
+  "unitPcs": "pcs",
+  "unitBunch": "bunch",
+  "unitPack": "pack",
+  "pantryAddTitle": "Add to the fridge",
+  "pantryAddIntro": "Photograph a receipt, say what is in the kitchen, or type it. Nothing enters the fridge until you have seen the list.",
+  "pantryDoorPhoto": "Photo",
+  "pantryDoorVoice": "Voice",
+  "pantryDoorType": "Type",
+  "pantryReview": "Review",
+  "pantryToAdd": "to add",
+  "pantryAiReading": "Reading the rest…",
+  "pantryAmountUnknown": "amount unknown",
+  "pantryCouldNotRead": "{count, plural, =1{Couldn’t read (1)} other{Couldn’t read ({count})}}",
+  "@pantryCouldNotRead": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pantryConfirmAdd": "{total, plural, =1{Add {checked} of 1} other{Add {checked} of {total}}}",
+  "@pantryConfirmAdd": {
+    "placeholders": {
+      "checked": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "pantryNoteOffline": "The receipt reader needs a connection. Type it or say it instead.",
+  "pantryNoteUnreadable": "Nothing readable in that picture — type it instead.",
+  "pantryCapReached": "AI reads used up for today — type them instead",
+  "pantryPhotoButton": "Photo or screenshot",
+  "pantryPhotoHint": "Photograph a receipt and the reader types it out. Nothing enters the fridge until you have seen the list.",
+  "pantryReadingReceipt": "Reading the receipt…",
+  "pantryBackTooltip": "Back to the fridge",
+  "pantryTypeHint": "2 kg rice, one per line",
+  "pantryVoiceHint": "Hold the mic and say what is in the kitchen",
+  "pantryWhatIsIt": "What is it?",
+  "pantryVisionTitle": "The reader uses Meta’s model",
+  "pantryVisionBody": "The photo is sent to Meta’s model to read it. It is used for that one call and is not stored. The lines land in the review below, where you can fix anything before it enters the fridge.",
+  "pantryGotIt": "Got it",
+  "pantryScreenshotOrPhoto": "Screenshot or photo",
+  "pantryCamera": "Camera",
+  "pantryInFridgeSnack": "{count, plural, =1{1 item in the fridge} other{{count} items in the fridge}}",
+  "@pantryInFridgeSnack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
