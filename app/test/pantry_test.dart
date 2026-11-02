@@ -47,6 +47,41 @@ void main() {
     });
   });
 
+  group('deduction defaults come from the line, never the shelf', () {
+    test('500 g rice against 2 kg of stock defaults to 0.5 kg', () {
+      final amount = PantryParser.statedAmountIn(
+        line: '500 g rice',
+        stockUnit: PantryUnit.kg,
+      );
+      expect(amount, 0.5);
+    });
+
+    test('a line that states nothing has no default at all', () {
+      expect(
+        PantryParser.statedAmountIn(line: 'rice', stockUnit: PantryUnit.kg),
+        isNull,
+        reason: 'naming an ingredient is not asking for the whole stock',
+      );
+      expect(
+        PantryParser.statedAmountIn(
+            line: 'rice, rinsed', stockUnit: PantryUnit.kg),
+        isNull,
+      );
+    });
+
+    test('a count line still counts', () {
+      expect(
+        PantryParser.statedAmountIn(line: '3 lemons', stockUnit: PantryUnit.pcs),
+        3,
+      );
+      expect(
+        PantryParser.statedAmountIn(line: '2 eggs', stockUnit: PantryUnit.bunch),
+        isNull,
+        reason: 'a bunch is not a piece',
+      );
+    });
+  });
+
   group('parsing', () {
     test('a leading quantity and unit become an amount', () {
       final line = PantryParser.parseLine('2 kg rice');

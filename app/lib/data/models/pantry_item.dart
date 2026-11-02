@@ -199,6 +199,24 @@ class PantryParser {
           if (line.trim().isNotEmpty) parseLine(line),
       ];
 
+  /// The amount a recipe line states, expressed in [stockUnit], or null when
+  /// the line states none or states one that cannot be compared.
+  ///
+  /// This is the only thing a deduction may default to: the recipe's own words.
+  /// A line that merely names the ingredient never becomes "use all of it".
+  static double? statedAmountIn({
+    required String line,
+    required PantryUnit stockUnit,
+  }) {
+    final parsed = parseLine(line);
+    final quantity = parsed.quantity;
+    final unit = parsed.unit;
+    if (quantity == null || unit == null) return null;
+    if (!unit.comparableTo(stockUnit)) return null;
+    if (unit.isCount && unit != stockUnit) return null;
+    return quantity * unit.base / stockUnit.base;
+  }
+
   /// Case- and space-insensitive key used to spot duplicates.
   static String key(String name) =>
       name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();

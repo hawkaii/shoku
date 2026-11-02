@@ -57,6 +57,10 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   List<PantryItem>? _undoSnapshot;
   int _skipped = 0;
 
+  /// Rows whose default has already been applied, so a rebuild never re-checks
+  /// something the cook unchecked.
+  final _defaulted = <String>{};
+
   @override
   void dispose() {
     _note.dispose();
@@ -143,8 +147,28 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
         .toList();
   }
 
+  /// The recipe line that mentions this item, first match wins.
+  String? _lineFor(PantryItem item, List<String> lines) {
+    for (final line in lines) {
+      final lower = line.toLowerCase();
+      if (lower.contains(item.name.toLowerCase())) return line;
+      for (final alias in item.aliases) {
+        if (alias.trim().isNotEmpty && lower.contains(alias.toLowerCase())) {
+          return line;
+        }
+      }
+    }
+    return null;
+  }
+
+  static String _formatAmount(double value) =>
+      value == value.roundToDouble() ? value.toStringAsFixed(0) : '$value';
+
   Future<void> _deduct(List<PantryItem> matched) async {
-    final chosen = matched.where((p) => _checked.contains(p.id)).toList();
+    // A row with no confirmed amount is not a deduction.
+    final chosen = matched
+        .where((p) => _checked.contains(p.id) && _usage[p.id] != null)
+        .toList();
     if (chosen.isEmpty) return;
     final store = ref.read(pantryStoreProvider.notifier);
     _undoSnapshot = [for (final item in chosen) item];
@@ -182,9 +206,23 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
     final c = context.colors;
     final nextVersion = widget.dish.versions.length + 1;
     final matched = _matched(ref.watch(pantryStoreProvider));
+    final rawLines = widget.dish.versions.isEmpty
+        ? widget.dish.steps
+        : widget.dish.versions.last.ingredients;
     for (final item in matched) {
-      _usage.putIfAbsent(item.id, () => item.quantity!);
-      _checked.add(item.id);
+      if (!_defaulted.add(item.id)) continue;
+      // Default to what the recipe line states — never to the whole stock.
+      final line = _lineFor(item, rawLines);
+      final stated = line == null
+          ? null
+          : PantryParser.statedAmountIn(line: line, stockUnit: item.unit!);
+      if (stated == null) {
+        _checked.remove(item.id);
+        _usage.remove(item.id);
+      } else {
+        _usage[item.id] = stated;
+        _checked.add(item.id);
+      }
     }
 
     return Padding(
@@ -415,10 +453,27 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       width: 72,
                       child: TextFormField(
                         key: ValueKey('deduct-${item.id}'),
-                        initialValue: '${item.quantity}',
+                        initialValue: _usage[item.id] == null
+                            ? ''
+                            : _formatAmount(_usage[item.id]!),
                         keyboardType: TextInputType.number,
-                        onChanged: (value) => _usage[item.id] =
-                            double.tryParse(value) ?? item.quantity!,
+                        // The stock is a hint, never a value: a line that
+                        // states no amount must not default to all of it.
+                        decoration: InputDecoration(
+                          hintText: _formatAmount(item.quantity!),
+                          hintStyle: ShokuType.bodySmall.copyWith(
+                              color: c.inkMuted.withValues(alpha: 0.6)),
+                        ),
+                        onChanged: (value) {
+                          final parsed = double.tryParse(value);
+                          setState(() {
+                            if (parsed == null || parsed <= 0) {
+                              _usage.remove(item.id);
+                            } else {
+                              _usage[item.id] = parsed;
+                            }
+                          });
+                        },
                         style: ShokuType.bodySmall.copyWith(color: c.ink),
                       ),
                     ),
