@@ -3,6 +3,25 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.26.0] — 2026-11-02
+
+### Added
+- Read a receipt photograph with the vision model *(pantry)* — [`8f9b3ef`](https://github.com/hawkaii/food-finder-app/commit/8f9b3ef1223d58af59328fa7cb3a671781775b8d)
+- The receipt photo goes to Meta's model, not to ML Kit *(pantry)* — [`436a925`](https://github.com/hawkaii/food-finder-app/commit/436a9254a189c985b38e26cd92b90056cc2b3b88)
+
+### Chores
+- V1.26.0 — receipts read by the model, and a real build *(release)* — [`b67fa50`](https://github.com/hawkaii/food-finder-app/commit/b67fa5076f2952b9508ba3fcc7afbef1bf9b2ffe)
+
+### Docs
+- V1.25.0 [skip ci] *(changelog)* — [`7ef2252`](https://github.com/hawkaii/food-finder-app/commit/7ef2252143072e77f7500ca90196d295fcffe944)
+
+### Fixed
+- A parsed name has to name something on a shelf *(pantry)* — [`bfe42a6`](https://github.com/hawkaii/food-finder-app/commit/bfe42a60927bf7557d403a66a12d9cb7b45dff72)
+- The field empties on send, and the wait is where you are looking *(chat)* — [`c3eb6b4`](https://github.com/hawkaii/food-finder-app/commit/c3eb6b407b0e2a1fc30a31a9e7f796ba706c5610)
+
+### Performance
+- The session opens behind a splash, images decode at their size, CI ships release APKs *(startup,size)* — [`4742648`](https://github.com/hawkaii/food-finder-app/commit/4742648592c6acbe75b6bcb819041d8871115ded)
+
 ## [1.25.0] — 2026-11-02
 
 ### Added
