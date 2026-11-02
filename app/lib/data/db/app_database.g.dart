@@ -3261,6 +3261,355 @@ class PantryRowsCompanion extends UpdateCompanion<PantryRow> {
   }
 }
 
+class $AssistantTurnRowsTable extends AssistantTurnRows
+    with TableInfo<$AssistantTurnRowsTable, AssistantTurnRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AssistantTurnRowsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dishIdMeta = const VerificationMeta('dishId');
+  @override
+  late final GeneratedColumn<String> dishId = GeneratedColumn<String>(
+      'dish_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _versionIdMeta =
+      const VerificationMeta('versionId');
+  @override
+  late final GeneratedColumn<String> versionId = GeneratedColumn<String>(
+      'version_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+      'role', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _messageMeta =
+      const VerificationMeta('message');
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+      'message', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, dishId, versionId, role, message, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'assistant_turn_rows';
+  @override
+  VerificationContext validateIntegrity(Insertable<AssistantTurnRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('dish_id')) {
+      context.handle(_dishIdMeta,
+          dishId.isAcceptableOrUnknown(data['dish_id']!, _dishIdMeta));
+    } else if (isInserting) {
+      context.missing(_dishIdMeta);
+    }
+    if (data.containsKey('version_id')) {
+      context.handle(_versionIdMeta,
+          versionId.isAcceptableOrUnknown(data['version_id']!, _versionIdMeta));
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(_messageMeta,
+          message.isAcceptableOrUnknown(data['message']!, _messageMeta));
+    } else if (isInserting) {
+      context.missing(_messageMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AssistantTurnRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AssistantTurnRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      dishId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}dish_id'])!,
+      versionId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}version_id']),
+      role: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
+      message: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $AssistantTurnRowsTable createAlias(String alias) {
+    return $AssistantTurnRowsTable(attachedDatabase, alias);
+  }
+}
+
+class AssistantTurnRow extends DataClass
+    implements Insertable<AssistantTurnRow> {
+  final String id;
+  final String dishId;
+  final String? versionId;
+
+  /// `user` or `assistant`.
+  final String role;
+  final String message;
+  final DateTime createdAt;
+  const AssistantTurnRow(
+      {required this.id,
+      required this.dishId,
+      this.versionId,
+      required this.role,
+      required this.message,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['dish_id'] = Variable<String>(dishId);
+    if (!nullToAbsent || versionId != null) {
+      map['version_id'] = Variable<String>(versionId);
+    }
+    map['role'] = Variable<String>(role);
+    map['message'] = Variable<String>(message);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  AssistantTurnRowsCompanion toCompanion(bool nullToAbsent) {
+    return AssistantTurnRowsCompanion(
+      id: Value(id),
+      dishId: Value(dishId),
+      versionId: versionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(versionId),
+      role: Value(role),
+      message: Value(message),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AssistantTurnRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AssistantTurnRow(
+      id: serializer.fromJson<String>(json['id']),
+      dishId: serializer.fromJson<String>(json['dishId']),
+      versionId: serializer.fromJson<String?>(json['versionId']),
+      role: serializer.fromJson<String>(json['role']),
+      message: serializer.fromJson<String>(json['message']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'dishId': serializer.toJson<String>(dishId),
+      'versionId': serializer.toJson<String?>(versionId),
+      'role': serializer.toJson<String>(role),
+      'message': serializer.toJson<String>(message),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  AssistantTurnRow copyWith(
+          {String? id,
+          String? dishId,
+          Value<String?> versionId = const Value.absent(),
+          String? role,
+          String? message,
+          DateTime? createdAt}) =>
+      AssistantTurnRow(
+        id: id ?? this.id,
+        dishId: dishId ?? this.dishId,
+        versionId: versionId.present ? versionId.value : this.versionId,
+        role: role ?? this.role,
+        message: message ?? this.message,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  AssistantTurnRow copyWithCompanion(AssistantTurnRowsCompanion data) {
+    return AssistantTurnRow(
+      id: data.id.present ? data.id.value : this.id,
+      dishId: data.dishId.present ? data.dishId.value : this.dishId,
+      versionId: data.versionId.present ? data.versionId.value : this.versionId,
+      role: data.role.present ? data.role.value : this.role,
+      message: data.message.present ? data.message.value : this.message,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssistantTurnRow(')
+          ..write('id: $id, ')
+          ..write('dishId: $dishId, ')
+          ..write('versionId: $versionId, ')
+          ..write('role: $role, ')
+          ..write('message: $message, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, dishId, versionId, role, message, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AssistantTurnRow &&
+          other.id == this.id &&
+          other.dishId == this.dishId &&
+          other.versionId == this.versionId &&
+          other.role == this.role &&
+          other.message == this.message &&
+          other.createdAt == this.createdAt);
+}
+
+class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
+  final Value<String> id;
+  final Value<String> dishId;
+  final Value<String?> versionId;
+  final Value<String> role;
+  final Value<String> message;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const AssistantTurnRowsCompanion({
+    this.id = const Value.absent(),
+    this.dishId = const Value.absent(),
+    this.versionId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.message = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AssistantTurnRowsCompanion.insert({
+    required String id,
+    required String dishId,
+    this.versionId = const Value.absent(),
+    required String role,
+    required String message,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        dishId = Value(dishId),
+        role = Value(role),
+        message = Value(message),
+        createdAt = Value(createdAt);
+  static Insertable<AssistantTurnRow> custom({
+    Expression<String>? id,
+    Expression<String>? dishId,
+    Expression<String>? versionId,
+    Expression<String>? role,
+    Expression<String>? message,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dishId != null) 'dish_id': dishId,
+      if (versionId != null) 'version_id': versionId,
+      if (role != null) 'role': role,
+      if (message != null) 'message': message,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AssistantTurnRowsCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? dishId,
+      Value<String?>? versionId,
+      Value<String>? role,
+      Value<String>? message,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return AssistantTurnRowsCompanion(
+      id: id ?? this.id,
+      dishId: dishId ?? this.dishId,
+      versionId: versionId ?? this.versionId,
+      role: role ?? this.role,
+      message: message ?? this.message,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (dishId.present) {
+      map['dish_id'] = Variable<String>(dishId.value);
+    }
+    if (versionId.present) {
+      map['version_id'] = Variable<String>(versionId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AssistantTurnRowsCompanion(')
+          ..write('id: $id, ')
+          ..write('dishId: $dishId, ')
+          ..write('versionId: $versionId, ')
+          ..write('role: $role, ')
+          ..write('message: $message, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MetaRowsTable extends MetaRows with TableInfo<$MetaRowsTable, MetaRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -3456,13 +3805,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CookLogRowsTable cookLogRows = $CookLogRowsTable(this);
   late final $CookTimerRowsTable cookTimerRows = $CookTimerRowsTable(this);
   late final $PantryRowsTable pantryRows = $PantryRowsTable(this);
+  late final $AssistantTurnRowsTable assistantTurnRows =
+      $AssistantTurnRowsTable(this);
   late final $MetaRowsTable metaRows = $MetaRowsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [dishRows, versionRows, cookLogRows, cookTimerRows, pantryRows, metaRows];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        dishRows,
+        versionRows,
+        cookLogRows,
+        cookTimerRows,
+        pantryRows,
+        assistantTurnRows,
+        metaRows
+      ];
 }
 
 typedef $$DishRowsTableCreateCompanionBuilder = DishRowsCompanion Function({
@@ -5329,6 +5687,201 @@ typedef $$PantryRowsTableProcessedTableManager = ProcessedTableManager<
     (PantryRow, BaseReferences<_$AppDatabase, $PantryRowsTable, PantryRow>),
     PantryRow,
     PrefetchHooks Function()>;
+typedef $$AssistantTurnRowsTableCreateCompanionBuilder
+    = AssistantTurnRowsCompanion Function({
+  required String id,
+  required String dishId,
+  Value<String?> versionId,
+  required String role,
+  required String message,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$AssistantTurnRowsTableUpdateCompanionBuilder
+    = AssistantTurnRowsCompanion Function({
+  Value<String> id,
+  Value<String> dishId,
+  Value<String?> versionId,
+  Value<String> role,
+  Value<String> message,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $$AssistantTurnRowsTableFilterComposer
+    extends Composer<_$AppDatabase, $AssistantTurnRowsTable> {
+  $$AssistantTurnRowsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get dishId => $composableBuilder(
+      column: $table.dishId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get versionId => $composableBuilder(
+      column: $table.versionId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$AssistantTurnRowsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AssistantTurnRowsTable> {
+  $$AssistantTurnRowsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get dishId => $composableBuilder(
+      column: $table.dishId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get versionId => $composableBuilder(
+      column: $table.versionId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$AssistantTurnRowsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AssistantTurnRowsTable> {
+  $$AssistantTurnRowsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get dishId =>
+      $composableBuilder(column: $table.dishId, builder: (column) => column);
+
+  GeneratedColumn<String> get versionId =>
+      $composableBuilder(column: $table.versionId, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$AssistantTurnRowsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $AssistantTurnRowsTable,
+    AssistantTurnRow,
+    $$AssistantTurnRowsTableFilterComposer,
+    $$AssistantTurnRowsTableOrderingComposer,
+    $$AssistantTurnRowsTableAnnotationComposer,
+    $$AssistantTurnRowsTableCreateCompanionBuilder,
+    $$AssistantTurnRowsTableUpdateCompanionBuilder,
+    (
+      AssistantTurnRow,
+      BaseReferences<_$AppDatabase, $AssistantTurnRowsTable, AssistantTurnRow>
+    ),
+    AssistantTurnRow,
+    PrefetchHooks Function()> {
+  $$AssistantTurnRowsTableTableManager(
+      _$AppDatabase db, $AssistantTurnRowsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AssistantTurnRowsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AssistantTurnRowsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AssistantTurnRowsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> dishId = const Value.absent(),
+            Value<String?> versionId = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            Value<String> message = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AssistantTurnRowsCompanion(
+            id: id,
+            dishId: dishId,
+            versionId: versionId,
+            role: role,
+            message: message,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String dishId,
+            Value<String?> versionId = const Value.absent(),
+            required String role,
+            required String message,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AssistantTurnRowsCompanion.insert(
+            id: id,
+            dishId: dishId,
+            versionId: versionId,
+            role: role,
+            message: message,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$AssistantTurnRowsTable, AssistantTurnRow>(
+                        table),
+                    BaseReferences<_$AppDatabase, $AssistantTurnRowsTable,
+                        AssistantTurnRow>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$AssistantTurnRowsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $AssistantTurnRowsTable,
+    AssistantTurnRow,
+    $$AssistantTurnRowsTableFilterComposer,
+    $$AssistantTurnRowsTableOrderingComposer,
+    $$AssistantTurnRowsTableAnnotationComposer,
+    $$AssistantTurnRowsTableCreateCompanionBuilder,
+    $$AssistantTurnRowsTableUpdateCompanionBuilder,
+    (
+      AssistantTurnRow,
+      BaseReferences<_$AppDatabase, $AssistantTurnRowsTable, AssistantTurnRow>
+    ),
+    AssistantTurnRow,
+    PrefetchHooks Function()>;
 typedef $$MetaRowsTableCreateCompanionBuilder = MetaRowsCompanion Function({
   required String key,
   required String value,
@@ -5467,6 +6020,8 @@ class $AppDatabaseManager {
       $$CookTimerRowsTableTableManager(_db, _db.cookTimerRows);
   $$PantryRowsTableTableManager get pantryRows =>
       $$PantryRowsTableTableManager(_db, _db.pantryRows);
+  $$AssistantTurnRowsTableTableManager get assistantTurnRows =>
+      $$AssistantTurnRowsTableTableManager(_db, _db.assistantTurnRows);
   $$MetaRowsTableTableManager get metaRows =>
       $$MetaRowsTableTableManager(_db, _db.metaRows);
 }

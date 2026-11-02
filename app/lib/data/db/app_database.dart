@@ -145,6 +145,25 @@ class PantryRows extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// The recipe chat, on this device only.
+///
+/// The server is stateless by design: it answers one question against one
+/// version and forgets. What was said is the cook's own memory, so it lives
+/// here and never enters the sync wire — no `dirty`, no `updatedAt`.
+class AssistantTurnRows extends Table {
+  TextColumn get id => text()();
+  TextColumn get dishId => text()();
+  TextColumn get versionId => text().nullable()();
+
+  /// `user` or `assistant`.
+  TextColumn get role => text()();
+  TextColumn get message => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Small key/value store for database-level facts. The seed marker lives here
 /// rather than in SharedPreferences so that wiping the database also resets it —
 /// the two can never disagree about whether the demo kitchen exists.
@@ -156,7 +175,15 @@ class MetaRows extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [DishRows, VersionRows, CookLogRows, CookTimerRows, PantryRows, MetaRows])
+@DriftDatabase(tables: [
+  DishRows,
+  VersionRows,
+  CookLogRows,
+  CookTimerRows,
+  PantryRows,
+  AssistantTurnRows,
+  MetaRows,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ??
@@ -171,7 +198,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -226,6 +253,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 8) {
             // The pantry, the fifth synced list and the only mutable one.
             await m.createTable(pantryRows);
+          }
+          if (from < 9) {
+            // The recipe chat, local only: the server keeps no thread.
+            await m.createTable(assistantTurnRows);
           }
         },
         beforeOpen: (details) async {

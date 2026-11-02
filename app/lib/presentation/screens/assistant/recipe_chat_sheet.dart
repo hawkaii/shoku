@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/shoku_theme.dart';
+import '../../../data/db/assistant_turn_repository.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/assistant_service.dart';
 import '../../../data/services/speech_service.dart';
@@ -32,7 +33,7 @@ Future<void> showRecipeChat(
   );
 }
 
-enum _Kind { mine, answer, diff, notice }
+enum _Kind { mine, answer, diff, notice, divider }
 
 class _Turn {
   const _Turn.mine(this.text)
@@ -47,9 +48,17 @@ class _Turn {
       : kind = _Kind.notice,
         reply = null,
         question = null;
+  const _Turn.divider(this.text)
+      : kind = _Kind.divider,
+        reply = null,
+        question = null;
   const _Turn.diff(this.reply, this.question)
       : kind = _Kind.diff,
         text = '';
+
+  /// A turn read back from this device's own memory.
+  factory _Turn.restored(AssistantTurnRecord turn) =>
+      turn.isMine ? _Turn.mine(turn.text) : _Turn.answer(turn.text);
 
   final _Kind kind;
   final String text;
@@ -62,6 +71,9 @@ class _Turn {
 /// Nothing here writes the journal directly. An edit arrives as arrays the
 /// server computed against one specific version; Apply writes exactly one
 /// version through the store, the same door a cook uses.
+///
+/// The conversation is remembered on this device, per dish, and the server is
+/// never told about it: `history` is the client's own last two exchanges.
 class RecipeChatSheet extends ConsumerStatefulWidget {
   const RecipeChatSheet({super.key, required this.dish, this.stepIndex});
 
@@ -75,7 +87,19 @@ class RecipeChatSheet extends ConsumerStatefulWidget {
 class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   final _input = TextEditingController();
   final _turns = <_Turn>[];
-  final _history = <AssistantTurn>[];
+
+  /// The turns behind the sheet, oldest first: restored and this session's.
+  final _stored = <AssistantTurnRecord>[];
+
+  int _total = 0;
+  bool _loading = true;
+
+  /// The version the sheet is talking about. History never crosses it.
+  String? _versionId;
+  int _versionNumber = 1;
+
+  /// A step scope the cook can drop with the chip's x.
+  bool _stepScope = true;
 
   bool _thinking = false;
   bool _applying = false;
@@ -89,37 +113,149 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   bool _stale = false;
 
   @override
+  void initState() {
+    super.initState();
+    _versionId = _headId(widget.dish);
+    _versionNumber = _numberOf(widget.dish, _versionId);
+    _load();
+  }
+
+  @override
   void dispose() {
     _input.dispose();
     super.dispose();
   }
 
+  static String? _headId(Dish dish) =>
+      dish.versions.isEmpty ? null : dish.versions.last.id;
+
+  static int _numberOf(Dish dish, String? versionId) {
+    final index = dish.versions.indexWhere((v) => v.id == versionId);
+    return index < 0 ? dish.versions.length : index + 1;
+  }
+
+  Future<void> _load() async {
+    final repo = ref.read(assistantTurnRepositoryProvider);
+    try {
+      final total = await repo.count(widget.dish.id);
+      final last = await repo.load(widget.dish.id);
+      if (!mounted) return;
+      setState(() {
+        _total = total;
+        _stored
+          ..clear()
+          ..addAll(last);
+        _turns
+          ..clear()
+          ..addAll([for (final turn in last) _Turn.restored(turn)]);
+        _loading = false;
+      });
+    } catch (_) {
+      // A chat that cannot be read is still a chat that can be started.
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _showEarlier() async {
+    final repo = ref.read(assistantTurnRepositoryProvider);
+    final all = await repo.load(widget.dish.id, limit: _total);
+    if (!mounted) return;
+    final already = _stored.length;
+    final older = all.length <= already ? const <AssistantTurnRecord>[] : all.sublist(0, all.length - already);
+    setState(() {
+      _stored
+        ..clear()
+        ..addAll(all);
+      _turns.insertAll(0, [for (final turn in older) _Turn.restored(turn)]);
+    });
+  }
+
+  Future<void> _clear() async {
+    if (_thinking || _applying) return;
+    await ref.read(assistantTurnRepositoryProvider).clear(widget.dish.id);
+    if (!mounted) return;
+    setState(() {
+      _stored.clear();
+      _turns.clear();
+      _total = 0;
+      _diff = null;
+      _appliedVersion = null;
+      _error = null;
+      _stale = false;
+    });
+  }
+
+  /// The last two exchanges **at this version**. Anything said about an older
+  /// version is context the server must not get: it would answer about a
+  /// recipe that no longer matches the one on screen.
+  List<AssistantTurn> _history() {
+    final relevant = [
+      for (final turn in _stored)
+        if (turn.versionId == _versionId) turn,
+    ];
+    final tail = relevant.length <= 4
+        ? relevant
+        : relevant.sublist(relevant.length - 4);
+    return [
+      for (final turn in tail)
+        AssistantTurn(role: turn.role, text: turn.text),
+    ];
+  }
+
+  /// The version changed while the sheet was open (an applied edit, or a fork
+  /// from elsewhere). Old turns stay readable behind a divider; new ones start
+  /// the context again.
+  void _movedTo(Dish dish) {
+    final head = _headId(dish);
+    if (!mounted || head == null || head == _versionId) return;
+    setState(() {
+      _versionId = head;
+      _versionNumber = _numberOf(dish, head);
+      _turns.add(_Turn.divider('v$_versionNumber'));
+    });
+  }
+
   String get _scope =>
-      widget.stepIndex == null ? '' : 'About step ${widget.stepIndex! + 1}: ';
+      widget.stepIndex != null && _stepScope ? 'About step ${widget.stepIndex! + 1}: ' : '';
 
   bool get _blocked => _cap || _offline;
 
   bool get _canSend => !_thinking && !_applying && _diff == null && !_blocked;
 
+  Future<void> _remember(String role, String text) async {
+    try {
+      final turn = await ref.read(assistantTurnRepositoryProvider).add(
+            dishId: widget.dish.id,
+            versionId: _versionId,
+            role: role,
+            text: text,
+          );
+      _stored.add(turn);
+      _total++;
+    } catch (_) {
+      // Memory is best-effort: losing a line must not lose the answer.
+    }
+  }
+
   Future<void> _send(String raw) async {
     final question = raw.trim();
     if (question.isEmpty || !_canSend) return;
 
+    final history = _history();
     setState(() {
       _turns.add(_Turn.mine(question));
       _thinking = true;
       _error = null;
     });
+    unawaited(_remember('user', question));
 
     try {
       final reply = await ref.read(assistantServiceProvider).ask(
             dishId: widget.dish.id,
-            versionId: widget.dish.versions.isEmpty
-                ? null
-                : widget.dish.versions.last.id,
+            versionId: _versionId,
             question: '$_scope$question',
             requestId: _uuid.v4(),
-            history: _history,
+            history: history,
           ).timeout(const Duration(seconds: 30));
 
       if (!mounted) return;
@@ -128,13 +264,6 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
         _thinking = false;
         _input.clear();
         _turns.add(_Turn.answer(reply.answer));
-        _history.addAll([
-          AssistantTurn(role: 'user', text: question),
-          AssistantTurn(role: 'assistant', text: reply.answer),
-        ]);
-        while (_history.length > 4) {
-          _history.removeAt(0);
-        }
         if (reply.isEdit) {
           final diff = _Turn.diff(reply, question);
           _turns.add(diff);
@@ -142,12 +271,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           _stale = false;
         }
       });
-
+      unawaited(_remember('assistant', reply.answer));
       if (reply.isEdit) {
         // A change is a decision, not a paragraph: never read it out unasked.
         await ref.read(speechServiceProvider).stop();
-      } else {
-        await ref.read(readAloudProvider.notifier).speak(reply.answer);
       }
     } on AssistantCapReached {
       if (!mounted) return;
@@ -238,8 +365,12 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final watched = ref.watch(dishProvider(widget.dish.id)) ?? widget.dish;
+    final head = _headId(watched);
+    if (head != null && head != _versionId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _movedTo(watched));
+    }
     final tall = _diff != null || _appliedVersion != null;
-    final readAloud = ref.watch(readAloudProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 240),
@@ -271,28 +402,65 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 Icon(Icons.auto_awesome, size: 18, color: c.accent),
                 const SizedBox(width: ShokuSpace.sm),
                 Expanded(
-                  child: Text('Ask about this cook',
-                      style: ShokuType.h2.copyWith(color: c.ink)),
+                  child: Text(
+                    'Ask about this dish · v$_versionNumber',
+                    key: const ValueKey('chat-title'),
+                    style: ShokuType.h2.copyWith(color: c.ink),
+                  ),
                 ),
                 GestureDetector(
-                  key: const ValueKey('read-aloud-toggle'),
-                  onTap: () => ref.read(readAloudProvider.notifier).toggle(),
+                  key: const ValueKey('chat-clear'),
+                  onTap: _turns.isEmpty ? null : _clear,
                   behavior: HitTestBehavior.opaque,
-                  child: ShokuChip(
-                    'Read aloud',
-                    icon: readAloud ? Icons.volume_up : Icons.volume_off,
-                    color: readAloud ? c.accent : c.inkMuted,
-                  ),
+                  child: Text('Clear chat',
+                      style: ShokuType.label.copyWith(
+                          fontSize: 9.5, color: c.inkMuted)),
                 ),
               ],
             ),
+            if (widget.stepIndex != null && _stepScope) ...[
+              const SizedBox(height: ShokuSpace.xs),
+              Row(
+                children: [
+                  GestureDetector(
+                    key: const ValueKey('chat-step-chip'),
+                    onTap: () => setState(() => _stepScope = false),
+                    behavior: HitTestBehavior.opaque,
+                    child: ShokuChip(
+                      'about step ${widget.stepIndex! + 1}',
+                      icon: Icons.close,
+                      color: c.accent,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (_total > _stored.length)
+              Center(
+                child: GestureDetector(
+                  key: const ValueKey('chat-earlier'),
+                  onTap: _showEarlier,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+                    child: Text(
+                      'Show earlier (${_total - _stored.length})',
+                      style: ShokuType.label
+                          .copyWith(fontSize: 9.5, color: c.inkMuted),
+                    ),
+                  ),
+                ),
+              ),
             const SizedBox(height: ShokuSpace.sm),
             Expanded(
               child: ListView(
                 reverse: true,
                 padding: const EdgeInsets.only(bottom: ShokuSpace.sm),
                 children: [
-                  for (final turn in _turns.reversed) _bubble(context, turn),
+                  if (_loading)
+                    const SizedBox.shrink()
+                  else
+                    for (final turn in _turns.reversed) _bubble(context, turn),
                   if (_thinking) _thinkingBubble(context),
                 ],
               ),
@@ -362,6 +530,22 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           ),
         _Kind.answer => _AnswerBubble(text: turn.text),
         _Kind.notice => _ChatNotice(text: turn.text),
+        _Kind.divider => Padding(
+            padding: const EdgeInsets.symmetric(vertical: ShokuSpace.sm),
+            child: Row(
+              children: [
+                Expanded(child: Divider(color: c.hairline, height: 1)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.sm),
+                  child: Text('v$_versionNumber starts here',
+                      key: const ValueKey('chat-version-divider'),
+                      style:
+                          ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                ),
+                Expanded(child: Divider(color: c.hairline, height: 1)),
+              ],
+            ),
+          ),
         _Kind.diff => _DiffCard(
             turn: turn,
             dish: widget.dish,
@@ -476,6 +660,7 @@ class _AnswerBubbleState extends ConsumerState<_AnswerBubble> {
             ),
             const SizedBox(width: ShokuSpace.sm),
             GestureDetector(
+              key: const ValueKey('answer-speaker'),
               onTap: _speak,
               behavior: HitTestBehavior.opaque,
               child: Icon(_speaking ? Icons.stop : Icons.volume_up,
