@@ -152,7 +152,11 @@ class PantryRows extends Table {
 /// here and never enters the sync wire — no `dirty`, no `updatedAt`.
 class AssistantTurnRows extends Table {
   TextColumn get id => text()();
-  TextColumn get dishId => text()();
+  TextColumn get dishId => text().nullable()();
+
+  /// `kitchen` or `dish`. The kitchen thread has no dish; a dish thread is one
+  /// per dish. Two scopes, two threads, and they never mix.
+  TextColumn get scope => text().withDefault(const Constant('dish'))();
   TextColumn get versionId => text().nullable()();
 
   /// `user` or `assistant`.
@@ -198,7 +202,7 @@ class AppDatabase extends _$AppDatabase {
             ));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
@@ -255,8 +259,14 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(pantryRows);
           }
           if (from < 9) {
-            // The recipe chat, local only: the server keeps no thread.
+            // The recipe chat, local only: the server keeps no thread. Created
+            // at today's shape, so a database older than v9 needs no second
+            // step to gain the scope column.
             await m.createTable(assistantTurnRows);
+          } else if (from < 10) {
+            // One assistant, two kinds of thread: the kitchen's and each
+            // dish's. Existing rows were dish chats.
+            await m.addColumn(assistantTurnRows, assistantTurnRows.scope);
           }
         },
         beforeOpen: (details) async {

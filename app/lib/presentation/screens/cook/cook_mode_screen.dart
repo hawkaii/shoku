@@ -14,6 +14,7 @@ import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/step_ingredients.dart';
 import '../../widgets/kit/step_library.dart';
+import '../../widgets/kit/bot_orb.dart';
 import '../../widgets/kit/step_text.dart';
 import '../assistant/recipe_chat_sheet.dart';
 import '../log/debrief_sheet.dart';
@@ -340,7 +341,22 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           children: [
                             StepMotionLibrary.build(context, steps[i], height: 168),
                             const SizedBox(height: ShokuSpace.lg),
-                            ShokuLabel('step ${(i + 1).toString().padLeft(2, '0')}'),
+                            Row(
+                              children: [
+                                ShokuLabel(
+                                    'step ${(i + 1).toString().padLeft(2, '0')}'),
+                                const Spacer(),
+                                // The assistant lives in the step header, not
+                                // over the timer.
+                                BotInlineChip(
+                                  onTap: () => showRecipeChat(context,
+                                      dish: dish, stepIndex: i),
+                                  badge: _changes.isEmpty
+                                      ? null
+                                      : '${_changes.length}',
+                                ),
+                              ],
+                            ),
                             const SizedBox(height: ShokuSpace.sm),
                             StepText(
                               text: steps[i],
@@ -357,18 +373,6 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      right: ShokuSpace.lg,
-                      bottom: ShokuSpace.md,
-                      child: _AiFab(
-                        onTap: () => showRecipeChat(
-                          context,
-                          dish: dish,
-                          stepIndex: _step,
-                        ),
-                        badge: _changes.isEmpty ? null : '${_changes.length}',
                       ),
                     ),
                   ],
@@ -486,48 +490,3 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   }
 }
 
-class _AiFab extends StatelessWidget {
-  final VoidCallback onTap;
-  final String? badge;
-
-  const _AiFab({required this.onTap, this.badge});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return ShokuPressable(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(
-          gradient: ShokuGradients.crimsonPress,
-          borderRadius: BorderRadius.circular(ShokuRadius.pill),
-          border: Border.all(color: c.ink, width: ShokuStroke.brutal),
-          boxShadow: [
-            BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.auto_awesome, size: 15, color: c.onAccent),
-            const SizedBox(width: 6),
-            Text('Ask', style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 13)),
-            if (badge != null) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: c.onAccent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(badge!,
-                    style: ShokuType.stat.copyWith(fontSize: 9, color: c.accent)),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}

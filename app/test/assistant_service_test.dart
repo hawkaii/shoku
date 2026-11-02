@@ -31,6 +31,7 @@ void main() {
     }));
 
     final reply = await service.ask(
+      scope: 'dish',
       dishId: 'd1',
       versionId: 'v1',
       question: 'how much is 2 tbsp?',
@@ -81,6 +82,7 @@ void main() {
     }));
 
     final reply = await service.ask(
+      scope: 'dish',
       dishId: 'd1',
       question: 'add potatoes',
       requestId: 'r2',
@@ -110,6 +112,7 @@ void main() {
     }));
 
     await service.ask(
+      scope: 'dish',
       dishId: 'd1',
       question: 'and then?',
       requestId: 'r3',
@@ -133,7 +136,7 @@ void main() {
     }));
 
     await expectLater(
-      service.ask(dishId: 'd1', question: 'anything', requestId: 'r4'),
+      service.ask(scope: 'dish', dishId: 'd1', question: 'anything', requestId: 'r4'),
       throwsA(isA<AssistantCapReached>()),
     );
   });

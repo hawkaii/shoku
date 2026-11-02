@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/services/share_intake.dart';
 import '../screens/add/import_sheet.dart';
 import '../state/sync_providers.dart';
+import '../widgets/kit/bot_orb.dart';
 import '../widgets/kit/nav.dart';
 import 'import_scope.dart';
 import 'sync_underline.dart';
@@ -90,7 +91,19 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
       // The import poller's lifetime is the app's, not the Journal's: a job
       // that settles while another tab is open still lands.
       child: Scaffold(
-        body: widget.shell,
+        body: Stack(
+          children: [
+            widget.shell,
+            // The one assistant, on every page the shell owns. Sheets open
+            // above the Scaffold, so it is hidden while one is up without any
+            // bookkeeping here.
+            const Positioned(
+              right: 16,
+              bottom: 12,
+              child: BotOrb(),
+            ),
+          ],
+        ),
         bottomNavigationBar: ShokuTabBar(
           items: _tabs,
           index: widget.shell.currentIndex,

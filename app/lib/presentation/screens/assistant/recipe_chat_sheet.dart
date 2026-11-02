@@ -272,6 +272,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
 
     try {
       final reply = await ref.read(assistantServiceProvider).ask(
+            scope: 'dish',
             dishId: widget.dish.id,
             versionId: _versionId,
             question: '$_scope$question',

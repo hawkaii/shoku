@@ -32,11 +32,14 @@ class _FakeAssistant extends AssistantService {
 
   @override
   Future<AssistantReply> ask({
-    required String dishId,
+    required String scope,
+    String? dishId,
     String? versionId,
+    int? stepIndex,
     required String question,
     required String requestId,
     List<AssistantTurn> history = const [],
+    List<String> exclude = const [],
   }) =>
       _reply();
 }
