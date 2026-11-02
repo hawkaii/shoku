@@ -51,6 +51,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(path: '/nutrition', builder: (_, __) => const NutritionComingSoonScreen()),
     GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionComingSoonScreen()),
+    GoRoute(path: '/pantry', builder: (_, __) => const PantryScreen()),
     GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),
   ],
 );

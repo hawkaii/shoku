@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/services/share_intake.dart';
-import '../screens/add/add_sheet.dart';
 import '../screens/add/import_sheet.dart';
 import '../state/sync_providers.dart';
 import '../widgets/kit/nav.dart';
@@ -87,7 +86,9 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
             i,
             initialLocation: i == widget.shell.currentIndex,
           ),
-          onCenterTap: () => showAddSheet(context),
+          // The centre is the pantry now. Importing lives on Home, as the
+          // "Save a recipe" row at the top of the journal.
+          onCenterTap: () => context.push('/pantry'),
         ),
       ),
     );
