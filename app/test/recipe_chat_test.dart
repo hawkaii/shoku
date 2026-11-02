@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +13,7 @@ import 'package:food_finder/data/services/assistant_service.dart';
 import 'package:food_finder/presentation/screens/assistant/recipe_chat_sheet.dart';
 import 'package:food_finder/presentation/state/assistant_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
+import 'package:food_finder/presentation/widgets/kit/mic_field.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -185,5 +188,81 @@ void main() {
     expect(dish.cooks, isEmpty);
 
     await tester.pumpWidget(const SizedBox());
+  });
+
+  group('the wait', () {
+    testWidgets('the field empties at once and the wait is on screen',
+        (tester) async {
+      final gate = Completer<AssistantReply>();
+      await tester.pumpWidget(chat(_FakeAssistant(() => gate.future)));
+
+      await tester.enterText(find.byType(TextField), 'is this spicy?');
+      await tester.tap(find.byKey(const ValueKey('chat-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      // Accepted: the question is in the list, the field is not holding it.
+      expect(find.text('is this spicy?'), findsOneWidget);
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.controller!.text, isEmpty,
+          reason: 'the input clears when the send is accepted, not when the answer lands');
+
+      // And the wait is visible without scrolling for it.
+      final thinking = find.byKey(const ValueKey('chat-thinking'));
+      expect(thinking, findsOneWidget);
+      final logicalHeight =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio;
+      expect(tester.getRect(thinking).bottom, lessThanOrEqualTo(logicalHeight),
+          reason: 'the bubble sits at the bottom edge, inside the sheet');
+      expect(
+        tester.widget<MicField>(find.byType(MicField)).enabled,
+        isFalse,
+        reason: 'nothing can be sent while an answer is in flight',
+      );
+
+      gate.complete(const AssistantReply(
+          intent: 'answer', answer: 'Mildly.', remaining: 9));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(thinking, findsNothing);
+      expect(find.text('Mildly.'), findsOneWidget);
+      expect(find.text('is this spicy?'), findsOneWidget);
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+          isEmpty);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('a failure clears the wait and leaves the field empty',
+        (tester) async {
+      final gate = Completer<void>();
+      await tester.pumpWidget(chat(_FakeAssistant(() async {
+        await gate.future;
+        throw Exception('down');
+      })));
+
+      await tester.enterText(find.byType(TextField), 'is this spicy?');
+      await tester.tap(find.byKey(const ValueKey('chat-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byKey(const ValueKey('chat-thinking')), findsOneWidget);
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+          isEmpty);
+
+      gate.complete();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byKey(const ValueKey('chat-thinking')), findsNothing);
+      expect(find.text('No connection — answers need the network.'), findsOneWidget);
+      expect(find.text('is this spicy?'), findsOneWidget,
+          reason: 'the turn that was sent is still in the conversation');
+      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+          isEmpty);
+
+      await tester.pumpWidget(const SizedBox());
+    });
   });
 }

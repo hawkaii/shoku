@@ -86,6 +86,7 @@ class RecipeChatSheet extends ConsumerStatefulWidget {
 
 class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   final _input = TextEditingController();
+  final _scroll = ScrollController();
   final _turns = <_Turn>[];
 
   /// The turns behind the sheet, oldest first: restored and this session's.
@@ -123,7 +124,22 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   @override
   void dispose() {
     _input.dispose();
+    _scroll.dispose();
     super.dispose();
+  }
+
+  /// The list is reversed, so offset zero is the newest turn. Anything appended
+  /// is only *visible* once the edge is brought back into view — a bubble the
+  /// cook has to scroll to find is a bubble they never saw.
+  void _scrollToLatest() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      _scroll.animateTo(
+        0,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   static String? _headId(Dish dish) =>
@@ -243,10 +259,15 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
 
     final history = _history();
     setState(() {
+      // The field empties the moment the turn is accepted, not when the answer
+      // lands: the question is already in the list, so nothing is lost by
+      // letting the cook start typing the next one.
+      _input.clear();
       _turns.add(_Turn.mine(question));
       _thinking = true;
       _error = null;
     });
+    _scrollToLatest();
     unawaited(_remember('user', question));
 
     try {
@@ -262,7 +283,6 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       HapticFeedback.selectionClick();
       setState(() {
         _thinking = false;
-        _input.clear();
         _turns.add(_Turn.answer(reply.answer));
         if (reply.isEdit) {
           final diff = _Turn.diff(reply, question);
@@ -271,6 +291,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           _stale = false;
         }
       });
+      _scrollToLatest();
       unawaited(_remember('assistant', reply.answer));
       if (reply.isEdit) {
         // A change is a decision, not a paragraph: never read it out unasked.
@@ -285,6 +306,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           'You have used today’s questions. They come back tomorrow.',
         ));
       });
+      _scrollToLatest();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -294,6 +316,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           'No connection — answers need the network.',
         ));
       });
+      _scrollToLatest();
     }
   }
 
@@ -454,14 +477,17 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             const SizedBox(height: ShokuSpace.sm),
             Expanded(
               child: ListView(
+                controller: _scroll,
                 reverse: true,
                 padding: const EdgeInsets.only(bottom: ShokuSpace.sm),
                 children: [
+                  // First, because the list is reversed: this is the bottom
+                  // edge, where the cook is looking.
+                  if (_thinking) _thinkingBubble(context),
                   if (_loading)
                     const SizedBox.shrink()
                   else
                     for (final turn in _turns.reversed) _bubble(context, turn),
-                  if (_thinking) _thinkingBubble(context),
                 ],
               ),
             ),
