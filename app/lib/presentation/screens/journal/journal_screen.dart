@@ -31,6 +31,7 @@ class JournalScreen extends ConsumerWidget {
     // The journal is read from the database on launch, so the first frame can
     // legitimately be empty — don't index into it.
     final status = ref.watch(journalStatusProvider);
+    final empty = dishes.isEmpty;
     if (status == JournalStatus.failed) {
       return _withImportCard(
         _JournalError(
@@ -38,22 +39,15 @@ class JournalScreen extends ConsumerWidget {
         ),
       );
     }
-    if (dishes.isEmpty) {
-      // A brand-new user has no dishes and still needs a way to import.
-      return _withImportCard(
-        Column(
-          children: [
-            const _SaveRecipeRow(),
-            Expanded(child: _JournalLoading(ready: status == JournalStatus.ready)),
-          ],
-        ),
-      );
-    }
-
-    final pinned = dishes.firstWhere(
-      (d) => d.status == DishStatus.toCook,
-      orElse: () => dishes.first,
-    );
+    // The page has one build path: the header is always the same tree, and
+    // only the shelf underneath it comes or goes. An early return on an empty
+    // list is a decision the page can no longer revise.
+    final pinned = empty
+        ? null
+        : dishes.firstWhere(
+            (d) => d.status == DishStatus.toCook,
+            orElse: () => dishes.first,
+          );
 
     // A CustomScrollView because the cook-log empty card is the one thing on
     // screen and must be laid out with SliverFillRemaining: it may not be cut
@@ -123,35 +117,49 @@ class JournalScreen extends ConsumerWidget {
           const SizedBox(height: ShokuSpace.xl),
 
           // ---- On the counter -----------------------------------------
-          const ShokuLabel('on the counter'),
-          const SizedBox(height: ShokuSpace.sm),
-          // No entrance animation here: this card is the one thing on the
-          // screen a new cook must see, and content must never depend on an
-          // opacity controller to become visible.
-          _PinnedCard(
-            dish: pinned,
-            onCook: () => showLogSheet(context, pinned),
-            onOpen: () => context.push('/dish/${pinned.id}'),
-          ),
-          const SizedBox(height: ShokuSpace.xl),
+          if (pinned != null) ...[
+            const ShokuLabel('on the counter'),
+            const SizedBox(height: ShokuSpace.sm),
+            // No entrance animation here: this card is the one thing on the
+            // screen a new cook must see, and content must never depend on an
+            // opacity controller to become visible.
+            _PinnedCard(
+              dish: pinned,
+              onCook: () => showLogSheet(context, pinned),
+              onOpen: () => context.push('/dish/${pinned.id}'),
+            ),
+            const SizedBox(height: ShokuSpace.xl),
 
-          // ---- Timeline ------------------------------------------------
-          Row(
-            children: [
-              const ShokuLabel('cook log'),
-              const Spacer(),
-              Text(
-                count(cooks.length, 'entry', 'entries'),
-                style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: ShokuSpace.sm),
+            // ---- Timeline -----------------------------------------------
+            Row(
+              children: [
+                const ShokuLabel('cook log'),
+                const Spacer(),
+                Text(
+                  count(cooks.length, 'entry', 'entries'),
+                  style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: ShokuSpace.sm),
+          ],
                 ],
               ),
             ),
           ),
-          if (cooks.isEmpty)
+          if (empty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: ShokuSpace.lg,
+                  right: ShokuSpace.lg,
+                  bottom: ShokuSpace.tabBarClearance(context),
+                ),
+                child: _JournalLoading(ready: status == JournalStatus.ready),
+              ),
+            )
+          else if (cooks.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(

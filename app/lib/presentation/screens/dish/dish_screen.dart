@@ -12,11 +12,13 @@ import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../state/pantry_providers.dart';
 import '../../widgets/kit/dish_image.dart';
+import '../../widgets/kit/bot_orb.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/status_badge.dart';
 import '../../widgets/kit/step_ingredients.dart';
 import '../assistant/recipe_chat_sheet.dart';
+import '../bot/bot_scope.dart';
 import '../log/debrief_sheet.dart';
 
 /// The dish, as a kitchen would hand it to you.
@@ -66,7 +68,9 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
+          children: [
+            Column(
           children: [
             _header(context, dish, version),
             Expanded(
@@ -153,6 +157,13 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                   _history(context, dish, version),
                 ],
               ),
+            ),
+          ],
+        ),
+            Positioned(
+              right: 16,
+              bottom: 12,
+              child: BotOrb(scope: BotScope(dishId: dish.id)),
             ),
           ],
         ),
@@ -252,26 +263,6 @@ class _DishScreenState extends ConsumerState<DishScreen> {
             icon: Icon(Icons.volume_up, size: 17, color: c.inkMuted),
             tooltip: 'Read this recipe',
             onPressed: () => _speakAll(dish, version),
-          ),
-          ShokuPressable(
-            key: const ValueKey('dish-ask'),
-            onTap: () => showRecipeChat(context, dish: dish),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: c.surface,
-                borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                border: Border.all(color: c.hairline),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.auto_awesome, size: 14, color: c.accent),
-                  const SizedBox(width: 5),
-                  Text('ASK', style: ShokuType.label.copyWith(color: c.ink)),
-                ],
-              ),
-            ),
           ),
           PopupMenuButton<String>(
             key: const ValueKey('dish-overflow'),

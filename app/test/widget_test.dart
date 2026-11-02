@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:drift/native.dart';
+import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/main.dart';
+import 'package:food_finder/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:food_finder/presentation/screens/splash_screen.dart';
+import 'package:food_finder/presentation/state/journal_store.dart';
+import 'package:food_finder/presentation/state/shoku_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_finder/presentation/state/auth_providers.dart';
-import 'package:food_finder/presentation/widgets/kit/plate_mark.dart';
 
 void main() {
   testWidgets('Shoku boots into onboarding', (tester) async {
@@ -26,24 +32,68 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('the first frame is the splash, not a blank window',
+  testWidgets('auth resolving while onboarding is up never rebuilds the app',
       (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
     final gate = Completer<void>();
+
     await tester.pumpWidget(ProviderScope(
-      overrides: [authReadyProvider.overrideWith((ref) => gate.future)],
+      overrides: [
+        authReadyProvider.overrideWith((ref) => gate.future),
+        databaseProvider.overrideWithValue(db),
+      ],
+      child: const ShokuApp(),
+    ));
+    await tester.pumpAndSettle();
+
+    // Onboarding is local, so it is the first screen; the session opens behind
+    // it. No second MaterialApp is swapped in when it resolves.
+    expect(find.text('Start cooking'), findsOneWidget);
+    gate.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Start cooking'), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('an onboarded first frame is the splash, then the router',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final gate = Completer<void>();
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        authReadyProvider.overrideWith((ref) => gate.future),
+        onboardingDoneProvider.overrideWith((ref) => true),
+        databaseProvider.overrideWithValue(db),
+      ],
       child: const ShokuApp(),
     ));
     await tester.pump();
 
-    expect(find.byType(PlateMark), findsOneWidget,
+    expect(find.byType(SplashScreen), findsOneWidget,
         reason: 'something is painted while the session opens');
     expect(find.text('Start cooking'), findsNothing);
 
     gate.complete();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
-    expect(find.text('Start cooking'), findsOneWidget);
 
-    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    expect(tester.takeException(), isNull);
+    expect(find.text('Save a recipe'), findsOneWidget,
+        reason: 'the router took over from the splash without a rebuild of the app');
+
+    // The shell schedules its three-second sync pass when it mounts.
+    await tester.pump(const Duration(seconds: 4));
     await tester.pumpWidget(const SizedBox());
   });
 }

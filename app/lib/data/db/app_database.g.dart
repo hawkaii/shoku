@@ -3275,8 +3275,15 @@ class $AssistantTurnRowsTable extends AssistantTurnRows
   static const VerificationMeta _dishIdMeta = const VerificationMeta('dishId');
   @override
   late final GeneratedColumn<String> dishId = GeneratedColumn<String>(
-      'dish_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'dish_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _scopeMeta = const VerificationMeta('scope');
+  @override
+  late final GeneratedColumn<String> scope = GeneratedColumn<String>(
+      'scope', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('dish'));
   static const VerificationMeta _versionIdMeta =
       const VerificationMeta('versionId');
   @override
@@ -3302,7 +3309,7 @@ class $AssistantTurnRowsTable extends AssistantTurnRows
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, dishId, versionId, role, message, createdAt];
+      [id, dishId, scope, versionId, role, message, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3321,8 +3328,10 @@ class $AssistantTurnRowsTable extends AssistantTurnRows
     if (data.containsKey('dish_id')) {
       context.handle(_dishIdMeta,
           dishId.isAcceptableOrUnknown(data['dish_id']!, _dishIdMeta));
-    } else if (isInserting) {
-      context.missing(_dishIdMeta);
+    }
+    if (data.containsKey('scope')) {
+      context.handle(
+          _scopeMeta, scope.isAcceptableOrUnknown(data['scope']!, _scopeMeta));
     }
     if (data.containsKey('version_id')) {
       context.handle(_versionIdMeta,
@@ -3358,7 +3367,9 @@ class $AssistantTurnRowsTable extends AssistantTurnRows
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       dishId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}dish_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}dish_id']),
+      scope: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scope'])!,
       versionId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}version_id']),
       role: attachedDatabase.typeMapping
@@ -3379,7 +3390,11 @@ class $AssistantTurnRowsTable extends AssistantTurnRows
 class AssistantTurnRow extends DataClass
     implements Insertable<AssistantTurnRow> {
   final String id;
-  final String dishId;
+  final String? dishId;
+
+  /// `kitchen` or `dish`. The kitchen thread has no dish; a dish thread is one
+  /// per dish. Two scopes, two threads, and they never mix.
+  final String scope;
   final String? versionId;
 
   /// `user` or `assistant`.
@@ -3388,7 +3403,8 @@ class AssistantTurnRow extends DataClass
   final DateTime createdAt;
   const AssistantTurnRow(
       {required this.id,
-      required this.dishId,
+      this.dishId,
+      required this.scope,
       this.versionId,
       required this.role,
       required this.message,
@@ -3397,7 +3413,10 @@ class AssistantTurnRow extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['dish_id'] = Variable<String>(dishId);
+    if (!nullToAbsent || dishId != null) {
+      map['dish_id'] = Variable<String>(dishId);
+    }
+    map['scope'] = Variable<String>(scope);
     if (!nullToAbsent || versionId != null) {
       map['version_id'] = Variable<String>(versionId);
     }
@@ -3410,7 +3429,9 @@ class AssistantTurnRow extends DataClass
   AssistantTurnRowsCompanion toCompanion(bool nullToAbsent) {
     return AssistantTurnRowsCompanion(
       id: Value(id),
-      dishId: Value(dishId),
+      dishId:
+          dishId == null && nullToAbsent ? const Value.absent() : Value(dishId),
+      scope: Value(scope),
       versionId: versionId == null && nullToAbsent
           ? const Value.absent()
           : Value(versionId),
@@ -3425,7 +3446,8 @@ class AssistantTurnRow extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AssistantTurnRow(
       id: serializer.fromJson<String>(json['id']),
-      dishId: serializer.fromJson<String>(json['dishId']),
+      dishId: serializer.fromJson<String?>(json['dishId']),
+      scope: serializer.fromJson<String>(json['scope']),
       versionId: serializer.fromJson<String?>(json['versionId']),
       role: serializer.fromJson<String>(json['role']),
       message: serializer.fromJson<String>(json['message']),
@@ -3437,7 +3459,8 @@ class AssistantTurnRow extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'dishId': serializer.toJson<String>(dishId),
+      'dishId': serializer.toJson<String?>(dishId),
+      'scope': serializer.toJson<String>(scope),
       'versionId': serializer.toJson<String?>(versionId),
       'role': serializer.toJson<String>(role),
       'message': serializer.toJson<String>(message),
@@ -3447,14 +3470,16 @@ class AssistantTurnRow extends DataClass
 
   AssistantTurnRow copyWith(
           {String? id,
-          String? dishId,
+          Value<String?> dishId = const Value.absent(),
+          String? scope,
           Value<String?> versionId = const Value.absent(),
           String? role,
           String? message,
           DateTime? createdAt}) =>
       AssistantTurnRow(
         id: id ?? this.id,
-        dishId: dishId ?? this.dishId,
+        dishId: dishId.present ? dishId.value : this.dishId,
+        scope: scope ?? this.scope,
         versionId: versionId.present ? versionId.value : this.versionId,
         role: role ?? this.role,
         message: message ?? this.message,
@@ -3464,6 +3489,7 @@ class AssistantTurnRow extends DataClass
     return AssistantTurnRow(
       id: data.id.present ? data.id.value : this.id,
       dishId: data.dishId.present ? data.dishId.value : this.dishId,
+      scope: data.scope.present ? data.scope.value : this.scope,
       versionId: data.versionId.present ? data.versionId.value : this.versionId,
       role: data.role.present ? data.role.value : this.role,
       message: data.message.present ? data.message.value : this.message,
@@ -3476,6 +3502,7 @@ class AssistantTurnRow extends DataClass
     return (StringBuffer('AssistantTurnRow(')
           ..write('id: $id, ')
           ..write('dishId: $dishId, ')
+          ..write('scope: $scope, ')
           ..write('versionId: $versionId, ')
           ..write('role: $role, ')
           ..write('message: $message, ')
@@ -3486,13 +3513,14 @@ class AssistantTurnRow extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(id, dishId, versionId, role, message, createdAt);
+      Object.hash(id, dishId, scope, versionId, role, message, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AssistantTurnRow &&
           other.id == this.id &&
           other.dishId == this.dishId &&
+          other.scope == this.scope &&
           other.versionId == this.versionId &&
           other.role == this.role &&
           other.message == this.message &&
@@ -3501,7 +3529,8 @@ class AssistantTurnRow extends DataClass
 
 class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
   final Value<String> id;
-  final Value<String> dishId;
+  final Value<String?> dishId;
+  final Value<String> scope;
   final Value<String?> versionId;
   final Value<String> role;
   final Value<String> message;
@@ -3510,6 +3539,7 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
   const AssistantTurnRowsCompanion({
     this.id = const Value.absent(),
     this.dishId = const Value.absent(),
+    this.scope = const Value.absent(),
     this.versionId = const Value.absent(),
     this.role = const Value.absent(),
     this.message = const Value.absent(),
@@ -3518,20 +3548,21 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
   });
   AssistantTurnRowsCompanion.insert({
     required String id,
-    required String dishId,
+    this.dishId = const Value.absent(),
+    this.scope = const Value.absent(),
     this.versionId = const Value.absent(),
     required String role,
     required String message,
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        dishId = Value(dishId),
         role = Value(role),
         message = Value(message),
         createdAt = Value(createdAt);
   static Insertable<AssistantTurnRow> custom({
     Expression<String>? id,
     Expression<String>? dishId,
+    Expression<String>? scope,
     Expression<String>? versionId,
     Expression<String>? role,
     Expression<String>? message,
@@ -3541,6 +3572,7 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (dishId != null) 'dish_id': dishId,
+      if (scope != null) 'scope': scope,
       if (versionId != null) 'version_id': versionId,
       if (role != null) 'role': role,
       if (message != null) 'message': message,
@@ -3551,7 +3583,8 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
 
   AssistantTurnRowsCompanion copyWith(
       {Value<String>? id,
-      Value<String>? dishId,
+      Value<String?>? dishId,
+      Value<String>? scope,
       Value<String?>? versionId,
       Value<String>? role,
       Value<String>? message,
@@ -3560,6 +3593,7 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
     return AssistantTurnRowsCompanion(
       id: id ?? this.id,
       dishId: dishId ?? this.dishId,
+      scope: scope ?? this.scope,
       versionId: versionId ?? this.versionId,
       role: role ?? this.role,
       message: message ?? this.message,
@@ -3576,6 +3610,9 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
     }
     if (dishId.present) {
       map['dish_id'] = Variable<String>(dishId.value);
+    }
+    if (scope.present) {
+      map['scope'] = Variable<String>(scope.value);
     }
     if (versionId.present) {
       map['version_id'] = Variable<String>(versionId.value);
@@ -3600,6 +3637,7 @@ class AssistantTurnRowsCompanion extends UpdateCompanion<AssistantTurnRow> {
     return (StringBuffer('AssistantTurnRowsCompanion(')
           ..write('id: $id, ')
           ..write('dishId: $dishId, ')
+          ..write('scope: $scope, ')
           ..write('versionId: $versionId, ')
           ..write('role: $role, ')
           ..write('message: $message, ')
@@ -5690,7 +5728,8 @@ typedef $$PantryRowsTableProcessedTableManager = ProcessedTableManager<
 typedef $$AssistantTurnRowsTableCreateCompanionBuilder
     = AssistantTurnRowsCompanion Function({
   required String id,
-  required String dishId,
+  Value<String?> dishId,
+  Value<String> scope,
   Value<String?> versionId,
   required String role,
   required String message,
@@ -5700,7 +5739,8 @@ typedef $$AssistantTurnRowsTableCreateCompanionBuilder
 typedef $$AssistantTurnRowsTableUpdateCompanionBuilder
     = AssistantTurnRowsCompanion Function({
   Value<String> id,
-  Value<String> dishId,
+  Value<String?> dishId,
+  Value<String> scope,
   Value<String?> versionId,
   Value<String> role,
   Value<String> message,
@@ -5722,6 +5762,9 @@ class $$AssistantTurnRowsTableFilterComposer
 
   ColumnFilters<String> get dishId => $composableBuilder(
       column: $table.dishId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get versionId => $composableBuilder(
       column: $table.versionId, builder: (column) => ColumnFilters(column));
@@ -5751,6 +5794,9 @@ class $$AssistantTurnRowsTableOrderingComposer
   ColumnOrderings<String> get dishId => $composableBuilder(
       column: $table.dishId, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get scope => $composableBuilder(
+      column: $table.scope, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get versionId => $composableBuilder(
       column: $table.versionId, builder: (column) => ColumnOrderings(column));
 
@@ -5778,6 +5824,9 @@ class $$AssistantTurnRowsTableAnnotationComposer
 
   GeneratedColumn<String> get dishId =>
       $composableBuilder(column: $table.dishId, builder: (column) => column);
+
+  GeneratedColumn<String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
 
   GeneratedColumn<String> get versionId =>
       $composableBuilder(column: $table.versionId, builder: (column) => column);
@@ -5821,7 +5870,8 @@ class $$AssistantTurnRowsTableTableManager extends RootTableManager<
                   $db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String> dishId = const Value.absent(),
+            Value<String?> dishId = const Value.absent(),
+            Value<String> scope = const Value.absent(),
             Value<String?> versionId = const Value.absent(),
             Value<String> role = const Value.absent(),
             Value<String> message = const Value.absent(),
@@ -5831,6 +5881,7 @@ class $$AssistantTurnRowsTableTableManager extends RootTableManager<
               AssistantTurnRowsCompanion(
             id: id,
             dishId: dishId,
+            scope: scope,
             versionId: versionId,
             role: role,
             message: message,
@@ -5839,7 +5890,8 @@ class $$AssistantTurnRowsTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String id,
-            required String dishId,
+            Value<String?> dishId = const Value.absent(),
+            Value<String> scope = const Value.absent(),
             Value<String?> versionId = const Value.absent(),
             required String role,
             required String message,
@@ -5849,6 +5901,7 @@ class $$AssistantTurnRowsTableTableManager extends RootTableManager<
               AssistantTurnRowsCompanion.insert(
             id: id,
             dishId: dishId,
+            scope: scope,
             versionId: versionId,
             role: role,
             message: message,

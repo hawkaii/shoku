@@ -151,11 +151,13 @@ void main() {
     expect(find.byKey(const ValueKey('dish-menu-status')), findsOneWidget);
   });
 
-  testWidgets('the header carries ASK and a speaker', (tester) async {
+  testWidgets('the header carries a speaker, and the orb is the assistant door',
+      (tester) async {
     await open(tester);
 
-    expect(find.byKey(const ValueKey('dish-ask')), findsOneWidget);
     expect(find.byKey(const ValueKey('dish-speak')), findsOneWidget);
-    expect(find.text('ASK'), findsOneWidget);
+    expect(find.byKey(const ValueKey('bot-orb')), findsOneWidget);
+    expect(find.byKey(const ValueKey('dish-ask')), findsNothing,
+        reason: 'the old ASK chip was replaced by the one assistant');
   });
 }

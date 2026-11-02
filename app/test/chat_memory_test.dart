@@ -32,11 +32,14 @@ class _FakeAssistant extends AssistantService {
 
   @override
   Future<AssistantReply> ask({
-    required String dishId,
+    required String scope,
+    String? dishId,
     String? versionId,
+    int? stepIndex,
     required String question,
     required String requestId,
     List<AssistantTurn> history = const [],
+    List<String> exclude = const [],
   }) {
     this.history.add(history);
     versionIds.add(versionId);
@@ -172,7 +175,7 @@ void main() {
 
       expect(find.text('Ask about this dish · v2'), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('chat-clear')));
+      await tester.tap(find.byKey(const ValueKey('bot-new-chat')));
       await tester.pumpAndSettle();
 
       expect(find.text('remember me'), findsNothing);

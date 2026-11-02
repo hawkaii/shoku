@@ -163,6 +163,17 @@ class JournalStore extends StateNotifier<List<Dish>> {
     state = await _repo.loadDishes();
   }
 
+  /// A local re-read, for the shell: if the store finished booting before the
+  /// Journal mounted, the page still starts from the rows the database holds.
+  /// Never triggers a sync — this is not a change, it is a catch-up.
+  Future<void> reload() async {
+    try {
+      state = await _repo.loadDishes();
+    } catch (_) {
+      // The Journal already has a state it can render.
+    }
+  }
+
   /// The sample recipe exists for exactly one audience: a kitchen with no
   /// account. Signed in, it is removed for good.
   Future<void> ensureSample({
