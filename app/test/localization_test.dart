@@ -4,11 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:food_finder/core/theme/shoku_theme.dart';
+import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/l10n/app_localizations.dart';
 import 'package:food_finder/main.dart';
 import 'package:food_finder/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/state/locale_provider.dart';
+import 'package:food_finder/presentation/widgets/kit/status_badge.dart';
 import 'package:food_finder/presentation/widgets/language_picker.dart';
 
 void main() {
@@ -90,6 +92,25 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getString('app_locale'), 'fr');
     expect(find.byType(LanguagePicker), findsNothing);
+  });
+
+  testWidgets('a cookbook badge reads in Spanish', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ShokuTheme.light(),
+        locale: const Locale('es'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: shokuSupportedLocalesForTest,
+        home: const Scaffold(
+          body: Center(
+            child: StatusBadge(status: DishStatus.cooked, cookCount: 2),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('COCINADO 2×'), findsOneWidget);
   });
 }
 

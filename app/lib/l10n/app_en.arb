@@ -55,5 +55,152 @@
   "authNotSignedIn": "Not signed in",
   "authSignedIn": "Signed in",
   "authLocalOnly": "Cooks live on this phone only.",
-  "authSignOut": "Sign out"
+  "authSignOut": "Sign out",
+  "tabJournal": "Journal",
+  "tabCookbook": "Cookbook",
+  "tabFridge": "Fridge",
+  "tabWall": "Wall",
+  "tabYou": "You",
+  "journalKitchenTitle": "{month} kitchen",
+  "@journalKitchenTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "October"
+      }
+    }
+  },
+  "journalDishesCount": "{count, plural, =0{No dishes yet} =1{1 dish} other{{count} dishes}}",
+  "@journalDishesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalUpgradesCount": "{count, plural, =0{no upgrades} =1{1 upgrade} other{{count} upgrades}}",
+  "@journalUpgradesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalCooksLabel": "{count, plural, =1{cook} other{cooks}}",
+  "@journalCooksLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalUpgradesLabel": "{count, plural, =1{upgrade} other{upgrades}}",
+  "@journalUpgradesLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalEntriesCount": "{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}",
+  "@journalEntriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "journalOnTheCounter": "on the counter",
+  "journalCookLog": "cook log",
+  "journalCook": "Cook",
+  "journalFirstPage": "Your first page",
+  "journalFirstPageBody": "Log one cook — a photo, how it went, and one thing you changed. That becomes v1.",
+  "journalStartJournal": "Start the journal →",
+  "journalNoDishes": "No dishes yet — import a reel to start",
+  "journalOpening": "Opening your journal",
+  "journalErrorTitle": "Your journal could not be opened",
+  "journalErrorBody": "The saved cooks are still on this phone.",
+  "journalTryAgain": "Try again",
+  "journalSaveRecipe": "Save a recipe",
+  "cookbookTitle": "Cookbook",
+  "cookbookCookedCount": "{count, plural, =0{nothing cooked} =1{1 cooked} other{{count} cooked}}",
+  "@cookbookCookedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookbookToCook": "To cook",
+  "cookbookCooked": "Cooked",
+  "cookbookNothingToCook": "Nothing waiting to be cooked.",
+  "cookbookNoCooksYet": "No cooks yet. Pick something from To cook.",
+  "cookbookNeverCooked": "never cooked",
+  "cookbookLastCooked": "last {outcome}",
+  "@cookbookLastCooked": {
+    "placeholders": {
+      "outcome": {
+        "type": "String",
+        "example": "Good"
+      }
+    }
+  },
+  "badgeToCook": "TO COOK",
+  "badgeCooked": "COOKED",
+  "badgeCookedCount": "{count, plural, =1{COOKED {count}×} other{COOKED {count}×}}",
+  "@badgeCookedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "badgeSignature": "SIGNATURE",
+  "outcomeNailedIt": "Nailed it",
+  "outcomeGood": "Good",
+  "outcomeNeedsWork": "Needs work",
+  "moodQuick": "quick",
+  "moodProject": "project",
+  "moodComfort": "comfort",
+  "minutesShort": "{count, plural, =1{1 min} other{{count} min}}",
+  "@minutesShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelSample": "Sample",
+  "addSheetTitle": "Import a recipe",
+  "addSheetSubtitle": "One reel becomes one dish you can cook and version.",
+  "addSheetLinkHint": "Paste an Instagram or YouTube link",
+  "addSheetShareOption": "Share from another app",
+  "addSheetShareHint": "Instagram → share → Shoku",
+  "addSheetScanOption": "Scan a barcode",
+  "addSheetScanHint": "Add straight to your pantry",
+  "addSheetBackendNote": "Extraction runs on the backend — this build is the interface only.",
+  "importHeadline": "Importing a reel",
+  "importQueued": "Queued",
+  "importWaking": "Waking the kitchen…",
+  "importWaitingHint": "The first one after a pause takes a minute",
+  "importReadingReel": "Reading the reel",
+  "importReadingAudio": "Reading the audio",
+  "importWritingRecipe": "Writing the recipe",
+  "importWatchingVideo": "Watching the video",
+  "importReadingCaption": "Reading the caption",
+  "importReady": "Ready",
+  "importFailedShort": "Could not read this one",
+  "reasonUnsupportedUrl": "That link is not a reel or video we can read",
+  "reasonSourceBlocked": "YouTube is blocking our server right now — try again later or paste the recipe",
+  "reasonTimeout": "That took too long — try again",
+  "reasonWorkerUnavailable": "The kitchen did not wake up — try again in a minute",
+  "reasonTimedOut": "Still reading — this can take a few minutes. You can leave this and the dish will be here when it is ready",
+  "reasonGone": "That import is no longer on the server — try the link again",
+  "reasonInvalidRecipe": "We could not find a recipe in that one",
+  "reasonNoAudio": "That video has nothing to listen to",
+  "reasonNoText": "That reel has no caption and no speech we could read",
+  "reasonNoRecipe": "That video does not show a recipe",
+  "reasonVisionFailed": "We could not read that video — paste the recipe instead",
+  "reasonTakenDown": "That recipe was removed",
+  "reasonUnknown": "Could not read this one — paste the recipe instead"
 }

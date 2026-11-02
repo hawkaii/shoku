@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../data/services/share_intake.dart';
+import '../../l10n/app_localizations.dart';
 import '../screens/add/import_sheet.dart';
 import '../state/journal_store.dart';
 import '../state/sync_providers.dart';
@@ -23,13 +25,17 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
-  static const _tabs = [
-    ShokuTabItem(Icons.menu_book_outlined, Icons.menu_book, 'Journal'),
-    ShokuTabItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu, 'Cookbook'),
-    ShokuTabItem(Icons.kitchen_outlined, Icons.kitchen, 'Fridge'),
-    ShokuTabItem(Icons.grid_view_outlined, Icons.grid_view, 'Wall'),
-    ShokuTabItem(Icons.person_outline, Icons.person, 'You'),
-  ];
+  /// Built in `build`, not const: the five words are copy, and copy is the one
+  /// thing that changes with the language.
+  List<ShokuTabItem> _tabs(AppLocalizations l10n) => [
+        ShokuTabItem(
+            Icons.menu_book_outlined, Icons.menu_book, l10n.tabJournal),
+        ShokuTabItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu,
+            l10n.tabCookbook),
+        ShokuTabItem(Icons.kitchen_outlined, Icons.kitchen, l10n.tabFridge),
+        ShokuTabItem(Icons.grid_view_outlined, Icons.grid_view, l10n.tabWall),
+        ShokuTabItem(Icons.person_outline, Icons.person, l10n.tabYou),
+      ];
 
   /// The fridge sits in the middle of the bar as a raised door, but it is a
   /// branch like any other — see [ShokuTabBar.centerIndex].
@@ -111,7 +117,7 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
           ],
         ),
         bottomNavigationBar: ShokuTabBar(
-          items: _tabs,
+          items: _tabs(context.l10n),
           index: widget.shell.currentIndex,
           centerIndex: _fridgeBranch,
           activeUnderline: const SyncUnderline(),

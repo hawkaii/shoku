@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
@@ -18,6 +20,7 @@ class RecipesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     final dishes = ref.watch(dishesProvider);
     final filter = ref.watch(libraryFilterProvider);
 
@@ -37,10 +40,10 @@ class RecipesScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text('Cookbook', style: ShokuType.h1.copyWith(color: c.ink)),
+              Text(l10n.cookbookTitle, style: ShokuType.h1.copyWith(color: c.ink)),
               const Spacer(),
               Text(
-                '${cooked.length} cooked',
+                l10n.cookbookCookedCount(cooked.length),
                 style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
               ),
             ],
@@ -60,8 +63,8 @@ class RecipesScreen extends ConsumerWidget {
               child: Center(
                 child: Text(
                   filter == LibraryFilter.toCook
-                      ? 'Nothing waiting to be cooked.'
-                      : 'No cooks yet. Pick something from To cook.',
+                      ? l10n.cookbookNothingToCook
+                      : l10n.cookbookNoCooksYet,
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
               ),
@@ -118,11 +121,13 @@ class _DishTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final outcome = dish.lastCook?.outcome;
     final meta = metaLine([
-      minutesLabel(dish.minutes),
-      dish.cookCount == 0
-          ? 'never cooked'
-          : 'last ${dish.outcomeLabel.toLowerCase()}',
+      dish.minutes > 0 ? l10n.minutesShort(dish.minutes) : '',
+      outcome == null
+          ? l10n.cookbookNeverCooked
+          : l10n.cookbookLastCooked(outcomeLabel(l10n, outcome)),
     ]);
 
     return ShokuPressable(
@@ -190,7 +195,7 @@ class _DishTile extends StatelessWidget {
           ),
           if (dish.isSample) ...[
             const SizedBox(height: 4),
-            ShokuChip('Sample', color: c.reward, filled: true),
+            ShokuChip(l10n.labelSample, color: c.reward, filled: true),
           ],
         ],
       ),

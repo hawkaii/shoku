@@ -359,6 +359,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out'**
   String get authSignOut;
+
+  /// No description provided for @tabJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get tabJournal;
+
+  /// No description provided for @tabCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook'**
+  String get tabCookbook;
+
+  /// No description provided for @tabFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge'**
+  String get tabFridge;
+
+  /// No description provided for @tabWall.
+  ///
+  /// In en, this message translates to:
+  /// **'Wall'**
+  String get tabWall;
+
+  /// No description provided for @tabYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get tabYou;
+
+  /// No description provided for @journalKitchenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} kitchen'**
+  String journalKitchenTitle(String month);
+
+  /// No description provided for @journalDishesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No dishes yet} =1{1 dish} other{{count} dishes}}'**
+  String journalDishesCount(int count);
+
+  /// No description provided for @journalUpgradesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no upgrades} =1{1 upgrade} other{{count} upgrades}}'**
+  String journalUpgradesCount(int count);
+
+  /// No description provided for @journalCooksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{cook} other{cooks}}'**
+  String journalCooksLabel(int count);
+
+  /// No description provided for @journalUpgradesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{upgrade} other{upgrades}}'**
+  String journalUpgradesLabel(int count);
+
+  /// No description provided for @journalEntriesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no entries} =1{1 entry} other{{count} entries}}'**
+  String journalEntriesCount(int count);
+
+  /// No description provided for @journalOnTheCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'on the counter'**
+  String get journalOnTheCounter;
+
+  /// No description provided for @journalCookLog.
+  ///
+  /// In en, this message translates to:
+  /// **'cook log'**
+  String get journalCookLog;
+
+  /// No description provided for @journalCook.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook'**
+  String get journalCook;
+
+  /// No description provided for @journalFirstPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first page'**
+  String get journalFirstPage;
+
+  /// No description provided for @journalFirstPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Log one cook — a photo, how it went, and one thing you changed. That becomes v1.'**
+  String get journalFirstPageBody;
+
+  /// No description provided for @journalStartJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the journal →'**
+  String get journalStartJournal;
+
+  /// No description provided for @journalNoDishes.
+  ///
+  /// In en, this message translates to:
+  /// **'No dishes yet — import a reel to start'**
+  String get journalNoDishes;
+
+  /// No description provided for @journalOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening your journal'**
+  String get journalOpening;
+
+  /// No description provided for @journalErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your journal could not be opened'**
+  String get journalErrorTitle;
+
+  /// No description provided for @journalErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The saved cooks are still on this phone.'**
+  String get journalErrorBody;
+
+  /// No description provided for @journalTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get journalTryAgain;
+
+  /// No description provided for @journalSaveRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a recipe'**
+  String get journalSaveRecipe;
+
+  /// No description provided for @cookbookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookbook'**
+  String get cookbookTitle;
+
+  /// No description provided for @cookbookCookedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{nothing cooked} =1{1 cooked} other{{count} cooked}}'**
+  String cookbookCookedCount(int count);
+
+  /// No description provided for @cookbookToCook.
+  ///
+  /// In en, this message translates to:
+  /// **'To cook'**
+  String get cookbookToCook;
+
+  /// No description provided for @cookbookCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooked'**
+  String get cookbookCooked;
+
+  /// No description provided for @cookbookNothingToCook.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting to be cooked.'**
+  String get cookbookNothingToCook;
+
+  /// No description provided for @cookbookNoCooksYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No cooks yet. Pick something from To cook.'**
+  String get cookbookNoCooksYet;
+
+  /// No description provided for @cookbookNeverCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'never cooked'**
+  String get cookbookNeverCooked;
+
+  /// No description provided for @cookbookLastCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'last {outcome}'**
+  String cookbookLastCooked(String outcome);
+
+  /// No description provided for @badgeToCook.
+  ///
+  /// In en, this message translates to:
+  /// **'TO COOK'**
+  String get badgeToCook;
+
+  /// No description provided for @badgeCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'COOKED'**
+  String get badgeCooked;
+
+  /// No description provided for @badgeCookedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{COOKED {count}×} other{COOKED {count}×}}'**
+  String badgeCookedCount(int count);
+
+  /// No description provided for @badgeSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'SIGNATURE'**
+  String get badgeSignature;
+
+  /// No description provided for @outcomeNailedIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Nailed it'**
+  String get outcomeNailedIt;
+
+  /// No description provided for @outcomeGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get outcomeGood;
+
+  /// No description provided for @outcomeNeedsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs work'**
+  String get outcomeNeedsWork;
+
+  /// No description provided for @moodQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'quick'**
+  String get moodQuick;
+
+  /// No description provided for @moodProject.
+  ///
+  /// In en, this message translates to:
+  /// **'project'**
+  String get moodProject;
+
+  /// No description provided for @moodComfort.
+  ///
+  /// In en, this message translates to:
+  /// **'comfort'**
+  String get moodComfort;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 min} other{{count} min}}'**
+  String minutesShort(int count);
+
+  /// No description provided for @labelSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample'**
+  String get labelSample;
+
+  /// No description provided for @addSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a recipe'**
+  String get addSheetTitle;
+
+  /// No description provided for @addSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One reel becomes one dish you can cook and version.'**
+  String get addSheetSubtitle;
+
+  /// No description provided for @addSheetLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an Instagram or YouTube link'**
+  String get addSheetLinkHint;
+
+  /// No description provided for @addSheetShareOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Share from another app'**
+  String get addSheetShareOption;
+
+  /// No description provided for @addSheetShareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram → share → Shoku'**
+  String get addSheetShareHint;
+
+  /// No description provided for @addSheetScanOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a barcode'**
+  String get addSheetScanOption;
+
+  /// No description provided for @addSheetScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add straight to your pantry'**
+  String get addSheetScanHint;
+
+  /// No description provided for @addSheetBackendNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Extraction runs on the backend — this build is the interface only.'**
+  String get addSheetBackendNote;
+
+  /// No description provided for @importHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing a reel'**
+  String get importHeadline;
+
+  /// No description provided for @importQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get importQueued;
+
+  /// No description provided for @importWaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Waking the kitchen…'**
+  String get importWaking;
+
+  /// No description provided for @importWaitingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The first one after a pause takes a minute'**
+  String get importWaitingHint;
+
+  /// No description provided for @importReadingReel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the reel'**
+  String get importReadingReel;
+
+  /// No description provided for @importReadingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the audio'**
+  String get importReadingAudio;
+
+  /// No description provided for @importWritingRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the recipe'**
+  String get importWritingRecipe;
+
+  /// No description provided for @importWatchingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watching the video'**
+  String get importWatchingVideo;
+
+  /// No description provided for @importReadingCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the caption'**
+  String get importReadingCaption;
+
+  /// No description provided for @importReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get importReady;
+
+  /// No description provided for @importFailedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this one'**
+  String get importFailedShort;
+
+  /// No description provided for @reasonUnsupportedUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'That link is not a reel or video we can read'**
+  String get reasonUnsupportedUrl;
+
+  /// No description provided for @reasonSourceBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube is blocking our server right now — try again later or paste the recipe'**
+  String get reasonSourceBlocked;
+
+  /// No description provided for @reasonTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'That took too long — try again'**
+  String get reasonTimeout;
+
+  /// No description provided for @reasonWorkerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The kitchen did not wake up — try again in a minute'**
+  String get reasonWorkerUnavailable;
+
+  /// No description provided for @reasonTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Still reading — this can take a few minutes. You can leave this and the dish will be here when it is ready'**
+  String get reasonTimedOut;
+
+  /// No description provided for @reasonGone.
+  ///
+  /// In en, this message translates to:
+  /// **'That import is no longer on the server — try the link again'**
+  String get reasonGone;
+
+  /// No description provided for @reasonInvalidRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find a recipe in that one'**
+  String get reasonInvalidRecipe;
+
+  /// No description provided for @reasonNoAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'That video has nothing to listen to'**
+  String get reasonNoAudio;
+
+  /// No description provided for @reasonNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'That reel has no caption and no speech we could read'**
+  String get reasonNoText;
+
+  /// No description provided for @reasonNoRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'That video does not show a recipe'**
+  String get reasonNoRecipe;
+
+  /// No description provided for @reasonVisionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not read that video — paste the recipe instead'**
+  String get reasonVisionFailed;
+
+  /// No description provided for @reasonTakenDown.
+  ///
+  /// In en, this message translates to:
+  /// **'That recipe was removed'**
+  String get reasonTakenDown;
+
+  /// No description provided for @reasonUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this one — paste the recipe instead'**
+  String get reasonUnknown;
 }
 
 class _AppLocalizationsDelegate

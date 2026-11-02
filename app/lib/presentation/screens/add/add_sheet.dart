@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../widgets/kit/feedback.dart';
 import 'import_sheet.dart';
@@ -35,6 +36,7 @@ class _AddSheetState extends State<AddSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: EdgeInsets.only(
         left: ShokuSpace.lg,
@@ -47,8 +49,8 @@ class _AddSheetState extends State<AddSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ShokuSheetHeader(
-            title: 'Import a recipe',
-            subtitle: 'One reel becomes one dish you can cook and version.',
+            title: l10n.addSheetTitle,
+            subtitle: l10n.addSheetSubtitle,
             onClose: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: ShokuSpace.lg),
@@ -66,7 +68,7 @@ class _AddSheetState extends State<AddSheet> {
               cursorColor: c.accent,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Paste an Instagram or YouTube link',
+                hintText: l10n.addSheetLinkHint,
                 hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
             ),
@@ -74,8 +76,8 @@ class _AddSheetState extends State<AddSheet> {
           const SizedBox(height: ShokuSpace.md),
           _Option(
             icon: Icons.share_outlined,
-            title: 'Share from another app',
-            subtitle: 'Instagram → share → Shoku',
+            title: l10n.addSheetShareOption,
+            subtitle: l10n.addSheetShareHint,
             onTap: () {
               // The link typed above is the link being imported; dropping it
               // here loses the import before it starts.
@@ -88,13 +90,13 @@ class _AddSheetState extends State<AddSheet> {
           const SizedBox(height: ShokuSpace.sm),
           _Option(
             icon: Icons.qr_code_scanner,
-            title: 'Scan a barcode',
-            subtitle: 'Add straight to your pantry',
+            title: l10n.addSheetScanOption,
+            subtitle: l10n.addSheetScanHint,
             onTap: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: ShokuSpace.lg),
           Text(
-            'Extraction runs on the backend — this build is the interface only.',
+            l10n.addSheetBackendNote,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
         ],

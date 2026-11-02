@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 
@@ -20,11 +21,19 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
 
     final (Color bg, Color fg, IconData icon, String text) = switch (status) {
-      DishStatus.toCook => (c.reward, c.canvas, Icons.schedule, 'TO COOK'),
-      DishStatus.cooked => (c.ready, c.canvas, Icons.check, 'COOKED${cookCount > 0 ? ' $cookCount×' : ''}'),
-      DishStatus.signature => (c.ink, c.canvas, Icons.star_rounded, 'SIGNATURE'),
+      DishStatus.toCook =>
+        (c.reward, c.canvas, Icons.schedule, l10n.badgeToCook),
+      DishStatus.cooked => (
+          c.ready,
+          c.canvas,
+          Icons.check,
+          cookCount > 0 ? l10n.badgeCookedCount(cookCount) : l10n.badgeCooked
+        ),
+      DishStatus.signature =>
+        (c.ink, c.canvas, Icons.star_rounded, l10n.badgeSignature),
     };
 
     return Container(
@@ -74,6 +83,7 @@ class StatusToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
 
     Widget side({
       required bool active,
@@ -139,14 +149,14 @@ class StatusToggle extends StatelessWidget {
         children: [
           side(
             active: showingToCook,
-            label: 'To cook',
+            label: l10n.cookbookToCook,
             count: toCookCount,
             icon: Icons.schedule,
             onTap: () => onChanged(true),
           ),
           side(
             active: !showingToCook,
-            label: 'Cooked',
+            label: l10n.cookbookCooked,
             count: cookedCount,
             icon: Icons.check_circle_outline,
             onTap: () => onChanged(false),

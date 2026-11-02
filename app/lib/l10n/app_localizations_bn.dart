@@ -137,4 +137,313 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get authSignOut => 'সাইন আউট';
+
+  @override
+  String get tabJournal => 'জার্নাল';
+
+  @override
+  String get tabCookbook => 'কুকবুক';
+
+  @override
+  String get tabFridge => 'ফ্রিজ';
+
+  @override
+  String get tabWall => 'ওয়াল';
+
+  @override
+  String get tabYou => 'আপনি';
+
+  @override
+  String journalKitchenTitle(String month) {
+    return '$month রান্নাঘর';
+  }
+
+  @override
+  String journalDishesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি পদ',
+      one: '১টি পদ',
+      zero: 'এখনও কোনো পদ নেই',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalUpgradesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি উন্নতি',
+      one: '১টি উন্নতি',
+      zero: 'কোনো উন্নতি নেই',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalCooksLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'বার রান্না',
+      one: 'বার রান্না',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalUpgradesLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'উন্নতি',
+      one: 'উন্নতি',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalEntriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি এন্ট্রি',
+      one: '১টি এন্ট্রি',
+      zero: 'কোনো এন্ট্রি নেই',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get journalOnTheCounter => 'কাউন্টারে';
+
+  @override
+  String get journalCookLog => 'কুক লগ';
+
+  @override
+  String get journalCook => 'রান্না করুন';
+
+  @override
+  String get journalFirstPage => 'আপনার প্রথম পাতা';
+
+  @override
+  String get journalFirstPageBody =>
+      'একবার রান্না করুন — একটি ছবি, কেমন হলো, এবং একটি জিনিস যা আপনি বদলেছেন। সেটিই v1 হয়।';
+
+  @override
+  String get journalStartJournal => 'জার্নাল শুরু করুন →';
+
+  @override
+  String get journalNoDishes =>
+      'এখনও কোনো পদ নেই — শুরু করতে একটি রিল ইমপোর্ট করুন';
+
+  @override
+  String get journalOpening => 'আপনার জার্নাল খোলা হচ্ছে';
+
+  @override
+  String get journalErrorTitle => 'আপনার জার্নাল খোলা যায়নি';
+
+  @override
+  String get journalErrorBody => 'সংরক্ষিত রান্নাগুলো এখনও এই ফোনে আছে।';
+
+  @override
+  String get journalTryAgain => 'আবার চেষ্টা করুন';
+
+  @override
+  String get journalSaveRecipe => 'একটি রেসিপি সংরক্ষণ করুন';
+
+  @override
+  String get cookbookTitle => 'কুকবুক';
+
+  @override
+  String cookbookCookedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি রান্না',
+      one: '১টি রান্না',
+      zero: 'কিছু রান্না হয়নি',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cookbookToCook => 'রান্না করতে হবে';
+
+  @override
+  String get cookbookCooked => 'রান্না হয়েছে';
+
+  @override
+  String get cookbookNothingToCook => 'রান্না করার জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String get cookbookNoCooksYet =>
+      'এখনও কোনো রান্না নেই। রান্না করতে হবে থেকে কিছু বেছে নিন।';
+
+  @override
+  String get cookbookNeverCooked => 'কখনও রান্না হয়নি';
+
+  @override
+  String cookbookLastCooked(String outcome) {
+    return 'শেষবার: $outcome';
+  }
+
+  @override
+  String get badgeToCook => 'রান্না করতে হবে';
+
+  @override
+  String get badgeCooked => 'রান্না হয়েছে';
+
+  @override
+  String badgeCookedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'রান্না $count×',
+      one: 'রান্না $count×',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get badgeSignature => 'সিগনেচার';
+
+  @override
+  String get outcomeNailedIt => 'একদম ঠিক';
+
+  @override
+  String get outcomeGood => 'ভালো';
+
+  @override
+  String get outcomeNeedsWork => 'উন্নতি দরকার';
+
+  @override
+  String get moodQuick => 'দ্রুত';
+
+  @override
+  String get moodProject => 'প্রজেক্ট';
+
+  @override
+  String get moodComfort => 'আরামদায়ক';
+
+  @override
+  String minutesShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count মিনিট',
+      one: '১ মিনিট',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get labelSample => 'নমুনা';
+
+  @override
+  String get addSheetTitle => 'একটি রেসিপি ইমপোর্ট করুন';
+
+  @override
+  String get addSheetSubtitle =>
+      'একটি রিল একটি পদ হয়ে যায় যা আপনি রান্না ও ভার্সন করতে পারেন।';
+
+  @override
+  String get addSheetLinkHint => 'Instagram বা YouTube লিংক পেস্ট করুন';
+
+  @override
+  String get addSheetShareOption => 'অন্য অ্যাপ থেকে শেয়ার করুন';
+
+  @override
+  String get addSheetShareHint => 'Instagram → শেয়ার → Shoku';
+
+  @override
+  String get addSheetScanOption => 'বারকোড স্ক্যান করুন';
+
+  @override
+  String get addSheetScanHint => 'সরাসরি আপনার ফ্রিজে যোগ করুন';
+
+  @override
+  String get addSheetBackendNote =>
+      'এক্সট্র্যাকশন সার্ভারে চলে — এই বিল্ড শুধু ইন্টারফেস।';
+
+  @override
+  String get importHeadline => 'রিল ইমপোর্ট হচ্ছে';
+
+  @override
+  String get importQueued => 'সারিতে';
+
+  @override
+  String get importWaking => 'রান্নাঘর জাগছে…';
+
+  @override
+  String get importWaitingHint => 'বিরতির পর প্রথমটিতে এক মিনিট লাগে';
+
+  @override
+  String get importReadingReel => 'রিল পড়া হচ্ছে';
+
+  @override
+  String get importReadingAudio => 'অডিও পড়া হচ্ছে';
+
+  @override
+  String get importWritingRecipe => 'রেসিপি লেখা হচ্ছে';
+
+  @override
+  String get importWatchingVideo => 'ভিডিও দেখা হচ্ছে';
+
+  @override
+  String get importReadingCaption => 'ক্যাপশন পড়া হচ্ছে';
+
+  @override
+  String get importReady => 'প্রস্তুত';
+
+  @override
+  String get importFailedShort => 'এটি পড়া যায়নি';
+
+  @override
+  String get reasonUnsupportedUrl =>
+      'ওই লিংক এমন রিল বা ভিডিও নয় যা আমরা পড়তে পারি';
+
+  @override
+  String get reasonSourceBlocked =>
+      'YouTube এখন আমাদের সার্ভার আটকাচ্ছে — পরে চেষ্টা করুন বা রেসিপি পেস্ট করুন';
+
+  @override
+  String get reasonTimeout => 'এতে অনেক সময় লাগল — আবার চেষ্টা করুন';
+
+  @override
+  String get reasonWorkerUnavailable =>
+      'রান্নাঘর জাগেনি — এক মিনিটে আবার চেষ্টা করুন';
+
+  @override
+  String get reasonTimedOut =>
+      'এখনও পড়ছি — এতে কয়েক মিনিট লাগতে পারে। আপনি চলে যেতে পারেন, প্রস্তুত হলে পদটি এখানে থাকবে';
+
+  @override
+  String get reasonGone =>
+      'ওই ইমপোর্ট আর সার্ভারে নেই — লিংকটি আবার চেষ্টা করুন';
+
+  @override
+  String get reasonInvalidRecipe => 'ওটিতে আমরা কোনো রেসিপি পাইনি';
+
+  @override
+  String get reasonNoAudio => 'ওই ভিডিওতে শোনার মতো কিছু নেই';
+
+  @override
+  String get reasonNoText =>
+      'ওই রিলে ক্যাপশন নেই বা আমরা পড়তে পারি এমন কথা নেই';
+
+  @override
+  String get reasonNoRecipe => 'ওই ভিডিও কোনো রেসিপি দেখায় না';
+
+  @override
+  String get reasonVisionFailed =>
+      'আমরা ওই ভিডিও পড়তে পারিনি — রেসিপি পেস্ট করুন';
+
+  @override
+  String get reasonTakenDown => 'ওই রেসিপি সরিয়ে ফেলা হয়েছিল';
+
+  @override
+  String get reasonUnknown => 'এটি পড়া যায়নি — রেসিপি পেস্ট করুন';
 }
