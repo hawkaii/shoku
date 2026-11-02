@@ -104,6 +104,7 @@ void main() {
   Widget wall(http.Client client) => ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          sampleRecipeProvider.overrideWithValue(null),
           feedServiceProvider.overrideWithValue(FeedService(
             api: ApiClient(
               baseUrl: 'https://api.test',

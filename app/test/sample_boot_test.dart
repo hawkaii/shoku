@@ -9,6 +9,7 @@ import 'package:food_finder/data/mock/sample_recipe.dart';
 import 'package:food_finder/main.dart';
 import 'package:food_finder/presentation/screens/journal/journal_screen.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
+import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/presentation/state/shoku_providers.dart';
 
 /// The release build's crash: a signed-out first launch, an empty database and
@@ -43,8 +44,51 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('pinned-card')), findsOneWidget);
     expect(find.text('Paneer Tikka'), findsWidgets);
     expect(find.text('SAMPLE'), findsWidgets);
+  });
+
+  test('the first read already has the sample — no second pass', () async {
+    final container = ProviderContainer(
+      overrides: [databaseProvider.overrideWithValue(db)],
+    );
+    addTearDown(container.dispose);
+
+    final states = <List<Dish>>[];
+    container.listen<List<Dish>>(
+      journalStoreProvider,
+      (previous, next) => states.add(next),
+      fireImmediately: true,
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    // The immediate read, then exactly one load. If seeding happened after the
+    // first load the journal would publish twice — an empty kitchen, then the
+    // sample — which is the frame the crash report is about.
+    expect(states, hasLength(2));
+    expect(states.last, hasLength(1));
+    expect(states.last.single.isSample, isTrue);
+  });
+
+  test('a reload reads the sample on its own first load', () async {
+    await JournalRepository(db).seedSample(SampleRecipe.dish());
+
+    // A fresh container is exactly what a reload creates: a new store over the
+    // same database, with nobody calling ensureSample.
+    final container = ProviderContainer(
+      overrides: [databaseProvider.overrideWithValue(db)],
+    );
+    addTearDown(container.dispose);
+    final states = <List<Dish>>[];
+    container.listen<List<Dish>>(
+      journalStoreProvider,
+      (previous, next) => states.add(next),
+      fireImmediately: true,
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    expect(states.last.single.isSample, isTrue);
   });
 
   testWidgets('the journal renders a sample dish with no cooks',

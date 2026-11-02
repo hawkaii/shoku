@@ -7,6 +7,9 @@ import '../../data/services/api_client.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/sync/sync_repository.dart';
 import '../../data/sync/sync_service.dart';
+import '../state/auth_providers.dart';
+
+export '../state/auth_providers.dart';
 import '../state/journal_store.dart';
 
 enum SyncStatus { idle, syncing, offline, signedOut, failed }
@@ -150,8 +153,6 @@ class SyncController {
 }
 
 final syncStatusProvider = StateProvider<SyncStatus>((ref) => SyncStatus.idle);
-
-final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
 /// Supabase's session events, as the app actually cares about them.
 ///

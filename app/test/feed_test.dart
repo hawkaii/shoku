@@ -73,6 +73,7 @@ void main() {
     return ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
+        sampleRecipeProvider.overrideWithValue(null),
         feedServiceProvider.overrideWithValue(FeedService(api: api(client))),
         importServiceProvider.overrideWithValue(ImportService(
           api: api(client),

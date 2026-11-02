@@ -125,12 +125,13 @@ class JournalScreen extends ConsumerWidget {
           // ---- On the counter -----------------------------------------
           const ShokuLabel('on the counter'),
           const SizedBox(height: ShokuSpace.sm),
-          ShokuEntrance(
-            child: _PinnedCard(
-              dish: pinned,
-              onCook: () => showLogSheet(context, pinned),
-              onOpen: () => context.push('/dish/${pinned.id}'),
-            ),
+          // No entrance animation here: this card is the one thing on the
+          // screen a new cook must see, and content must never depend on an
+          // opacity controller to become visible.
+          _PinnedCard(
+            dish: pinned,
+            onCook: () => showLogSheet(context, pinned),
+            onOpen: () => context.push('/dish/${pinned.id}'),
           ),
           const SizedBox(height: ShokuSpace.xl),
 
@@ -262,6 +263,7 @@ class _PinnedCard extends StatelessWidget {
     return ShokuPressable(
       onTap: onOpen,
       child: Container(
+        key: const ValueKey('pinned-card'),
         padding: const EdgeInsets.all(ShokuSpace.sm),
         decoration: BoxDecoration(
           color: c.surface,

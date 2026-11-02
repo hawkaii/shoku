@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'auth_providers.dart';
+
 import '../../data/db/app_database.dart';
 import '../../data/db/journal_repository.dart';
 import '../../data/mock/journal_data.dart';
+import '../../data/mock/sample_recipe.dart';
 
 /// The journal is the product, so it is the one piece of real state: every
 /// mutation goes through the repository and the UI re-reads what the database
@@ -16,8 +19,12 @@ class JournalStore extends StateNotifier<List<Dish>> {
     this._repo, {
     void Function(JournalStatus)? onStatus,
     Future<void> Function()? onChanged,
+    bool Function()? isSignedIn,
+    Dish? sample,
   })  : _onStatus = onStatus,
         _onChanged = onChanged,
+        _isSignedIn = isSignedIn,
+        _sample = sample,
         super(const []) {
     _boot();
   }
@@ -28,6 +35,15 @@ class JournalStore extends StateNotifier<List<Dish>> {
   /// Fired after every local mutation: the sync layer hooks in here without the
   /// store knowing anything about HTTP.
   final Future<void> Function()? _onChanged;
+
+  /// Asked at boot, not at the shell's first frame: the sample has to be in the
+  /// same read that fills the Journal, or the cook sees an empty kitchen and a
+  /// reload repeats it.
+  final bool Function()? _isSignedIn;
+
+  /// The starter dish, or null when this build does not want one (a test that
+  /// models its own kitchen, for instance).
+  final Dish? _sample;
 
   bool _loaded = false;
   bool get isLoaded => _loaded;
@@ -40,6 +56,7 @@ class JournalStore extends StateNotifier<List<Dish>> {
       // The app ships empty. An install that already carries the demo kitchen
       // loses it once, and nothing the user imported is touched.
       await _repo.removeDemoKitchen(JournalData.demoDishIds);
+      await _ensureSampleBeforeFirstRead();
       state = await _repo.loadDishes();
       _loaded = true;
       _onStatus?.call(JournalStatus.ready);
@@ -50,6 +67,28 @@ class JournalStore extends StateNotifier<List<Dish>> {
       state = const [];
       _loaded = true;
       _onStatus?.call(JournalStatus.failed);
+    }
+  }
+
+  /// Seeding belongs to the load, not after it. Signed out, with the sample
+  /// not yet taken away, a kitchen that has never had it gets it in the very
+  /// first `loadDishes()` — which is also what a reload reads.
+  Future<void> _ensureSampleBeforeFirstRead() async {
+    try {
+      if (_isSignedIn?.call() == true) return;
+      final sample = _sample;
+      if (sample == null) return;
+      if (await _repo.sampleWasRemoved() ||
+          await _repo.sampleWasSeeded() ||
+          await _repo.hasSample(sample.id)) {
+        return;
+      }
+      // Only an empty kitchen gets the starter dish. A journal with anything in
+      // it belongs to its cook, and a second dish would be an imposition.
+      if (await _repo.countDishes() > 0) return;
+      await _repo.seedSample(sample);
+    } catch (_) {
+      // A sample is a kindness, not a dependency.
     }
   }
 
@@ -177,9 +216,17 @@ final journalStatusProvider = StateProvider<JournalStatus>(
   (ref) => JournalStatus.loading,
 );
 
+/// The starter dish for a signed-out kitchen. Null opts out — a test that
+/// brings its own journal does not need a stranger's paneer in it.
+final sampleRecipeProvider = Provider<Dish?>((ref) => SampleRecipe.dish());
+
 final journalStoreProvider = StateNotifierProvider<JournalStore, List<Dish>>(
   (ref) => JournalStore(
     ref.watch(journalRepositoryProvider),
+    // Late-bound like the sync hook: reading auth at boot is enough, and a
+    // sign-in is handled by the sync controller dropping the sample.
+    isSignedIn: () => ref.read(authServiceProvider).isSignedIn,
+    sample: ref.watch(sampleRecipeProvider),
     onStatus: (status) =>
         ref.read(journalStatusProvider.notifier).state = status,
     // Late-bound: sync_providers imports this file, so the callback is resolved

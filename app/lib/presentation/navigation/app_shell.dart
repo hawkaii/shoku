@@ -5,10 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../data/mock/sample_recipe.dart';
 import '../../data/services/share_intake.dart';
 import '../screens/add/import_sheet.dart';
-import '../state/journal_store.dart';
 import '../state/sync_providers.dart';
 import '../widgets/kit/nav.dart';
 import 'import_scope.dart';
@@ -48,19 +46,6 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // stream owns every attempt after this one.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(syncControllerProvider).syncNow();
-    });
-    // A kitchen with no account gets one labelled sample so the loop can be
-    // felt; a signed-in one has it taken away.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      try {
-        ref.read(journalStoreProvider.notifier).ensureSample(
-              signedIn: ref.read(authServiceProvider).isSignedIn,
-              sample: SampleRecipe.dish(),
-            );
-      } catch (_) {
-        // The sample is optional; the shell is not.
-      }
     });
     // On web the session is restored from storage *after* the first frame, so
     // the first pass can reach the API with no token. One more look a few

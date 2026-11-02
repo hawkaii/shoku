@@ -135,6 +135,13 @@ class JournalRepository {
     return row?.value == '1';
   }
 
+  Future<bool> sampleWasSeeded() async {
+    final row = await (_db.select(_db.metaRows)
+          ..where((m) => m.key.equals('sample_seeded')))
+        .getSingleOrNull();
+    return row?.value == '1';
+  }
+
   Future<void> seedSample(Dish dish) async {
     await _db.transaction(() async {
       await _writeDish(dish, dirty: false, insertOnly: true);
