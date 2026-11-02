@@ -375,6 +375,42 @@ class AssistantAsk(Base):
     __table_args__ = (Index("ix_assistant_asks_user_day", "user_id", "day"),)
 
 
+class PantryParseUsage(Base):
+    """Per-user, per-UTC-day counter for receipt parsing.
+
+    Separate from ``assistant_usage`` on purpose: ten receipts a day and twenty
+    conversations a day are different budgets, and sharing one counter would let
+    a photo of a shopping bag spend the assistant's allowance.
+    """
+
+    __tablename__ = "pantry_parse_usage"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class PantryParseAsk(Base):
+    """One metered parse, keyed by the client's ``request_id``.
+
+    Same idempotency as an assistant ask: a retried POST finds its own row and
+    does not spend a second unit. Removed when the model call fails.
+    """
+
+    __tablename__ = "pantry_parse_requests"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    request_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (Index("ix_pantry_parse_asks_user_day", "user_id", "day"),)
+
+
 class AssistantUsage(Base):
     """Per-user, per-UTC-day counter for the assistant cap."""
 

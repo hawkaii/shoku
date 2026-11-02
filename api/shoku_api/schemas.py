@@ -525,6 +525,35 @@ class AssistantResponse(BaseModel):
     appliable: AssistantAppliable | None = None
 
 
+class PantryParseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    #: Deduplicates the cap reservation: a retried POST is metered once.
+    request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)]
+    #: Only the lines the device's own parser could not read. 1–20, no empties.
+    lines: list[Annotated[str, StringConstraints(min_length=1, max_length=300)]] = Field(
+        min_length=1, max_length=20
+    )
+
+
+class PantryParseItem(BaseModel):
+    """One readable receipt line. ``line`` is echoed so the client can line it up."""
+
+    line: str
+    name: Annotated[str, StringConstraints(min_length=1, max_length=120)]
+    #: Null when the line states no amount — never a guess.
+    quantity: float | None = Field(default=None, ge=0, le=1_000_000)
+    #: Whitelisted, or null. An unknown unit is dropped, never coerced.
+    unit: PantryUnit | None = None
+
+
+class PantryParseResponse(BaseModel):
+    items: list[PantryParseItem]
+    remaining: int
+    #: Next midnight UTC, for the same sentence the assistant uses.
+    reset_at: datetime
+
+
 class PresignRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

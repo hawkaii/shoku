@@ -18,6 +18,12 @@ from .auth import AuthVerifier, build_verifier
 from .config import Settings
 from .db import build_engine, build_session_factory
 from .domain.errors import Unavailable
+from .pantry_parse import (
+    MusePantryParser,
+    PantryParseDeps,
+    PantryParser,
+    UnconfiguredPantryParser,
+)
 from .assistant import (
     AssistantDeps,
     AssistantModel,
@@ -61,6 +67,7 @@ class AppContext:
     structurer: Structurer
     storage: Storage
     assistant_model: AssistantModel
+    pantry_parser: PantryParser
     clock: Clock
     breaker: CircuitBreaker
     #: Starts the worker VM when a job is queued, and stops it when idle.
@@ -89,6 +96,14 @@ class AppContext:
             model=self.assistant_model,
             clock=self.clock,
             daily_cap=self.settings.assistant_daily_cap,
+        )
+
+    @property
+    def pantry_parse_deps(self) -> PantryParseDeps:
+        return PantryParseDeps(
+            parser=self.pantry_parser,
+            clock=self.clock,
+            daily_cap=self.settings.pantry_parse_daily_cap,
         )
 
     @property
@@ -137,15 +152,22 @@ def build_context(
         storage = DevStorage(settings.storage_public_base_url)
 
     assistant_model: AssistantModel = UnconfiguredAssistantModel()
+    pantry_parser: PantryParser = UnconfiguredPantryParser()
     assistant_key = settings.assistant_api_key or settings.structurer_api_key
     if assistant_key:
+        # One provider, two schemas. The receipt parser is not a second vendor.
+        base_url = settings.assistant_base_url or settings.structurer_base_url
+        model = settings.assistant_model or settings.structurer_model
         assistant_model = MuseAssistant(
-            settings.assistant_base_url or settings.structurer_base_url,
+            base_url,
             assistant_key,
-            settings.assistant_model or settings.structurer_model,
+            model,
             settings.assistant_timeout,
             reasoning_effort=settings.structurer_reasoning_effort,
             max_tokens=settings.structurer_max_tokens,
+        )
+        pantry_parser = MusePantryParser(
+            base_url, assistant_key, model, settings.assistant_timeout
         )
 
     queue: Queue
@@ -190,6 +212,7 @@ def build_context(
         structurer=UnconfiguredStructurer(),
         storage=storage,
         assistant_model=assistant_model,
+        pantry_parser=pantry_parser,
         clock=SystemClock(),
         worker_pool=worker_pool,
         waker=waker,

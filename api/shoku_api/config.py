@@ -66,6 +66,10 @@ class Settings(BaseSettings):
     assistant_model: str = ""
     assistant_timeout: float = 60.0
 
+    # Receipt parsing has its own allowance: a bag of shopping is not a
+    # conversation, and sharing the assistant's 20 would spend it twice over.
+    pantry_parse_daily_cap: int = 10
+
     # The Wall. A report is counted per distinct user; at this many, the row
     # leaves the feed. Never below 2 — a threshold of one is an unshare button.
     feed_report_threshold: int = 3
