@@ -233,7 +233,12 @@ def test_the_parse_cap_is_separate_from_the_assistant_cap(client, ctx, dish_payl
     assert (
         client.post(
             "/v1/assistant/ask",
-            json={"dish_id": "dish-1", "question": "salt?", "request_id": "talk-0001"},
+            json={
+                "scope": "dish",
+                "dish_id": "dish-1",
+                "question": "salt?",
+                "request_id": "talk-0001",
+            },
         ).json()["remaining"]
         == 2
     )

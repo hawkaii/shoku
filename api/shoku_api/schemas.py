@@ -483,16 +483,42 @@ class AssistantTurn(BaseModel):
     text: Annotated[str, StringConstraints(min_length=1, max_length=1200)]
 
 
+#: Where the question is being asked. ``kitchen`` has no dish; ``dish`` is the
+#: cookbook view, and the only scope that can return an edit.
+AssistantScope = Literal["dish", "kitchen"]
+
+
 class AssistantRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    dish_id: Annotated[str, StringConstraints(min_length=1, max_length=64)]
+    #: Required, and the two scopes are mutually exclusive with ``dish_id``:
+    #: a kitchen question that names a dish is a contradiction, and a dish
+    #: question without one has nothing to read.
+    scope: AssistantScope
+    dish_id: Annotated[str, StringConstraints(min_length=1, max_length=64)] | None = None
     version_id: Annotated[str, StringConstraints(min_length=1, max_length=64)] | None = None
+    #: Cook mode only: which step the cook is standing at.
+    step_index: int | None = Field(default=None, ge=0, le=200)
+    #: "not this one" — shortcodes the shelf already showed and the user rejected.
+    exclude: list[Annotated[str, StringConstraints(max_length=64)]] = Field(
+        default_factory=list, max_length=20
+    )
     question: Annotated[str, StringConstraints(min_length=1, max_length=1000)]
     #: Deduplicates the cap reservation: a retried POST is metered once.
     request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)]
     #: The client's own last exchanges, so a follow-up to "clarify" has context.
     history: list[AssistantTurn] = Field(default_factory=list, max_length=4)
+
+    @model_validator(mode="after")
+    def _scope_matches_its_shape(self) -> "AssistantRequest":
+        if self.scope == "kitchen":
+            if self.dish_id is not None:
+                raise ValueError("kitchen scope takes no dish_id")
+            if self.step_index is not None:
+                raise ValueError("step_index only means something in dish scope")
+        elif self.dish_id is None:
+            raise ValueError("dish scope needs a dish_id")
+        return self
 
 
 class AssistantEdit(BaseModel):
@@ -515,14 +541,53 @@ class AssistantAppliable(BaseModel):
     base_version_id: str
 
 
+class AssistantSuggestion(BaseModel):
+    """One Wall card the caller can cook, as the model chose it.
+
+    Built entirely from the server's own candidate — the model picks a shortcode
+    and cannot introduce a dish, an amount or a match the matcher did not find.
+    """
+
+    shortcode: str
+    title: str
+    creator: str | None = None
+    thumbnail_url: str | None = None
+    url: str
+    have: int
+    total: int
+    missing: list[str]
+
+
+class AssistantChoice(BaseModel):
+    """A dish the request might have meant, offered back to disambiguate."""
+
+    dish_id: str
+    title: str
+
+
+class AssistantCaptureItem(BaseModel):
+    """One thing the cook said they have. Shown on a confirmation card first."""
+
+    name: Annotated[str, StringConstraints(min_length=1, max_length=120)]
+    #: Null when nothing was stated — chat never invents an amount.
+    quantity: float | None = Field(default=None, ge=0, le=1_000_000)
+    unit: PantryUnit | None = None
+
+
 class AssistantResponse(BaseModel):
-    intent: Literal["answer", "clarify", "edit"]
+    intent: Literal["answer", "clarify", "edit", "suggest", "capture"]
     answer: str
     remaining: int
     #: Next midnight UTC, so the client can say when the cap comes back.
     reset_at: datetime
     edits: list[AssistantEdit] = Field(default_factory=list)
     appliable: AssistantAppliable | None = None
+    #: Kitchen only: at most three cards, each from a server-computed candidate.
+    suggestions: list[AssistantSuggestion] = Field(default_factory=list)
+    #: Kitchen only: what the cook said they have, awaiting confirmation.
+    items: list[AssistantCaptureItem] = Field(default_factory=list)
+    #: Recent dishes, when the request needed one it was not given.
+    choices: list[AssistantChoice] = Field(default_factory=list)
 
 
 class PantryParseRequest(BaseModel):

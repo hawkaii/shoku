@@ -19,6 +19,7 @@ _requests = itertools.count(1)
 
 def ask(client: TestClient, **overrides):
     payload = {
+        "scope": "dish",
         "dish_id": "dish-1",
         "question": "How do I know when it is done?",
         "request_id": f"req-{next(_requests):08d}",
@@ -351,6 +352,7 @@ def test_cannot_ask_about_someone_elses_dish(
         response = other.post(
             "/v1/assistant/ask",
             json={
+                "scope": "dish",
                 "dish_id": "dish-1",
                 "question": "What is in this?",
                 "request_id": "other-user-0001",
