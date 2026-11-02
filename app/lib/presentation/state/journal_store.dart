@@ -123,6 +123,32 @@ class JournalStore extends StateNotifier<List<Dish>> {
   Future<void> refresh() async {
     state = await _repo.loadDishes();
   }
+
+  /// The sample recipe exists for exactly one audience: a kitchen with no
+  /// account. Signed in, it is removed for good.
+  Future<void> ensureSample({
+    required bool signedIn,
+    required Dish sample,
+  }) async {
+    if (signedIn) {
+      await dropSample(sampleId: sample.id);
+      return;
+    }
+    if (await _repo.sampleWasRemoved() || await _repo.hasSample(sample.id)) {
+      return;
+    }
+    await _repo.seedSample(sample);
+    state = await _repo.loadDishes();
+  }
+
+  /// Signing in takes the sample away before the first push, so its rows can
+  /// never reach the server.
+  Future<void> dropSample({required String sampleId}) async {
+    if (await _repo.hasSample(sampleId)) {
+      await _repo.removeSample(sampleId);
+      state = await _repo.loadDishes();
+    }
+  }
 }
 
 final databaseProvider = Provider<AppDatabase>((ref) {

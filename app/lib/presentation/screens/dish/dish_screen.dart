@@ -103,6 +103,18 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                                   style: ShokuType.bodySmall
                                       .copyWith(color: c.inkMuted)),
                             ],
+                            if (dish.isSample) ...[
+                              const SizedBox(height: 6),
+                              ShokuChip('Sample',
+                                  color: c.reward, filled: true),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Sign in to import your own reels and talk to the recipe.',
+                                key: const ValueKey('sample-gate'),
+                                style: ShokuType.bodySmall
+                                    .copyWith(color: c.inkMuted),
+                              ),
+                            ],
                           ],
                         ),
                       ),

@@ -7,6 +7,7 @@ import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/dish_image.dart';
+import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/status_badge.dart';
 import 'dish_actions.dart';
@@ -187,6 +188,10 @@ class _DishTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11.5),
           ),
+          if (dish.isSample) ...[
+            const SizedBox(height: 4),
+            ShokuChip('Sample', color: c.reward, filled: true),
+          ],
         ],
       ),
     );

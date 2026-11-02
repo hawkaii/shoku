@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/mock/sample_recipe.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/sync/sync_repository.dart';
@@ -68,6 +69,11 @@ class SyncController {
     _signedOutRetries = 0;
     _retry?.cancel();
     _retry = null;
+    // The sample belongs to signed-out kitchens. It goes before the first push
+    // so its rows can never travel to the server.
+    await _ref
+        .read(journalStoreProvider.notifier)
+        .dropSample(sampleId: SampleRecipe.dishId);
     await syncNow();
   }
 

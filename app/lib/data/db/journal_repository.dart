@@ -118,6 +118,45 @@ class JournalRepository {
     });
   }
 
+  /// The sample recipe, written as a *local* row so it is never uploaded.
+  Future<bool> hasSample(String id) async {
+    final row = await (_db.select(_db.dishRows)
+          ..where((d) => d.id.equals(id) & d.deletedAt.isNull()))
+        .getSingleOrNull();
+    return row != null;
+  }
+
+  /// Whether the sample has already been taken away. Once an account exists,
+  /// signing out again must not put a stranger's dish back in the journal.
+  Future<bool> sampleWasRemoved() async {
+    final row = await (_db.select(_db.metaRows)
+          ..where((m) => m.key.equals('sample_removed')))
+        .getSingleOrNull();
+    return row?.value == '1';
+  }
+
+  Future<void> seedSample(Dish dish) async {
+    await _db.transaction(() async {
+      await _writeDish(dish, dirty: false, insertOnly: true);
+      await _db.into(_db.metaRows).insertOnConflictUpdate(
+            MetaRowsCompanion.insert(key: 'sample_seeded', value: '1'),
+          );
+    });
+  }
+
+  /// Hard delete, never a tombstone: this dish was never the user's, and a
+  /// tombstone would travel to the server and leave a scar there.
+  Future<void> removeSample(String id) async {
+    await _db.transaction(() async {
+      await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id))).go();
+      await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id))).go();
+      await (_db.delete(_db.dishRows)..where((d) => d.id.equals(id))).go();
+      await _db.into(_db.metaRows).insertOnConflictUpdate(
+            MetaRowsCompanion.insert(key: 'sample_removed', value: '1'),
+          );
+    });
+  }
+
   /// Whether the demo kitchen has ever been written. Stored in the database so
   /// a wiped database reseeds and a user who deletes every dish does not.
   Future<bool> isSeeded() async {

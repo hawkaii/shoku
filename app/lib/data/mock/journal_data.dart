@@ -191,6 +191,9 @@ class Dish {
         steps: steps,
       );
 
+  /// The bundled sample: a local-only dish that leaves on the first sign-in.
+  bool get isSample => id.startsWith('sample-');
+
   int get cookCount => cooks.length;
   int get currentVersion => versions.length;
   CookLog? get lastCook => cooks.isEmpty ? null : cooks.first;
