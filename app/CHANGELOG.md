@@ -3,6 +3,40 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.28.0] — 2026-11-02
+
+### Added
+- Ten locales, a persisted language choice, onboarding step zero *(l10n)* — [`4552816`](https://github.com/hawkaii/food-finder-app/commit/4552816c4ba441f482ce35bcf6f8be39afc4640b)
+- Onboarding and auth copy in ten locales *(l10n)* — [`78286e6`](https://github.com/hawkaii/food-finder-app/commit/78286e66f82d22de4ff63a15d2a1a8daae01fa2b)
+- Shell, journal and cookbook copy in ten locales *(l10n)* — [`cdc6a85`](https://github.com/hawkaii/food-finder-app/commit/cdc6a85709c7488049e7192aabdb36015eccb23f)
+- Fridge and receipt copy in ten locales *(l10n)* — [`22f39ec`](https://github.com/hawkaii/food-finder-app/commit/22f39ecf827c53f9e3d259edbcaf0cd4bf9ed806)
+- Bot and chat copy in ten locales *(l10n)* — [`8aeb5b6`](https://github.com/hawkaii/food-finder-app/commit/8aeb5b6650ef9ea784da05aa146a07e0c1f293e3)
+- Answer in the reader's language *(assistant)* — [`2d53de8`](https://github.com/hawkaii/food-finder-app/commit/2d53de8c0a3182326afd3bb66a453783d39e2c5c)
+- Migrate remaining app copy to ARB (en source) *(l10n)* — [`3d5c699`](https://github.com/hawkaii/food-finder-app/commit/3d5c699ec9b0ced8e8887afc2e2f5ace295f12b6)
+- Fill the 146 missing Spanish strings *(l10n)* — [`c7805ac`](https://github.com/hawkaii/food-finder-app/commit/c7805acaf3dc75f4432a58cf4b7bb69bfe26b2d5)
+- Fill the 146 missing French strings *(l10n)* — [`234476e`](https://github.com/hawkaii/food-finder-app/commit/234476e2a9efbe6f3dc082dc6bc1a62b56d7d945)
+- Fill the 146 missing Portuguese strings *(l10n)* — [`f8268ea`](https://github.com/hawkaii/food-finder-app/commit/f8268ea13792770c949c86104f5cfd449a3104d6)
+- Fill the 146 missing Indonesian strings *(l10n)* — [`10dc07b`](https://github.com/hawkaii/food-finder-app/commit/10dc07be6a173d44f4d021e26f6f0593dda88691)
+- Fill the 146 missing Hindi strings *(l10n)* — [`9f5efd7`](https://github.com/hawkaii/food-finder-app/commit/9f5efd73286a9f363cb9ecd5b40075de2f29daf8)
+- Fill the 146 missing Marathi strings *(l10n)* — [`456609f`](https://github.com/hawkaii/food-finder-app/commit/456609f52a045ee7b354ef555424eca68a6ae0e4)
+- Fill the 146 missing Bengali strings *(l10n)* — [`10d327f`](https://github.com/hawkaii/food-finder-app/commit/10d327fbc0eadb8a30d0267f84dc42a9b0e22887)
+- Fill the 146 missing Tamil strings *(l10n)* — [`80ced64`](https://github.com/hawkaii/food-finder-app/commit/80ced64b728f825e342e25ee03a10f85782a907b)
+- Fill the 146 missing Telugu strings *(l10n)* — [`5bcb91f`](https://github.com/hawkaii/food-finder-app/commit/5bcb91f1eb637b51c96bac19fcbf61d444dde349)
+
+### Chores
+- V1.28.0 — ten languages *(release)* — [`25db296`](https://github.com/hawkaii/food-finder-app/commit/25db296006c75511887e4cc24c803c99e6894f40)
+
+### Docs
+- V1.27.0 [skip ci] *(changelog)* — [`02cfff0`](https://github.com/hawkaii/food-finder-app/commit/02cfff0ebf8b4baca9a84e9c06049b98bc0d7fc7)
+
+### Fixed
+- Fragments fall back to English without delegates *(l10n)* — [`bf0968b`](https://github.com/hawkaii/food-finder-app/commit/bf0968bf92c89d81197c334a8a8dfa6331d7e575)
+- Apply the translation review *(l10n)* — [`7740116`](https://github.com/hawkaii/food-finder-app/commit/77401166bd14f172c5cdb0127c2c067c88405eb7)
+
+### Other
+- Checkpoint the last migration pass, green but unfinished *(l10n)* — [`d5f9013`](https://github.com/hawkaii/food-finder-app/commit/d5f9013f732278d83ab1576b4c066b665e2402f7)
+- Ten languages — [`c3c3531`](https://github.com/hawkaii/food-finder-app/commit/c3c3531e15e676e9cb9b056da0c179d715aeb68c)
+
 ## [1.27.0] — 2026-11-02
 
 ### Added
