@@ -288,8 +288,13 @@ class MusePantryImageParser:
         "For each line you can read, return one item:\n"
         "- line: the row as it appears on the receipt, as close to verbatim as "
         "you can read it. This is what the person will see next to the item.\n"
-        "- name: the food, lowercase, without the brand and without the size. "
-        "'AMUL BUTTER 500G' is name 'butter'.\n"
+        "- name: the generic food, lowercase, and it must contain a product noun "
+        "— 'chips', 'butter', 'salt'. Never return a bare variant or adjective "
+        "on its own ('classic', 'original', 'premium', 'large', '500g'): those "
+        "are not things on a shelf. If you are not sure what the generic product "
+        "is called, keep the printed words minus the quantity and the price — "
+        "'2 X LAYS CLASSIC' becomes 'lays classic'. Keeping the brand in the "
+        "name is fine; the app strips known brands when it matches a pantry.\n"
         "- quantity: the amount printed for that row, as a number. 500G is 500, "
         "'2 X' is 2, a pack of 6 is 6. If the row states no amount, quantity is "
         "null. Never invent, estimate or infer an amount — a missing amount is "
@@ -520,6 +525,61 @@ def _decode_image(mime_type: str, image_base64: str) -> bytes:
     return raw
 
 
+#: Words that describe a variant, never a product. A name that is only one of
+#: these is not something you can buy; the printed line is.
+_VARIANT_WORDS = frozenset(
+    {
+        "classic", "original", "premium", "value", "economy", "regular", "select",
+        "gold", "plus", "max", "ultra", "best", "new", "combo", "offer", "family",
+        "large", "medium", "small", "jumbo", "mini", "pack", "packet", "refill",
+        "fresh", "natural", "pure", "special", "super", "lite", "light", "extra",
+    }
+)
+
+#: "2 x ", "500 g", "1kg", "₹120", "Rs. 45": the parts of a line that are not food.
+_LEADING_COUNT = re.compile(r"^\s*\d+(?:[.,]\d+)?\s*[xX]\s+")
+_MEASURE = re.compile(
+    r"\b\d+(?:[.,]\d+)?\s*(?:g|kg|gm|gms|ml|l|ltr|tbsp|tsp|pcs|pack|packet|bunch)?\b",
+    re.IGNORECASE,
+)
+
+
+def _has_product_noun(name: str) -> bool:
+    """Whether a name is something a shelf could hold.
+
+    Rejects a name with no letters at all, and a single word that only ever
+    describes a variant. "butter" and "salt" pass; "classic" and "500g" do not.
+    """
+    # "500g" has one letter and no noun; require enough alphabet to be a word.
+    if len(re.sub(r"[^a-z]", "", name.lower())) < 2:
+        return False
+    words = [word.strip(".,()") for word in name.lower().split()]
+    words = [word for word in words if word]
+    return not (len(words) == 1 and words[0] in _VARIANT_WORDS)
+
+
+def _printed_name(line: str) -> str:
+    """The line with its count and its size taken out: "2 X LAYS CLASSIC" → "lays classic"."""
+    text = _LEADING_COUNT.sub(" ", line)
+    text = _MEASURE.sub(" ", text)
+    text = re.sub(r"[^A-Za-z ]+", " ", text)
+    return " ".join(text.split()).lower()
+
+
+def _name_or_printed(line: str, name: str) -> str:
+    """Keep the model's name when it names a thing, else fall back to the print.
+
+    The model is asked to produce a product noun, and mostly does. When it
+    returns a bare variant instead — the failure that turned "2 X LAYS CLASSIC"
+    into a shelf item called "classic" — the printed words are the honest
+    answer, and the app's own vocabular matches them against a pantry.
+    """
+    if _has_product_noun(name):
+        return name
+    printed = _printed_name(line)
+    return printed or name
+
+
 def _clean_image(raw) -> list[PantryParseItem]:
     """The same rules as a text line, minus the input to compare against.
 
@@ -535,6 +595,7 @@ def _clean_image(raw) -> list[PantryParseItem]:
         if not name:
             continue
         line = str(entry.get("line") or "").strip()[:300] or name
+        name = _name_or_printed(line, name)
 
         unit = entry.get("unit")
         if unit not in UNITS:

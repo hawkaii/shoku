@@ -12,7 +12,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from shoku_api.domain.errors import Unavailable
-from shoku_api.pantry_parse import FakePantryImageParser
+from shoku_api.pantry_parse import (
+    FakePantryImageParser,
+    MusePantryImageParser,
+    _name_or_printed,
+)
 
 _requests = itertools.count(1)
 
@@ -212,3 +216,56 @@ def test_parse_image_requires_an_identity(anonymous: TestClient) -> None:
         json={"request_id": "anon-0001", "mime_type": "image/png", "image_base64": b64(PNG)},
     )
     assert response.status_code == 401
+
+
+# ---- the name must name something ----------------------------------------
+
+
+def test_a_bare_variant_is_replaced_by_the_printed_words(client, ctx) -> None:
+    """The live bug: "2 X LAYS CLASSIC" came back as a shelf item called "classic"."""
+    arm(ctx, [{"line": "2 X LAYS CLASSIC", "name": "classic", "quantity": 2, "unit": "pcs"}])
+
+    item = parse_image(client).json()["items"][0]
+
+    assert item["name"] == "lays classic", "a variant word alone is not a product"
+    assert item["quantity"] == 2.0
+    assert item["unit"] == "pcs"
+
+
+def test_a_real_product_name_is_left_alone(client, ctx) -> None:
+    arm(ctx, [{"line": "2 X LAYS CLASSIC", "name": "potato chips", "quantity": 2, "unit": "pcs"}])
+
+    assert parse_image(client).json()["items"][0]["name"] == "potato chips"
+
+
+def test_a_size_wearing_a_name_is_replaced_too(client, ctx) -> None:
+    arm(ctx, [{"line": "AMUL BUTTER 500G", "name": "500g", "quantity": 500, "unit": "g"}])
+
+    assert parse_image(client).json()["items"][0]["name"] == "amul butter"
+
+
+def test_a_price_in_the_line_never_becomes_the_name(client, ctx) -> None:
+    arm(ctx, [{"line": "PREMIMUM BASMATI 5KG 1200.00", "name": "premium", "quantity": 5, "unit": "kg"}])
+
+    assert parse_image(client).json()["items"][0]["name"] == "premimum basmati"
+
+
+def test_the_fallback_keeps_a_product_that_is_one_word(client, ctx) -> None:
+    """Salt and ghee are products, not adjectives: they must survive untouched."""
+    arm(ctx, [{"line": "TATA SALT 1KG", "name": "salt", "quantity": 1, "unit": "kg"}])
+
+    assert parse_image(client).json()["items"][0]["name"] == "salt"
+
+
+def test_the_prompt_asks_for_a_product_noun() -> None:
+    prompt = MusePantryImageParser.PROMPT
+    assert "product noun" in prompt
+    assert "classic" in prompt, "the failing case is named in the instruction"
+    assert "lays classic" in prompt, "and the fallback is shown, not just described"
+
+
+def test_the_guard_reads_the_printed_words() -> None:
+    assert _name_or_printed("2 X LAYS CLASSIC", "classic") == "lays classic"
+    assert _name_or_printed("AMUL BUTTER 500G", "500g") == "amul butter"
+    assert _name_or_printed("AMUL BUTTER 500G", "butter") == "butter"
+    assert _name_or_printed("", "classic") == "classic", "nothing better to offer"
