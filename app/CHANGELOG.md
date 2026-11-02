@@ -3,6 +3,28 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.25.0] — 2026-11-02
+
+### Added
+- The conversation is remembered on this device, and the sheet is chat only *(chat)* — [`309c8af`](https://github.com/hawkaii/food-finder-app/commit/309c8af0c35239b6cdb881ff17f794b4161e2faf)
+- The page a kitchen hands you — what it is, whether you can cook it, then the lists *(dish)* — [`7478e36`](https://github.com/hawkaii/food-finder-app/commit/7478e36affee9fc3dd32035d02103e52bd2802c9)
+- One labelled recipe for a kitchen with no account *(sample)* — [`361d5d2`](https://github.com/hawkaii/food-finder-app/commit/361d5d290a5150add89d58de34f074889d9fae6f)
+- The speaker lives on the page, not in the chat *(read-aloud)* — [`40aa954`](https://github.com/hawkaii/food-finder-app/commit/40aa954c20fcd8d7c5217805ff70da06d1110d33)
+
+### Chores
+- V1.25.0 — the recipe page, remembered *(release)* — [`90c5fa0`](https://github.com/hawkaii/food-finder-app/commit/90c5fa0cfc802e7fe97483e0eb0368ff7b6fa0c0)
+
+### Docs
+- V1.24.0 [skip ci] *(changelog)* — [`1464c9e`](https://github.com/hawkaii/food-finder-app/commit/1464c9e31db52787067fba748c5f6a81b976de67)
+
+### Fixed
+- No null assertion between a signed-out launch and the journal *(startup)* — [`4b74a4b`](https://github.com/hawkaii/food-finder-app/commit/4b74a4bf1846941fe27e0b02c9b4a590c3110a24)
+- Seed the sample in the load, not after it *(journal)* — [`7f1381a`](https://github.com/hawkaii/food-finder-app/commit/7f1381a84fa60490300bcc5ec235cb4deff76767)
+
+### Tests
+- Every way a line can meet the shelf, and the one sentence a vanished version gets *(fridge)* — [`8c5ba70`](https://github.com/hawkaii/food-finder-app/commit/8c5ba7003acc8b409e16496fdc25dea59f1929d7)
+- The chat table arrives on a v8 database without a rebuild *(migration)* — [`ef1f786`](https://github.com/hawkaii/food-finder-app/commit/ef1f7869866eb50fd7d7cb7471939306e2242f59)
+
 ## [1.24.0] — 2026-11-02
 
 ### Added
