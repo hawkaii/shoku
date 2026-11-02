@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "languageTitle": "Language",
+  "@languageTitle": {
+    "description": "Title of the language picker, on onboarding and in You."
+  },
+  "languageSubtitle": "Shoku in your language. You can change this later in You.",
+  "@languageSubtitle": {
+    "description": "Explains that the choice can be revisited from the You tab."
+  },
+  "languageSystem": "System language",
+  "@languageSystem": {
+    "description": "Language option that follows the device locale."
+  },
+  "languageSystemHint": "Follows this phone",
+  "@languageSystemHint": {
+    "description": "Subtitle under the system-language option."
+  },
+  "languageTapToContinue": "Tap a language to continue",
+  "@languageTapToContinue": {
+    "description": "Hint shown under the onboarding language picker."
+  }
+}

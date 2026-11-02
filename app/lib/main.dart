@@ -3,21 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/shoku_theme.dart';
 import 'data/services/prefs.dart';
+import 'l10n/app_localizations.dart';
+import 'l10n/languages.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/navigation/back_guard.dart';
 import 'presentation/state/journal_store.dart';
+import 'presentation/state/locale_provider.dart';
 import 'presentation/state/shoku_providers.dart';
 import 'presentation/state/sync_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Read the persisted flag before the first frame so onboarding never flashes.
+  // Read the persisted flags before the first frame so onboarding never flashes
+  // and the first paint is already in the chosen language.
   var onboardingDone = false;
+  Locale? initialLocale;
   try {
     onboardingDone = await Prefs.onboardingDone();
+    initialLocale = shokuLocaleFromCode(await Prefs.localeCode());
   } catch (_) {
-    // Storage unavailable (e.g. web preview): show onboarding once.
+    // Storage unavailable (e.g. web preview): show onboarding once and follow
+    // the device locale.
   }
 
   runApp(
@@ -25,6 +32,9 @@ Future<void> main() async {
       overrides: [
         onboardingDoneProvider.overrideWith(
           (ref) => onboardingDone || previewScreen != null,
+        ),
+        localeProvider.overrideWith(
+          (ref) => LocaleController(initialLocale),
         ),
         // The journal calls this after every local change. Bound here so the
         // store stays ignorant of HTTP and the sync layer owns the policy.
@@ -43,6 +53,7 @@ class ShokuApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     // One app, one Navigator, from the first frame. The gate decides which
     // route is allowed to build; swapping MaterialApps would dispose the
@@ -72,6 +83,9 @@ class ShokuApp extends ConsumerWidget {
         theme: ShokuTheme.light(),
         darkTheme: ShokuTheme.dark(),
         themeMode: mode,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: shokuSupportedLocales,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
           child: child ?? const SizedBox.shrink(),

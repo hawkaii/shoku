@@ -1,0 +1,8 @@
+{
+  "@@locale": "fr",
+  "languageTitle": "Langue",
+  "languageSubtitle": "Shoku dans votre langue. Vous pouvez la changer plus tard dans Vous.",
+  "languageSystem": "Langue du système",
+  "languageSystemHint": "Suit le téléphone",
+  "languageTapToContinue": "Touchez une langue pour continuer"
+}

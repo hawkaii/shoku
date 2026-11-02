@@ -3,15 +3,18 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/prefs.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
 import '../../widgets/kit/plate_mark.dart';
+import '../../widgets/language_picker.dart';
 
-/// Three steps, and the middle one is the product: you actually perform the
-/// share gesture once, here, so you know it forever.
+/// Four steps: choose a language, meet the product, perform the share gesture
+/// once, then see what a version is. The language step is first because
+/// everything after it is copy.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -20,8 +23,11 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const _pageCount = 4;
+
   late final int _initialPage =
-      int.tryParse(Uri.base.queryParameters['onboardStep'] ?? '') ?? 0;
+      (int.tryParse(Uri.base.queryParameters['onboardStep'] ?? '') ?? 0)
+          .clamp(0, _pageCount - 1);
   late final PageController _controller = PageController(initialPage: _initialPage);
   late int _page = _initialPage;
   int _stage = 0; // 0 = reel, 1 = share sheet, 2 = saved
@@ -32,7 +38,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _next() {
-    if (_page < 2) {
+    if (_page < _pageCount - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOutCubic,
@@ -62,7 +68,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   Text('SHOKU', style: ShokuType.label.copyWith(color: c.inkMuted)),
                   const Spacer(),
-                  if (_page < 2)
+                  if (_page > 0 && _page < _pageCount - 1)
                     GestureDetector(
                       onTap: _finish,
                       child: Text('Skip',
@@ -76,6 +82,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 controller: _controller,
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
+                  _LanguageStep(
+                    onSelected: (_) => _controller.nextPage(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
                   const _IntroStep(),
                   _ShareStep(
                     stage: _stage,
@@ -97,7 +109,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   SmoothPageIndicator(
                     controller: _controller,
-                    count: 3,
+                    count: _pageCount,
                     effect: ExpandingDotsEffect(
                       dotWidth: 6,
                       dotHeight: 6,
@@ -108,37 +120,79 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(height: ShokuSpace.lg),
-                  ShokuPressable(
-                    onTap: _next,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        gradient: ShokuGradients.crimsonPress,
-                        borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                        border: Border.all(color: c.ink, width: ShokuStroke.brutal),
-                        boxShadow: [
-                          BoxShadow(
-                              color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          _page == 0
-                              ? 'Start cooking'
-                              : _page == 1
-                                  ? (_stage == 2 ? 'Continue' : 'Share a reel to try it')
-                                  : 'Open my journal',
-                          style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                  if (_page == 0)
+                    Text(
+                      context.l10n.languageTapToContinue,
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                    )
+                  else
+                    ShokuPressable(
+                      onTap: _next,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          gradient: ShokuGradients.crimsonPress,
+                          borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                          border: Border.all(color: c.ink, width: ShokuStroke.brutal),
+                          boxShadow: [
+                            BoxShadow(
+                                color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            _page == 1
+                                ? 'Start cooking'
+                                : _page == 2
+                                    ? (_stage == 2 ? 'Continue' : 'Share a reel to try it')
+                                    : 'Open my journal',
+                            style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LanguageStep extends StatelessWidget {
+  final ValueChanged<Locale?> onSelected;
+
+  const _LanguageStep({required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final l10n = context.l10n;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        ShokuSpace.xl,
+        ShokuSpace.lg,
+        ShokuSpace.xl,
+        ShokuSpace.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.languageTitle,
+            style: ShokuType.h1.copyWith(color: c.ink, fontSize: 28),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.languageSubtitle,
+            style: ShokuType.body.copyWith(color: c.inkMuted),
+          ),
+          const SizedBox(height: ShokuSpace.lg),
+          LanguagePicker(onSelected: onSelected),
+        ],
       ),
     );
   }

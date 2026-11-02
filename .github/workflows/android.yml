@@ -87,6 +87,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # The generated AppLocalizations must build from the ARBs, and every
+      # supported locale must carry every key the English template declares.
+      # Missing translations are a failed check, never a silent English
+      # fallback at runtime.
+      - name: Localizations
+        run: |
+          set -euo pipefail
+          flutter gen-l10n
+          flutter test test/l10n_keys_test.dart --reporter expanded
+
       - name: Analyze
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 

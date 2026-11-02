@@ -1,0 +1,8 @@
+{
+  "@@locale": "hi",
+  "languageTitle": "भाषा",
+  "languageSubtitle": "शोकु आपकी भाषा में। आप इसे बाद में \"आप\" में बदल सकते हैं।",
+  "languageSystem": "सिस्टम भाषा",
+  "languageSystemHint": "फ़ोन की भाषा के अनुसार",
+  "languageTapToContinue": "जारी रखने के लिए कोई भाषा चुनें"
+}

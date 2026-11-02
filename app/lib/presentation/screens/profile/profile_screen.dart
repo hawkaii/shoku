@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
+import '../../../l10n/languages.dart';
 import '../../state/journal_providers.dart';
+import '../../state/locale_provider.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/language_picker.dart';
 import 'sign_in_sheet.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -23,6 +27,7 @@ class ProfileScreen extends ConsumerWidget {
     final upgrades = ref.watch(totalUpgradesProvider);
     final signature = ref.watch(signatureCountProvider);
     final mode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     return SafeArea(
       bottom: false,
@@ -100,6 +105,16 @@ class ProfileScreen extends ConsumerWidget {
               ThemeMode.light,
               ThemeMode.dark,
             ][i],
+          ),
+
+          const SizedBox(height: ShokuSpace.sm),
+          ShokuListRow(
+            icon: Icons.translate,
+            title: context.l10n.languageTitle,
+            subtitle: locale == null
+                ? context.l10n.languageSystem
+                : shokuLanguageName(locale) ?? context.l10n.languageSystem,
+            onTap: () => showLanguagePickerSheet(context),
           ),
 
           const SizedBox(height: ShokuSpace.lg),
