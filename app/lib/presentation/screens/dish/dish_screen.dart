@@ -39,6 +39,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
   /// The version last rendered, for the one note the page has to say out loud:
   /// "v3 is gone — showing v4".
   String? _lastVersionId;
+  int _lastNumber = 1;
   String? _goneNote;
 
   @override
@@ -190,17 +191,21 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     if (_lastVersionId != null &&
         _lastVersionId != version.id &&
         !dish.versions.any((v) => v.id == _lastVersionId)) {
-      final goneNumber = int.tryParse(
-              RegExp(r'(\d+)$').firstMatch(_lastVersionId!)?.group(1) ?? '') ??
-          inspected;
+      final gone = _lastNumber;
+      final showing = _numberOf(version, inspected);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() => _goneNote = 'v$goneNumber is gone — showing v$inspected');
+          setState(() => _goneNote = 'v$gone is gone — showing v$showing');
         }
       });
     }
     _lastVersionId = version.id;
+    _lastNumber = _numberOf(version, inspected);
   }
+
+  /// Versions that came from a reel carry number 0; the page counts positions.
+  int _numberOf(RecipeVersion version, int inspected) =>
+      version.number > 0 ? version.number : inspected;
 
   Widget _header(BuildContext context, Dish dish, RecipeVersion version) {
     final c = context.colors;
@@ -367,7 +372,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
-        content: Text('${count(ids.length, 'item')} added to your list'),
+        content: Text('${ids.length} added to your list'),
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () => store.removeMany(ids),
