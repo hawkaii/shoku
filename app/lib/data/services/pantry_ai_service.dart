@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 
 import '../models/pantry_item.dart';
@@ -121,4 +123,38 @@ class PantryAiService {
 
   /// A receipt is at most one page; the contract caps a call at twenty lines.
   static const maxLines = 20;
+}
+
+/// Reads a receipt image with the server's vision model.
+///
+/// This replaced on-device OCR, which could not read a real till slip. The
+/// image is uploaded, used for the call and not stored — the app says so before
+/// the first upload. Typed and voice leftovers still go through
+/// [PantryAiService], which never carries an image.
+class PantryVisionService {
+  PantryVisionService({required ApiClient api, String Function()? newRequestId})
+      : _api = api,
+        _newRequestId = newRequestId;
+
+  final ApiClient _api;
+
+  /// Injected so a test can assert on the id it sent.
+  final String Function()? _newRequestId;
+
+  Future<PantryAiResult> read(List<int> bytes, {String? mimeType}) async {
+    if (bytes.isEmpty) return const PantryAiResult(items: []);
+    try {
+      final response = await _api.post('/v1/pantry/parse-image', {
+        'request_id': _newRequestId?.call() ?? _uuid.v4(),
+        'mime_type': mimeType ?? 'image/jpeg',
+        'image_base64': base64Encode(bytes),
+      });
+      return PantryAiResult.parse(response);
+    } on ApiError catch (error) {
+      if (error.status == 429 || error.reason == 'daily_cap_reached') {
+        throw const PantryCapReached();
+      }
+      rethrow;
+    }
+  }
 }

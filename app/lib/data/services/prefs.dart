@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _onboardingKey = 'onboarding_done';
 const _seededKey = 'journal_seeded';
+const _visionDisclosureKey = 'receipt_vision_disclosure';
 
 /// Onboarding is persisted, not in-memory: it must not replay on every launch.
 class Prefs {
@@ -25,6 +26,17 @@ class Prefs {
   static Future<void> setJournalSeeded(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_seededKey, value);
+  }
+
+  /// One disclosure, once: the image leaves the phone for Meta's model.
+  static Future<bool> receiptVisionSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_visionDisclosureKey) ?? false;
+  }
+
+  static Future<void> setReceiptVisionSeen(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_visionDisclosureKey, value);
   }
 
   const Prefs._();

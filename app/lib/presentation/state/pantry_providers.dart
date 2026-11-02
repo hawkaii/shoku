@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../data/db/pantry_repository.dart';
 import '../../data/models/pantry_item.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/pantry_ai_service.dart';
+import '../../data/services/receipt_image.dart';
 import '../../data/services/suggestions_service.dart';
 import 'journal_store.dart';
 import 'sync_providers.dart';
@@ -202,6 +204,19 @@ final pantryAiServiceProvider = Provider<PantryAiService>(
   (ref) => PantryAiService(
     api: ApiClient(auth: ref.watch(authServiceProvider)),
   ),
+);
+
+final pantryVisionServiceProvider = Provider<PantryVisionService>(
+  (ref) => PantryVisionService(
+    api: ApiClient(auth: ref.watch(authServiceProvider)),
+  ),
+);
+
+/// Picking bytes, behind a seam a widget test can answer without a camera.
+typedef ReceiptImagePicker = Future<List<int>?> Function(ImageSource source);
+
+final receiptImagePickerProvider = Provider<ReceiptImagePicker>(
+  (ref) => ReceiptImage.pickFrom,
 );
 
 final suggestionsServiceProvider = Provider<SuggestionsService>(

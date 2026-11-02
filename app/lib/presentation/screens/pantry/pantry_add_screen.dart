@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +9,12 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/pantry_item.dart';
-import '../../../data/services/ocr_service.dart';
+import '../../../data/services/api_client.dart';
 import '../../../data/services/pantry_ai_service.dart';
+import '../../../data/services/prefs.dart';
+import '../../../data/services/receipt_image.dart';
 import '../../state/pantry_providers.dart';
+import '../../state/sync_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
 import '../../widgets/kit/motion.dart';
@@ -50,15 +52,33 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
   /// Guards an in-flight call: a review started after this one owns the sheet.
   int _generation = 0;
 
+  /// The vision read is in flight. The picker has already returned, so the cook
+  /// is waiting on the model, not on their own phone.
+  bool _readingPhoto = false;
+
+  /// The reader has no way out: no connection, or every attempt failed. Typed
+  /// and voice are unaffected and stay offered.
+  bool _photoOffline = false;
+
   @override
   void dispose() {
     _text.dispose();
     super.dispose();
   }
 
-  /// Receipt or screenshot: read on the device, then the same parser and the
-  /// same review. The image is never uploaded.
+  /// Receipt or screenshot: the model reads the image, and the same review
+  /// sheet takes it from there.
+  ///
+  /// This used to be on-device OCR. It could not read a real till slip, so the
+  /// picture goes to the server's vision model instead — and the cook is told
+  /// that once, before the first upload.
   Future<void> _fromPhoto() async {
+    if (_photoOffline || ref.read(syncStatusProvider) == SyncStatus.offline) {
+      return;
+    }
+    await _discloseOnce();
+    if (!mounted) return;
+
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: context.colors.canvas,
@@ -80,24 +100,93 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         ),
       ),
     );
-    if (source == null) return;
+    if (source == null || !mounted) return;
 
-    final picked = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 2200,
-      imageQuality: 90,
+    final bytes = await ref.read(receiptImagePickerProvider)(source);
+    if (bytes == null || !mounted) return;
+    await _readImage(bytes);
+  }
+
+  /// One sheet, once per device: the image leaves the phone.
+  Future<void> _discloseOnce() async {
+    final seen = await Prefs.receiptVisionSeen().catchError((_) => false);
+    if (seen || !mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.colors.canvas,
+      builder: (context) => const _VisionDisclosure(),
     );
-    if (picked == null || !mounted) return;
+    // Remembered even when it is swiped away: asking twice is not consent.
+    unawaited(Prefs.setReceiptVisionSeen(true).catchError((_) {}));
+  }
 
-    final text = await OcrService().readText(File(picked.path));
-    if (!mounted) return;
-    if (text == null) {
-      setState(() => _note =
-          'Reading text happens on the phone, so a screenshot cannot be read here. Type it below instead.');
-      return;
+  Future<void> _readImage(List<int> bytes) async {
+    setState(() {
+      _readingPhoto = true;
+      _note = null;
+      _capNote = null;
+    });
+
+    PantryAiResult? result;
+    String? cap;
+    var offline = false;
+    try {
+      result = await ref.read(pantryVisionServiceProvider).read(
+            bytes,
+            mimeType: ReceiptImage.mimeTypeOf(bytes),
+          );
+    } on PantryCapReached {
+      cap = 'AI reads used up for today — type them instead';
+    } on ApiError {
+      // The server had a day. The rows already parsed stay; try again later.
+    } catch (_) {
+      offline = true;
     }
-    _text.text = text;
-    _review(strict: true);
+    if (!mounted) return;
+
+    setState(() {
+      _readingPhoto = false;
+      _capNote = cap;
+      _photoOffline = offline;
+      if (offline) {
+        _note = 'The receipt reader needs a connection. Type it or say it instead.';
+      } else if (result != null && result.items.isEmpty) {
+        // An unreadable picture is an empty list, never an error dialog.
+        _note = 'Nothing readable in that picture — type it instead.';
+      } else if (result != null) {
+        _mergeVision(result.items);
+      }
+    });
+  }
+
+  /// Image items land in the same review as everything else: checked, and
+  /// marked as the model's reading.
+  void _mergeVision(List<AiPantryLine> items) {
+    final merged = [..._lines];
+    for (final item in items) {
+      final line = ParsedPantryLine(
+        raw: item.line,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        confident: true,
+        fromAi: true,
+      );
+      final at = merged.indexWhere(
+        (existing) => PantryParser.key(existing.raw) == PantryParser.key(item.line),
+      );
+      if (at >= 0) {
+        merged[at] = line;
+        _checked.add(at);
+      } else {
+        merged.add(line);
+        _checked.add(merged.length - 1);
+      }
+    }
+    _lines = merged;
+    _reviewing = _lines.isNotEmpty;
+    _note = null;
   }
 
   void _review({bool? strict}) {
@@ -313,6 +402,14 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                       key: const ValueKey('pantry-add-note'),
                       style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                 ],
+                if (_capNote != null) ...[
+                  const SizedBox(height: ShokuSpace.sm),
+                  Text(
+                    _capNote!,
+                    key: const ValueKey('pantry-ai-cap'),
+                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                  ),
+                ],
                 const SizedBox(height: ShokuSpace.md),
                 ShokuPressable(
                   key: const ValueKey('pantry-parse'),
@@ -341,14 +438,6 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                       key: const ValueKey('pantry-ai-reading'),
                       style: ShokuType.label
                           .copyWith(fontSize: 9, color: c.inkMuted),
-                    ),
-                  ],
-                  if (_capNote != null) ...[
-                    const SizedBox(height: ShokuSpace.xs),
-                    Text(
-                      _capNote!,
-                      key: const ValueKey('pantry-ai-cap'),
-                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                     ),
                   ],
                   const SizedBox(height: ShokuSpace.xs),
@@ -507,34 +596,49 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         maxLines: 3,
       );
 
-  Widget _photoDoor(ShokuColors c) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ShokuPressable(
-            key: const ValueKey('pantry-photo'),
-            onTap: _fromPhoto,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              decoration: BoxDecoration(
-                color: c.surface,
-                borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                border: Border.all(color: c.hairline),
-              ),
-              child: Center(
-                child: Text('Photo or screenshot',
-                    style:
-                        ShokuType.label.copyWith(fontSize: 10, color: c.ink)),
-              ),
+  Widget _photoDoor(ShokuColors c) {
+    final offline =
+        _photoOffline || ref.watch(syncStatusProvider) == SyncStatus.offline;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ShokuPressable(
+          key: const ValueKey('pantry-photo'),
+          onTap: offline ? null : _fromPhoto,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 11),
+            decoration: BoxDecoration(
+              color: offline ? c.surfaceAlt : c.surface,
+              borderRadius: BorderRadius.circular(ShokuRadius.chip),
+              border: Border.all(color: c.hairline),
+            ),
+            child: Center(
+              child: Text('Photo or screenshot',
+                  style: ShokuType.label.copyWith(
+                      fontSize: 10, color: offline ? c.inkMuted : c.ink)),
             ),
           ),
-          const SizedBox(height: ShokuSpace.xs),
+        ),
+        const SizedBox(height: ShokuSpace.xs),
+        Text(
+          offline
+              ? 'The receipt reader needs a connection. Type it or say it instead.'
+              : 'Photograph a receipt and the reader types it out. Nothing enters the fridge until you have seen the list.',
+          key: const ValueKey('pantry-photo-copy'),
+          style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+        ),
+        if (_readingPhoto) ...[
+          const SizedBox(height: ShokuSpace.sm),
           Text(
-            'Read on this device. The picture is not uploaded, and the lines land here for review.',
-            style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+            'Reading the receipt…',
+            key: const ValueKey('pantry-vision-reading'),
+            style: ShokuType.label.copyWith(fontSize: 9, color: c.accent),
           ),
         ],
-      );
+      ],
+    );
+  }
 
   Widget _field({required Widget child}) => Container(
         padding: const EdgeInsets.symmetric(
@@ -548,4 +652,55 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         ),
         child: child,
       );
+}
+
+/// The trade, said once: the picture leaves the phone for Meta's model.
+class _VisionDisclosure extends StatelessWidget {
+  const _VisionDisclosure();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        ShokuSpace.lg,
+        ShokuSpace.lg,
+        ShokuSpace.lg,
+        ShokuSpace.xl,
+      ),
+      child: Column(
+        key: const ValueKey('pantry-vision-disclosure'),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('The reader uses Meta’s model',
+              style: ShokuType.h2.copyWith(color: c.ink)),
+          const SizedBox(height: ShokuSpace.xs),
+          Text(
+            'The photo is sent to Meta’s model to read it. It is used for that one call and is not stored. The lines land in the review below, where you can fix anything before it enters the fridge.',
+            style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+          ),
+          const SizedBox(height: ShokuSpace.md),
+          ShokuPressable(
+            key: const ValueKey('pantry-vision-disclosure-ok'),
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                gradient: ShokuGradients.crimsonPress,
+                borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                border: Border.all(color: c.ink, width: ShokuStroke.brutal),
+              ),
+              child: Center(
+                child: Text('Got it',
+                    style: ShokuType.title
+                        .copyWith(color: c.onAccent, fontSize: 14)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
