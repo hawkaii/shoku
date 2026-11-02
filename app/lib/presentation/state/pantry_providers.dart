@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/pantry_repository.dart';
@@ -31,6 +33,9 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
   Future<void> refresh() async {
     state = await _repo.load();
     _ref.read(pantryRevisionProvider.notifier).state++;
+    // A pantry write is a local change like any other: it has to reach the
+    // server, or the shelf only exists on the device that typed it.
+    unawaited(_ref.read(syncHookProvider)?.call() ?? Future<void>.value());
   }
 
   Future<void> add({

@@ -65,7 +65,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
               children: [
                 Row(
                   children: [
-                    Text('Pantry', style: ShokuType.h1.copyWith(color: c.ink)),
+                    Text('Fridge', style: ShokuType.h1.copyWith(color: c.ink)),
                     const Spacer(),
                     Text(count(items.length, 'item'),
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
@@ -91,7 +91,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                   ),
                 ),
                 const SizedBox(height: ShokuSpace.md),
-                const ShokuLabel('cook from your pantry'),
+                const ShokuLabel('cook from your fridge'),
                 const SizedBox(height: ShokuSpace.sm),
                 _Shelf(items: items),
                 if (toBuy.isNotEmpty) ...[
@@ -103,7 +103,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 ],
                 if (inStock.isNotEmpty) ...[
                   const SizedBox(height: ShokuSpace.lg),
-                  const ShokuLabel('in the kitchen'),
+                  const ShokuLabel('in the fridge'),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final item in inStock) _Row(item: item),
                 ],
@@ -115,7 +115,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                         const PlateMark(size: 90),
                         const SizedBox(height: ShokuSpace.sm),
                         Text(
-                          'Nothing in the pantry yet. Photograph a receipt, or just tell me what’s in the fridge.',
+                          'Nothing in the fridge yet. Photograph a receipt, or just tell me what’s in it.',
                           key: const ValueKey('pantry-empty'),
                           textAlign: TextAlign.center,
                           style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
@@ -374,7 +374,7 @@ class _PantryCaptureSheetState extends ConsumerState<PantryCaptureSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Add to the pantry',
+          Text('Add to the fridge',
               style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: 2),
           Text(

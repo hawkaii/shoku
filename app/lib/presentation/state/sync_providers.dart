@@ -46,7 +46,7 @@ class SyncController {
   /// Signed out has a ceiling. Retrying with no token is a local no-op, so a
   /// phone that has never signed in should not own a timer forever — the auth
   /// stream is what wakes it, and it does so immediately.
-  static const _maxSignedOutRetries = 3;
+  static const _maxSignedOutRetries = 6;
 
   void dispose() {
     _disposed = true;

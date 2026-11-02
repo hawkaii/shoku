@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +40,12 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // failed sync is a state, not an error the user has to dismiss. The auth
     // stream owns every attempt after this one.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(syncControllerProvider).syncNow();
+    });
+    // On web the session is restored from storage *after* the first frame, so
+    // the first pass can reach the API with no token. One more look a few
+    // seconds later is what turns a signed-in reload into a filled journal.
+    Timer(const Duration(seconds: 3), () {
       if (mounted) ref.read(syncControllerProvider).syncNow();
     });
   }

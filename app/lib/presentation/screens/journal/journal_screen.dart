@@ -7,6 +7,7 @@ import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
+import '../../state/pantry_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -38,8 +39,14 @@ class JournalScreen extends ConsumerWidget {
       );
     }
     if (dishes.isEmpty) {
+      // A brand-new user has no dishes and still needs a way to import.
       return _withImportCard(
-        _JournalLoading(ready: status == JournalStatus.ready),
+        Column(
+          children: [
+            const _SaveRecipeRow(),
+            Expanded(child: _JournalLoading(ready: status == JournalStatus.ready)),
+          ],
+        ),
       );
     }
 
@@ -64,32 +71,7 @@ class JournalScreen extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
           // ---- Save a recipe -------------------------------------------
-          ShokuPressable(
-            key: const ValueKey('journal-save-recipe'),
-            onTap: () => showAddSheet(context),
-            child: Container(
-              margin: const EdgeInsets.only(top: ShokuSpace.xs),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: ShokuSpace.md, vertical: ShokuSpace.sm),
-              decoration: BoxDecoration(
-                color: context.colors.surface,
-                borderRadius: BorderRadius.circular(ShokuRadius.card),
-                border: Border.all(color: context.colors.hairline),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.add, size: 16, color: context.colors.accent),
-                  const SizedBox(width: ShokuSpace.sm),
-                  Text('Save a recipe',
-                      style: ShokuType.title.copyWith(
-                          color: context.colors.ink, fontSize: 13)),
-                  const Spacer(),
-                  Icon(Icons.chevron_right,
-                      size: 18, color: context.colors.inkMuted),
-                ],
-              ),
-            ),
-          ),
+          const _SaveRecipeRow(),
           const SizedBox(height: ShokuSpace.md),
 
           // ---- Rhythm header ------------------------------------------
@@ -105,6 +87,8 @@ class JournalScreen extends ConsumerWidget {
                   style: ShokuType.h1.copyWith(color: c.ink),
                 ),
               ),
+              const SizedBox(width: ShokuSpace.sm),
+              const _FridgeButton(),
             ],
           ),
           const SizedBox(height: 4),
@@ -534,6 +518,76 @@ class _EmptyJournal extends StatelessWidget {
 
 /// Shown for the frame or two while the journal is read from disk, and for a
 /// genuinely empty journal. No spinners: the mark, one line, and nothing to tap.
+/// A cart-style door to the fridge, with how much is in it.
+class _FridgeButton extends ConsumerWidget {
+  const _FridgeButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final items = ref.watch(pantryStoreProvider).where((i) => !i.wanted).length;
+    return GestureDetector(
+      key: const ValueKey('fridge-button'),
+      onTap: () => context.push('/pantry'),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: c.surface,
+          borderRadius: BorderRadius.circular(ShokuRadius.chip),
+          border: Border.all(color: c.hairline),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.kitchen, size: 15, color: c.ink),
+            const SizedBox(width: 4),
+            Text('$items',
+                style: ShokuType.stat.copyWith(fontSize: 11, color: c.ink)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The import door, present in every journal state — including the empty one,
+/// where it is the only way forward for a new user.
+class _SaveRecipeRow extends StatelessWidget {
+  const _SaveRecipeRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          ShokuSpace.lg, ShokuSpace.xs, ShokuSpace.lg, 0),
+      child: ShokuPressable(
+        key: const ValueKey('journal-save-recipe'),
+        onTap: () => showAddSheet(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: ShokuSpace.md, vertical: ShokuSpace.sm),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(ShokuRadius.card),
+            border: Border.all(color: c.hairline),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.add, size: 16, color: c.accent),
+              const SizedBox(width: ShokuSpace.sm),
+              Text('Save a recipe',
+                  style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
+              const Spacer(),
+              Icon(Icons.chevron_right, size: 18, color: c.inkMuted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _JournalLoading extends StatelessWidget {
   final bool ready;
   const _JournalLoading({this.ready = false});

@@ -277,7 +277,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('pantry-empty')), findsOneWidget);
       expect(find.text('Add items'), findsOneWidget);
-      expect(find.text('Pantry'), findsOneWidget);
+      expect(find.text('Fridge'), findsOneWidget);
     });
 
     testWidgets('typed capture reviews before anything enters stock',
