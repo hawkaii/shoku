@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
@@ -23,6 +26,8 @@ class JournalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final cooks = ref.watch(cooksProvider);
     final dishes = ref.watch(dishesProvider);
     final totalCooks = ref.watch(totalCooksProvider);
@@ -75,7 +80,9 @@ class JournalScreen extends ConsumerWidget {
               const SizedBox(width: ShokuSpace.sm),
               Expanded(
                 child: Text(
-                  'October kitchen',
+                  l10n.journalKitchenTitle(
+                    DateFormat.MMMM(locale).format(DateTime.now()),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ShokuType.h1.copyWith(color: c.ink),
@@ -91,8 +98,8 @@ class JournalScreen extends ConsumerWidget {
               Expanded(
                 child: Text(
                   metaLine([
-                    count(dishes.length, 'dish', 'dishes'),
-                    count(upgrades, 'upgrade'),
+                    l10n.journalDishesCount(dishes.length),
+                    l10n.journalUpgradesCount(upgrades),
                   ]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -100,15 +107,15 @@ class JournalScreen extends ConsumerWidget {
                 ),
               ),
               _CounterPill(
-                value: '$totalCooks',
-                label: 'cooks',
+                value: NumberFormat.decimalPattern(locale).format(totalCooks),
+                label: l10n.journalCooksLabel(totalCooks),
                 color: c.accent,
                 onTap: () {},
               ),
               const SizedBox(width: ShokuSpace.xs),
               _CounterPill(
-                value: '$upgrades',
-                label: 'upgrades',
+                value: NumberFormat.decimalPattern(locale).format(upgrades),
+                label: l10n.journalUpgradesLabel(upgrades),
                 color: c.reward,
                 onTap: () {},
               ),
@@ -118,7 +125,7 @@ class JournalScreen extends ConsumerWidget {
 
           // ---- On the counter -----------------------------------------
           if (pinned != null) ...[
-            const ShokuLabel('on the counter'),
+            ShokuLabel(l10n.journalOnTheCounter),
             const SizedBox(height: ShokuSpace.sm),
             // No entrance animation here: this card is the one thing on the
             // screen a new cook must see, and content must never depend on an
@@ -133,10 +140,10 @@ class JournalScreen extends ConsumerWidget {
             // ---- Timeline -----------------------------------------------
             Row(
               children: [
-                const ShokuLabel('cook log'),
+                ShokuLabel(l10n.journalCookLog),
                 const Spacer(),
                 Text(
-                  count(cooks.length, 'entry', 'entries'),
+                  l10n.journalEntriesCount(cooks.length),
                   style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
                 ),
               ],
@@ -268,6 +275,7 @@ class _PinnedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return ShokuPressable(
       onTap: onOpen,
       child: Container(
@@ -298,11 +306,11 @@ class _PinnedCard extends StatelessWidget {
                       ),
                       // A duration we don't know is not shown at all: a stray
                       // dot or a dash would read as data.
-                      if (minutesLabel(dish.minutes).isNotEmpty) ...[
+                      if (dish.minutes > 0) ...[
                         const SizedBox(width: ShokuSpace.xs),
                         Flexible(
                           child: Text(
-                            '· ${minutesLabel(dish.minutes)}',
+                            '· ${l10n.minutesShort(dish.minutes)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: ShokuType.stat.copyWith(
@@ -332,7 +340,7 @@ class _PinnedCard extends StatelessWidget {
                           cookCount: dish.cookCount,
                           compact: true),
                       if (dish.isSample)
-                        ShokuChip('Sample', color: c.reward, filled: true),
+                        ShokuChip(l10n.labelSample, color: c.reward, filled: true),
                     ],
                   ),
                 ],
@@ -352,7 +360,7 @@ class _PinnedCard extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  'Cook',
+                  l10n.journalCook,
                   style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 13),
                 ),
               ),
@@ -374,8 +382,11 @@ class _TimelineEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final day = log.cookedAt.day.toString().padLeft(2, '0');
-    final month = _month(log.cookedAt.month);
+    final month =
+        DateFormat.MMM(locale).format(log.cookedAt).toUpperCase();
 
     return IntrinsicHeight(
       child: Row(
@@ -442,7 +453,7 @@ class _TimelineEntry extends StatelessWidget {
                                   color: c.hairline,
                                 ),
                                 Text(
-                                  log.outcome.label,
+                                  outcomeLabel(l10n, log.outcome),
                                   style: ShokuType.label.copyWith(fontSize: 9, color: c.ink),
                                 ),
                               ],
@@ -461,7 +472,8 @@ class _TimelineEntry extends StatelessWidget {
                           // How the night felt and what it was worth — quiet,
                           // in the words the log already stores.
                           Text(
-                            '${log.mood.name} · ${log.rating}/5',
+                            '${moodLabel(l10n, log.mood)} · '
+                            '${NumberFormat.decimalPattern(locale).format(log.rating)}/5',
                             key: const ValueKey('cook-mood-rating'),
                             style: ShokuType.bodySmall.copyWith(
                               color: c.inkMuted,
@@ -502,9 +514,6 @@ class _TimelineEntry extends StatelessWidget {
   }
 }
 
-String _month(int m) =>
-    const ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][m - 1];
-
 class _EmptyJournal extends StatelessWidget {
   final VoidCallback onStart;
   const _EmptyJournal({required this.onStart});
@@ -512,6 +521,7 @@ class _EmptyJournal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(ShokuSpace.lg),
       decoration: BoxDecoration(
@@ -523,14 +533,15 @@ class _EmptyJournal extends StatelessWidget {
         children: [
           const Center(child: PlateMark(size: 96)),
           const SizedBox(height: ShokuSpace.sm),
-          Text('Your first page', style: ShokuType.h2.copyWith(color: c.ink)),
+          Text(l10n.journalFirstPage, style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: ShokuSpace.xs),
           Text(
-            'Log one cook — a photo, how it went, and one thing you changed. That becomes v1.',
+            l10n.journalFirstPageBody,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.md),
-          Text('Start the journal →', style: ShokuType.title.copyWith(color: c.accent, fontSize: 14)),
+          Text(l10n.journalStartJournal,
+              style: ShokuType.title.copyWith(color: c.accent, fontSize: 14)),
         ],
       ),
     );
@@ -604,7 +615,7 @@ class _SaveRecipeRow extends StatelessWidget {
             children: [
               Icon(Icons.add, size: 16, color: c.accent),
               const SizedBox(width: ShokuSpace.sm),
-              Text('Save a recipe',
+              Text(context.l10n.journalSaveRecipe,
                   style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
               const Spacer(),
               Icon(Icons.chevron_right, size: 18, color: c.inkMuted),
@@ -631,7 +642,9 @@ class _JournalLoading extends StatelessWidget {
             const PlateMark(size: 56),
             const SizedBox(height: ShokuSpace.md),
             Text(
-              ready ? 'No dishes yet — import a reel to start' : 'Opening your journal',
+              ready
+                  ? context.l10n.journalNoDishes
+                  : context.l10n.journalOpening,
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
           ],
@@ -649,6 +662,7 @@ class _JournalError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return SafeArea(
       child: Center(
         child: Padding(
@@ -659,18 +673,20 @@ class _JournalError extends StatelessWidget {
               const PlateMark(size: 56),
               const SizedBox(height: ShokuSpace.md),
               Text(
-                'Your journal could not be opened',
+                l10n.journalErrorTitle,
                 textAlign: TextAlign.center,
                 style: ShokuType.title.copyWith(color: c.ink, fontSize: 15),
               ),
               const SizedBox(height: ShokuSpace.xs),
               Text(
-                'The saved cooks are still on this phone.',
+                l10n.journalErrorBody,
                 textAlign: TextAlign.center,
                 style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
               const SizedBox(height: ShokuSpace.lg),
-              TextButton(onPressed: onRetry, child: const Text('Try again')),
+              TextButton(
+                  onPressed: onRetry,
+                  child: Text(l10n.journalTryAgain)),
             ],
           ),
         ),

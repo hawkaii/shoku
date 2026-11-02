@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/models/cook_timer.dart';
@@ -154,6 +156,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
 
   Future<bool> _confirmLeave() async {
     if (_changes.isEmpty && _step == 0) return true;
+    final l10n = context.l10n;
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -171,12 +174,12 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Leave this cook?', style: ShokuType.h1.copyWith(color: c.ink)),
+                Text(l10n.cookLeaveTitle, style: ShokuType.h1.copyWith(color: c.ink)),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   _changes.isEmpty
-                      ? 'You are part-way through. Nothing is saved yet.'
-                      : '${_changes.length} change${_changes.length == 1 ? '' : 's'} in this cook will be discarded.',
+                      ? l10n.cookLeaveBody
+                      : l10n.cookLeaveChanges(_changes.length),
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
                 const SizedBox(height: ShokuSpace.lg),
@@ -192,7 +195,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                             side: BorderSide(color: c.hairline),
                           ),
                         ),
-                        child: Text('Keep cooking',
+                        child: Text(l10n.exitKeepCooking,
                             style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
                       ),
                     ),
@@ -207,7 +210,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                             borderRadius: BorderRadius.circular(ShokuRadius.chip),
                           ),
                         ),
-                        child: Text('Discard',
+                        child: Text(l10n.chatDiscard,
                             style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13)),
                       ),
                     ),
@@ -225,11 +228,13 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final dish = ref.watch(dishProvider(widget.dishId));
     if (dish == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final steps = dish.steps.isEmpty ? const ['Follow the recipe.'] : dish.steps;
+    final steps = dish.steps.isEmpty ? [l10n.cookNoSteps] : dish.steps;
     final isLast = _step == steps.length - 1;
 
     final versionId = dish.versions.isEmpty ? '' : dish.versions.last.id;
@@ -286,7 +291,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                       ),
                     ),
                     if (_changes.isNotEmpty) ...[
-                      ShokuChip('${_changes.length} changed', color: c.reward, filled: true),
+                      ShokuChip(l10n.cookChangedCount(_changes.length),
+                          color: c.reward, filled: true),
                       const SizedBox(width: ShokuSpace.sm),
                     ],
                     Text(
@@ -344,7 +350,9 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                             Row(
                               children: [
                                 ShokuLabel(
-                                    'step ${(i + 1).toString().padLeft(2, '0')}'),
+                                    l10n.cookStepLabel(
+                                        NumberFormat('00', locale)
+                                            .format(i + 1))),
                                 const Spacer(),
                                 // The assistant lives in the step header, not
                                 // over the timer.
@@ -406,7 +414,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Timer cleared — this dish has a new version',
+                      l10n.cookTimerCleared,
                       style: ShokuType.label.copyWith(color: c.inkMuted),
                     ),
                   ),
@@ -431,7 +439,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                               border: Border.all(color: c.hairline),
                             ),
                             child: Center(
-                              child: Text('Back',
+                              child: Text(l10n.cookBack,
                                   style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
                             ),
                           ),
@@ -464,7 +472,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           ),
                           child: Center(
                             child: Text(
-                              isLast ? 'Finish & log' : 'Next step',
+                              isLast ? l10n.cookFinishLog : l10n.cookNextStep,
                               style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                             ),
                           ),

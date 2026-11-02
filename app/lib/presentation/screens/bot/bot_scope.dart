@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/assistant_turn_repository.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../state/journal_providers.dart';
 
 /// What the assistant is talking about, derived from where the cook is.
@@ -38,12 +40,14 @@ final botScopeProvider = StateProvider<BotScope>((ref) => const BotScope.kitchen
 
 /// Resolves the chip's words against the journal, so a renamed dish renames the
 /// chip without the scope having to store a copy of the title.
-String botScopeLabel(WidgetRef ref, BotScope scope) {
-  if (scope.isKitchen) return 'No dish';
+String botScopeLabel(WidgetRef ref, BotScope scope,
+    [AppLocalizations? l10n]) {
+  final t = l10n ?? lookupAppLocalizations(const Locale('en'));
+  if (scope.isKitchen) return t.botNoDish;
   final dish = ref.watch(dishProvider(scope.dishId!));
   if (scope.stepIndex != null) {
     final total = scope.stepCount ?? dish?.steps.length ?? 0;
-    return 'Cooking · step ${scope.stepIndex! + 1} of $total';
+    return t.botCookingStep(scope.stepIndex! + 1, total);
   }
-  return dish?.title ?? 'Dish';
+  return dish?.title ?? t.botDishFallback;
 }

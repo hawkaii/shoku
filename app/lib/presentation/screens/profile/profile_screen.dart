@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
+import '../../../l10n/languages.dart';
 import '../../state/journal_providers.dart';
+import '../../state/locale_provider.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/controls.dart';
 import '../../widgets/kit/feedback.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/language_picker.dart';
 import 'sign_in_sheet.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -19,10 +23,12 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     final cooks = ref.watch(totalCooksProvider);
     final upgrades = ref.watch(totalUpgradesProvider);
     final signature = ref.watch(signatureCountProvider);
     final mode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
 
     return SafeArea(
       bottom: false,
@@ -34,31 +40,43 @@ class ProfileScreen extends ConsumerWidget {
           ShokuSpace.tabBarClearance(context),
         ),
         children: [
-          Text('You', style: ShokuType.h1.copyWith(color: c.ink)),
+          Text(l10n.tabYou, style: ShokuType.h1.copyWith(color: c.ink)),
           const SizedBox(height: 2),
           Text(
-            'The record of what you have actually cooked.',
+            l10n.profileSubtitle,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
 
           Row(
             children: [
-              Expanded(child: _StatBlock(value: '$cooks', label: 'cooks', color: c.ink)),
+              Expanded(
+                  child: _StatBlock(
+                      value: '$cooks',
+                      label: l10n.journalCooksLabel(cooks),
+                      color: c.ink)),
               const SizedBox(width: ShokuSpace.sm),
-              Expanded(child: _StatBlock(value: '$upgrades', label: 'upgrades', color: c.reward)),
+              Expanded(
+                  child: _StatBlock(
+                      value: '$upgrades',
+                      label: l10n.journalUpgradesLabel(upgrades),
+                      color: c.reward)),
               const SizedBox(width: ShokuSpace.sm),
-              Expanded(child: _StatBlock(value: '$signature', label: 'signature', color: c.ready)),
+              Expanded(
+                  child: _StatBlock(
+                      value: '$signature',
+                      label: l10n.badgeSignature,
+                      color: c.ready)),
             ],
           ),
 
           const SizedBox(height: ShokuSpace.lg),
-          const ShokuLabel('account'),
+          ShokuLabel(l10n.profileAccount),
           const SizedBox(height: ShokuSpace.sm),
           const _AccountRow(),
 
           const SizedBox(height: ShokuSpace.lg),
-          const ShokuLabel('nutrition'),
+          ShokuLabel(l10n.nutritionTitle),
           const SizedBox(height: ShokuSpace.sm),
           Container(
             padding: const EdgeInsets.all(ShokuSpace.md),
@@ -73,27 +91,31 @@ class ProfileScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Coming soon',
+                      Text(l10n.profileComingSoon,
                           style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
                       const SizedBox(height: 2),
                       Text(
-                        'A future lens on how your versions change a dish.',
+                        l10n.profileNutritionBody,
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: ShokuSpace.sm),
-                ShokuChip('soon', color: c.reward, filled: true),
+                ShokuChip(l10n.profileSoon, color: c.reward, filled: true),
               ],
             ),
           ),
 
           const SizedBox(height: ShokuSpace.xl),
-          const ShokuLabel('appearance'),
+          ShokuLabel(l10n.profileAppearance),
           const SizedBox(height: ShokuSpace.sm),
           ShokuSegmented(
-            labels: const ['SYSTEM', 'LIGHT', 'DARK'],
+            labels: [
+              l10n.profileThemeSystem,
+              l10n.profileThemeLight,
+              l10n.profileThemeDark,
+            ],
             selected: mode == ThemeMode.system ? 0 : (mode == ThemeMode.light ? 1 : 2),
             onChanged: (i) => ref.read(themeModeProvider.notifier).state = [
               ThemeMode.system,
@@ -102,11 +124,21 @@ class ProfileScreen extends ConsumerWidget {
             ][i],
           ),
 
+          const SizedBox(height: ShokuSpace.sm),
+          ShokuListRow(
+            icon: Icons.translate,
+            title: context.l10n.languageTitle,
+            subtitle: locale == null
+                ? context.l10n.languageSystem
+                : shokuLanguageName(locale) ?? context.l10n.languageSystem,
+            onTap: () => showLanguagePickerSheet(context),
+          ),
+
           const SizedBox(height: ShokuSpace.lg),
           ShokuListRow(
             icon: Icons.menu_book_outlined,
-            title: 'How Shoku works',
-            subtitle: 'The share gesture, in three steps',
+            title: l10n.profileHowItWorks,
+            subtitle: l10n.profileHowItWorksBody,
             onTap: () async {
               await Prefs.setOnboardingDone(false);
               ref.read(onboardingDoneProvider.notifier).state = false;
@@ -115,20 +147,20 @@ class ProfileScreen extends ConsumerWidget {
           const ShokuHairline(),
           ShokuListRow(
             icon: Icons.help_outline,
-            title: 'Help & feedback',
+            title: l10n.helpTitle,
             onTap: () => context.push('/help'),
           ),
           const ShokuHairline(),
           ShokuListRow(
             icon: Icons.delete_outline,
-            title: 'Reset journal',
+            title: l10n.profileResetJournal,
             showChevron: false,
             onTap: () {},
           ),
           const SizedBox(height: ShokuSpace.xl),
           Center(
             child: Text(
-              'Shoku · evening kitchen',
+              l10n.profileFooter,
               style: ShokuType.label.copyWith(color: c.inkMuted),
             ),
           ),
@@ -169,6 +201,7 @@ class _AccountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final auth = AuthService();
     return StreamBuilder(
       stream: auth.changes,
@@ -189,13 +222,13 @@ class _AccountRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      session == null ? 'Not signed in' : 'Signed in',
+                      session == null ? l10n.authNotSignedIn : l10n.authSignedIn,
                       style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       session == null
-                          ? 'Cooks live on this phone only.'
+                          ? l10n.authLocalOnly
                           : email,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -214,14 +247,14 @@ class _AccountRow extends StatelessWidget {
                       color: c.ink,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
                     ),
-                    child: Text('Sign in',
+                    child: Text(l10n.authSignIn,
                         style: ShokuType.label.copyWith(color: c.canvas)),
                   ),
                 )
               else
                 TextButton(
                   onPressed: () => AuthService().signOut(),
-                  child: Text('Sign out',
+                  child: Text(l10n.authSignOut,
                       style: ShokuType.label.copyWith(color: c.inkMuted)),
                 ),
             ],

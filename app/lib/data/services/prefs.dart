@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _onboardingKey = 'onboarding_done';
 const _seededKey = 'journal_seeded';
 const _visionDisclosureKey = 'receipt_vision_disclosure';
+const _localeKey = 'app_locale';
 
 /// Onboarding is persisted, not in-memory: it must not replay on every launch.
 class Prefs {
@@ -37,6 +38,22 @@ class Prefs {
   static Future<void> setReceiptVisionSeen(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_visionDisclosureKey, value);
+  }
+
+  /// The chosen language code, or null for "follow the phone". Stored as a
+  /// code rather than a locale: it outlives any one build of the app.
+  static Future<String?> localeCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_localeKey);
+  }
+
+  static Future<void> setLocaleCode(String? code) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (code == null) {
+      await prefs.remove(_localeKey);
+    } else {
+      await prefs.setString(_localeKey, code);
+    }
   }
 
   const Prefs._();

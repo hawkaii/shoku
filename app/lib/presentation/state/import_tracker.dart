@@ -18,7 +18,7 @@ class ImportTrackerState {
     this.pending,
     this.title,
     this.progress,
-    this.failure,
+    this.reason,
   });
 
   /// The import in flight, or null when there is nothing running.
@@ -30,43 +30,35 @@ class ImportTrackerState {
 
   final ImportProgress? progress;
 
-  /// A settled failure, kept as one quiet line until dismissed.
-  final String? failure;
+  /// The API's failure code, kept as a code until a widget can give it words in
+  /// the reader's language. Never server prose.
+  final String? reason;
 
   bool get isRunning => pending != null;
-  bool get isIdle => pending == null && failure == null;
+  bool get isIdle => pending == null && reason == null;
 
   /// What the card says first: the reel's name, else its stage, else the fact
-  /// that something is being imported.
+  /// that something is being imported. The stage's words live in the widget, so
+  /// this getter only answers "is there a name".
   String get headline {
     final name = title?.trim();
     if (name != null && name.isNotEmpty) return name;
-    final label = progress?.label;
-    if (label != null && label.isNotEmpty) return label;
-    return 'Importing a reel';
-  }
-
-  /// The stage, when the headline is already the reel's name.
-  String? get detail {
-    final name = title?.trim();
-    if (name == null || name.isEmpty) return null;
-    final label = progress?.label;
-    return label == null || label.isEmpty ? null : label;
+    return '';
   }
 
   ImportTrackerState copyWith({
     PendingImport? pending,
     String? title,
     ImportProgress? progress,
-    String? failure,
+    String? reason,
     bool clearPending = false,
-    bool clearFailure = false,
+    bool clearReason = false,
   }) =>
       ImportTrackerState(
         pending: clearPending ? null : (pending ?? this.pending),
         title: title ?? this.title,
         progress: progress ?? this.progress,
-        failure: clearFailure ? null : (failure ?? this.failure),
+        reason: clearReason ? null : (reason ?? this.reason),
       );
 }
 
@@ -115,7 +107,7 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
       pending: pending,
       title: state.pending?.jobId == pending.jobId ? state.title : null,
       progress: state.pending?.jobId == pending.jobId ? state.progress : null,
-      failure: null,
+      reason: null,
     );
     _timer?.cancel();
     // Look once immediately, so the card has a stage to show within a second.
@@ -140,7 +132,7 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
       if (progress.stage == ImportStage.failed) {
         await _store.clear();
         state = ImportTrackerState(
-          failure: importReasonText(progress.reason),
+          reason: progress.reason ?? 'unknown',
         );
         return; // a failure is not polled again
       }

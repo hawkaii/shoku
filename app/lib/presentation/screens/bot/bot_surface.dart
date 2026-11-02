@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
-import '../../../core/utils/shoku_text.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../data/models/feed_item.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/assistant_service.dart';
@@ -102,9 +104,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
     const verbs = ['delete', 'remove the dish', 'reset', 'erase', 'clear my'];
     if (!verbs.any(lower.contains)) return false;
     ref.read(botControllerProvider.notifier).addTurn(
-          const BotTurn.notice(
-            'I can\'t change your journal from here. Open the dish (or its ⋯ menu) and the real flow will do it.',
-          ),
+          BotTurn.notice(context.l10n.botDestructiveRefusal),
         );
     ref.read(botControllerProvider.notifier).setDraft('');
     return true;
@@ -165,6 +165,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _header(BuildContext context, BotState state) {
     final c = context.colors;
+    final l10n = context.l10n;
     final scope = ref.watch(botScopeProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -184,7 +185,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 key: const ValueKey('bot-scope-chip'),
                 onTap: () => showScopeSwitcher(context),
                 child: ShokuChip(
-                  botScopeLabel(ref, scope),
+                  botScopeLabel(ref, scope, l10n),
                   icon: Icons.expand_more,
                   color: c.accent,
                 ),
@@ -196,7 +197,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                     ? BotSurfaceMode.normal
                     : BotSurfaceMode.mini),
                 child: Text(
-                  _mode == BotSurfaceMode.mini ? 'Open' : 'Minimise',
+                  _mode == BotSurfaceMode.mini ? l10n.botOpen : l10n.botMinimise,
                   style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
                 ),
               ),
@@ -217,7 +218,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 behavior: HitTestBehavior.opaque,
                 child: Padding(
                   padding: const EdgeInsets.only(top: ShokuSpace.xs),
-                  child: Text('New chat',
+                  child: Text(l10n.botNewChat,
                       style: ShokuType.label
                           .copyWith(fontSize: 9.5, color: c.inkMuted)),
                 ),
@@ -239,7 +240,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              'The assistant needs a connection. Nothing is answered offline.',
+              context.l10n.botOfflineLine,
               key: const ValueKey('bot-offline'),
               style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
             ),
@@ -284,7 +285,15 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _thread(BuildContext context, BotState state) {
     final c = context.colors;
+    final l10n = context.l10n;
     final starters = ref.watch(botStartersProvider);
+    final stocked = ref
+        .watch(pantryStoreProvider)
+        .where((item) => !item.wanted)
+        .length;
+    final starterLabels = stocked == 0
+        ? [l10n.botStarterFridge, l10n.botStarterWall, l10n.botStarterPhoto]
+        : [l10n.botStarterDinner(stocked)];
     return ListView(
       controller: _scroll,
       reverse: true,
@@ -295,7 +304,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
             alignment: Alignment.centerLeft,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
-              child: Text('THINKING',
+              child: Text(l10n.botThinking,
                   key: const ValueKey('bot-thinking'),
                   style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
             ),
@@ -314,23 +323,28 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
               ),
             ),
           ),
-          for (final starter in starters.reversed) _starter(context, starter),
+          for (var i = starters.length - 1; i >= 0; i--)
+            _starter(
+              context,
+              starters[i],
+              i < starterLabels.length ? starterLabels[i] : starters[i],
+            ),
         ],
       ],
     );
   }
 
-  Widget _starter(BuildContext context, String text) {
+  Widget _starter(BuildContext context, String prompt, String label) {
     final c = context.colors;
     return Padding(
       padding: const EdgeInsets.only(bottom: ShokuSpace.sm),
       child: GestureDetector(
         onTap: () {
-          ref.read(botControllerProvider.notifier).send(text);
+          ref.read(botControllerProvider.notifier).send(prompt);
           _scrollToLatest();
         },
         child: Container(
-          key: ValueKey('bot-starter-${text.hashCode}'),
+          key: ValueKey('bot-starter-${label.hashCode}'),
           width: double.infinity,
           padding: const EdgeInsets.all(ShokuSpace.md),
           decoration: BoxDecoration(
@@ -346,7 +360,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
               ),
               const SizedBox(width: ShokuSpace.sm),
               Flexible(
-                child: Text(text,
+                child: Text(label,
                     style: ShokuType.bodySmall.copyWith(color: c.ink)),
               ),
             ],
@@ -358,6 +372,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _turn(BuildContext context, BotTurn turn) {
     final c = context.colors;
+    final l10n = context.l10n;
     switch (turn.kind) {
       case BotTurnKind.mine:
         return Align(
@@ -376,9 +391,26 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
       case BotTurnKind.notice:
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
-          child: Text(turn.text,
-              key: const ValueKey('bot-notice'),
-              style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+          child: Text(
+            turn.text == 'cap'
+                ? l10n.botCapNotice
+                : turn.text == 'offline'
+                    ? l10n.botOfflineNotice
+                    : turn.text == 'added'
+                        ? l10n.botAddedToFridge(turn.count ?? 0)
+                        : turn.text,
+            key: const ValueKey('bot-notice'),
+            style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+          ),
+        );
+      case BotTurnKind.choices:
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+          child: Text(
+            l10n.botWhichDish(turn.choices.join(' · ')),
+            key: const ValueKey('bot-choices'),
+            style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+          ),
         );
       case BotTurnKind.divider:
         return Padding(
@@ -421,6 +453,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _suggestions(BuildContext context, List<BotSuggestion> cards) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Column(
       key: const ValueKey('bot-suggestions'),
       children: [
@@ -440,7 +473,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 Text(card.title,
                     style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
                 const SizedBox(height: 2),
-                Text('${card.source} · ${card.have} of ${card.total}',
+                Text(l10n.botSuggestionMeta(card.source, card.have, card.total),
                     style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
                 if (card.missing.isNotEmpty) ...[
                   const SizedBox(height: 6),
@@ -456,7 +489,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 const SizedBox(height: ShokuSpace.sm),
                 Row(
                   children: [
-                    _cardAction(context, 'Open', () {
+                    _cardAction(context, l10n.botOpen, () {
                       Navigator.of(context).maybePop();
                       showFeedDetail(context, _asFeedItem(card));
                     }, primary: true),
@@ -464,15 +497,15 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                     if (card.missing.isNotEmpty)
                       _cardAction(
                         context,
-                        'Add ${card.missing.length} missing',
+                        l10n.botAddMissing(card.missing.length),
                         () async {
                           await ref
                               .read(pantryStoreProvider.notifier)
                               .wantMany(card.missing);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  '${count(card.missing.length, 'item')} added to your list')));
+                              content: Text(l10n
+                                  .botAddedToList(card.missing.length))));
                         },
                       ),
                     const Spacer(),
@@ -482,7 +515,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                         ref.read(botControllerProvider.notifier).reshuffle();
                         _scrollToLatest();
                       },
-                      child: Text('Not this',
+                      child: Text(l10n.botNotThis,
                           style: ShokuType.label
                               .copyWith(fontSize: 9, color: c.inkMuted)),
                     ),
@@ -515,6 +548,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _capture(BuildContext context, List<BotCaptureItem> items) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     return Container(
       key: const ValueKey('bot-capture-card'),
       margin: const EdgeInsets.only(top: ShokuSpace.sm),
@@ -527,41 +562,42 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Add to the fridge?',
+          Text(l10n.botAddToFridgeQuestion,
               style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
           const SizedBox(height: 4),
           for (final item in items)
             Padding(
               padding: const EdgeInsets.only(bottom: 2),
               child: Text(
-                '${item.name} · ${_amountOf(item)}',
+                '${item.name} · ${_amountOf(item, l10n, locale)}',
                 style: ShokuType.bodySmall.copyWith(color: c.ink),
               ),
             ),
           const SizedBox(height: ShokuSpace.sm),
-          _cardAction(context, 'Add ${count(items.length, 'item')} to fridge', () async {
+          _cardAction(
+              context, l10n.botAddCountToFridge(items.length), () async {
             final added =
                 await ref.read(botControllerProvider.notifier).confirmCapture(items);
             if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    '${count(added, 'item')} in the fridge')));
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.botAddedToFridge(added))));
           }, primary: true),
         ],
       ),
     );
   }
 
-  static String _amountOf(BotCaptureItem item) {
-    if (item.quantity == null) return 'amount?';
-    final value = item.quantity!;
-    final rounded =
-        value == value.roundToDouble() ? value.toStringAsFixed(0) : '$value';
-    return item.unit == null ? rounded : '$rounded ${item.unit}';
+  static String _amountOf(
+      BotCaptureItem item, AppLocalizations l10n, String locale) {
+    if (item.quantity == null) return l10n.botAmountUnknown;
+    final number =
+        NumberFormat.decimalPattern(locale).format(item.quantity);
+    return item.unit == null ? number : '$number ${item.unit}';
   }
 
   Widget _composer(BuildContext context, BotState state, bool offline) {
     final c = context.colors;
+    final l10n = context.l10n;
     final blocked = offline || state.cap || state.thinking;
     return Padding(
       padding: EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.xs,
@@ -588,10 +624,10 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                   border: InputBorder.none,
                   isDense: true,
                   hintText: state.cap
-                      ? 'Out of questions for today'
+                      ? l10n.botOutOfQuestions
                       : offline
-                          ? 'No connection'
-                          : 'Ask about the kitchen…',
+                          ? l10n.botNoConnection
+                          : l10n.botAskKitchen,
                 ),
               ),
             ),

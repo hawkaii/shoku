@@ -22,8 +22,10 @@ void main() {
     ));
     await tester.pump(const Duration(milliseconds: 400));
 
-    // The primary CTA is the stable signal that onboarding rendered.
-    expect(find.text('Start cooking'), findsOneWidget);
+    // The language step is first now, so the stable signal is the route plus
+    // its localized title, not a button label that moved one page in.
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
 
     // The splash paints first, so onboarding mounts on this frame and its
     // entrance timer is still queued: one more pump lets it fire, and tearing
@@ -50,12 +52,11 @@ void main() {
 
     // Onboarding is local, so it is the first screen; the session opens behind
     // it. No second MaterialApp is swapped in when it resolves.
-    expect(find.text('Start cooking'), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsOneWidget);
     gate.complete();
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Start cooking'), findsOneWidget);
     expect(find.byType(OnboardingScreen), findsOneWidget);
 
     await tester.pumpAndSettle(const Duration(milliseconds: 50));
@@ -81,7 +82,7 @@ void main() {
 
     expect(find.byType(SplashScreen), findsOneWidget,
         reason: 'something is painted while the session opens');
-    expect(find.text('Start cooking'), findsNothing);
+    expect(find.byType(OnboardingScreen), findsNothing);
 
     gate.complete();
     await tester.pump();

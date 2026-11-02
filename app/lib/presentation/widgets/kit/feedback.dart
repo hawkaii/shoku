@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import 'foundation.dart';
 
@@ -130,6 +132,8 @@ class ShokuBrassHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -143,7 +147,7 @@ class ShokuBrassHud extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${streak}d',
+              l10n.hudStreakDays(streak),
               style: ShokuType.stat.copyWith(fontSize: 12, color: c.reward),
             ),
             Container(
@@ -153,7 +157,7 @@ class ShokuBrassHud extends StatelessWidget {
               color: c.reward.withValues(alpha: 0.4),
             ),
             Text(
-              'LVL ${level.toString().padLeft(2, '0')}',
+              l10n.hudLevel(NumberFormat('00', locale).format(level)),
               style: ShokuType.stat.copyWith(fontSize: 12, color: c.inkMuted),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/auth_service.dart';
 import '../../widgets/kit/motion.dart';
@@ -45,7 +46,7 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.length < 6) {
-      setState(() => _error = 'Email and a password of 6+ characters');
+      setState(() => _error = context.l10n.authErrorEmailPassword);
       return;
     }
     setState(() {
@@ -63,7 +64,7 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
             setState(() {
               _busy = false;
               _creating = false;
-              _error = 'Check your email to confirm, then sign in';
+              _error = context.l10n.authErrorConfirmEmail;
             });
           }
           return;
@@ -82,26 +83,27 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
     }
   }
 
-  static String _friendly(Object error) {
+  String _friendly(Object error) {
     final text = error.toString();
     if (text.contains('Invalid login credentials')) {
-      return 'That email and password do not match';
+      return context.l10n.authErrorMismatch;
     }
     if (text.contains('Email not confirmed')) {
-      return 'That account is not confirmed yet — check your email';
+      return context.l10n.authErrorUnconfirmed;
     }
     if (text.contains('already registered')) {
-      return 'That email already has an account — sign in instead';
+      return context.l10n.authErrorExists;
     }
     if (text.contains('SocketException') || text.contains('network')) {
-      return 'No connection';
+      return context.l10n.authErrorNoConnection;
     }
-    return 'Could not sign in';
+    return context.l10n.authErrorGeneric;
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -113,16 +115,16 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Keep your journal', style: ShokuType.h2.copyWith(color: c.ink)),
+          Text(l10n.authSheetTitle, style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: 2),
           Text(
-            'Cooks stay on this phone until you sign in. Signing in puts them on every device you use.',
+            l10n.authSheetBody,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
-          _field(c, _email, 'Email', keyboard: TextInputType.emailAddress),
+          _field(c, _email, l10n.authEmail, keyboard: TextInputType.emailAddress),
           const SizedBox(height: ShokuSpace.sm),
-          _field(c, _password, 'Password', obscure: true),
+          _field(c, _password, l10n.authPassword, obscure: true),
           if (_error != null) ...[
             const SizedBox(height: ShokuSpace.sm),
             Text(_error!, style: ShokuType.bodySmall.copyWith(color: c.danger)),
@@ -141,7 +143,11 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
               ),
               child: Center(
                 child: Text(
-                  _busy ? 'Working…' : (_creating ? 'Create account' : 'Sign in'),
+                  _busy
+                      ? l10n.authWorking
+                      : (_creating
+                          ? l10n.authCreateAccount
+                          : l10n.authSignIn),
                   style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                 ),
               ),
@@ -157,7 +163,9 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
                         _error = null;
                       }),
               child: Text(
-                _creating ? 'I already have an account' : 'Create an account',
+                _creating
+                    ? l10n.authHaveAccount
+                    : l10n.authCreateAccountLink,
                 style: ShokuType.label.copyWith(color: c.inkMuted),
               ),
             ),

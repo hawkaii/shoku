@@ -22,6 +22,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .domain.clock import Clock
+from .domain.locale import resolve as resolve_locale
 from .domain.errors import NotFound, Unavailable, UsageCapExceeded
 from .models import (
     AssistantAsk,
@@ -65,6 +66,8 @@ class AssistantContext:
     recent_notes: tuple[str, ...] = ()
     #: "dish" or "kitchen"; decides what the model is allowed to return.
     scope: str = "dish"
+    #: The language name the answer must be written in.
+    language: str = "English"
     #: Cook mode: which step the person is standing at.
     step_index: int | None = None
     #: (name, quantity, unit, wanted) — kitchen only.
@@ -287,8 +290,14 @@ class MuseAssistant:
     def respond(self, context, question, history) -> AssistantTurn:
         import httpx  # noqa: PLC0415 - optional dependency
 
+        # One line, first, so it is never buried under the English instructions
+        # below. The ops stay English by instruction and by schema.
+        system = (
+            f"Answer in {context.language}. "
+            "The recipe operation vocabulary stays English.\n\n" + self.PROMPT
+        )
         messages = [
-            {"role": "system", "content": self.PROMPT},
+            {"role": "system", "content": system},
             {"role": "user", "content": _render(context)},
         ]
         for role, text in history[-4:]:
@@ -427,8 +436,16 @@ class AssistantDeps:
 
 
 def ask(
-    session: Session, deps: AssistantDeps, *, uid: str, request: AssistantRequest
+    session: Session,
+    deps: AssistantDeps,
+    *,
+    uid: str,
+    request: AssistantRequest,
+    accept_language: str | None = None,
 ) -> AssistantResponse:
+    language = resolve_locale(
+        body_locale=request.locale, accept_language=accept_language
+    )
     now = deps.clock.now().astimezone(timezone.utc)
     reset_at = _reset_at(now)
     used = _reserve(
@@ -440,7 +457,7 @@ def ask(
     try:
         if request.scope == "kitchen":
             context = _kitchen_context(
-                session, uid=uid, exclude=tuple(request.exclude)
+                session, uid=uid, exclude=tuple(request.exclude), language=language
             )
         else:
             dish = _load_dish(session, uid=uid, dish_id=request.dish_id)
@@ -449,7 +466,11 @@ def ask(
                 session, uid=uid, dish=dish, version_id=request.version_id
             )
             context = _build_context(
-                session, dish=dish, version=viewed or head, step_index=request.step_index
+                session,
+                dish=dish,
+                version=viewed or head,
+                step_index=request.step_index,
+                language=language,
             )
 
         turn = deps.model.respond(context, request.question, history)
@@ -588,6 +609,7 @@ def _build_context(
     dish: Dish,
     version: RecipeVersion | None,
     step_index: int | None = None,
+    language: str = "English",
 ) -> AssistantContext:
     notes = session.scalars(
         select(CookLog.note)
@@ -611,6 +633,7 @@ def _build_context(
         recent_notes=tuple(notes),
         scope="dish",
         step_index=step_index,
+        language=language,
     )
 
 
@@ -618,7 +641,7 @@ def _build_context(
 
 
 def _kitchen_context(
-    session: Session, *, uid: str, exclude: tuple[str, ...]
+    session: Session, *, uid: str, exclude: tuple[str, ...], language: str = "English"
 ) -> AssistantContext:
     """Everything the model may see with no dish open, built here and only here.
 
@@ -651,6 +674,7 @@ def _kitchen_context(
         ),
         dishes=tuple((dish_id, title, count) for dish_id, title, count in rows),
         candidates=_candidates(session, uid=uid, exclude=exclude),
+        language=language,
     )
 
 

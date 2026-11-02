@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../state/journal_store.dart';
 
 /// Long-pressing a Cookbook card asks what to do with it.
@@ -29,13 +31,15 @@ class DishActionsSheet extends ConsumerWidget {
   DishStatus get _target =>
       dish.status == DishStatus.toCook ? DishStatus.cooked : DishStatus.toCook;
 
-  String get _targetLabel => _target == DishStatus.cooked
-      ? 'Mark as cooked'
-      : 'Move back to To cook';
+  String _targetLabel(AppLocalizations l10n) =>
+      _target == DishStatus.cooked
+          ? l10n.actionMarkCooked
+          : l10n.actionMoveBackToCook;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -56,8 +60,8 @@ class DishActionsSheet extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             dish.cookCount == 0
-                ? 'Never cooked'
-                : 'Cooked ${dish.cookCount} time${dish.cookCount == 1 ? '' : 's'}',
+                ? l10n.actionNeverCooked
+                : l10n.actionCookedCount(dish.cookCount),
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
@@ -67,10 +71,10 @@ class DishActionsSheet extends ConsumerWidget {
             icon: _target == DishStatus.cooked
                 ? Icons.check_circle_outline
                 : Icons.schedule,
-            title: _targetLabel,
+            title: _targetLabel(l10n),
             subtitle: _target == DishStatus.cooked
-                ? 'It moves to Cooked. You can put it back.'
-                : 'It moves to To cook, ready to make again.',
+                ? l10n.actionStatusCookedBody
+                : l10n.actionStatusToCookBody,
             onTap: () {
               HapticFeedback.selectionClick();
               ref.read(journalStoreProvider.notifier).setStatus(dish.id, _target);
@@ -81,8 +85,8 @@ class DishActionsSheet extends ConsumerWidget {
           _Action(
             key: const ValueKey('dish-action-delete'),
             icon: Icons.delete_outline,
-            title: 'Delete',
-            subtitle: 'Leaves your journal. Asks first.',
+            title: l10n.pantryDelete,
+            subtitle: l10n.actionDeleteBody,
             danger: true,
             onTap: () => _confirmDelete(context, ref),
           ),
@@ -90,7 +94,7 @@ class DishActionsSheet extends ConsumerWidget {
           Center(
             child: TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Keep it',
+              child: Text(l10n.actionKeep,
                   style: ShokuType.label.copyWith(color: c.inkMuted)),
             ),
           ),
@@ -100,6 +104,7 @@ class DishActionsSheet extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final store = ref.read(journalStoreProvider.notifier);
     final navigator = Navigator.of(context);
     navigator.pop(); // the sheet has done its job; the question is its own step
@@ -121,15 +126,14 @@ class DishActionsSheet extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Remove this dish?',
+                Text(l10n.actionRemoveTitle,
                     style: ShokuType.h1.copyWith(color: c.ink)),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   // The dish leaves the journal; the reel does not stop
                   // existing. Saying "gone forever" would be a lie, and saying
                   // "deleted" alone would hide where it goes.
-                  '${dish.title} leaves your journal, along with its versions and its cooks. '
-                  'The reel is still out there if you want to import it again — this copy is not coming back.',
+                  l10n.actionRemoveBody(dish.title),
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
                 const SizedBox(height: ShokuSpace.lg),
@@ -145,7 +149,7 @@ class DishActionsSheet extends ConsumerWidget {
                             side: BorderSide(color: c.hairline),
                           ),
                         ),
-                        child: Text('Keep it',
+                        child: Text(l10n.actionKeep,
                             style: ShokuType.title
                                 .copyWith(color: c.ink, fontSize: 13)),
                       ),
@@ -164,7 +168,7 @@ class DishActionsSheet extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(ShokuRadius.chip),
                           ),
                         ),
-                        child: Text('Remove',
+                        child: Text(l10n.actionRemove,
                             style: ShokuType.title
                                 .copyWith(color: c.canvas, fontSize: 13)),
                       ),

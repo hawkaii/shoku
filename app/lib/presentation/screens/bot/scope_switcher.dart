@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../state/bot_providers.dart';
 import '../../state/journal_providers.dart';
@@ -24,7 +25,7 @@ Future<void> showScopeSwitcher(BuildContext context) async {
   container.read(botScopeProvider.notifier).state = target;
   if (target.isKitchen) {
     // The kitchen thread lives in the sheet that is already open.
-    container.read(botControllerProvider.notifier).insertDivider('No dish');
+    container.read(botControllerProvider.notifier).insertDivider(context.l10n.botNoDish);
     return;
   }
   final dish = container.read(dishProvider(target.dishId!));
@@ -39,6 +40,7 @@ class _ScopeSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     final dishes = ref.watch(dishesProvider);
     final current = ref.watch(botScopeProvider);
 
@@ -51,14 +53,15 @@ class _ScopeSwitcher extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(
                 ShokuSpace.lg, ShokuSpace.lg, ShokuSpace.lg, ShokuSpace.sm),
-            child: Text('Talk about…',
+            child: Text(l10n.botTalkAbout,
                 style: ShokuType.h2.copyWith(color: c.ink)),
           ),
           if (!current.isKitchen)
             ListTile(
               key: const ValueKey('bot-scope-this-dish'),
               title: Text(
-                  ref.read(dishProvider(current.dishId!))?.title ?? 'This dish',
+                  ref.read(dishProvider(current.dishId!))?.title ??
+                      l10n.botThisDish,
                   style: ShokuType.bodySmall),
               trailing: const Icon(Icons.check, size: 16),
               onTap: () => Navigator.of(context).pop(current),
@@ -72,7 +75,7 @@ class _ScopeSwitcher extends ConsumerWidget {
           ListTile(
             key: const ValueKey('bot-scope-kitchen'),
             leading: Icon(Icons.kitchen_outlined, size: 18, color: c.inkMuted),
-            title: Text('No dish — the kitchen',
+            title: Text(l10n.botNoDishKitchen,
                 style: ShokuType.bodySmall.copyWith(color: c.ink)),
             onTap: () =>
                 Navigator.of(context).pop(const BotScope.kitchen()),

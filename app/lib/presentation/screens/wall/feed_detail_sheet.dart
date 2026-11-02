@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
@@ -70,6 +71,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
 
   Future<void> _addToCookbook() async {
     if (_adding) return;
+    final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _adding = true);
     try {
@@ -80,13 +82,13 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(
         content: Text(dish == null
-            ? 'That reel is no longer on the server'
-            : 'Saved ${dish.title} to your cookbook'),
+            ? l10n.wallReelGone
+            : l10n.wallSavedToCookbook(dish.title)),
       ));
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not reach the server')),
+        SnackBar(content: Text(l10n.importUnreachable)),
       );
     } finally {
       if (mounted) setState(() => _adding = false);
@@ -104,6 +106,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final imported =
         ref.watch(importedShortcodesProvider).contains(widget.item.shortcode);
     final content = _content;
@@ -164,9 +167,9 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                 else ...[
                   Text(
                     metaLine([
-                      if (content.minutes > 0) '${content.minutes} min',
-                      count(content.ingredients.length, 'ingredient'),
-                      count(content.steps.length, 'step'),
+                      if (content.minutes > 0) l10n.minutesShort(content.minutes),
+                      l10n.wallIngredientsCount(content.ingredients.length),
+                      l10n.wallStepsCount(content.steps.length),
                     ]),
                     key: const ValueKey('feed-detail-meta'),
                     style: ShokuType.label.copyWith(color: c.inkMuted),
@@ -183,7 +186,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                     ),
                   ],
                   const SizedBox(height: ShokuSpace.lg),
-                  const ShokuLabel('method'),
+                  ShokuLabel(l10n.wallMethod),
                   const SizedBox(height: ShokuSpace.sm),
                   for (var i = 0; i < content.steps.length; i++)
                     Padding(
@@ -225,7 +228,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                           ),
                           child: Center(
                             child: Text(
-                              'View the reel',
+                              l10n.dishViewReel,
                               style: ShokuType.title
                                   .copyWith(color: c.ink, fontSize: 13),
                             ),
@@ -248,7 +251,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                               ),
                               child: Center(
                                 child: Text(
-                                  'In your cookbook',
+                                  l10n.wallInCookbook,
                                   style: ShokuType.label.copyWith(
                                     color: c.inkMuted,
                                     letterSpacing: 0.4,
@@ -280,8 +283,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                                 child: Center(
                                   child: Text(
                                     _adding
-                                        ? 'Saving…'
-                                        : 'Add to cookbook',
+                                        ? l10n.wallSaving
+                                        : l10n.wallAddToCookbook,
                                     style: ShokuType.title.copyWith(
                                       color: _adding || content == null
                                           ? c.inkMuted
@@ -319,7 +322,7 @@ class _QuietLoading extends StatelessWidget {
           ),
           const SizedBox(width: ShokuSpace.sm),
           Text(
-            'Reading the reel',
+            context.l10n.importReadingReel,
             key: const ValueKey('feed-detail-loading'),
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
@@ -338,20 +341,21 @@ class _QuietFailure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'This reel did not load',
+            l10n.wallReelLoadFailed,
             key: const ValueKey('feed-detail-failed'),
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           TextButton(
             onPressed: onRetry,
             style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('Try again',
+            child: Text(l10n.journalTryAgain,
                 style: ShokuType.label.copyWith(color: c.ink)),
           ),
         ],

@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/photo_service.dart';
@@ -83,6 +85,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
     if (_saving) return;
     setState(() => _saving = true);
 
+    final l10n = context.l10n;
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
@@ -118,15 +121,13 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(version == null
-              ? 'Could not save this cook'
-              : 'Saved as v$version · ${_mood.name}'),
+              ? l10n.debriefSaveFailed
+              : l10n.debriefSaved(version, moodLabel(l10n, _mood))),
         ),
       );
     } catch (_) {
       if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Could not save this cook')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.debriefSaveFailed)));
     }
   }
 
@@ -204,6 +205,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final nextVersion = widget.dish.versions.length + 1;
     final matched = _matched(ref.watch(pantryStoreProvider));
     final rawLines = widget.dish.versions.isEmpty
@@ -248,10 +250,10 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                 ),
               ),
             ),
-            Text('How did it go?', style: ShokuType.h1.copyWith(color: c.ink)),
+            Text(l10n.debriefTitle, style: ShokuType.h1.copyWith(color: c.ink)),
             const SizedBox(height: 2),
             Text(
-              '${widget.dish.title} · becomes v$nextVersion',
+              l10n.debriefSubtitle(widget.dish.title, nextVersion),
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
             const SizedBox(height: ShokuSpace.lg),
@@ -280,7 +282,10 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                         children: [
                           Icon(Icons.photo_camera_outlined, size: 13, color: c.ink),
                           const SizedBox(width: 5),
-                          Text(_photo == null ? 'ADD PHOTO' : 'CHANGE PHOTO',
+                          Text(
+                              _photo == null
+                                  ? l10n.debriefAddPhoto
+                                  : l10n.debriefChangePhoto,
                               style: ShokuType.label.copyWith(fontSize: 9, color: c.ink)),
                         ],
                       ),
@@ -294,7 +299,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             // Rating
             Row(
               children: [
-                const ShokuLabel('rating'),
+                ShokuLabel(l10n.debriefRating),
                 const Spacer(),
                 for (var i = 1; i <= 5; i++)
                   GestureDetector(
@@ -316,7 +321,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.md),
 
             // Mood
-            const ShokuLabel('what kind of cook was it'),
+            ShokuLabel(l10n.debriefMoodLabel),
             const SizedBox(height: ShokuSpace.sm),
             Row(
               children: [
@@ -334,7 +339,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                         ),
                         child: Center(
                           child: Text(
-                            mood.name.toUpperCase(),
+                            moodLabel(l10n, mood).toUpperCase(),
                             style: ShokuType.label.copyWith(
                               fontSize: 9.5,
                               color: _mood == mood ? c.canvas : c.inkMuted,
@@ -351,11 +356,11 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.lg),
 
             // Changes
-            const ShokuLabel('what altered from the original'),
+            ShokuLabel(l10n.debriefChangesLabel),
             const SizedBox(height: ShokuSpace.sm),
             if (_changes.isEmpty)
               Text(
-                'Nothing yet — add what you did differently.',
+                l10n.debriefNoChanges,
                 style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               )
             else
@@ -384,7 +389,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       cursorColor: c.accent,
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'e.g. 2 tbsp honey instead of 3',
+                        hintText: l10n.debriefChangeHint,
                         hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                       ),
                       onSubmitted: (value) {
@@ -424,13 +429,13 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const SizedBox(height: ShokuSpace.md),
 
             // Note
-            const ShokuLabel('what was missing'),
+            ShokuLabel(l10n.debriefNoteLabel),
             const SizedBox(height: ShokuSpace.sm),
-            MicField(controller: _note, hint: '“needed more acid, next time add lime”'),
+            MicField(controller: _note, hint: l10n.debriefNoteHint),
 
             if (matched.isNotEmpty) ...[
               const SizedBox(height: ShokuSpace.lg),
-              const ShokuLabel('used from pantry'),
+              ShokuLabel(l10n.debriefPantryLabel),
               const SizedBox(height: ShokuSpace.sm),
               for (final item in matched)
                 Row(
@@ -478,7 +483,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(item.unit!.label,
+                    Text(unitLabel(l10n, item.unit!),
                         style: ShokuType.label.copyWith(color: c.inkMuted)),
                   ],
                 ),
@@ -489,19 +494,19 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       key: const ValueKey('deduct-matches'),
                       onPressed:
                           _checked.isEmpty ? null : () => _deduct(matched),
-                      child: const Text('Deduct what matches'),
+                      child: Text(l10n.debriefDeduct),
                     ),
                   ),
                   if (_undoSnapshot != null)
                     TextButton(
                       key: const ValueKey('deduct-undo'),
                       onPressed: _undo,
-                      child: const Text('Undo'),
+                      child: Text(l10n.chatUndo),
                     ),
                 ],
               ),
               if (_skipped > 0)
-                Text('$_skipped lines not deducted',
+                Text(l10n.debriefSkipped(_skipped),
                     key: const ValueKey('deduct-skipped'),
                     style: ShokuType.label.copyWith(color: c.inkMuted)),
             ],
@@ -523,7 +528,9 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                 ),
                 child: Center(
                   child: Text(
-                    _changes.isEmpty ? 'Save as v$nextVersion' : 'Save & upgrade to v$nextVersion',
+                    _changes.isEmpty
+                        ? l10n.debriefSave(nextVersion)
+                        : l10n.debriefSaveUpgrade(nextVersion),
                     style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                   ),
                 ),

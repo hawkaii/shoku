@@ -27,7 +27,11 @@ void main() {
     ));
     await tester.pump(const Duration(milliseconds: 600));
 
-    await tester.tap(find.text('Skip'));
+    // Language is step zero now; pick the fixed test locale, then Skip is on
+    // the intro step where it always was.
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
     // 1.5 s: enough for the first read, well inside the 3 s sync timer, so the
     // card cannot be arriving because of a later sync pass.
     await tester.pump(const Duration(milliseconds: 600));

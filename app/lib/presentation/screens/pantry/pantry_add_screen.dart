@@ -6,8 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
-import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/pantry_item.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/pantry_ai_service.dart';
@@ -88,12 +89,12 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Screenshot or photo'),
+              title: Text(context.l10n.pantryScreenshotOrPhoto),
               onTap: () => Navigator.of(context).pop(ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Camera'),
+              title: Text(context.l10n.pantryCamera),
               onTap: () => Navigator.of(context).pop(ImageSource.camera),
             ),
           ],
@@ -137,7 +138,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
             mimeType: ReceiptImage.mimeTypeOf(bytes),
           );
     } on PantryCapReached {
-      cap = 'AI reads used up for today — type them instead';
+      cap = 'cap';
     } on ApiError {
       // The server had a day. The rows already parsed stay; try again later.
     } catch (_) {
@@ -150,10 +151,10 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
       _capNote = cap;
       _photoOffline = offline;
       if (offline) {
-        _note = 'The receipt reader needs a connection. Type it or say it instead.';
+        _note = 'offline';
       } else if (result != null && result.items.isEmpty) {
         // An unreadable picture is an empty list, never an error dialog.
-        _note = 'Nothing readable in that picture — type it instead.';
+        _note = 'unreadable';
       } else if (result != null) {
         _mergeVision(result.items);
       }
@@ -231,7 +232,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
     try {
       result = await ref.read(pantryAiServiceProvider).read(leftovers);
     } on PantryCapReached {
-      cap = 'AI reads used up for today — type them instead';
+      cap = 'cap';
     } catch (_) {
       // Offline, or the server is having a day. The parsed rows still stand and
       // a failed call never blocks adding them.
@@ -277,7 +278,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('What is it?'),
+        title: Text(context.l10n.pantryWhatIsIt),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -286,11 +287,11 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.pantryCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Done'),
+            child: Text(context.l10n.pantryDone),
           ),
         ],
       ),
@@ -331,13 +332,15 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
     context.pop();
     messenger.showSnackBar(
       SnackBar(
-          content: Text('${count(selected.length, 'item')} in the fridge')),
+          content: Text(context.l10n.pantryInFridgeSnack(selected.length))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final ambiguous = [
       for (var i = 0; i < _lines.length; i++)
         if (!_lines[i].confident) i,
@@ -360,10 +363,10 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                   key: const ValueKey('pantry-add-back'),
                   icon: const Icon(Icons.arrow_back),
                   color: c.ink,
-                  tooltip: 'Back to the fridge',
+                  tooltip: l10n.pantryBackTooltip,
                   onPressed: () => context.pop(),
                 ),
-                Text('Add to the fridge',
+                Text(l10n.pantryAddTitle,
                     style: ShokuType.h2.copyWith(color: c.ink)),
               ],
             ),
@@ -378,18 +381,20 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
               ),
               children: [
                 Text(
-                  'Photograph a receipt, say what is in the kitchen, or type it. Nothing enters the fridge until you have seen the list.',
+                  l10n.pantryAddIntro,
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
                 const SizedBox(height: ShokuSpace.md),
                 Row(
                   children: [
+                    _doorButton(_Door.photo, l10n.pantryDoorPhoto,
+                        Icons.receipt_long_outlined),
+                    const SizedBox(width: ShokuSpace.xs),
                     _doorButton(
-                        _Door.photo, 'Photo', Icons.receipt_long_outlined),
+                        _Door.voice, l10n.pantryDoorVoice, Icons.mic_none),
                     const SizedBox(width: ShokuSpace.xs),
-                    _doorButton(_Door.voice, 'Voice', Icons.mic_none),
-                    const SizedBox(width: ShokuSpace.xs),
-                    _doorButton(_Door.typed, 'Type', Icons.keyboard_outlined),
+                    _doorButton(_Door.typed, l10n.pantryDoorType,
+                        Icons.keyboard_outlined),
                   ],
                 ),
                 const SizedBox(height: ShokuSpace.md),
@@ -398,14 +403,17 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                 if (_door == _Door.photo) _photoDoor(c),
                 if (_note != null) ...[
                   const SizedBox(height: ShokuSpace.sm),
-                  Text(_note!,
+                  Text(
+                      _note == 'offline'
+                          ? l10n.pantryNoteOffline
+                          : l10n.pantryNoteUnreadable,
                       key: const ValueKey('pantry-add-note'),
                       style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                 ],
                 if (_capNote != null) ...[
                   const SizedBox(height: ShokuSpace.sm),
                   Text(
-                    _capNote!,
+                    l10n.pantryCapReached,
                     key: const ValueKey('pantry-ai-cap'),
                     style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                   ),
@@ -422,7 +430,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                       border: Border.all(color: c.hairline),
                     ),
                     child: Center(
-                      child: Text('Review',
+                      child: Text(l10n.pantryReview,
                           style: ShokuType.title
                               .copyWith(color: c.ink, fontSize: 13)),
                     ),
@@ -430,11 +438,11 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                 ),
                 if (_reviewing) ...[
                   const SizedBox(height: ShokuSpace.lg),
-                  const ShokuLabel('to add'),
+                  ShokuLabel(l10n.pantryToAdd),
                   if (_readingAi) ...[
                     const SizedBox(height: ShokuSpace.xs),
                     Text(
-                      'Reading the rest…',
+                      l10n.pantryAiReading,
                       key: const ValueKey('pantry-ai-reading'),
                       style: ShokuType.label
                           .copyWith(fontSize: 9, color: c.inkMuted),
@@ -488,7 +496,12 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                           ],
                         ),
                         subtitle: Text(
-                          _lines[i].amountLabel ?? 'amount unknown',
+                          pantryAmount(l10n, locale, _lines[i].quantity,
+                                  _lines[i].unit)
+                              .isEmpty
+                              ? l10n.pantryAmountUnknown
+                              : pantryAmount(l10n, locale, _lines[i].quantity,
+                                  _lines[i].unit),
                           style: ShokuType.label
                               .copyWith(fontSize: 9, color: c.inkMuted),
                         ),
@@ -497,7 +510,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                     ExpansionTile(
                       key: const ValueKey('pantry-ambiguous'),
                       tilePadding: EdgeInsets.zero,
-                      title: Text('Couldn’t read (${ambiguous.length})',
+                      title: Text(l10n.pantryCouldNotRead(ambiguous.length),
                           style: ShokuType.label.copyWith(color: c.inkMuted)),
                       children: [
                         for (final index in ambiguous)
@@ -524,7 +537,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Add ${_checked.length} of ${_lines.length}',
+                          l10n.pantryConfirmAdd(_checked.length, _lines.length),
                           key: const ValueKey('pantry-confirm-label'),
                           style: ShokuType.title
                               .copyWith(color: c.onAccent, fontSize: 14),
@@ -581,10 +594,10 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
           minLines: 3,
           style: ShokuType.bodySmall,
           onChanged: (_) => setState(() => _reviewing = false),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: InputBorder.none,
             isDense: true,
-            hintText: '2 kg rice, one per line',
+            hintText: context.l10n.pantryTypeHint,
           ),
         ),
       );
@@ -592,11 +605,12 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
   Widget _voiceDoor() => MicField(
         key: const ValueKey('pantry-voice'),
         controller: _text,
-        hint: 'Hold the mic and say what is in the kitchen',
+        hint: context.l10n.pantryVoiceHint,
         maxLines: 3,
       );
 
   Widget _photoDoor(ShokuColors c) {
+    final l10n = context.l10n;
     final offline =
         _photoOffline || ref.watch(syncStatusProvider) == SyncStatus.offline;
     return Column(
@@ -614,7 +628,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
               border: Border.all(color: c.hairline),
             ),
             child: Center(
-              child: Text('Photo or screenshot',
+              child: Text(l10n.pantryPhotoButton,
                   style: ShokuType.label.copyWith(
                       fontSize: 10, color: offline ? c.inkMuted : c.ink)),
             ),
@@ -622,16 +636,14 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         ),
         const SizedBox(height: ShokuSpace.xs),
         Text(
-          offline
-              ? 'The receipt reader needs a connection. Type it or say it instead.'
-              : 'Photograph a receipt and the reader types it out. Nothing enters the fridge until you have seen the list.',
+          offline ? l10n.pantryNoteOffline : l10n.pantryPhotoHint,
           key: const ValueKey('pantry-photo-copy'),
           style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
         ),
         if (_readingPhoto) ...[
           const SizedBox(height: ShokuSpace.sm),
           Text(
-            'Reading the receipt…',
+            l10n.pantryReadingReceipt,
             key: const ValueKey('pantry-vision-reading'),
             style: ShokuType.label.copyWith(fontSize: 9, color: c.accent),
           ),
@@ -661,6 +673,7 @@ class _VisionDisclosure extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -673,11 +686,11 @@ class _VisionDisclosure extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('The reader uses Meta’s model',
+          Text(l10n.pantryVisionTitle,
               style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: ShokuSpace.xs),
           Text(
-            'The photo is sent to Meta’s model to read it. It is used for that one call and is not stored. The lines land in the review below, where you can fix anything before it enters the fridge.',
+            l10n.pantryVisionBody,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.md),
@@ -693,7 +706,7 @@ class _VisionDisclosure extends StatelessWidget {
                 border: Border.all(color: c.ink, width: ShokuStroke.brutal),
               ),
               child: Center(
-                child: Text('Got it',
+                child: Text(l10n.pantryGotIt,
                     style: ShokuType.title
                         .copyWith(color: c.onAccent, fontSize: 14)),
               ),

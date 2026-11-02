@@ -1,0 +1,8 @@
+# Every string that ships with the app lives in lib/l10n/app_<code>.arb.
+# app_en.arb is the source of truth: a locale that is missing a key is a
+# failed check, not a silent English fallback.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

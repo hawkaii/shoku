@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/api_client.dart';
@@ -75,6 +77,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
     if (_saving || !_canSave) return;
     setState(() => _saving = true);
 
+    final l10n = context.l10n;
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final changes = _changes;
@@ -114,25 +117,28 @@ class _LogSheetState extends ConsumerState<LogSheet> {
           );
       HapticFeedback.mediumImpact();
       navigator.pop();
+      final outcome = _outcome;
       messenger.showSnackBar(
         SnackBar(
           content: Text(version == null
-              ? 'Could not save that cook'
-              : 'Logged as v$version${_outcome == null ? '' : ' · ${_outcome!.label}'}'),
+              ? l10n.logSaveFailed
+              : outcome == null
+                  ? l10n.logSaved(version)
+                  : l10n.logSavedWithOutcome(
+                      version, outcomeLabel(l10n, outcome))),
           duration: const Duration(seconds: 2),
         ),
       );
     } catch (_) {
       if (mounted) setState(() => _saving = false);
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Could not save that cook')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.logSaveFailed)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final changes = _changes;
 
     return Padding(
@@ -158,7 +164,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                 ),
               ),
             ),
-            Text('Log tonight’s cook', style: ShokuType.h1.copyWith(color: c.ink)),
+            Text(l10n.logTitle, style: ShokuType.h1.copyWith(color: c.ink)),
             const SizedBox(height: 2),
             Text(
               widget.dish.title,
@@ -199,8 +205,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                             const SizedBox(height: 4),
                             Text(
                               _photo == null
-                                  ? 'SNAP TONIGHT’S RESULT'
-                                  : 'PHOTO READY TO UPLOAD',
+                                  ? l10n.logSnapResult
+                                  : l10n.logPhotoReady,
                               style: ShokuType.label.copyWith(color: c.canvas, fontSize: 9),
                             ),
                           ],
@@ -213,7 +219,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            const ShokuLabel('how did it go'),
+            ShokuLabel(l10n.logHowDidItGo),
             const SizedBox(height: ShokuSpace.sm),
             Row(
               children: [
@@ -240,7 +246,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                         ),
                         child: Center(
                           child: Text(
-                            outcome.upper,
+                            outcomeLabel(l10n, outcome).toUpperCase(),
                             style: ShokuType.label.copyWith(
                               fontSize: 9.5,
                               color: _outcome == outcome && outcome == CookOutcome.nailedIt
@@ -258,7 +264,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            const ShokuLabel('a note for you'),
+            ShokuLabel(l10n.logNoteLabel),
             const SizedBox(height: ShokuSpace.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),
@@ -275,14 +281,14 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                 maxLines: 2,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  hintText: 'The pan ran hot, so I pulled it early',
+                  hintText: l10n.logNoteHint,
                   hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
               ),
             ),
             const SizedBox(height: ShokuSpace.lg),
 
-            const ShokuLabel('what did you change'),
+            ShokuLabel(l10n.logChangeLabel),
             const SizedBox(height: ShokuSpace.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),
@@ -299,7 +305,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                 maxLines: 2,
                 decoration: InputDecoration(
                   border: InputBorder.none,
-                  hintText: 'More lime, 2 minutes less, air-fried instead',
+                  hintText: l10n.logChangeHint,
                   hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
               ),
@@ -335,10 +341,11 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                   child: Center(
                     child: Text(
                       _photo != null
-                          ? 'Save with photo'
+                          ? l10n.logSaveWithPhoto
                           : changes.isEmpty
-                              ? 'Save tonight'
-                              : 'Save & upgrade to v${widget.dish.currentVersion + 1}',
+                              ? l10n.logSaveTonight
+                              : l10n.logSaveUpgrade(
+                                  widget.dish.currentVersion + 1),
                       style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                     ),
                   ),

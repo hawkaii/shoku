@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 
 enum ShokuButtonVariant { primary, outline, ghost }
@@ -196,13 +197,13 @@ class ShokuSegmented extends StatelessWidget {
 }
 
 class ShokuSearchField extends StatelessWidget {
-  final String hint;
+  final String? hint;
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
 
   const ShokuSearchField({
     super.key,
-    this.hint = 'Search recipes, notes, handles',
+    this.hint,
     this.onChanged,
     this.controller,
   });
@@ -231,7 +232,7 @@ class ShokuSearchField extends StatelessWidget {
               decoration: InputDecoration(
                 isDense: true,
                 border: InputBorder.none,
-                hintText: hint,
+                hintText: hint ?? context.l10n.searchHint,
                 hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
             ),

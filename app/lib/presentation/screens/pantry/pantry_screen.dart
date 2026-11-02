@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
-import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/pantry_item.dart';
 import '../../state/pantry_providers.dart';
 import '../../widgets/kit/foundation.dart';
@@ -59,7 +60,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     await ref.read(pantryStoreProvider.notifier).removeMany(ids);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${count(ids.length, 'item')} deleted')),
+      SnackBar(content: Text(context.l10n.pantryDeletedCount(ids.length))),
     );
   }
 
@@ -85,6 +86,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final items = ref.watch(pantryStoreProvider);
     final visible = _query.isEmpty
         ? items
@@ -109,13 +111,13 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
               children: [
                 Row(
                   children: [
-                    Text('Fridge', style: ShokuType.h1.copyWith(color: c.ink)),
+                    Text(l10n.pantryTitle, style: ShokuType.h1.copyWith(color: c.ink)),
                     const SizedBox(width: ShokuSpace.sm),
-                    Text(count(items.length, 'item'),
+                    Text(l10n.pantryItemCount(items.length),
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                     const Spacer(),
                     if (_selecting)
-                      Text('${_selected.length} selected',
+                      Text(l10n.pantrySelectedCount(_selected.length),
                           key: const ValueKey('pantry-selected-count'),
                           style: ShokuType.bodySmall.copyWith(color: c.ink))
                     else
@@ -127,7 +129,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                             horizontal: ShokuSpace.sm,
                             vertical: ShokuSpace.xs,
                           ),
-                          child: Text('Edit',
+                          child: Text(l10n.pantryEdit,
                               style: ShokuType.bodySmall
                                   .copyWith(color: c.inkMuted)),
                         ),
@@ -149,19 +151,19 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                     style: ShokuType.bodySmall.copyWith(color: c.ink),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search ${count(items.length, 'item')}',
+                      hintText: l10n.pantrySearchHint(items.length),
                       hintStyle:
                           ShokuType.bodySmall.copyWith(color: c.inkMuted),
                     ),
                   ),
                 ),
                 const SizedBox(height: ShokuSpace.md),
-                const ShokuLabel('cook from your fridge'),
+                ShokuLabel(l10n.pantryShelfLabel),
                 const SizedBox(height: ShokuSpace.sm),
                 _Shelf(items: items),
                 if (toBuy.isNotEmpty) ...[
                   const SizedBox(height: ShokuSpace.lg),
-                  const ShokuLabel('to buy'),
+                  ShokuLabel(l10n.pantryToBuy),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final item in toBuy)
                     _Row(
@@ -179,7 +181,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 ],
                 if (inStock.isNotEmpty) ...[
                   const SizedBox(height: ShokuSpace.lg),
-                  const ShokuLabel('in the fridge'),
+                  ShokuLabel(l10n.pantryInFridge),
                   const SizedBox(height: ShokuSpace.sm),
                   for (final item in inStock)
                     _Row(
@@ -201,7 +203,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                         const PlateMark(size: 90),
                         const SizedBox(height: ShokuSpace.sm),
                         Text(
-                          'Nothing in the fridge yet. Photograph a receipt, or just tell me what’s in it.',
+                          l10n.pantryEmpty,
                           key: const ValueKey('pantry-empty'),
                           textAlign: TextAlign.center,
                           style:
@@ -239,7 +241,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                     border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                   ),
                   child: Center(
-                    child: Text('Add items',
+                    child: Text(l10n.pantryAddItems,
                         style: ShokuType.title
                             .copyWith(color: c.onAccent, fontSize: 14)),
                   ),
@@ -256,19 +258,20 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
     final amount = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('How much?'),
+        title: Text(context.l10n.pantryHowMuch),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: '2 kg'),
+          decoration:
+              InputDecoration(hintText: context.l10n.pantryAmountExample),
         ),
         actions: [
           TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel')),
+              child: Text(context.l10n.pantryCancel)),
           TextButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Done'),
+            child: Text(context.l10n.pantryDone),
           ),
         ],
       ),
@@ -308,6 +311,8 @@ class _Row extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     return Dismissible(
       key: ValueKey('pantry-dismiss-${item.id}'),
       direction:
@@ -318,8 +323,8 @@ class _Row extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: ShokuSpace.md),
         color: c.danger,
-        child:
-            Text('Delete', style: ShokuType.label.copyWith(color: c.onAccent)),
+        child: Text(l10n.pantryDelete,
+            style: ShokuType.label.copyWith(color: c.onAccent)),
       ),
       child: Semantics(
         selected: selected,
@@ -367,7 +372,8 @@ class _Row extends ConsumerWidget {
                     onEdit: onTap,
                   )
                 else
-                  Text(item.amountLabel,
+                  Text(
+                      pantryAmount(l10n, locale, item.quantity, item.unit),
                       style: ShokuType.stat
                           .copyWith(fontSize: 11, color: c.inkMuted)),
               ],
@@ -396,6 +402,8 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     if (item.quantity == null) {
       return ShokuPressable(
         key: ValueKey('pantry-set-amount-${item.name}'),
@@ -408,7 +416,7 @@ class _Stepper extends StatelessWidget {
             borderRadius: BorderRadius.circular(ShokuRadius.chip),
             border: Border.all(color: c.hairline),
           ),
-          child: Text('set amount',
+          child: Text(l10n.pantrySetAmount,
               style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
         ),
       );
@@ -421,7 +429,7 @@ class _Stepper extends StatelessWidget {
         SizedBox(
           width: 70,
           child: Text(
-            item.amountLabel,
+            pantryAmount(l10n, locale, item.quantity, item.unit),
             key: ValueKey('pantry-amount-${item.name}'),
             textAlign: TextAlign.center,
             style: ShokuType.stat.copyWith(fontSize: 12, color: c.ink),
@@ -436,9 +444,12 @@ class _Stepper extends StatelessWidget {
   Widget _stepButton(
       BuildContext context, String label, Key key, VoidCallback onTap) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Semantics(
       button: true,
-      label: label == '−' ? 'Less ${item.name}' : 'More ${item.name}',
+      label: label == '−'
+          ? l10n.pantryLessItem(item.name)
+          : l10n.pantryMoreItem(item.name),
       child: GestureDetector(
         key: key,
         onTap: onTap,
@@ -474,6 +485,7 @@ class _SelectionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -495,7 +507,7 @@ class _SelectionBar extends StatelessWidget {
                   border: Border.all(color: c.hairline),
                 ),
                 child: Center(
-                  child: Text('Cancel',
+                  child: Text(l10n.pantryCancel,
                       style:
                           ShokuType.title.copyWith(fontSize: 14, color: c.ink)),
                 ),
@@ -516,7 +528,10 @@ class _SelectionBar extends StatelessWidget {
                   border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                 ),
                 child: Center(
-                  child: Text(count == 0 ? 'Select items' : 'Delete $count',
+                  child: Text(
+                      count == 0
+                          ? l10n.pantrySelectItems
+                          : l10n.pantryDeleteCount(count),
                       style: ShokuType.title
                           .copyWith(color: c.onAccent, fontSize: 14)),
                 ),
@@ -540,13 +555,14 @@ class _Shelf extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     final suggestions = ref.watch(suggestionsProvider);
 
     return suggestions.when(
       loading: () => const SizedBox(height: 40),
-      error: (_, __) => _quiet(c),
+      error: (_, __) => _quiet(context, c),
       data: (reels) {
-        if (reels.isEmpty) return _quiet(c);
+        if (reels.isEmpty) return _quiet(context, c);
         return SizedBox(
           height: 128,
           child: ListView.separated(
@@ -588,7 +604,7 @@ class _Shelf extends ConsumerWidget {
                                 style: ShokuType.title
                                     .copyWith(color: c.ink, fontSize: 12)),
                             const SizedBox(height: 2),
-                            Text(reel.scoreLabel,
+                            Text(l10n.shelfScore(reel.have, reel.total),
                                 key: const ValueKey('suggestion-score'),
                                 style: ShokuType.label
                                     .copyWith(fontSize: 9, color: c.inkMuted)),
@@ -603,7 +619,8 @@ class _Shelf extends ConsumerWidget {
                                         .want(name);
                                   }
                                 },
-                                child: Text('+ ${reel.missing.length} to buy',
+                                child: Text(
+                                    l10n.shelfBuyCount(reel.missing.length),
                                     style: ShokuType.label.copyWith(
                                         fontSize: 9, color: c.accent)),
                               ),
@@ -621,8 +638,8 @@ class _Shelf extends ConsumerWidget {
     );
   }
 
-  Widget _quiet(dynamic c) => Text(
-        'Nothing to suggest yet — add a few items and I will match walls and your own dishes.',
+  Widget _quiet(BuildContext context, dynamic c) => Text(
+        context.l10n.shelfEmpty,
         key: const ValueKey('shelf-empty'),
         style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
       );
