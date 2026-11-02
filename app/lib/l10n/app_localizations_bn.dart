@@ -1034,4 +1034,70 @@ class AppLocalizationsBn extends AppLocalizations {
 
     return 'v$versionString হিসেবে প্রয়োগ করুন';
   }
+
+  @override
+  String get importPasteFirst => 'আগে একটি লিংক পেস্ট করুন';
+
+  @override
+  String get importNoLink => 'রিল প্রস্তুত কিন্তু সার্ভার কোনো লিংক পাঠায়নি';
+
+  @override
+  String get importCouldNotStart => 'ওই ইমপোর্ট শুরু করা যায়নি';
+
+  @override
+  String get importSignIn => 'ইমপোর্ট করতে আপনি থেকে সাইন ইন করুন';
+
+  @override
+  String get importUnreachable => 'সার্ভারে পৌঁছানো যায়নি';
+
+  @override
+  String get importLostConnection =>
+      'সংযোগ চলে গেছে — রিল এখনও পড়া হচ্ছে। আবার খুলে চালিয়ে যান';
+
+  @override
+  String get importStillOnServer =>
+      'সার্ভারে পৌঁছানো যায়নি — রিল এখনও সেখানে। আবার খুলে চালিয়ে যান';
+
+  @override
+  String get importGone => 'ওই রিল আর সার্ভারে নেই — লিংকটি আবার চেষ্টা করুন';
+
+  @override
+  String importSaved(String title) {
+    return '$title সংরক্ষিত';
+  }
+
+  @override
+  String get importNothingToSave => 'সংরক্ষণ করার কিছু নেই';
+
+  @override
+  String get importCouldNotSave =>
+      'রেসিপি ফিরে এসেছে কিন্তু সংরক্ষণ করা যায়নি — আবার খুলুন';
+
+  @override
+  String get importOpenAgain =>
+      'সার্ভারে পৌঁছানো যায়নি — এক মিনিটে আবার খুলুন';
+
+  @override
+  String get importSheetTitle => 'রিল সংরক্ষণ করুন';
+
+  @override
+  String get importSheetBody =>
+      'YouTube বা Instagram লিংক পেস্ট করুন। এটি একটি পদ হয়ে যায় যা আপনি রান্না করতে পারেন, নির্মাতাসহ।';
+
+  @override
+  String get importStillWorking => 'এখনও কাজ চলছে — এই রিলটি লম্বা';
+
+  @override
+  String get importLongWait =>
+      'লম্বা রিলে কয়েক মিনিট লাগে। আপনি চলে যেতে পারেন; প্রস্তুত হলে পদটি আসবে।';
+
+  @override
+  String get importCloseWait =>
+      'আপনি এটি বন্ধ করতে পারেন; প্রস্তুত হলে পদটি আসবে।';
+
+  @override
+  String get importReading => 'পড়া হচ্ছে…';
+
+  @override
+  String get importReadLink => 'এই লিংকটি পড়ুন';
 }

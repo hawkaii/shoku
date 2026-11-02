@@ -1048,4 +1048,72 @@ class AppLocalizationsTa extends AppLocalizations {
 
     return 'v$versionString ஆகப் பயன்படுத்து';
   }
+
+  @override
+  String get importPasteFirst => 'முதலில் ஒரு இணைப்பை ஒட்டவும்';
+
+  @override
+  String get importNoLink =>
+      'ரீல் தயார் ஆனால் சர்வர் எந்த இணைப்பையும் அனுப்பவில்லை';
+
+  @override
+  String get importCouldNotStart => 'அந்த இறக்குமதியைத் தொடங்க முடியவில்லை';
+
+  @override
+  String get importSignIn => 'இறக்குமதி செய்ய நீங்கள் பகுதியில் உள்நுழையுங்கள்';
+
+  @override
+  String get importUnreachable => 'சர்வரை அடைய முடியவில்லை';
+
+  @override
+  String get importLostConnection =>
+      'இணைப்பு போனது — ரீல் இன்னும் படிக்கப்படுகிறது. மீண்டும் திறந்து தொடருங்கள்';
+
+  @override
+  String get importStillOnServer =>
+      'சர்வரை அடைய முடியவில்லை — ரீல் இன்னும் அங்கே உள்ளது. மீண்டும் திறந்து தொடருங்கள்';
+
+  @override
+  String get importGone =>
+      'அந்த ரீல் இப்போது சர்வரில் இல்லை — இணைப்பை மீண்டும் முயற்சிக்கவும்';
+
+  @override
+  String importSaved(String title) {
+    return '$title சேமிக்கப்பட்டது';
+  }
+
+  @override
+  String get importNothingToSave => 'சேமிக்க எதுவும் இல்லை';
+
+  @override
+  String get importCouldNotSave =>
+      'ரெசிபி திரும்பியது ஆனால் சேமிக்க முடியவில்லை — மீண்டும் திறக்கவும்';
+
+  @override
+  String get importOpenAgain =>
+      'சர்வரை அடைய முடியவில்லை — ஒரு நிமிடத்தில் மீண்டும் திறக்கவும்';
+
+  @override
+  String get importSheetTitle => 'ரீலைச் சேமி';
+
+  @override
+  String get importSheetBody =>
+      'YouTube அல்லது Instagram இணைப்பை ஒட்டவும். அது நீங்கள் சமைக்கக்கூடிய உணவாக மாறும், உருவாக்குநருடன்.';
+
+  @override
+  String get importStillWorking =>
+      'இன்னும் வேலை நடக்கிறது — இந்த ரீல் நீளமானது';
+
+  @override
+  String get importLongWait =>
+      'நீளமானது சில நிமிடங்கள் ஆகும். நீங்கள் செல்லலாம்; தயாரானதும் உணவு வரும்.';
+
+  @override
+  String get importCloseWait => 'இதை மூடலாம்; தயாரானதும் உணவு வரும்.';
+
+  @override
+  String get importReading => 'படிக்கிறது…';
+
+  @override
+  String get importReadLink => 'இந்த இணைப்பைப் படி';
 }

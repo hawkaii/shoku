@@ -1038,4 +1038,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return 'Apply as v$versionString';
   }
+
+  @override
+  String get importPasteFirst => 'Paste a link first';
+
+  @override
+  String get importNoLink =>
+      'The reel is ready but the server sent no link for it';
+
+  @override
+  String get importCouldNotStart => 'We could not start that import';
+
+  @override
+  String get importSignIn => 'Sign in from You to import';
+
+  @override
+  String get importUnreachable => 'Could not reach the server';
+
+  @override
+  String get importLostConnection =>
+      'Lost the connection — the reel is still being read. Open this again to pick it up';
+
+  @override
+  String get importStillOnServer =>
+      'Could not reach the server — the reel is still on it. Open this again to pick it up';
+
+  @override
+  String get importGone =>
+      'That reel is no longer on the server — try the link again';
+
+  @override
+  String importSaved(String title) {
+    return 'Saved $title';
+  }
+
+  @override
+  String get importNothingToSave => 'Nothing to save';
+
+  @override
+  String get importCouldNotSave =>
+      'The recipe came back but could not be saved — open this again';
+
+  @override
+  String get importOpenAgain =>
+      'Could not reach the server — open this again in a minute';
+
+  @override
+  String get importSheetTitle => 'Save a reel';
+
+  @override
+  String get importSheetBody =>
+      'Paste a YouTube or Instagram link. It becomes a dish you can cook, with the creator attached.';
+
+  @override
+  String get importStillWorking => 'Still working — this reel is long';
+
+  @override
+  String get importLongWait =>
+      'A long one takes a few minutes. You can leave this — the dish appears when it is ready.';
+
+  @override
+  String get importCloseWait =>
+      'You can close this — the dish appears when it is ready.';
+
+  @override
+  String get importReading => 'Reading…';
+
+  @override
+  String get importReadLink => 'Read this link';
 }

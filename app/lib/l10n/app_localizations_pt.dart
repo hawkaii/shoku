@@ -1038,4 +1038,72 @@ class AppLocalizationsPt extends AppLocalizations {
 
     return 'Aplicar como v$versionString';
   }
+
+  @override
+  String get importPasteFirst => 'Cole um link primeiro';
+
+  @override
+  String get importNoLink =>
+      'O reel está pronto, mas o servidor não enviou um link';
+
+  @override
+  String get importCouldNotStart => 'Não foi possível iniciar essa importação';
+
+  @override
+  String get importSignIn => 'Entre em Você para importar';
+
+  @override
+  String get importUnreachable => 'Não foi possível alcançar o servidor';
+
+  @override
+  String get importLostConnection =>
+      'Conexão perdida — o reel ainda está sendo lido. Abra isto de novo para retomar';
+
+  @override
+  String get importStillOnServer =>
+      'Não foi possível alcançar o servidor — o reel ainda está lá. Abra isto de novo para retomar';
+
+  @override
+  String get importGone =>
+      'Esse reel não está mais no servidor — tente o link de novo';
+
+  @override
+  String importSaved(String title) {
+    return 'Salvo $title';
+  }
+
+  @override
+  String get importNothingToSave => 'Nada para salvar';
+
+  @override
+  String get importCouldNotSave =>
+      'A receita voltou, mas não pôde ser salva — abra isto de novo';
+
+  @override
+  String get importOpenAgain =>
+      'Não foi possível alcançar o servidor — abra isto de novo em um minuto';
+
+  @override
+  String get importSheetTitle => 'Salvar um reel';
+
+  @override
+  String get importSheetBody =>
+      'Cole um link do YouTube ou Instagram. Ele vira um prato que você pode cozinhar, com o criador anexado.';
+
+  @override
+  String get importStillWorking => 'Ainda trabalhando — este reel é longo';
+
+  @override
+  String get importLongWait =>
+      'Um longo leva alguns minutos. Você pode sair; o prato aparece quando estiver pronto.';
+
+  @override
+  String get importCloseWait =>
+      'Você pode fechar isto; o prato aparece quando estiver pronto.';
+
+  @override
+  String get importReading => 'Lendo…';
+
+  @override
+  String get importReadLink => 'Ler este link';
 }

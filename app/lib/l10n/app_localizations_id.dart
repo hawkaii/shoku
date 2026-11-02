@@ -1032,4 +1032,71 @@ class AppLocalizationsId extends AppLocalizations {
 
     return 'Terapkan sebagai v$versionString';
   }
+
+  @override
+  String get importPasteFirst => 'Tempel tautan dulu';
+
+  @override
+  String get importNoLink => 'Reel siap tetapi server tidak mengirim tautan';
+
+  @override
+  String get importCouldNotStart => 'Kami tidak bisa memulai impor itu';
+
+  @override
+  String get importSignIn => 'Masuk dari Kamu untuk mengimpor';
+
+  @override
+  String get importUnreachable => 'Tidak bisa menghubungi server';
+
+  @override
+  String get importLostConnection =>
+      'Koneksi hilang — reel masih dibaca. Buka ini lagi untuk melanjutkan';
+
+  @override
+  String get importStillOnServer =>
+      'Tidak bisa menghubungi server — reel masih di sana. Buka ini lagi untuk melanjutkan';
+
+  @override
+  String get importGone =>
+      'Reel itu tidak ada lagi di server — coba tautannya lagi';
+
+  @override
+  String importSaved(String title) {
+    return 'Disimpan $title';
+  }
+
+  @override
+  String get importNothingToSave => 'Tidak ada yang disimpan';
+
+  @override
+  String get importCouldNotSave =>
+      'Resep kembali tetapi tidak bisa disimpan — buka ini lagi';
+
+  @override
+  String get importOpenAgain =>
+      'Tidak bisa menghubungi server — buka ini lagi sebentar lagi';
+
+  @override
+  String get importSheetTitle => 'Simpan reel';
+
+  @override
+  String get importSheetBody =>
+      'Tempel tautan YouTube atau Instagram. Itu menjadi hidangan yang bisa kamu masak, dengan kreatornya.';
+
+  @override
+  String get importStillWorking => 'Masih bekerja — reel ini panjang';
+
+  @override
+  String get importLongWait =>
+      'Yang panjang butuh beberapa menit. Kamu bisa pergi; hidangannya muncul saat siap.';
+
+  @override
+  String get importCloseWait =>
+      'Kamu bisa menutup ini; hidangannya muncul saat siap.';
+
+  @override
+  String get importReading => 'Membaca…';
+
+  @override
+  String get importReadLink => 'Baca tautan ini';
 }

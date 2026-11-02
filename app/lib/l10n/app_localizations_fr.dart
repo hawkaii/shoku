@@ -1043,4 +1043,72 @@ class AppLocalizationsFr extends AppLocalizations {
 
     return 'Appliquer comme v$versionString';
   }
+
+  @override
+  String get importPasteFirst => 'Collez d\'abord un lien';
+
+  @override
+  String get importNoLink =>
+      'Le reel est prêt mais le serveur n\'a envoyé aucun lien';
+
+  @override
+  String get importCouldNotStart => 'Impossible de lancer cette importation';
+
+  @override
+  String get importSignIn => 'Connectez-vous dans Vous pour importer';
+
+  @override
+  String get importUnreachable => 'Impossible d\'atteindre le serveur';
+
+  @override
+  String get importLostConnection =>
+      'Connexion perdue — le reel est toujours en lecture. Rouvrez ceci pour reprendre';
+
+  @override
+  String get importStillOnServer =>
+      'Impossible d\'atteindre le serveur — le reel y est toujours. Rouvrez ceci pour reprendre';
+
+  @override
+  String get importGone =>
+      'Ce reel n\'est plus sur le serveur — réessayez le lien';
+
+  @override
+  String importSaved(String title) {
+    return 'Enregistré $title';
+  }
+
+  @override
+  String get importNothingToSave => 'Rien à enregistrer';
+
+  @override
+  String get importCouldNotSave =>
+      'La recette est revenue mais n\'a pas pu être enregistrée — rouvrez ceci';
+
+  @override
+  String get importOpenAgain =>
+      'Impossible d\'atteindre le serveur — rouvrez ceci dans une minute';
+
+  @override
+  String get importSheetTitle => 'Enregistrer un reel';
+
+  @override
+  String get importSheetBody =>
+      'Collez un lien YouTube ou Instagram. Il devient un plat que vous pouvez cuisiner, avec le créateur attaché.';
+
+  @override
+  String get importStillWorking => 'Toujours en cours — ce reel est long';
+
+  @override
+  String get importLongWait =>
+      'Un long prend quelques minutes. Vous pouvez partir ; le plat apparaît quand il est prêt.';
+
+  @override
+  String get importCloseWait =>
+      'Vous pouvez fermer ceci ; le plat apparaît quand il est prêt.';
+
+  @override
+  String get importReading => 'Lecture…';
+
+  @override
+  String get importReadLink => 'Lire ce lien';
 }

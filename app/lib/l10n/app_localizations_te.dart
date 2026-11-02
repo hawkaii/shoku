@@ -1038,4 +1038,71 @@ class AppLocalizationsTe extends AppLocalizations {
 
     return 'v$versionStringగా వర్తింపజేయండి';
   }
+
+  @override
+  String get importPasteFirst => 'మొదట లింక్ పేస్ట్ చేయండి';
+
+  @override
+  String get importNoLink => 'రీల్ సిద్ధంగా ఉంది కానీ సర్వర్ లింక్ పంపలేదు';
+
+  @override
+  String get importCouldNotStart => 'ఆ ఇంపోర్ట్ ప్రారంభించలేకపోయాం';
+
+  @override
+  String get importSignIn => 'ఇంపోర్ట్ చేయడానికి మీరు లో సైన్ ఇన్ చేయండి';
+
+  @override
+  String get importUnreachable => 'సర్వర్‌ను చేరుకోలేకపోయాం';
+
+  @override
+  String get importLostConnection =>
+      'కనెక్షన్ పోయింది — రీల్ ఇంకా చదువుతోంది. మళ్లీ తెరిచి కొనసాగించండి';
+
+  @override
+  String get importStillOnServer =>
+      'సర్వర్‌ను చేరుకోలేకపోయాం — రీల్ ఇంకా అక్కడే ఉంది. మళ్లీ తెరిచి కొనసాగించండి';
+
+  @override
+  String get importGone =>
+      'ఆ రీల్ ఇప్పుడు సర్వర్‌లో లేదు — లింక్‌ను మళ్లీ ప్రయత్నించండి';
+
+  @override
+  String importSaved(String title) {
+    return '$title సేవ్ అయింది';
+  }
+
+  @override
+  String get importNothingToSave => 'సేవ్ చేయడానికి ఏమీ లేదు';
+
+  @override
+  String get importCouldNotSave =>
+      'రెసిపీ తిరిగి వచ్చింది కానీ సేవ్ చేయలేకపోయాం — మళ్లీ తెరవండి';
+
+  @override
+  String get importOpenAgain =>
+      'సర్వర్‌ను చేరుకోలేకపోయాం — ఒక నిమిషంలో మళ్లీ తెరవండి';
+
+  @override
+  String get importSheetTitle => 'రీల్‌ను సేవ్ చేయండి';
+
+  @override
+  String get importSheetBody =>
+      'YouTube లేదా Instagram లింక్ పేస్ట్ చేయండి. అది మీరు వండగల వంటకంగా మారుతుంది, సృష్టికర్తతో.';
+
+  @override
+  String get importStillWorking => 'ఇంకా పని జరుగుతోంది — ఈ రీల్ పొడవైనది';
+
+  @override
+  String get importLongWait =>
+      'పొడవైనది కొన్ని నిమిషాలు తీసుకుంటుంది. మీరు వెళ్లొచ్చు; సిద్ధమైనప్పుడు వంటకం వస్తుంది.';
+
+  @override
+  String get importCloseWait =>
+      'దీన్ని మూసేయవచ్చు; సిద్ధమైనప్పుడు వంటకం వస్తుంది.';
+
+  @override
+  String get importReading => 'చదువుతోంది…';
+
+  @override
+  String get importReadLink => 'ఈ లింక్ చదవండి';
 }

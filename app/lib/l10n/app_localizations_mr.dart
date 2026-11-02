@@ -1036,4 +1036,70 @@ class AppLocalizationsMr extends AppLocalizations {
 
     return 'v$versionString म्हणून लागू करा';
   }
+
+  @override
+  String get importPasteFirst => 'आधी लिंक पेस्ट करा';
+
+  @override
+  String get importNoLink => 'रील तयार आहे पण सर्व्हरने लिंक पाठवला नाही';
+
+  @override
+  String get importCouldNotStart => 'ते इंपोर्ट सुरू होऊ शकले नाही';
+
+  @override
+  String get importSignIn => 'इंपोर्टसाठी तुम्ही मध्ये साइन इन करा';
+
+  @override
+  String get importUnreachable => 'सर्व्हरपर्यंत पोहोचता आले नाही';
+
+  @override
+  String get importLostConnection =>
+      'कनेक्शन गेले — रील अजून वाचली जात आहे. पुन्हा उघडून पूर्ण करा';
+
+  @override
+  String get importStillOnServer =>
+      'सर्व्हरपर्यंत पोहोचता आले नाही — रील अजून तिथे आहे. पुन्हा उघडून पूर्ण करा';
+
+  @override
+  String get importGone => 'ती रील आता सर्व्हरवर नाही — लिंक पुन्हा वापरून पहा';
+
+  @override
+  String importSaved(String title) {
+    return '$title जतन केले';
+  }
+
+  @override
+  String get importNothingToSave => 'जतन करण्यासाठी काही नाही';
+
+  @override
+  String get importCouldNotSave =>
+      'रेसिपी परत आली पण जतन होऊ शकली नाही — पुन्हा उघडा';
+
+  @override
+  String get importOpenAgain =>
+      'सर्व्हरपर्यंत पोहोचता आले नाही — एका मिनिटात पुन्हा उघडा';
+
+  @override
+  String get importSheetTitle => 'रील जतन करा';
+
+  @override
+  String get importSheetBody =>
+      'YouTube किंवा Instagram लिंक पेस्ट करा. ती एक पदार्थ बनते जो तुम्ही शिजवू शकता, निर्मात्यासह.';
+
+  @override
+  String get importStillWorking => 'अजून काम चालू आहे — ही रील लांब आहे';
+
+  @override
+  String get importLongWait =>
+      'लांब रीलला काही मिनिटे लागतात. तुम्ही जाऊ शकता; तयार झाल्यावर पदार्थ येईल.';
+
+  @override
+  String get importCloseWait =>
+      'तुम्ही हे बंद करू शकता; तयार झाल्यावर पदार्थ येईल.';
+
+  @override
+  String get importReading => 'वाचत आहोत…';
+
+  @override
+  String get importReadLink => 'ही लिंक वाचा';
 }

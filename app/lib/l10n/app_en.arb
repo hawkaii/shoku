@@ -572,5 +572,31 @@
         "format": "decimalPattern"
       }
     }
+  },
+  "importPasteFirst": "Paste a link first",
+  "importNoLink": "The reel is ready but the server sent no link for it",
+  "importCouldNotStart": "We could not start that import",
+  "importSignIn": "Sign in from You to import",
+  "importUnreachable": "Could not reach the server",
+  "importLostConnection": "Lost the connection — the reel is still being read. Open this again to pick it up",
+  "importStillOnServer": "Could not reach the server — the reel is still on it. Open this again to pick it up",
+  "importGone": "That reel is no longer on the server — try the link again",
+  "importSaved": "Saved {title}",
+  "importNothingToSave": "Nothing to save",
+  "importCouldNotSave": "The recipe came back but could not be saved — open this again",
+  "importOpenAgain": "Could not reach the server — open this again in a minute",
+  "importSheetTitle": "Save a reel",
+  "importSheetBody": "Paste a YouTube or Instagram link. It becomes a dish you can cook, with the creator attached.",
+  "importStillWorking": "Still working — this reel is long",
+  "importLongWait": "A long one takes a few minutes. You can leave this — the dish appears when it is ready.",
+  "importCloseWait": "You can close this — the dish appears when it is ready.",
+  "importReading": "Reading…",
+  "importReadLink": "Read this link",
+  "@importSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   }
 }

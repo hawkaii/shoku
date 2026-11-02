@@ -1511,6 +1511,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply as v{version}'**
   String chatApplyAs(int version);
+
+  /// No description provided for @importPasteFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a link first'**
+  String get importPasteFirst;
+
+  /// No description provided for @importNoLink.
+  ///
+  /// In en, this message translates to:
+  /// **'The reel is ready but the server sent no link for it'**
+  String get importNoLink;
+
+  /// No description provided for @importCouldNotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not start that import'**
+  String get importCouldNotStart;
+
+  /// No description provided for @importSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in from You to import'**
+  String get importSignIn;
+
+  /// No description provided for @importUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server'**
+  String get importUnreachable;
+
+  /// No description provided for @importLostConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost the connection — the reel is still being read. Open this again to pick it up'**
+  String get importLostConnection;
+
+  /// No description provided for @importStillOnServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server — the reel is still on it. Open this again to pick it up'**
+  String get importStillOnServer;
+
+  /// No description provided for @importGone.
+  ///
+  /// In en, this message translates to:
+  /// **'That reel is no longer on the server — try the link again'**
+  String get importGone;
+
+  /// No description provided for @importSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {title}'**
+  String importSaved(String title);
+
+  /// No description provided for @importNothingToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to save'**
+  String get importNothingToSave;
+
+  /// No description provided for @importCouldNotSave.
+  ///
+  /// In en, this message translates to:
+  /// **'The recipe came back but could not be saved — open this again'**
+  String get importCouldNotSave;
+
+  /// No description provided for @importOpenAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server — open this again in a minute'**
+  String get importOpenAgain;
+
+  /// No description provided for @importSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a reel'**
+  String get importSheetTitle;
+
+  /// No description provided for @importSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a YouTube or Instagram link. It becomes a dish you can cook, with the creator attached.'**
+  String get importSheetBody;
+
+  /// No description provided for @importStillWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Still working — this reel is long'**
+  String get importStillWorking;
+
+  /// No description provided for @importLongWait.
+  ///
+  /// In en, this message translates to:
+  /// **'A long one takes a few minutes. You can leave this — the dish appears when it is ready.'**
+  String get importLongWait;
+
+  /// No description provided for @importCloseWait.
+  ///
+  /// In en, this message translates to:
+  /// **'You can close this — the dish appears when it is ready.'**
+  String get importCloseWait;
+
+  /// No description provided for @importReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading…'**
+  String get importReading;
+
+  /// No description provided for @importReadLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this link'**
+  String get importReadLink;
 }
 
 class _AppLocalizationsDelegate

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flutter/foundation.dart';
-
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
@@ -13,6 +12,7 @@ import '../../state/import_providers.dart';
 import '../../state/import_tracker.dart';
 import '../../state/journal_store.dart';
 import '../../widgets/kit/motion.dart';
+import '../journal/import_card.dart';
 
 /// Import one link, with the wait made visible.
 ///
@@ -92,7 +92,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     if (_busy) return;
     final url = _url.text.trim();
     if (url.length < 8) {
-      setState(() => _error = 'Paste a link first');
+      setState(() => _error = context.l10n.importPasteFirst);
       return;
     }
     setState(() {
@@ -116,7 +116,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         if (started.shortcode.isEmpty) {
           setState(() {
             _busy = false;
-            _error = 'The reel is ready but the server sent no link for it';
+            _error = context.l10n.importNoLink;
           });
           return;
         }
@@ -130,14 +130,15 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       }
 
       if (started.stage == ImportStage.failed) {
-        await _abandon(importReasonText(started.reason));
+        if (!mounted) return;
+        await _abandon(reasonText(context.l10n, started.reason));
         return;
       }
 
       if (started.jobId == null) {
         setState(() {
           _busy = false;
-          _error = 'We could not start that import';
+          _error = context.l10n.importCouldNotStart;
         });
         return;
       }
@@ -157,19 +158,17 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     } on ApiUnauthenticated {
       setState(() {
         _busy = false;
-        _error = 'Sign in from You to import';
+        _error = context.l10n.importSignIn;
       });
     } on ApiError catch (error) {
       setState(() {
         _busy = false;
-        _error = importReasonText(error.reason);
+        _error = reasonText(context.l10n, error.reason);
       });
     } catch (error) {
       setState(() {
         _busy = false;
-        _error = kDebugMode
-            ? 'Could not reach the server ($error)'
-            : 'Could not reach the server';
+        _error = context.l10n.importUnreachable;
       });
     }
   }
@@ -204,11 +203,11 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
               _slowTimer?.cancel();
               setState(() {
                 _busy = false;
-                _stillReading = importReasonText(progress.reason);
+                _stillReading = reasonText(context.l10n, progress.reason);
               });
             } else {
               _slowTimer?.cancel();
-              _abandon(importReasonText(progress.reason));
+              _abandon(reasonText(context.l10n, progress.reason));
             }
           case ImportStage.queued:
           case ImportStage.extracting:
@@ -218,15 +217,14 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       onError: (Object error) {
         if (!mounted) return;
         if (error is ApiUnauthenticated) {
-          _abandon('Sign in from You to import');
+          _abandon(context.l10n.importSignIn);
           return;
         }
         // The retries are spent, but the job is still the server's: the note
         // stays, and the next open resumes it rather than starting over.
         setState(() {
           _busy = false;
-          _error =
-              'Lost the connection — the reel is still being read. Open this again to pick it up';
+          _error = context.l10n.importLostConnection;
         });
       },
     );
@@ -260,7 +258,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
           return;
         }
         if (progress.stage == ImportStage.failed) {
-          await _abandon(importReasonText(progress.reason));
+          await _abandon(reasonText(context.l10n, progress.reason));
           return;
         }
         _watch(service, jobId, pending.shortcode);
@@ -268,25 +266,24 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       } on ApiUnauthenticated {
         setState(() {
           _busy = false;
-          _error = 'Sign in from You to import';
+          _error = context.l10n.importSignIn;
         });
         return;
       } on ApiError catch (error) {
         if (error.status == 404) {
           // The server has forgotten the job; there is nothing left to resume.
-          await _abandon(importReasonText('gone'));
+          await _abandon(reasonText(context.l10n, 'gone'));
           return;
         }
         setState(() {
           _busy = false;
-          _error = 'Could not check on that import — open this again in a minute';
+          _error = context.l10n.importOpenAgain;
         });
         return;
       } catch (_) {
         setState(() {
           _busy = false;
-          _error =
-              'Could not reach the server — the reel is still on it. Open this again to pick it up';
+          _error = context.l10n.importStillOnServer;
         });
         return;
       }
@@ -304,20 +301,20 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         setState(() {
           _busy = false;
           _progress = null;
-          _error = 'That reel is no longer on the server — try the link again';
+          _error = context.l10n.importGone;
         });
         return;
       }
       Navigator.of(context).pop();
       _requestSync();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Saved ${dish.title}')),
+        SnackBar(content: Text(context.l10n.importSaved(dish.title))),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = 'Could not reach the server — open this again in a minute';
+        _error = context.l10n.importOpenAgain;
       });
     }
   }
@@ -331,14 +328,17 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       Navigator.of(context).pop();
       _requestSync();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(dish == null ? 'Nothing to save' : 'Saved ${dish.title}')),
+        SnackBar(
+            content: Text(dish == null
+                ? context.l10n.importNothingToSave
+                : context.l10n.importSaved(dish.title))),
       );
     } catch (_) {
       // Keep the note: the parse exists, only the save failed.
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = 'The recipe came back but could not be saved — open this again';
+        _error = context.l10n.importCouldNotSave;
       });
     }
   }
@@ -360,6 +360,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final showProgress = _progress != null &&
         _busy &&
         _progress!.stage != ImportStage.failed;
@@ -374,10 +375,10 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Save a reel', style: ShokuType.h2.copyWith(color: c.ink)),
+          Text(l10n.importSheetTitle, style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: 2),
           Text(
-            'Paste a YouTube or Instagram link. It becomes a dish you can cook, with the creator attached.',
+            l10n.importSheetBody,
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.md),
@@ -412,7 +413,9 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    _slow ? 'Still working — this reel is long' : _progress!.label,
+                    _slow
+                        ? l10n.importStillWorking
+                        : stageText(l10n, _progress) ?? '',
                     key: const ValueKey('import-stage'),
                     style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                   ),
@@ -422,9 +425,10 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
             const SizedBox(height: 4),
             Text(
               _slow
-                  ? 'A long one takes a few minutes. You can leave this — the dish appears when it is ready.'
-                  : (_progress!.waitingHint ??
-                      'You can close this — the dish appears when it is ready.'),
+                  ? l10n.importLongWait
+                  : (_progress!.detail == 'starting'
+                      ? l10n.importWaitingHint
+                      : l10n.importCloseWait),
               key: const ValueKey('import-hint'),
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
@@ -457,7 +461,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
               ),
               child: Center(
                 child: Text(
-                  _busy ? 'Reading…' : 'Read this link',
+                  _busy ? l10n.importReading : l10n.importReadLink,
                   style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                 ),
               ),

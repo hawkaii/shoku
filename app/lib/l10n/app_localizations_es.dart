@@ -1036,4 +1036,72 @@ class AppLocalizationsEs extends AppLocalizations {
 
     return 'Aplicar como v$versionString';
   }
+
+  @override
+  String get importPasteFirst => 'Primero pega un enlace';
+
+  @override
+  String get importNoLink =>
+      'El reel está listo pero el servidor no envió un enlace';
+
+  @override
+  String get importCouldNotStart => 'No pudimos iniciar esa importación';
+
+  @override
+  String get importSignIn => 'Inicia sesión en Tú para importar';
+
+  @override
+  String get importUnreachable => 'No se pudo llegar al servidor';
+
+  @override
+  String get importLostConnection =>
+      'Se perdió la conexión — el reel aún se está leyendo. Abre esto otra vez para retomarlo';
+
+  @override
+  String get importStillOnServer =>
+      'No se pudo llegar al servidor — el reel sigue ahí. Abre esto otra vez para retomarlo';
+
+  @override
+  String get importGone =>
+      'Ese reel ya no está en el servidor — prueba el enlace otra vez';
+
+  @override
+  String importSaved(String title) {
+    return 'Guardado $title';
+  }
+
+  @override
+  String get importNothingToSave => 'Nada que guardar';
+
+  @override
+  String get importCouldNotSave =>
+      'La receta volvió pero no se pudo guardar — abre esto otra vez';
+
+  @override
+  String get importOpenAgain =>
+      'No se pudo llegar al servidor — abre esto otra vez en un minuto';
+
+  @override
+  String get importSheetTitle => 'Guardar un reel';
+
+  @override
+  String get importSheetBody =>
+      'Pega un enlace de YouTube o Instagram. Se convierte en un plato que puedes cocinar, con el creador adjunto.';
+
+  @override
+  String get importStillWorking => 'Aún trabajando — este reel es largo';
+
+  @override
+  String get importLongWait =>
+      'Uno largo tarda unos minutos. Puedes salir; el plato aparece cuando esté listo.';
+
+  @override
+  String get importCloseWait =>
+      'Puedes cerrar esto; el plato aparece cuando esté listo.';
+
+  @override
+  String get importReading => 'Leyendo…';
+
+  @override
+  String get importReadLink => 'Leer este enlace';
 }
