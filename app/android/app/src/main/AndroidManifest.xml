@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Network access. This must live in the main manifest, not only in the
+         debug one: a release APK without it cannot reach the API at all, which
+         looks exactly like "no connection" to the user. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Permissions for image picker -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -18,7 +23,10 @@
     <application
         android:label="Shoku"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
+        <!-- Cleartext is a demo concession: the dev API is plain HTTP. It is a
+             Play blocker and goes away when api.gradientdescent.wiki serves TLS. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
