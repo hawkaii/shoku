@@ -130,23 +130,33 @@ class JournalStore extends StateNotifier<List<Dish>> {
     required bool signedIn,
     required Dish sample,
   }) async {
-    if (signedIn) {
-      await dropSample(sampleId: sample.id);
-      return;
+    // A sample is a kindness, not a dependency: if the write fails, the shell
+    // must still open. Nothing about the sample may take the journal down.
+    try {
+      if (signedIn) {
+        await dropSample(sampleId: sample.id);
+        return;
+      }
+      if (await _repo.sampleWasRemoved() || await _repo.hasSample(sample.id)) {
+        return;
+      }
+      await _repo.seedSample(sample);
+      state = await _repo.loadDishes();
+    } catch (_) {
+      // Leave the journal as it was; the empty state is a valid screen.
     }
-    if (await _repo.sampleWasRemoved() || await _repo.hasSample(sample.id)) {
-      return;
-    }
-    await _repo.seedSample(sample);
-    state = await _repo.loadDishes();
   }
 
   /// Signing in takes the sample away before the first push, so its rows can
   /// never reach the server.
   Future<void> dropSample({required String sampleId}) async {
-    if (await _repo.hasSample(sampleId)) {
-      await _repo.removeSample(sampleId);
-      state = await _repo.loadDishes();
+    try {
+      if (await _repo.hasSample(sampleId)) {
+        await _repo.removeSample(sampleId);
+        state = await _repo.loadDishes();
+      }
+    } catch (_) {
+      // Signing in must not fail because a local delete did.
     }
   }
 }

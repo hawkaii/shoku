@@ -315,7 +315,18 @@ class ShokuTheme {
 }
 
 extension ShokuContext on BuildContext {
-  ShokuTokens get tokens => Theme.of(this).extension<ShokuTokens>()!;
+  /// The app's tokens, with a fallback for a context that is not under
+  /// [ShokuTheme] yet — a dialog shown from a root host, a bare MaterialApp in
+  /// a test, a widget built before the theme is installed.
+  ///
+  /// This used to be a bare `!`. An assertion is the right thing to see in
+  /// debug; in a release build the `!` becomes a null-check crash that blanks
+  /// the whole screen, which is not a trade worth making for a colour.
+  ShokuTokens get tokens {
+    final tokens = Theme.of(this).extension<ShokuTokens>();
+    assert(tokens != null, 'Build this under ShokuTheme, not a bare ThemeData.');
+    return tokens ?? const ShokuTokens(colors: ShokuColors.light, isDark: false);
+  }
   ShokuColors get colors => tokens.colors;
   bool get isDark => tokens.isDark;
   TextTheme get text => Theme.of(this).textTheme;

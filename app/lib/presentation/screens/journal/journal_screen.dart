@@ -312,7 +312,19 @@ class _PinnedCard extends StatelessWidget {
                     style: ShokuType.title.copyWith(color: c.ink),
                   ),
                   const SizedBox(height: 1),
-                  StatusBadge(status: dish.status, cookCount: dish.cookCount, compact: true),
+                  Wrap(
+                    spacing: ShokuSpace.xs,
+                    runSpacing: 2,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      StatusBadge(
+                          status: dish.status,
+                          cookCount: dish.cookCount,
+                          compact: true),
+                      if (dish.isSample)
+                        ShokuChip('Sample', color: c.reward, filled: true),
+                    ],
+                  ),
                 ],
               ),
             ),

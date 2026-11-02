@@ -53,10 +53,14 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // felt; a signed-in one has it taken away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(journalStoreProvider.notifier).ensureSample(
-            signedIn: ref.read(authServiceProvider).isSignedIn,
-            sample: SampleRecipe.dish(),
-          );
+      try {
+        ref.read(journalStoreProvider.notifier).ensureSample(
+              signedIn: ref.read(authServiceProvider).isSignedIn,
+              sample: SampleRecipe.dish(),
+            );
+      } catch (_) {
+        // The sample is optional; the shell is not.
+      }
     });
     // On web the session is restored from storage *after* the first frame, so
     // the first pass can reach the API with no token. One more look a few
