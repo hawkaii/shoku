@@ -12,39 +12,84 @@ import '../state/sync_providers.dart';
 
 const _uuid = Uuid();
 
-enum BotTurnKind { mine, answer, notice, divider, suggestions, capture }
+enum BotTurnKind { mine, answer, notice, divider, suggestions, capture, choices }
 
 /// One line in the kitchen thread.
 class BotTurn {
   const BotTurn.mine(this.text)
       : kind = BotTurnKind.mine,
         suggestions = const [],
-        items = const [];
+        items = const [],
+        choices = const [],
+        count = null;
   const BotTurn.answer(this.text)
       : kind = BotTurnKind.answer,
         suggestions = const [],
-        items = const [];
+        items = const [],
+        choices = const [],
+        count = null;
   const BotTurn.notice(this.text)
       : kind = BotTurnKind.notice,
         suggestions = const [],
-        items = const [];
+        items = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.cap()
+      : kind = BotTurnKind.notice,
+        text = 'cap',
+        suggestions = const [],
+        items = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.offline()
+      : kind = BotTurnKind.notice,
+        text = 'offline',
+        suggestions = const [],
+        items = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.added(this.count)
+      : kind = BotTurnKind.notice,
+        text = 'added',
+        suggestions = const [],
+        items = const [],
+        choices = const [];
   const BotTurn.divider(this.text)
       : kind = BotTurnKind.divider,
         suggestions = const [],
-        items = const [];
+        items = const [],
+        choices = const [],
+        count = null;
   const BotTurn.suggestions(this.suggestions)
       : kind = BotTurnKind.suggestions,
         text = '',
-        items = const [];
+        items = const [],
+        choices = const [],
+        count = null;
   const BotTurn.capture(this.items)
       : kind = BotTurnKind.capture,
         text = '',
-        suggestions = const [];
+        suggestions = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.choices(this.choices)
+      : kind = BotTurnKind.choices,
+        text = '',
+        suggestions = const [],
+        items = const [],
+        count = null;
 
   final BotTurnKind kind;
   final String text;
   final List<BotSuggestion> suggestions;
   final List<BotCaptureItem> items;
+
+  /// Dish names the server offered when the request was ambiguous. Content,
+  /// never translated: only the question around them is copy.
+  final List<String> choices;
+
+  /// How many items a notice is about, when the sentence needs a number.
+  final int? count;
 }
 
 class BotState {
@@ -193,9 +238,9 @@ class BotController extends StateNotifier<BotState> {
         turns.add(BotTurn.capture(reply.items));
       }
       if (reply.choices.isNotEmpty) {
-        turns.add(BotTurn.notice(
-          'Which dish did you mean? ${reply.choices.map((c) => c.title).join(' · ')}',
-        ));
+        turns.add(BotTurn.choices([
+          for (final choice in reply.choices) choice.title,
+        ]));
       }
       state = state.copyWith(turns: turns, thinking: false);
       unawaited(_remember('assistant', reply.answer));
@@ -206,8 +251,7 @@ class BotController extends StateNotifier<BotState> {
         cap: true,
         turns: [
           ...state.turns,
-          const BotTurn.notice(
-              'You have used today’s questions. They come back tomorrow.'),
+          const BotTurn.cap(),
         ],
       );
     } catch (_) {
@@ -218,8 +262,7 @@ class BotController extends StateNotifier<BotState> {
         offline: true,
         turns: [
           ...state.turns,
-          const BotTurn.notice(
-              'The assistant needs a connection. Nothing here is answered offline.'),
+          const BotTurn.offline(),
         ],
       );
     }
@@ -246,9 +289,7 @@ class BotController extends StateNotifier<BotState> {
     state = state.copyWith(
       turns: [
         ...state.turns,
-        BotTurn.notice(added == 1
-            ? '1 item in the fridge.'
-            : '$added items in the fridge.'),
+        BotTurn.added(added),
       ],
     );
     return added;

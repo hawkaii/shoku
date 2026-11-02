@@ -10,7 +10,9 @@ import 'package:food_finder/l10n/app_localizations.dart';
 import 'package:food_finder/main.dart';
 import 'package:food_finder/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:food_finder/presentation/screens/pantry/pantry_edit_sheet.dart';
+import 'package:food_finder/presentation/screens/bot/scope_switcher.dart';
 import 'package:food_finder/presentation/state/auth_providers.dart';
+import 'package:food_finder/presentation/state/journal_providers.dart';
 import 'package:food_finder/presentation/state/locale_provider.dart';
 import 'package:food_finder/presentation/widgets/kit/status_badge.dart';
 import 'package:food_finder/presentation/widgets/language_picker.dart';
@@ -141,6 +143,36 @@ void main() {
     expect(find.text('Editar artículo'), findsOneWidget);
     expect(find.text('Guardado como 2 kg'), findsOneWidget);
     expect(find.text('manojo'), findsOneWidget);
+  });
+
+  testWidgets('the bot scope switcher reads in Spanish', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [dishesProvider.overrideWithValue(const [])],
+        child: MaterialApp(
+          theme: ShokuTheme.light(),
+          locale: const Locale('es'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: shokuSupportedLocalesForTest,
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () => showScopeSwitcher(context),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hablar sobre…'), findsOneWidget);
+    expect(find.text('Sin plato — la cocina'), findsOneWidget);
   });
 }
 

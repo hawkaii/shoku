@@ -751,4 +751,287 @@ class AppLocalizationsBn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get botNoDish => 'পদ ছাড়া';
+
+  @override
+  String get botDishFallback => 'পদ';
+
+  @override
+  String botCookingStep(int step, int total) {
+    final intl.NumberFormat stepNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String stepString = stepNumberFormat.format(step);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return 'রান্না · ধাপ $stepString / $totalString';
+  }
+
+  @override
+  String get botTalkAbout => 'এটি নিয়ে কথা…';
+
+  @override
+  String get botThisDish => 'এই পদ';
+
+  @override
+  String get botNoDishKitchen => 'পদ ছাড়া — রান্নাঘর';
+
+  @override
+  String get botOpen => 'খুলুন';
+
+  @override
+  String get botMinimise => 'ছোট করুন';
+
+  @override
+  String get botNewChat => 'নতুন চ্যাট';
+
+  @override
+  String get botThinking => 'ভাবছে';
+
+  @override
+  String get botOfflineLine =>
+      'সহায়কের সংযোগ দরকার। অফলাইনে কিছু উত্তর হয় না।';
+
+  @override
+  String get botAskKitchen => 'রান্নাঘর নিয়ে জিজ্ঞাসা করুন…';
+
+  @override
+  String botAskDish(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'এই পদ নিয়ে জিজ্ঞাসা করুন · v$versionString';
+  }
+
+  @override
+  String get botOutOfQuestions => 'আজকের প্রশ্ন শেষ';
+
+  @override
+  String get botNoConnection => 'কোনো সংযোগ নেই';
+
+  @override
+  String get botCapNotice => 'আপনি আজকের প্রশ্ন ব্যবহার করেছেন। কাল আবার আসবে।';
+
+  @override
+  String get botOfflineNotice =>
+      'সহায়কের সংযোগ দরকার। এখানে অফলাইনে কিছু উত্তর হয় না।';
+
+  @override
+  String botWhichDish(String choices) {
+    return 'কোন পদটি বলেছেন? $choices';
+  }
+
+  @override
+  String botAddedToFridge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ফ্রিজে $countটি জিনিস।',
+      one: 'ফ্রিজে ১টি জিনিস।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get botDestructiveRefusal =>
+      'আমি এখান থেকে আপনার জার্নাল বদলাতে পারি না। পদটি (বা তার ⋯ মেনু) খুলুন, আসল প্রবাহ তা করবে।';
+
+  @override
+  String botAddMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি অনুপস্থিত যোগ করুন',
+      one: '১টি অনুপস্থিত যোগ করুন',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String botAddedToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি জিনিস আপনার তালিকায় যোগ হয়েছে',
+      one: '১টি জিনিস আপনার তালিকায় যোগ হয়েছে',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get botNotThis => 'এটি নয়';
+
+  @override
+  String get botAddToFridgeQuestion => 'ফ্রিজে যোগ করবেন?';
+
+  @override
+  String botAddCountToFridge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ফ্রিজে $countটি জিনিস যোগ করুন',
+      one: 'ফ্রিজে ১টি জিনিস যোগ করুন',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get botAmountUnknown => 'পরিমাণ?';
+
+  @override
+  String botSuggestionMeta(String source, int have, int total) {
+    final intl.NumberFormat haveNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String haveString = haveNumberFormat.format(have);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return '$source · $totalString-এর মধ্যে $haveString';
+  }
+
+  @override
+  String get botStarterFridge => 'আপনার ফ্রিজে কী আছে?';
+
+  @override
+  String get botStarterWall => 'আমাকে ওয়াল থেকে কিছু দেখান';
+
+  @override
+  String get botStarterPhoto => 'আমার কাছে একটি পদের ছবি আছে';
+
+  @override
+  String botStarterDinner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'আপনার ফ্রিজে $countটি জিনিস আছে। তা দিয়ে রাতের খাবার?',
+      one: 'আপনার ফ্রিজে ১টি জিনিস আছে। তা দিয়ে রাতের খাবার?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatEarlier(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'আগেরগুলো দেখান ($count)',
+      one: 'আগেরটি দেখান (১)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatAboutStep(int step) {
+    final intl.NumberFormat stepNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String stepString = stepNumberFormat.format(step);
+
+    return 'ধাপ $stepString নিয়ে';
+  }
+
+  @override
+  String get chatAskHint => 'জিজ্ঞাসা করুন, বা মাইক চেপে ধরুন';
+
+  @override
+  String get chatResolveChange => 'উপরের পরিবর্তনটি সমাধান করুন';
+
+  @override
+  String get chatAsk => 'জিজ্ঞাসা';
+
+  @override
+  String chatVersionDivider(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString এখান থেকে শুরু';
+  }
+
+  @override
+  String chatApplied(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'V$versionString · প্রয়োগ হয়েছে';
+  }
+
+  @override
+  String chatOpenVersion(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString খুলুন';
+  }
+
+  @override
+  String get chatUndo => 'ফিরিয়ে নিন';
+
+  @override
+  String get chatRecipeChange => 'রেসিপি পরিবর্তন';
+
+  @override
+  String chatVersionArrow(int from, int to) {
+    final intl.NumberFormat fromNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String fromString = fromNumberFormat.format(from);
+    final intl.NumberFormat toNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String toString = toNumberFormat.format(to);
+
+    return 'v$fromString → v$toString';
+  }
+
+  @override
+  String chatMoreEdits(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count আরও',
+      one: '+১ আরও',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatCreatesVersion(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString তৈরি করে — এই বার্তা থেকে';
+  }
+
+  @override
+  String get chatRecompute => 'আবার হিসাব করুন';
+
+  @override
+  String get chatDiscard => 'বাদ দিন';
+
+  @override
+  String get chatNotApplied => 'প্রয়োগ হয়নি';
+
+  @override
+  String get chatNothingChanged => 'আপনার রেসিপিতে কিছু বদলায়নি।';
+
+  @override
+  String get chatTryAgain => 'আবার চেষ্টা করুন';
+
+  @override
+  String get chatApplying => 'প্রয়োগ হচ্ছে…';
+
+  @override
+  String chatApplyAs(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString হিসেবে প্রয়োগ করুন';
+  }
 }

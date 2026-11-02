@@ -370,5 +370,207 @@
         "type": "int"
       }
     }
+  },
+  "botNoDish": "No dish",
+  "botDishFallback": "Dish",
+  "botCookingStep": "Cooking · step {step} of {total}",
+  "@botCookingStep": {
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "botTalkAbout": "Talk about…",
+  "botThisDish": "This dish",
+  "botNoDishKitchen": "No dish — the kitchen",
+  "botOpen": "Open",
+  "botMinimise": "Minimise",
+  "botNewChat": "New chat",
+  "botThinking": "THINKING",
+  "botOfflineLine": "The assistant needs a connection. Nothing is answered offline.",
+  "botAskKitchen": "Ask about the kitchen…",
+  "botAskDish": "Ask about this dish · v{version}",
+  "@botAskDish": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "botOutOfQuestions": "Out of questions for today",
+  "botNoConnection": "No connection",
+  "botCapNotice": "You have used today’s questions. They come back tomorrow.",
+  "botOfflineNotice": "The assistant needs a connection. Nothing here is answered offline.",
+  "botWhichDish": "Which dish did you mean? {choices}",
+  "@botWhichDish": {
+    "placeholders": {
+      "choices": {
+        "type": "String"
+      }
+    }
+  },
+  "botAddedToFridge": "{count, plural, =1{1 item in the fridge.} other{{count} items in the fridge.}}",
+  "@botAddedToFridge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "botDestructiveRefusal": "I can’t change your journal from here. Open the dish (or its ⋯ menu) and the real flow will do it.",
+  "botAddMissing": "{count, plural, =1{Add 1 missing} other{Add {count} missing}}",
+  "@botAddMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "botAddedToList": "{count, plural, =1{1 item added to your list} other{{count} items added to your list}}",
+  "@botAddedToList": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "botNotThis": "Not this",
+  "botAddToFridgeQuestion": "Add to the fridge?",
+  "botAddCountToFridge": "{count, plural, =1{Add 1 item to fridge} other{Add {count} items to fridge}}",
+  "@botAddCountToFridge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "botAmountUnknown": "amount?",
+  "botSuggestionMeta": "{source} · {have} of {total}",
+  "@botSuggestionMeta": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "have": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "botStarterFridge": "What's in your fridge?",
+  "botStarterWall": "Show me something from the Wall",
+  "botStarterPhoto": "I have a photo of a dish",
+  "botStarterDinner": "{count, plural, =1{You have 1 thing in the fridge. Dinner from it?} other{You have {count} things in the fridge. Dinner from them?}}",
+  "@botStarterDinner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatEarlier": "{count, plural, =1{Show earlier (1)} other{Show earlier ({count})}}",
+  "@chatEarlier": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatAboutStep": "about step {step}",
+  "@chatAboutStep": {
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatAskHint": "Ask, or hold the mic",
+  "chatResolveChange": "Resolve the change above",
+  "chatAsk": "Ask",
+  "chatVersionDivider": "v{version} starts here",
+  "@chatVersionDivider": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatApplied": "V{version} · APPLIED",
+  "@chatApplied": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatOpenVersion": "Open v{version}",
+  "@chatOpenVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatUndo": "Undo",
+  "chatRecipeChange": "RECIPE CHANGE",
+  "chatVersionArrow": "v{from} → v{to}",
+  "@chatVersionArrow": {
+    "placeholders": {
+      "from": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "to": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatMoreEdits": "{count, plural, =1{+1 more} other{+{count} more}}",
+  "@chatMoreEdits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chatCreatesVersion": "Creates v{version} — from this message",
+  "@chatCreatesVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "chatRecompute": "Recompute",
+  "chatDiscard": "Discard",
+  "chatNotApplied": "NOT APPLIED",
+  "chatNothingChanged": "Nothing changed in your recipe.",
+  "chatTryAgain": "Try again",
+  "chatApplying": "Applying…",
+  "chatApplyAs": "Apply as v{version}",
+  "@chatApplyAs": {
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }

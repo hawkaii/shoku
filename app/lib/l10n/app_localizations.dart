@@ -1205,6 +1205,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 item in the fridge} other{{count} items in the fridge}}'**
   String pantryInFridgeSnack(int count);
+
+  /// No description provided for @botNoDish.
+  ///
+  /// In en, this message translates to:
+  /// **'No dish'**
+  String get botNoDish;
+
+  /// No description provided for @botDishFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Dish'**
+  String get botDishFallback;
+
+  /// No description provided for @botCookingStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking · step {step} of {total}'**
+  String botCookingStep(int step, int total);
+
+  /// No description provided for @botTalkAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk about…'**
+  String get botTalkAbout;
+
+  /// No description provided for @botThisDish.
+  ///
+  /// In en, this message translates to:
+  /// **'This dish'**
+  String get botThisDish;
+
+  /// No description provided for @botNoDishKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'No dish — the kitchen'**
+  String get botNoDishKitchen;
+
+  /// No description provided for @botOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get botOpen;
+
+  /// No description provided for @botMinimise.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimise'**
+  String get botMinimise;
+
+  /// No description provided for @botNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get botNewChat;
+
+  /// No description provided for @botThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'THINKING'**
+  String get botThinking;
+
+  /// No description provided for @botOfflineLine.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant needs a connection. Nothing is answered offline.'**
+  String get botOfflineLine;
+
+  /// No description provided for @botAskKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about the kitchen…'**
+  String get botAskKitchen;
+
+  /// No description provided for @botAskDish.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this dish · v{version}'**
+  String botAskDish(int version);
+
+  /// No description provided for @botOutOfQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of questions for today'**
+  String get botOutOfQuestions;
+
+  /// No description provided for @botNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get botNoConnection;
+
+  /// No description provided for @botCapNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used today’s questions. They come back tomorrow.'**
+  String get botCapNotice;
+
+  /// No description provided for @botOfflineNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant needs a connection. Nothing here is answered offline.'**
+  String get botOfflineNotice;
+
+  /// No description provided for @botWhichDish.
+  ///
+  /// In en, this message translates to:
+  /// **'Which dish did you mean? {choices}'**
+  String botWhichDish(String choices);
+
+  /// No description provided for @botAddedToFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item in the fridge.} other{{count} items in the fridge.}}'**
+  String botAddedToFridge(int count);
+
+  /// No description provided for @botDestructiveRefusal.
+  ///
+  /// In en, this message translates to:
+  /// **'I can’t change your journal from here. Open the dish (or its ⋯ menu) and the real flow will do it.'**
+  String get botDestructiveRefusal;
+
+  /// No description provided for @botAddMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 missing} other{Add {count} missing}}'**
+  String botAddMissing(int count);
+
+  /// No description provided for @botAddedToList.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item added to your list} other{{count} items added to your list}}'**
+  String botAddedToList(int count);
+
+  /// No description provided for @botNotThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Not this'**
+  String get botNotThis;
+
+  /// No description provided for @botAddToFridgeQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the fridge?'**
+  String get botAddToFridgeQuestion;
+
+  /// No description provided for @botAddCountToFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 item to fridge} other{Add {count} items to fridge}}'**
+  String botAddCountToFridge(int count);
+
+  /// No description provided for @botAmountUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'amount?'**
+  String get botAmountUnknown;
+
+  /// No description provided for @botSuggestionMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{source} · {have} of {total}'**
+  String botSuggestionMeta(String source, int have, int total);
+
+  /// No description provided for @botStarterFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s in your fridge?'**
+  String get botStarterFridge;
+
+  /// No description provided for @botStarterWall.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me something from the Wall'**
+  String get botStarterWall;
+
+  /// No description provided for @botStarterPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a photo of a dish'**
+  String get botStarterPhoto;
+
+  /// No description provided for @botStarterDinner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You have 1 thing in the fridge. Dinner from it?} other{You have {count} things in the fridge. Dinner from them?}}'**
+  String botStarterDinner(int count);
+
+  /// No description provided for @chatEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show earlier (1)} other{Show earlier ({count})}}'**
+  String chatEarlier(int count);
+
+  /// No description provided for @chatAboutStep.
+  ///
+  /// In en, this message translates to:
+  /// **'about step {step}'**
+  String chatAboutStep(int step);
+
+  /// No description provided for @chatAskHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask, or hold the mic'**
+  String get chatAskHint;
+
+  /// No description provided for @chatResolveChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve the change above'**
+  String get chatResolveChange;
+
+  /// No description provided for @chatAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get chatAsk;
+
+  /// No description provided for @chatVersionDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} starts here'**
+  String chatVersionDivider(int version);
+
+  /// No description provided for @chatApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'V{version} · APPLIED'**
+  String chatApplied(int version);
+
+  /// No description provided for @chatOpenVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Open v{version}'**
+  String chatOpenVersion(int version);
+
+  /// No description provided for @chatUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get chatUndo;
+
+  /// No description provided for @chatRecipeChange.
+  ///
+  /// In en, this message translates to:
+  /// **'RECIPE CHANGE'**
+  String get chatRecipeChange;
+
+  /// No description provided for @chatVersionArrow.
+  ///
+  /// In en, this message translates to:
+  /// **'v{from} → v{to}'**
+  String chatVersionArrow(int from, int to);
+
+  /// No description provided for @chatMoreEdits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 more} other{+{count} more}}'**
+  String chatMoreEdits(int count);
+
+  /// No description provided for @chatCreatesVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates v{version} — from this message'**
+  String chatCreatesVersion(int version);
+
+  /// No description provided for @chatRecompute.
+  ///
+  /// In en, this message translates to:
+  /// **'Recompute'**
+  String get chatRecompute;
+
+  /// No description provided for @chatDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get chatDiscard;
+
+  /// No description provided for @chatNotApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT APPLIED'**
+  String get chatNotApplied;
+
+  /// No description provided for @chatNothingChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing changed in your recipe.'**
+  String get chatNothingChanged;
+
+  /// No description provided for @chatTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get chatTryAgain;
+
+  /// No description provided for @chatApplying.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying…'**
+  String get chatApplying;
+
+  /// No description provided for @chatApplyAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply as v{version}'**
+  String chatApplyAs(int version);
 }
 
 class _AppLocalizationsDelegate

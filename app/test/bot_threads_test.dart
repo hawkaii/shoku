@@ -315,7 +315,7 @@ void main() {
       await send(tester, 'add potato');
 
       expect(find.textContaining('Paneer butter masala'), findsOneWidget);
-      expect(find.byKey(const ValueKey('bot-notice')), findsOneWidget);
+      expect(find.byKey(const ValueKey('bot-choices')), findsOneWidget);
     });
   });
 

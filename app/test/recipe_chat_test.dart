@@ -117,7 +117,7 @@ void main() {
     await tester.pumpWidget(chat(_FakeAssistant(() async => throw Exception('down'))));
     await send(tester, 'is this done?');
 
-    expect(find.text('No connection — answers need the network.'), findsOneWidget);
+    expect(find.byKey(const ValueKey('chat-notice')), findsOneWidget);
     final field = tester.widget<TextField>(find.byType(TextField));
     expect(field.enabled, isFalse, reason: 'nothing typed can be sent');
     expect(find.text('No connection'), findsOneWidget);
@@ -259,7 +259,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 250));
 
       expect(find.byKey(const ValueKey('chat-thinking')), findsNothing);
-      expect(find.text('No connection — answers need the network.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('chat-notice')), findsOneWidget);
       expect(find.text('is this spicy?'), findsOneWidget,
           reason: 'the turn that was sent is still in the conversation');
       expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
