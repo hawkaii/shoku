@@ -3,6 +3,29 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.27.0] — 2026-11-02
+
+### Added
+- Scopes, and a kitchen that can suggest and capture *(assistant)* — [`21cd114`](https://github.com/hawkaii/food-finder-app/commit/21cd114a71b48ee71437bb11b663eea5e8190bb1)
+- One assistant on every page, in the scope you are looking at *(bot)* — [`2d5b20f`](https://github.com/hawkaii/food-finder-app/commit/2d5b20f95bc818bf1554e9b1e1db31ed49a8287b)
+- Scope is visible, threads stay apart, and the kitchen can offer dinner *(bot)* — [`7cd5d78`](https://github.com/hawkaii/food-finder-app/commit/7cd5d780b3a6dbf0ac66895d0574a97fd6fb9de5)
+- The tomato-sparkle mark, drawn once and sized everywhere *(bot)* — [`8c31e86`](https://github.com/hawkaii/food-finder-app/commit/8c31e862b587896cadf2dcb7e943c021b5a963c0)
+
+### Chores
+- V1.27.0 — the Shoku bot *(release)* — [`7a85fb5`](https://github.com/hawkaii/food-finder-app/commit/7a85fb5107659942a2e584f31495c35e81cc8197)
+
+### Docs
+- V1.26.1 [skip ci] *(changelog)* — [`8b5de13`](https://github.com/hawkaii/food-finder-app/commit/8b5de13a7430978b28b18e8c388f6f71bda86866)
+
+### Fixed
+- One MaterialApp, and the gate is a redirect — the two-app swap is gone *(startup)* — [`d134b92`](https://github.com/hawkaii/food-finder-app/commit/d134b92fb271ad8b2a2293df13cbb3e7e47b36c9)
+- A page that started empty re-reads the shelf and repaints *(journal)* — [`ffa4b17`](https://github.com/hawkaii/food-finder-app/commit/ffa4b1716fc5ec85fbdb5c75d6d666ab35f05d91)
+- One build path, so an empty first frame cannot stick *(journal)* — [`84a31e4`](https://github.com/hawkaii/food-finder-app/commit/84a31e48c8e0fb51c1ddf00cc9b53af071a32f81)
+- The orb does not touch the database on first frame *(bot)* — [`b91f4ad`](https://github.com/hawkaii/food-finder-app/commit/b91f4ad176a2d5fd9bf3416a28d16ff1ad5f0ec5)
+
+### Other
+- The Shoku bot — [`9895687`](https://github.com/hawkaii/food-finder-app/commit/98956875f1d8b19f37138521e7f710e68f0391e1)
+
 ## [1.26.1] — 2026-11-02
 
 ### Docs
