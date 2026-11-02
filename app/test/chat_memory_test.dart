@@ -175,7 +175,7 @@ void main() {
 
       expect(find.text('Ask about this dish · v2'), findsOneWidget);
 
-      await tester.tap(find.byKey(const ValueKey('chat-clear')));
+      await tester.tap(find.byKey(const ValueKey('bot-new-chat')));
       await tester.pumpAndSettle();
 
       expect(find.text('remember me'), findsNothing);

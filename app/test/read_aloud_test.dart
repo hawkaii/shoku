@@ -95,6 +95,6 @@ void main() {
 
     expect(find.byKey(const ValueKey('read-aloud-toggle')), findsNothing);
     expect(find.text('Read aloud'), findsNothing);
-    expect(find.byKey(const ValueKey('chat-clear')), findsOneWidget);
+    expect(find.byKey(const ValueKey('bot-new-chat')), findsOneWidget);
   });
 }

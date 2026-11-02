@@ -128,20 +128,7 @@ class BotController extends StateNotifier<BotState> {
     }
   }
 
-  List<String> _starters() {
-    final fridge = _ref.read(pantryStoreProvider);
-    final stocked = fridge.where((item) => !item.wanted).length;
-    if (stocked == 0) {
-      return const [
-        "What's in your fridge?",
-        'Show me something from the Wall',
-        'I have a photo of a dish',
-      ];
-    }
-    return [
-      'You have $stocked ${stocked == 1 ? 'thing' : 'things'} in the fridge. Dinner from them?',
-    ];
-  }
+  List<String> _starters() => _startersFor(_ref.read(pantryStoreProvider));
 
   void setDraft(String text) => state = state.copyWith(draft: text);
 
@@ -300,6 +287,27 @@ class BotController extends StateNotifier<BotState> {
   void addTurn(BotTurn turn) =>
       state = state.copyWith(turns: [...state.turns, turn]);
 }
+
+/// What an empty thread offers: three starters in an empty kitchen, and the
+/// dinner question when there is something to cook. Watches the pantry, so the
+/// count is live rather than a snapshot from when the sheet opened.
+List<String> _startersFor(List<PantryItem> fridge) {
+  final stocked = fridge.where((item) => !item.wanted).length;
+  if (stocked == 0) {
+    return const [
+      "What's in your fridge?",
+      'Show me something from the Wall',
+      'I have a photo of a dish',
+    ];
+  }
+  return [
+    'You have $stocked ${stocked == 1 ? 'thing' : 'things'} in the fridge. Dinner from them?',
+  ];
+}
+
+final botStartersProvider = Provider<List<String>>(
+  (ref) => _startersFor(ref.watch(pantryStoreProvider)),
+);
 
 final botControllerProvider =
     StateNotifierProvider<BotController, BotState>((ref) => BotController(ref));

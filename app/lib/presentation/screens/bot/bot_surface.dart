@@ -283,7 +283,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
 
   Widget _thread(BuildContext context, BotState state) {
     final c = context.colors;
-    final starters = state.starters;
+    final starters = ref.watch(botStartersProvider);
     return ListView(
       controller: _scroll,
       reverse: true,

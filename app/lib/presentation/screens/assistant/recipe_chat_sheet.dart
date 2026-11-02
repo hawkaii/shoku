@@ -14,6 +14,8 @@ import '../../../data/services/speech_service.dart';
 import '../../state/assistant_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
+import '../bot/bot_scope.dart';
+import '../bot/scope_switcher.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
 import '../../widgets/kit/motion.dart';
@@ -275,6 +277,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             scope: 'dish',
             dishId: widget.dish.id,
             versionId: _versionId,
+            // In cook mode the question is about the step on screen.
+            stepIndex: widget.stepIndex,
             question: '$_scope$question',
             requestId: _uuid.v4(),
             history: history,
@@ -433,10 +437,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                   ),
                 ),
                 GestureDetector(
-                  key: const ValueKey('chat-clear'),
+                  key: const ValueKey('bot-new-chat'),
                   onTap: _turns.isEmpty ? null : _clear,
                   behavior: HitTestBehavior.opaque,
-                  child: Text('Clear chat',
+                  child: Text('New chat',
                       style: ShokuType.label.copyWith(
                           fontSize: 9.5, color: c.inkMuted)),
                 ),
@@ -493,6 +497,20 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
               ),
             ),
             if (_appliedVersion != null) _appliedBar(context, _appliedVersion!),
+            const SizedBox(height: ShokuSpace.sm),
+            // The scope is never silent: it is above the input, always.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                key: const ValueKey('bot-scope-chip'),
+                onTap: () => showScopeSwitcher(context),
+                child: ShokuChip(
+                  botScopeLabel(ref, BotScope(dishId: widget.dish.id)),
+                  icon: Icons.expand_more,
+                  color: c.accent,
+                ),
+              ),
+            ),
             const SizedBox(height: ShokuSpace.sm),
             MicField(
               controller: _input,
