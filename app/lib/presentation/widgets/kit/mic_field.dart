@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import 'motion.dart';
 
@@ -8,7 +9,7 @@ import 'motion.dart';
 /// the consent gesture, and it is visible.
 class MicField extends StatefulWidget {
   final TextEditingController controller;
-  final String hint;
+  final String? hint;
   final int maxLines;
 
   /// Composer-off: cap reached, offline, or a change waiting on an answer.
@@ -17,7 +18,7 @@ class MicField extends StatefulWidget {
   const MicField({
     super.key,
     required this.controller,
-    this.hint = 'Type or hold the mic',
+    this.hint,
     this.maxLines = 3,
     this.enabled = true,
   });
@@ -67,6 +68,7 @@ class _MicFieldState extends State<MicField> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 6),
       decoration: BoxDecoration(
@@ -90,7 +92,7 @@ class _MicFieldState extends State<MicField> {
               cursorColor: c.accent,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: _listening ? 'Listening…' : widget.hint,
+                hintText: _listening ? l10n.micListening : (widget.hint ?? l10n.micHint),
                 hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
             ),

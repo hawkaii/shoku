@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/fridge_match.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/speech_service.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../state/pantry_providers.dart';
@@ -47,6 +51,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final dish = ref.watch(dishProvider(widget.dishId));
     if (dish == null || dish.versions.isEmpty) {
       return _DishUnavailable(dishId: widget.dishId);
@@ -63,7 +68,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
       unset: matcher.isUnset,
     );
 
-    _noteIfVersionWent(dish, version, inspected);
+    _noteIfVersionWent(dish, version, inspected, l10n);
 
     return Scaffold(
       body: SafeArea(
@@ -109,11 +114,11 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                             ],
                             if (dish.isSample) ...[
                               const SizedBox(height: 6),
-                              ShokuChip('Sample',
+                              ShokuChip(l10n.labelSample,
                                   color: c.reward, filled: true),
                               const SizedBox(height: 4),
                               Text(
-                                'Sign in to import your own reels and talk to the recipe.',
+                                l10n.dishSampleGate,
                                 key: const ValueKey('sample-gate'),
                                 style: ShokuType.bodySmall
                                     .copyWith(color: c.inkMuted),
@@ -124,7 +129,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                       ),
                       const SizedBox(width: ShokuSpace.sm),
                       Text(
-                        count(dish.cookCount, 'cook'),
+                        l10n.dishCookCount(dish.cookCount),
                         style: ShokuType.stat
                             .copyWith(fontSize: 11, color: c.inkMuted),
                       ),
@@ -133,7 +138,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                   if (version.tags.contains('from video')) ...[
                     const SizedBox(height: ShokuSpace.xs),
                     Text(
-                      'read from the video — amounts may be off',
+                      l10n.dishFromVideoNote,
                       key: const ValueKey('from-video-note'),
                       style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                     ),
@@ -197,7 +202,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                 ],
               ),
               child: Center(
-                child: Text('Start cook mode',
+                child: Text(l10n.dishStartCookMode,
                     style: ShokuType.title
                         .copyWith(color: c.onAccent, fontSize: 14)),
               ),
@@ -210,7 +215,12 @@ class _DishScreenState extends ConsumerState<DishScreen> {
 
   /// A version can disappear through a sync from another device. Saying so
   /// beats silently renumbering the page under the cook's eyes.
-  void _noteIfVersionWent(Dish dish, RecipeVersion version, int inspected) {
+  void _noteIfVersionWent(
+    Dish dish,
+    RecipeVersion version,
+    int inspected,
+    AppLocalizations l10n,
+  ) {
     if (_lastVersionId != null &&
         _lastVersionId != version.id &&
         !dish.versions.any((v) => v.id == _lastVersionId)) {
@@ -218,7 +228,9 @@ class _DishScreenState extends ConsumerState<DishScreen> {
       final showing = _numberOf(version, inspected);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() => _goneNote = 'v$gone is gone — showing v$showing');
+          setState(() {
+            _goneNote = l10n.dishVersionGone(gone, showing);
+          });
         }
       });
     }
@@ -232,6 +244,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
 
   Widget _header(BuildContext context, Dish dish, RecipeVersion version) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         ShokuSpace.lg,
@@ -261,13 +274,13 @@ class _DishScreenState extends ConsumerState<DishScreen> {
           IconButton(
             key: const ValueKey('dish-speak'),
             icon: Icon(Icons.volume_up, size: 17, color: c.inkMuted),
-            tooltip: 'Read this recipe',
+            tooltip: l10n.dishReadRecipe,
             onPressed: () => _speakAll(dish, version),
           ),
           PopupMenuButton<String>(
             key: const ValueKey('dish-overflow'),
             icon: Icon(Icons.more_horiz, size: 19, color: c.inkMuted),
-            tooltip: 'More',
+            tooltip: l10n.dishMore,
             color: c.surface,
             onSelected: (value) {
               switch (value) {
@@ -283,17 +296,17 @@ class _DishScreenState extends ConsumerState<DishScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                key: ValueKey('dish-menu-cook'),
+              PopupMenuItem(
+                key: const ValueKey('dish-menu-cook'),
                 value: 'cooked',
-                child: Text('I just cooked this'),
+                child: Text(l10n.dishMenuCooked),
               ),
               PopupMenuItem(
                 key: const ValueKey('dish-menu-status'),
                 value: 'status',
                 child: Text(dish.status == DishStatus.toCook
-                    ? 'Mark as cooked'
-                    : 'Mark as to cook'),
+                    ? l10n.actionMarkCooked
+                    : l10n.dishMarkToCook),
               ),
             ],
           ),
@@ -313,6 +326,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
 
   Widget _fridgeStrip(BuildContext context, Dish dish, FridgeCoverage coverage) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Container(
       key: const ValueKey('fridge-strip'),
       padding: const EdgeInsets.all(ShokuSpace.md),
@@ -349,7 +363,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                 minimumSize: const Size(0, 30),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: Text('Set up your fridge',
+              child: Text(l10n.dishSetUpFridge,
                   style: ShokuType.label.copyWith(fontSize: 9.5, color: c.accent)),
             )
           else if (coverage.missing > 0)
@@ -357,7 +371,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
               key: const ValueKey('fridge-add-missing'),
               onTap: () => _addMissing(coverage),
               child: Text(
-                'Add ${coverage.missingNames.length} missing to list',
+                l10n.dishAddMissingToList(coverage.missingNames.length),
                 style: ShokuType.label.copyWith(fontSize: 9.5, color: c.accent),
               ),
             ),
@@ -369,15 +383,16 @@ class _DishScreenState extends ConsumerState<DishScreen> {
   Future<void> _addMissing(FridgeCoverage coverage) async {
     final names = coverage.missingNames;
     if (names.isEmpty) return;
+    final l10n = context.l10n;
     final store = ref.read(pantryStoreProvider.notifier);
     final ids = await store.wantMany(names);
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
-        content: Text('${ids.length} added to your list'),
+        content: Text(l10n.dishAddedToList(ids.length)),
         action: SnackBarAction(
-          label: 'Undo',
+          label: l10n.chatUndo,
           onPressed: () => store.removeMany(ids),
         ),
       ),
@@ -392,6 +407,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     FridgeCoverage coverage,
   ) {
     final c = context.colors;
+    final l10n = context.l10n;
     final missing = coverage.missing;
     return Container(
       decoration: BoxDecoration(
@@ -413,16 +429,17 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                   const SizedBox(width: ShokuSpace.sm),
                   Expanded(
                     child: Text(
-                      [
-                        count(version.ingredients.length, 'ingredient'),
-                        if (!coverage.unset && missing > 0) '$missing missing',
-                      ].join(' · '),
+                      metaLine([
+                        l10n.dishIngredientsCount(version.ingredients.length),
+                        if (!coverage.unset && missing > 0)
+                          l10n.dishMissingCount(missing),
+                      ]),
                       style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                   ),
                   PopupMenuButton<int>(
                     key: const ValueKey('version-picker'),
-                    tooltip: 'Pick a version',
+                    tooltip: l10n.dishPickVersion,
                     color: c.surface,
                     onSelected: (number) => ref
                         .read(inspectedVersionProvider(widget.dishId).notifier)
@@ -432,7 +449,9 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         PopupMenuItem(
                           value: v,
                           child: Text(
-                            'v$v${v == inspected ? ' · showing' : ''}',
+                            v == inspected
+                                ? l10n.dishVersionShowing(v)
+                                : 'v$v',
                             style: ShokuType.bodySmall,
                           ),
                         ),
@@ -496,6 +515,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
   Widget _steps(
       BuildContext context, Dish dish, RecipeVersion version, List<String> steps) {
     final c = context.colors;
+    final l10n = context.l10n;
     final minutes = dish.minutes;
     return Container(
       decoration: BoxDecoration(
@@ -517,10 +537,10 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                   const SizedBox(width: ShokuSpace.sm),
                   Expanded(
                     child: Text(
-                      [
-                        count(steps.length, 'step'),
-                        if (minutes > 0) '$minutes min',
-                      ].join(' · '),
+                      metaLine([
+                        l10n.dishStepsCount(steps.length),
+                        if (minutes > 0) l10n.minutesShort(minutes),
+                      ]),
                       style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                   ),
@@ -576,7 +596,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                                     dish: dish, stepIndex: s),
                                 behavior: HitTestBehavior.opaque,
                                 child: Text(
-                                  'Ask about step ${s + 1}',
+                                  l10n.dishAskAboutStep(s + 1),
                                   style: ShokuType.label.copyWith(
                                       fontSize: 9, color: c.accent),
                                 ),
@@ -596,6 +616,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
 
   Widget _history(BuildContext context, Dish dish, RecipeVersion version) {
     final c = context.colors;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final recommended = dish.versions.last;
     final altered = recommended.changes
         .any((change) => change != 'First attempt' && change != 'No changes');
@@ -618,10 +640,10 @@ class _DishScreenState extends ConsumerState<DishScreen> {
               padding: const EdgeInsets.all(ShokuSpace.md),
               child: Row(
                 children: [
-                  Text('HISTORY',
+                  Text(l10n.dishHistory,
                       style: ShokuType.label.copyWith(color: c.inkMuted)),
                   const Spacer(),
-                  Text(count(cooks.length, 'cook'),
+                  Text(l10n.dishCookCount(cooks.length),
                       style: ShokuType.stat
                           .copyWith(fontSize: 10, color: c.inkMuted)),
                   Icon(_historyOpen ? Icons.expand_less : Icons.expand_more,
@@ -637,7 +659,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: cooks.isEmpty
-                    ? Text('Not cooked yet. The first log becomes v1.',
+                    ? Text(l10n.dishNotCookedYet,
                         style: ShokuType.bodySmall
                             .copyWith(color: c.inkMuted))
                     : Wrap(
@@ -646,7 +668,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         children: [
                           for (final log in cooks)
                             ShokuChip(
-                              'v${log.versionNumber} · ${log.outcome.label}',
+                              l10n.dishHistoryEntry(log.versionNumber,
+                                  outcomeLabel(l10n, log.outcome)),
                               color: log.outcome == CookOutcome.nailedIt
                                   ? c.ready
                                   : c.inkMuted,
@@ -663,7 +686,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('What altered',
+                    Text(l10n.dishWhatAltered,
                         style:
                             ShokuType.label.copyWith(color: c.inkMuted)),
                     const SizedBox(height: 4),
@@ -688,7 +711,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     ShokuSpace.md, 0, ShokuSpace.md, ShokuSpace.md),
-                child: Text('Not cooked yet. The first log becomes v1.',
+                child: Text(l10n.dishNotCookedYet,
                     style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
               )
             else
@@ -726,8 +749,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                                           fontSize: 11, color: c.accent)),
                                   const SizedBox(width: ShokuSpace.xs),
                                   Text(
-                                      '· ${_date(log.cookedAt)}'
-                                      '${_chatEdited(dish, log.versionNumber) ? ' · from a chat edit' : ''}',
+                                      '· ${_date(locale, log.cookedAt)}'
+                                      '${_chatEdited(dish, log.versionNumber) ? ' · ${l10n.dishFromChatEdit}' : ''}',
                                       style: ShokuType.stat.copyWith(
                                           fontSize: 11, color: c.inkMuted)),
                                   const Spacer(),
@@ -739,7 +762,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                log.note.isEmpty ? 'No note' : log.note,
+                                log.note.isEmpty ? l10n.dishNoNote : log.note,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: ShokuType.bodySmall
@@ -766,8 +789,8 @@ bool _chatEdited(Dish dish, int versionNumber) {
   return false;
 }
 
-String _date(DateTime d) =>
-    '${d.day.toString().padLeft(2, '0')} ${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]}';
+String _date(String locale, DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')} ${DateFormat.MMM(locale).format(d)}';
 
 /// Shown when the dish is missing, was deleted, or is an import with nothing
 /// extracted yet. Beats a `Bad state: No element` from indexing an empty list.
@@ -778,6 +801,7 @@ class _DishUnavailable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: c.canvas,
       body: SafeArea(
@@ -788,19 +812,19 @@ class _DishUnavailable extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'This dish is not here',
+                  l10n.dishUnavailableTitle,
                   style: ShokuType.title.copyWith(color: c.ink),
                 ),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
-                  'It may still be loading, or it was removed.',
+                  l10n.dishUnavailableBody,
                   textAlign: TextAlign.center,
                   style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                 ),
                 const SizedBox(height: ShokuSpace.lg),
                 TextButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text('Back to the journal'),
+                  child: Text(l10n.dishBackToJournal),
                 ),
               ],
             ),
@@ -821,11 +845,11 @@ class _ProvenanceCard extends StatelessWidget {
 
   const _ProvenanceCard({required this.version});
 
-  String get _platformLabel =>
+  String _platformLabel(AppLocalizations l10n) =>
       switch ((version.originPlatform ?? '').toLowerCase()) {
         'instagram' => 'Instagram',
         'youtube' => 'YouTube',
-        _ => 'the source',
+        _ => l10n.dishTheSource,
       };
 
   Future<void> _open(BuildContext context) async {
@@ -839,8 +863,9 @@ class _ProvenanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final handle = version.originHandle;
-    final name = version.originCreator ?? 'Imported';
+    final name = version.originCreator ?? l10n.dishImported;
 
     return Container(
       padding: const EdgeInsets.all(ShokuSpace.md),
@@ -882,7 +907,7 @@ class _ProvenanceCard extends StatelessWidget {
                     Text(
                       [
                         if (handle != null && handle.isNotEmpty) handle,
-                        _platformLabel,
+                        _platformLabel(l10n),
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -906,7 +931,7 @@ class _ProvenanceCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('View the reel',
+                  Text(l10n.dishViewReel,
                       style: ShokuType.label.copyWith(color: c.accent)),
                   const SizedBox(width: 4),
                   Icon(Icons.north_east, size: 13, color: c.accent),

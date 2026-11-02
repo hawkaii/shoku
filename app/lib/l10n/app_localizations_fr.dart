@@ -1111,4 +1111,652 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importReadLink => 'Lire ce lien';
+
+  @override
+  String get dishSampleGate =>
+      'Sign in to import your own reels and talk to the recipe.';
+
+  @override
+  String dishCookCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cooks',
+      one: '1 cook',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dishFromVideoNote => 'read from the video — amounts may be off';
+
+  @override
+  String dishVersionGone(int from, int to) {
+    final intl.NumberFormat fromNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String fromString = fromNumberFormat.format(from);
+    final intl.NumberFormat toNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String toString = toNumberFormat.format(to);
+
+    return 'v$fromString is gone — showing v$toString';
+  }
+
+  @override
+  String get dishStartCookMode => 'Start cook mode';
+
+  @override
+  String get dishReadRecipe => 'Read this recipe';
+
+  @override
+  String get dishMore => 'More';
+
+  @override
+  String get dishMenuCooked => 'I just cooked this';
+
+  @override
+  String get dishMarkToCook => 'Mark as to cook';
+
+  @override
+  String get dishSetUpFridge => 'Set up your fridge';
+
+  @override
+  String dishAddMissingToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count missing to list',
+      one: 'Add 1 missing to list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dishAddedToList(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count added to your list',
+      one: '1 added to your list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dishIngredientsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredients',
+      one: '1 ingredient',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dishMissingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count missing',
+      one: '1 missing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dishPickVersion => 'Pick a version';
+
+  @override
+  String dishVersionShowing(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString · showing';
+  }
+
+  @override
+  String dishStepsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+      one: '1 step',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dishAskAboutStep(int step) {
+    final intl.NumberFormat stepNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String stepString = stepNumberFormat.format(step);
+
+    return 'Ask about step $stepString';
+  }
+
+  @override
+  String get dishHistory => 'HISTORY';
+
+  @override
+  String get dishNotCookedYet => 'Not cooked yet. The first log becomes v1.';
+
+  @override
+  String dishHistoryEntry(int version, String outcome) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'v$versionString · $outcome';
+  }
+
+  @override
+  String get dishWhatAltered => 'What altered';
+
+  @override
+  String get dishFromChatEdit => 'from a chat edit';
+
+  @override
+  String get dishNoNote => 'No note';
+
+  @override
+  String get dishUnavailableTitle => 'This dish is not here';
+
+  @override
+  String get dishUnavailableBody =>
+      'It may still be loading, or it was removed.';
+
+  @override
+  String get dishBackToJournal => 'Back to the journal';
+
+  @override
+  String get dishImported => 'Imported';
+
+  @override
+  String get dishTheSource => 'the source';
+
+  @override
+  String get dishViewReel => 'View the reel';
+
+  @override
+  String get logTitle => 'Log tonight’s cook';
+
+  @override
+  String get logSnapResult => 'SNAP TONIGHT’S RESULT';
+
+  @override
+  String get logPhotoReady => 'PHOTO READY TO UPLOAD';
+
+  @override
+  String get logHowDidItGo => 'how did it go';
+
+  @override
+  String get logNoteLabel => 'a note for you';
+
+  @override
+  String get logNoteHint => 'The pan ran hot, so I pulled it early';
+
+  @override
+  String get logChangeLabel => 'what did you change';
+
+  @override
+  String get logChangeHint => 'More lime, 2 minutes less, air-fried instead';
+
+  @override
+  String get logSaveWithPhoto => 'Save with photo';
+
+  @override
+  String get logSaveTonight => 'Save tonight';
+
+  @override
+  String logSaveUpgrade(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Save & upgrade to v$versionString';
+  }
+
+  @override
+  String get logSaveFailed => 'Could not save that cook';
+
+  @override
+  String logSaved(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Logged as v$versionString';
+  }
+
+  @override
+  String logSavedWithOutcome(int version, String outcome) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Logged as v$versionString · $outcome';
+  }
+
+  @override
+  String get debriefTitle => 'How did it go?';
+
+  @override
+  String debriefSubtitle(String title, int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return '$title · becomes v$versionString';
+  }
+
+  @override
+  String get debriefAddPhoto => 'ADD PHOTO';
+
+  @override
+  String get debriefChangePhoto => 'CHANGE PHOTO';
+
+  @override
+  String get debriefRating => 'rating';
+
+  @override
+  String get debriefMoodLabel => 'what kind of cook was it';
+
+  @override
+  String get debriefChangesLabel => 'what altered from the original';
+
+  @override
+  String get debriefNoChanges => 'Nothing yet — add what you did differently.';
+
+  @override
+  String get debriefChangeHint => 'e.g. 2 tbsp honey instead of 3';
+
+  @override
+  String get debriefNoteLabel => 'what was missing';
+
+  @override
+  String get debriefNoteHint => '“needed more acid, next time add lime”';
+
+  @override
+  String get debriefPantryLabel => 'used from pantry';
+
+  @override
+  String get debriefDeduct => 'Deduct what matches';
+
+  @override
+  String debriefSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lines not deducted',
+      one: '1 line not deducted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String debriefSave(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Save as v$versionString';
+  }
+
+  @override
+  String debriefSaveUpgrade(int version) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Save & upgrade to v$versionString';
+  }
+
+  @override
+  String get debriefSaveFailed => 'Could not save this cook';
+
+  @override
+  String debriefSaved(int version, String mood) {
+    final intl.NumberFormat versionNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String versionString = versionNumberFormat.format(version);
+
+    return 'Saved as v$versionString · $mood';
+  }
+
+  @override
+  String get wallSubtitleEmpty => 'Reels people imported';
+
+  @override
+  String wallReelCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reels',
+      one: '1 reel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wallMoreBelow => 'more below';
+
+  @override
+  String get wallReelGone => 'That reel is no longer on the server';
+
+  @override
+  String wallSavedToCookbook(String title) {
+    return 'Saved $title to your cookbook';
+  }
+
+  @override
+  String get wallInCookbook => 'In your cookbook';
+
+  @override
+  String get wallSaving => 'Saving…';
+
+  @override
+  String get wallAddToCookbook => 'Add to cookbook';
+
+  @override
+  String get wallLoadFailed => 'The Wall did not load';
+
+  @override
+  String get wallEmptyTitle => 'Nothing has been imported yet';
+
+  @override
+  String get wallEmptyBody => 'Import a reel and it lands here, for everyone.';
+
+  @override
+  String get wallImportReel => 'Import a reel';
+
+  @override
+  String get wallLoadMoreFailed => 'Could not load more — try again';
+
+  @override
+  String get wallMoreReels => 'More reels';
+
+  @override
+  String get wallEndOfFeed => 'That is every reel for now';
+
+  @override
+  String wallStepsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count steps',
+      one: '1 step',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String wallIngredientsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredients',
+      one: '1 ingredient',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get wallMethod => 'method';
+
+  @override
+  String get wallReelLoadFailed => 'This reel did not load';
+
+  @override
+  String get actionMarkCooked => 'Mark as cooked';
+
+  @override
+  String get actionMoveBackToCook => 'Move back to To cook';
+
+  @override
+  String get actionNeverCooked => 'Never cooked';
+
+  @override
+  String actionCookedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cooked $count times',
+      one: 'Cooked 1 time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get actionStatusCookedBody =>
+      'It moves to Cooked. You can put it back.';
+
+  @override
+  String get actionStatusToCookBody =>
+      'It moves to To cook, ready to make again.';
+
+  @override
+  String get actionDeleteBody => 'Leaves your journal. Asks first.';
+
+  @override
+  String get actionKeep => 'Keep it';
+
+  @override
+  String get actionRemoveTitle => 'Remove this dish?';
+
+  @override
+  String actionRemoveBody(String title) {
+    return '$title leaves your journal, along with its versions and its cooks. The reel is still out there if you want to import it again — this copy is not coming back.';
+  }
+
+  @override
+  String get actionRemove => 'Remove';
+
+  @override
+  String get profileSubtitle => 'The record of what you have actually cooked.';
+
+  @override
+  String get profileAccount => 'account';
+
+  @override
+  String get profileComingSoon => 'Coming soon';
+
+  @override
+  String get profileNutritionBody =>
+      'A future lens on how your versions change a dish.';
+
+  @override
+  String get profileSoon => 'soon';
+
+  @override
+  String get profileAppearance => 'appearance';
+
+  @override
+  String get profileThemeSystem => 'SYSTEM';
+
+  @override
+  String get profileThemeLight => 'LIGHT';
+
+  @override
+  String get profileThemeDark => 'DARK';
+
+  @override
+  String get profileHowItWorks => 'How Shoku works';
+
+  @override
+  String get profileHowItWorksBody => 'The share gesture, in three steps';
+
+  @override
+  String get profileResetJournal => 'Reset journal';
+
+  @override
+  String get profileFooter => 'Shoku · evening kitchen';
+
+  @override
+  String get helpTitle => 'Help & feedback';
+
+  @override
+  String get helpSubtitle => 'Short answers to the things people ask first.';
+
+  @override
+  String get helpStillStuck => 'still stuck';
+
+  @override
+  String get helpStillStuckBody =>
+      'Send the reel link and what you expected. It makes the fix much faster.';
+
+  @override
+  String get nutritionTitle => 'Nutrition';
+
+  @override
+  String get nutritionComingSoon => 'COMING SOON';
+
+  @override
+  String get nutritionHeadline => 'A lens on how your cooking changes.';
+
+  @override
+  String get nutritionBody =>
+      'Your journal works without it. When it lands, it will read only the meals you cook here.';
+
+  @override
+  String get nutritionBackToYou => 'Back to You';
+
+  @override
+  String get exitTitle => 'Leave Shoku?';
+
+  @override
+  String get exitBody => 'Your journal is saved. Nothing is lost.';
+
+  @override
+  String get exitKeepCooking => 'Keep cooking';
+
+  @override
+  String get exitExit => 'Exit';
+
+  @override
+  String get orbAssistant => 'Assistant';
+
+  @override
+  String get orbAskAboutStep => 'Ask about this step';
+
+  @override
+  String timerStart(int minutes) {
+    final intl.NumberFormat minutesNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String minutesString = minutesNumberFormat.format(minutes);
+
+    return 'start $minutesString min timer';
+  }
+
+  @override
+  String get timerTimesUp => 'time\'s up';
+
+  @override
+  String get timerPaused => 'paused';
+
+  @override
+  String get timerRunning => 'running';
+
+  @override
+  String timerOnStep(int step, String state) {
+    final intl.NumberFormat stepNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String stepString = stepNumberFormat.format(step);
+
+    return 'step $stepString · $state';
+  }
+
+  @override
+  String get timerStartAgain => 'Start again';
+
+  @override
+  String get timerResume => 'Resume';
+
+  @override
+  String get timerPause => 'Pause';
+
+  @override
+  String get timerStop => 'Stop';
+
+  @override
+  String get timerAlertsOff =>
+      'alerts are off — enable notifications for Shoku';
+
+  @override
+  String get timerAlertsLate =>
+      'alerts may arrive late — allow exact alarms in settings';
+
+  @override
+  String get cookLeaveTitle => 'Leave this cook?';
+
+  @override
+  String get cookLeaveBody => 'You are part-way through. Nothing is saved yet.';
+
+  @override
+  String cookLeaveChanges(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes in this cook will be discarded.',
+      one: '1 change in this cook will be discarded.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookChangedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changed',
+      one: '1 changed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cookStepLabel(String step) {
+    return 'step $step';
+  }
+
+  @override
+  String get cookTimerCleared => 'Timer cleared — this dish has a new version';
+
+  @override
+  String get cookBack => 'Back';
+
+  @override
+  String get cookFinishLog => 'Finish & log';
+
+  @override
+  String get cookNextStep => 'Next step';
+
+  @override
+  String get cookNoSteps => 'Follow the recipe.';
+
+  @override
+  String get micHint => 'Type or hold the mic';
+
+  @override
+  String get micListening => 'Listening…';
+
+  @override
+  String get searchHint => 'Search recipes, notes, handles';
+
+  @override
+  String hudStreakDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '${count}d',
+      one: '1d',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hudLevel(String level) {
+    return 'LVL $level';
+  }
 }

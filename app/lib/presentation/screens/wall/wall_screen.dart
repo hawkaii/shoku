@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
@@ -51,6 +52,7 @@ class _WallScreenState extends ConsumerState<WallScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final feed = ref.watch(feedStoreProvider);
 
     return SafeArea(
@@ -76,13 +78,15 @@ class _WallScreenState extends ConsumerState<WallScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Wall', style: ShokuType.h1.copyWith(color: c.ink)),
+                        Text(l10n.tabWall, style: ShokuType.h1.copyWith(color: c.ink)),
                         const SizedBox(height: 2),
                         Text(
                           feed.items.isEmpty
-                              ? 'Reels people imported'
-                              : count(feed.items.length, 'reel') +
-                                  (feed.hasMore ? ' · more below' : ''),
+                              ? l10n.wallSubtitleEmpty
+                              : metaLine([
+                                  l10n.wallReelCount(feed.items.length),
+                                  if (feed.hasMore) l10n.wallMoreBelow,
+                                ]),
                           style:
                               ShokuType.bodySmall.copyWith(color: c.inkMuted),
                         ),
@@ -156,6 +160,7 @@ class _FeedCardState extends ConsumerState<FeedCard> {
   Future<void> _addToCookbook() async {
     if (_adding) return;
     setState(() => _adding = true);
+    final l10n = context.l10n;
     final service = ref.read(importServiceProvider);
     final messenger = ScaffoldMessenger.of(context);
     try {
@@ -164,13 +169,13 @@ class _FeedCardState extends ConsumerState<FeedCard> {
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(
         content: Text(dish == null
-            ? 'That reel is no longer on the server'
-            : 'Saved ${dish.title} to your cookbook'),
+            ? l10n.wallReelGone
+            : l10n.wallSavedToCookbook(dish.title)),
       ));
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not reach the server')),
+        SnackBar(content: Text(l10n.importUnreachable)),
       );
     } finally {
       if (mounted) setState(() => _adding = false);
@@ -180,6 +185,7 @@ class _FeedCardState extends ConsumerState<FeedCard> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final item = widget.item;
 
     final imported = ref
@@ -228,7 +234,7 @@ class _FeedCardState extends ConsumerState<FeedCard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  count(item.steps.length, 'step'),
+                  l10n.wallStepsCount(item.steps.length),
                   style: ShokuType.label.copyWith(
                     fontSize: 9,
                     color: c.inkMuted,
@@ -262,8 +268,8 @@ class _FeedCardState extends ConsumerState<FeedCard> {
                       ),
                       child: Text(
                         imported
-                            ? 'In your cookbook'
-                            : (_adding ? 'Saving…' : 'Add to cookbook'),
+                            ? l10n.wallInCookbook
+                            : (_adding ? l10n.wallSaving : l10n.wallAddToCookbook),
                         style: ShokuType.label.copyWith(
                           fontSize: 9.5,
                           color: imported ? c.inkMuted : c.ink,
@@ -298,6 +304,7 @@ class _EmptyWall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
 
     if (loading) {
       return Center(
@@ -316,12 +323,12 @@ class _EmptyWall extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'The Wall did not load',
+              l10n.wallLoadFailed,
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
             TextButton(
               onPressed: onRetry,
-              child: Text('Try again',
+              child: Text(l10n.journalTryAgain,
                   style: ShokuType.label.copyWith(color: c.ink)),
             ),
           ],
@@ -338,14 +345,14 @@ class _EmptyWall extends StatelessWidget {
             const PlateMark(size: 110),
             const SizedBox(height: ShokuSpace.sm),
             Text(
-              'Nothing has been imported yet',
+              l10n.wallEmptyTitle,
               key: const ValueKey('wall-empty-title'),
               textAlign: TextAlign.center,
               style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
             ),
             const SizedBox(height: 2),
             Text(
-              'Import a reel and it lands here, for everyone.',
+              l10n.wallEmptyBody,
               textAlign: TextAlign.center,
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
             ),
@@ -362,7 +369,7 @@ class _EmptyWall extends StatelessWidget {
                   border: Border.all(color: c.ink),
                 ),
                 child: Text(
-                  'Import a reel',
+                  l10n.wallImportReel,
                   style: ShokuType.label.copyWith(
                     fontSize: 10,
                     color: c.ink,
@@ -394,6 +401,7 @@ class _FeedFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     if (loading) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: ShokuSpace.lg),
@@ -410,7 +418,7 @@ class _FeedFooter extends StatelessWidget {
       return Center(
         child: TextButton(
           onPressed: onMore,
-          child: Text('Could not load more — try again',
+          child: Text(l10n.wallLoadMoreFailed,
               style: ShokuType.label.copyWith(color: c.inkMuted)),
         ),
       );
@@ -419,7 +427,7 @@ class _FeedFooter extends StatelessWidget {
       return Center(
         child: TextButton(
           onPressed: onMore,
-          child: Text('More reels',
+          child: Text(l10n.wallMoreReels,
               style: ShokuType.label.copyWith(color: c.inkMuted)),
         ),
       );
@@ -428,7 +436,7 @@ class _FeedFooter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.lg),
       child: Center(
         child: Text(
-          'That is every reel for now',
+          l10n.wallEndOfFeed,
           style: ShokuType.label.copyWith(color: c.inkMuted),
         ),
       ),

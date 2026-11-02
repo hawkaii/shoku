@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/models/cook_timer.dart';
 import '../../../data/services/timer_alerts.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../widgets/kit/motion.dart';
 
 /// The timer, as the cook sees it.
@@ -44,6 +46,7 @@ class CookTimerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final timer = this.timer;
 
     if (timer == null) {
@@ -52,7 +55,7 @@ class CookTimerCard extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: _TimerButton(
           key: const ValueKey('timer-start'),
-          label: 'start $suggestedMinutes min timer',
+          label: l10n.timerStart(suggestedMinutes),
           icon: Icons.timer_outlined,
           onTap: onStart,
         ),
@@ -62,12 +65,14 @@ class CookTimerCard extends StatelessWidget {
     final done = remainingMs <= 0;
     final paused = timer.isPaused && !done;
     final state = done
-        ? "time's up"
+        ? l10n.timerTimesUp
         : paused
-            ? 'paused'
-            : 'running';
+            ? l10n.timerPaused
+            : l10n.timerRunning;
     final elsewhere = currentStep != null && timer.stepIndex != currentStep;
-    final status = elsewhere ? 'step ${timer.stepIndex + 1} · $state' : state;
+    final status = elsewhere
+        ? l10n.timerOnStep(timer.stepIndex + 1, state)
+        : state;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
@@ -104,28 +109,28 @@ class CookTimerCard extends StatelessWidget {
               if (done)
                 _TimerButton(
                   key: const ValueKey('timer-start'),
-                  label: 'Start again',
+                  label: l10n.timerStartAgain,
                   onTap: onStart,
                 )
               else
                 _TimerButton(
                   key: ValueKey(paused ? 'timer-resume' : 'timer-pause'),
-                  label: paused ? 'Resume' : 'Pause',
+                  label: paused ? l10n.timerResume : l10n.timerPause,
                   onTap: paused ? onResume : onPause,
                 ),
               const SizedBox(width: ShokuSpace.xs),
               _TimerButton(
                 key: const ValueKey('timer-stop'),
-                label: 'Stop',
+                label: l10n.timerStop,
                 onTap: onStop,
                 quiet: true,
               ),
             ],
           ),
-          if (alertNote != null) ...[
+          if (alertNote(l10n) != null) ...[
             const SizedBox(height: 6),
             Text(
-              alertNote!,
+              alertNote(l10n)!,
               key: const ValueKey('timer-alert-note'),
               style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11),
             ),
@@ -136,11 +141,9 @@ class CookTimerCard extends StatelessWidget {
   }
 
   /// The truth about the alert, when it is not simply "yes, on time".
-  String? get alertNote => switch (alerts) {
-        TimerAlertPermission.denied =>
-          'alerts are off — enable notifications for Shoku',
-        TimerAlertPermission.inexact =>
-          'alerts may arrive late — allow exact alarms in settings',
+  String? alertNote(AppLocalizations l10n) => switch (alerts) {
+        TimerAlertPermission.denied => l10n.timerAlertsOff,
+        TimerAlertPermission.inexact => l10n.timerAlertsLate,
         _ => null,
       };
 }

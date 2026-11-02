@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../state/shoku_providers.dart';
 import '../../widgets/kit/foundation.dart';
@@ -11,11 +12,12 @@ class HelpScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     final topics = ref.watch(helpTopicsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Help & feedback', style: ShokuType.h1.copyWith(color: c.ink)),
+        title: Text(l10n.helpTitle, style: ShokuType.h1.copyWith(color: c.ink)),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -26,7 +28,7 @@ class HelpScreen extends ConsumerWidget {
         ),
         children: [
           Text(
-            'Short answers to the things people ask first.',
+            l10n.helpSubtitle,
             style: ShokuType.body.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
@@ -41,10 +43,10 @@ class HelpScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ShokuLabel('still stuck'),
+                ShokuLabel(l10n.helpStillStuck),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
-                  'Send the reel link and what you expected. It makes the fix much faster.',
+                  l10n.helpStillStuckBody,
                   style: ShokuType.bodySmall.copyWith(color: c.ink),
                 ),
               ],

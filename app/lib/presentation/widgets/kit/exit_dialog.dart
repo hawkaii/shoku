@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 
 /// One exit dialog, used by the app-level back guard.
 Future<bool> showExitDialog(BuildContext context) async {
+  final l10n = context.l10n;
   final result = await showDialog<bool>(
     context: context,
     builder: (context) {
@@ -21,10 +23,10 @@ Future<bool> showExitDialog(BuildContext context) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Leave Shoku?', style: ShokuType.h1.copyWith(color: c.ink)),
+              Text(l10n.exitTitle, style: ShokuType.h1.copyWith(color: c.ink)),
               const SizedBox(height: ShokuSpace.xs),
               Text(
-                'Your journal is saved. Nothing is lost.',
+                l10n.exitBody,
                 style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
               const SizedBox(height: ShokuSpace.lg),
@@ -40,7 +42,7 @@ Future<bool> showExitDialog(BuildContext context) async {
                           side: BorderSide(color: c.hairline),
                         ),
                       ),
-                      child: Text('Keep cooking',
+                      child: Text(l10n.exitKeepCooking,
                           style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
                     ),
                   ),
@@ -55,7 +57,7 @@ Future<bool> showExitDialog(BuildContext context) async {
                           borderRadius: BorderRadius.circular(ShokuRadius.chip),
                         ),
                       ),
-                      child: Text('Exit',
+                      child: Text(l10n.exitExit,
                           style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13)),
                     ),
                   ),

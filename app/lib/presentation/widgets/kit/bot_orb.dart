@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../screens/bot/bot_scope.dart';
 import '../../screens/bot/bot_surface.dart';
@@ -23,6 +24,7 @@ class BotOrb extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
+    final l10n = context.l10n;
     // The orb must not build the bot controller: that controller reads the
     // assistant thread and the pantry at construction, and doing it while the
     // Journal is still booting is what left the Journal looking empty on a
@@ -36,7 +38,7 @@ class BotOrb extends ConsumerWidget {
 
     return Semantics(
       button: true,
-      label: 'Assistant',
+      label: l10n.orbAssistant,
       child: ShokuPressable(
         key: const ValueKey('bot-orb'),
         onTap: () => showBotSheet(context, scope: scope),
@@ -76,9 +78,10 @@ class BotInlineChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     return Semantics(
       button: true,
-      label: 'Ask about this step',
+      label: l10n.orbAskAboutStep,
       child: GestureDetector(
         key: const ValueKey('bot-inline-chip'),
         onTap: onTap,
@@ -99,7 +102,7 @@ class BotInlineChip extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: 6),
-              Text('Ask',
+              Text(l10n.chatAsk,
                   style:
                       ShokuType.title.copyWith(color: c.ink, fontSize: 12.5)),
               if (badge != null) ...[

@@ -598,5 +598,470 @@
         "type": "String"
       }
     }
+  },
+  "dishSampleGate": "Sign in to import your own reels and talk to the recipe.",
+  "@dishSampleGate": {
+    "description": "Under the Sample chip on a sample dish."
+  },
+  "dishCookCount": "{count, plural, =1{1 cook} other{{count} cooks}}",
+  "@dishCookCount": {
+    "description": "Cook count next to a dish title.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishFromVideoNote": "read from the video — amounts may be off",
+  "@dishFromVideoNote": {
+    "description": "Warning under a version that was extracted from a video."
+  },
+  "dishVersionGone": "v{from} is gone — showing v{to}",
+  "@dishVersionGone": {
+    "description": "The inspected version disappeared through a sync.",
+    "placeholders": {
+      "from": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "to": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "dishStartCookMode": "Start cook mode",
+  "dishReadRecipe": "Read this recipe",
+  "@dishReadRecipe": {
+    "description": "Speaker tooltip in the dish header."
+  },
+  "dishMore": "More",
+  "@dishMore": {
+    "description": "Overflow menu tooltip in the dish header."
+  },
+  "dishMenuCooked": "I just cooked this",
+  "dishMarkToCook": "Mark as to cook",
+  "dishSetUpFridge": "Set up your fridge",
+  "dishAddMissingToList": "{count, plural, =1{Add 1 missing to list} other{Add {count} missing to list}}",
+  "@dishAddMissingToList": {
+    "description": "Adds the missing ingredient lines to the shopping list.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishAddedToList": "{count, plural, =1{1 added to your list} other{{count} added to your list}}",
+  "@dishAddedToList": {
+    "description": "Snackbar after adding missing lines to the list.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishIngredientsCount": "{count, plural, =1{1 ingredient} other{{count} ingredients}}",
+  "@dishIngredientsCount": {
+    "description": "Ingredients section header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishMissingCount": "{count, plural, =1{1 missing} other{{count} missing}}",
+  "@dishMissingCount": {
+    "description": "Missing line count in the ingredients header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishPickVersion": "Pick a version",
+  "@dishPickVersion": {
+    "description": "Version picker tooltip."
+  },
+  "dishVersionShowing": "v{version} · showing",
+  "@dishVersionShowing": {
+    "description": "Version picker row for the version on screen.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "dishStepsCount": "{count, plural, =1{1 step} other{{count} steps}}",
+  "@dishStepsCount": {
+    "description": "Steps section header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dishAskAboutStep": "Ask about step {step}",
+  "@dishAskAboutStep": {
+    "description": "Opens the assistant on one step.",
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "dishHistory": "HISTORY",
+  "dishNotCookedYet": "Not cooked yet. The first log becomes v1.",
+  "dishHistoryEntry": "v{version} · {outcome}",
+  "@dishHistoryEntry": {
+    "description": "Collapsed history chip: a version and how that cook went.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "outcome": {
+        "type": "String",
+        "example": "Nailed it"
+      }
+    }
+  },
+  "dishWhatAltered": "What altered",
+  "dishFromChatEdit": "from a chat edit",
+  "dishNoNote": "No note",
+  "dishUnavailableTitle": "This dish is not here",
+  "dishUnavailableBody": "It may still be loading, or it was removed.",
+  "dishBackToJournal": "Back to the journal",
+  "dishImported": "Imported",
+  "@dishImported": {
+    "description": "Creator name when the reel did not name one."
+  },
+  "dishTheSource": "the source",
+  "@dishTheSource": {
+    "description": "Platform name when it is not Instagram or YouTube."
+  },
+  "dishViewReel": "View the reel",
+  "logTitle": "Log tonight’s cook",
+  "logSnapResult": "SNAP TONIGHT’S RESULT",
+  "logPhotoReady": "PHOTO READY TO UPLOAD",
+  "logHowDidItGo": "how did it go",
+  "logNoteLabel": "a note for you",
+  "logNoteHint": "The pan ran hot, so I pulled it early",
+  "logChangeLabel": "what did you change",
+  "logChangeHint": "More lime, 2 minutes less, air-fried instead",
+  "logSaveWithPhoto": "Save with photo",
+  "logSaveTonight": "Save tonight",
+  "logSaveUpgrade": "Save & upgrade to v{version}",
+  "@logSaveUpgrade": {
+    "description": "Save button when the log carries changes.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "logSaveFailed": "Could not save that cook",
+  "logSaved": "Logged as v{version}",
+  "@logSaved": {
+    "description": "Snackbar after a plain log.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "logSavedWithOutcome": "Logged as v{version} · {outcome}",
+  "@logSavedWithOutcome": {
+    "description": "Snackbar after a log that picked an outcome.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "outcome": {
+        "type": "String",
+        "example": "Nailed it"
+      }
+    }
+  },
+  "debriefTitle": "How did it go?",
+  "debriefSubtitle": "{title} · becomes v{version}",
+  "@debriefSubtitle": {
+    "description": "Dish title and the version this cook will create.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Paneer Tikka"
+      },
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "debriefAddPhoto": "ADD PHOTO",
+  "debriefChangePhoto": "CHANGE PHOTO",
+  "debriefRating": "rating",
+  "debriefMoodLabel": "what kind of cook was it",
+  "debriefChangesLabel": "what altered from the original",
+  "debriefNoChanges": "Nothing yet — add what you did differently.",
+  "debriefChangeHint": "e.g. 2 tbsp honey instead of 3",
+  "debriefNoteLabel": "what was missing",
+  "debriefNoteHint": "“needed more acid, next time add lime”",
+  "debriefPantryLabel": "used from pantry",
+  "debriefDeduct": "Deduct what matches",
+  "debriefSkipped": "{count, plural, =1{1 line not deducted} other{{count} lines not deducted}}",
+  "@debriefSkipped": {
+    "description": "Pantry lines the fridge could not deduct.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "debriefSave": "Save as v{version}",
+  "@debriefSave": {
+    "description": "Save button with no changes.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "debriefSaveUpgrade": "Save & upgrade to v{version}",
+  "@debriefSaveUpgrade": {
+    "description": "Save button when the cook altered the recipe.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "debriefSaveFailed": "Could not save this cook",
+  "debriefSaved": "Saved as v{version} · {mood}",
+  "@debriefSaved": {
+    "description": "Snackbar after a cook is committed.",
+    "placeholders": {
+      "version": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "mood": {
+        "type": "String",
+        "example": "comfort"
+      }
+    }
+  },
+  "wallSubtitleEmpty": "Reels people imported",
+  "wallReelCount": "{count, plural, =1{1 reel} other{{count} reels}}",
+  "@wallReelCount": {
+    "description": "Count of reels on the Wall header.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wallMoreBelow": "more below",
+  "wallReelGone": "That reel is no longer on the server",
+  "wallSavedToCookbook": "Saved {title} to your cookbook",
+  "@wallSavedToCookbook": {
+    "description": "Snackbar after adding a Wall reel to the cookbook.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Paneer Tikka"
+      }
+    }
+  },
+  "wallInCookbook": "In your cookbook",
+  "wallSaving": "Saving…",
+  "wallAddToCookbook": "Add to cookbook",
+  "wallLoadFailed": "The Wall did not load",
+  "wallEmptyTitle": "Nothing has been imported yet",
+  "wallEmptyBody": "Import a reel and it lands here, for everyone.",
+  "wallImportReel": "Import a reel",
+  "wallLoadMoreFailed": "Could not load more — try again",
+  "wallMoreReels": "More reels",
+  "wallEndOfFeed": "That is every reel for now",
+  "wallStepsCount": "{count, plural, =1{1 step} other{{count} steps}}",
+  "@wallStepsCount": {
+    "description": "Steps count on a Wall card or detail.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wallIngredientsCount": "{count, plural, =1{1 ingredient} other{{count} ingredients}}",
+  "@wallIngredientsCount": {
+    "description": "Ingredients count in the Wall detail meta line.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wallMethod": "method",
+  "wallReelLoadFailed": "This reel did not load",
+  "actionMarkCooked": "Mark as cooked",
+  "actionMoveBackToCook": "Move back to To cook",
+  "actionNeverCooked": "Never cooked",
+  "actionCookedCount": "{count, plural, =1{Cooked 1 time} other{Cooked {count} times}}",
+  "@actionCookedCount": {
+    "description": "How many times a dish has been cooked.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "actionStatusCookedBody": "It moves to Cooked. You can put it back.",
+  "actionStatusToCookBody": "It moves to To cook, ready to make again.",
+  "actionDeleteBody": "Leaves your journal. Asks first.",
+  "actionKeep": "Keep it",
+  "actionRemoveTitle": "Remove this dish?",
+  "actionRemoveBody": "{title} leaves your journal, along with its versions and its cooks. The reel is still out there if you want to import it again — this copy is not coming back.",
+  "@actionRemoveBody": {
+    "description": "Delete confirmation body; the title is the dish name.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Paneer Tikka"
+      }
+    }
+  },
+  "actionRemove": "Remove",
+  "profileSubtitle": "The record of what you have actually cooked.",
+  "profileAccount": "account",
+  "profileComingSoon": "Coming soon",
+  "profileNutritionBody": "A future lens on how your versions change a dish.",
+  "profileSoon": "soon",
+  "profileAppearance": "appearance",
+  "profileThemeSystem": "SYSTEM",
+  "profileThemeLight": "LIGHT",
+  "profileThemeDark": "DARK",
+  "profileHowItWorks": "How Shoku works",
+  "profileHowItWorksBody": "The share gesture, in three steps",
+  "profileResetJournal": "Reset journal",
+  "profileFooter": "Shoku · evening kitchen",
+  "helpTitle": "Help & feedback",
+  "helpSubtitle": "Short answers to the things people ask first.",
+  "helpStillStuck": "still stuck",
+  "helpStillStuckBody": "Send the reel link and what you expected. It makes the fix much faster.",
+  "nutritionTitle": "Nutrition",
+  "nutritionComingSoon": "COMING SOON",
+  "nutritionHeadline": "A lens on how your cooking changes.",
+  "nutritionBody": "Your journal works without it. When it lands, it will read only the meals you cook here.",
+  "nutritionBackToYou": "Back to You",
+  "exitTitle": "Leave Shoku?",
+  "exitBody": "Your journal is saved. Nothing is lost.",
+  "exitKeepCooking": "Keep cooking",
+  "exitExit": "Exit",
+  "orbAssistant": "Assistant",
+  "@orbAssistant": {
+    "description": "Accessibility label on the floating assistant orb."
+  },
+  "orbAskAboutStep": "Ask about this step",
+  "@orbAskAboutStep": {
+    "description": "Accessibility label on the in-step assistant chip."
+  },
+  "timerStart": "start {minutes} min timer",
+  "@timerStart": {
+    "description": "Offer to start a timer suggested by the step.",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "timerTimesUp": "time's up",
+  "timerPaused": "paused",
+  "timerRunning": "running",
+  "timerOnStep": "step {step} · {state}",
+  "@timerOnStep": {
+    "description": "A timer that belongs to a step other than the one on screen.",
+    "placeholders": {
+      "step": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "state": {
+        "type": "String",
+        "example": "running"
+      }
+    }
+  },
+  "timerStartAgain": "Start again",
+  "timerResume": "Resume",
+  "timerPause": "Pause",
+  "timerStop": "Stop",
+  "timerAlertsOff": "alerts are off — enable notifications for Shoku",
+  "timerAlertsLate": "alerts may arrive late — allow exact alarms in settings",
+  "cookLeaveTitle": "Leave this cook?",
+  "cookLeaveBody": "You are part-way through. Nothing is saved yet.",
+  "cookLeaveChanges": "{count, plural, =1{1 change in this cook will be discarded.} other{{count} changes in this cook will be discarded.}}",
+  "@cookLeaveChanges": {
+    "description": "Leave confirmation when changes were made during cook mode.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookChangedCount": "{count, plural, =1{1 changed} other{{count} changed}}",
+  "@cookChangedCount": {
+    "description": "Chip in cook mode counting the edits made so far.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cookStepLabel": "step {step}",
+  "@cookStepLabel": {
+    "description": "Step header; the step number is zero-padded by the caller.",
+    "placeholders": {
+      "step": {
+        "type": "String",
+        "example": "01"
+      }
+    }
+  },
+  "cookTimerCleared": "Timer cleared — this dish has a new version",
+  "cookBack": "Back",
+  "cookFinishLog": "Finish & log",
+  "cookNextStep": "Next step",
+  "cookNoSteps": "Follow the recipe.",
+  "@cookNoSteps": {
+    "description": "Shown when an imported dish has no parsed steps yet."
+  },
+  "micHint": "Type or hold the mic",
+  "micListening": "Listening…",
+  "searchHint": "Search recipes, notes, handles",
+  "hudStreakDays": "{count, plural, =1{1d} other{{count}d}}",
+  "@hudStreakDays": {
+    "description": "Streak length in the compact badge.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hudLevel": "LVL {level}",
+  "@hudLevel": {
+    "description": "Level in the compact badge; the caller zero-pads to two digits.",
+    "placeholders": {
+      "level": {
+        "type": "String",
+        "example": "07"
+      }
+    }
   }
 }

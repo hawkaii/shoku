@@ -1625,6 +1625,882 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read this link'**
   String get importReadLink;
+
+  /// Under the Sample chip on a sample dish.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to import your own reels and talk to the recipe.'**
+  String get dishSampleGate;
+
+  /// Cook count next to a dish title.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cook} other{{count} cooks}}'**
+  String dishCookCount(int count);
+
+  /// Warning under a version that was extracted from a video.
+  ///
+  /// In en, this message translates to:
+  /// **'read from the video — amounts may be off'**
+  String get dishFromVideoNote;
+
+  /// The inspected version disappeared through a sync.
+  ///
+  /// In en, this message translates to:
+  /// **'v{from} is gone — showing v{to}'**
+  String dishVersionGone(int from, int to);
+
+  /// No description provided for @dishStartCookMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Start cook mode'**
+  String get dishStartCookMode;
+
+  /// Speaker tooltip in the dish header.
+  ///
+  /// In en, this message translates to:
+  /// **'Read this recipe'**
+  String get dishReadRecipe;
+
+  /// Overflow menu tooltip in the dish header.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get dishMore;
+
+  /// No description provided for @dishMenuCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'I just cooked this'**
+  String get dishMenuCooked;
+
+  /// No description provided for @dishMarkToCook.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as to cook'**
+  String get dishMarkToCook;
+
+  /// No description provided for @dishSetUpFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your fridge'**
+  String get dishSetUpFridge;
+
+  /// Adds the missing ingredient lines to the shopping list.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 missing to list} other{Add {count} missing to list}}'**
+  String dishAddMissingToList(int count);
+
+  /// Snackbar after adding missing lines to the list.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 added to your list} other{{count} added to your list}}'**
+  String dishAddedToList(int count);
+
+  /// Ingredients section header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ingredient} other{{count} ingredients}}'**
+  String dishIngredientsCount(int count);
+
+  /// Missing line count in the ingredients header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 missing} other{{count} missing}}'**
+  String dishMissingCount(int count);
+
+  /// Version picker tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a version'**
+  String get dishPickVersion;
+
+  /// Version picker row for the version on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} · showing'**
+  String dishVersionShowing(int version);
+
+  /// Steps section header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 step} other{{count} steps}}'**
+  String dishStepsCount(int count);
+
+  /// Opens the assistant on one step.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about step {step}'**
+  String dishAskAboutStep(int step);
+
+  /// No description provided for @dishHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'HISTORY'**
+  String get dishHistory;
+
+  /// No description provided for @dishNotCookedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not cooked yet. The first log becomes v1.'**
+  String get dishNotCookedYet;
+
+  /// Collapsed history chip: a version and how that cook went.
+  ///
+  /// In en, this message translates to:
+  /// **'v{version} · {outcome}'**
+  String dishHistoryEntry(int version, String outcome);
+
+  /// No description provided for @dishWhatAltered.
+  ///
+  /// In en, this message translates to:
+  /// **'What altered'**
+  String get dishWhatAltered;
+
+  /// No description provided for @dishFromChatEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'from a chat edit'**
+  String get dishFromChatEdit;
+
+  /// No description provided for @dishNoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No note'**
+  String get dishNoNote;
+
+  /// No description provided for @dishUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This dish is not here'**
+  String get dishUnavailableTitle;
+
+  /// No description provided for @dishUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may still be loading, or it was removed.'**
+  String get dishUnavailableBody;
+
+  /// No description provided for @dishBackToJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the journal'**
+  String get dishBackToJournal;
+
+  /// Creator name when the reel did not name one.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported'**
+  String get dishImported;
+
+  /// Platform name when it is not Instagram or YouTube.
+  ///
+  /// In en, this message translates to:
+  /// **'the source'**
+  String get dishTheSource;
+
+  /// No description provided for @dishViewReel.
+  ///
+  /// In en, this message translates to:
+  /// **'View the reel'**
+  String get dishViewReel;
+
+  /// No description provided for @logTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log tonight’s cook'**
+  String get logTitle;
+
+  /// No description provided for @logSnapResult.
+  ///
+  /// In en, this message translates to:
+  /// **'SNAP TONIGHT’S RESULT'**
+  String get logSnapResult;
+
+  /// No description provided for @logPhotoReady.
+  ///
+  /// In en, this message translates to:
+  /// **'PHOTO READY TO UPLOAD'**
+  String get logPhotoReady;
+
+  /// No description provided for @logHowDidItGo.
+  ///
+  /// In en, this message translates to:
+  /// **'how did it go'**
+  String get logHowDidItGo;
+
+  /// No description provided for @logNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'a note for you'**
+  String get logNoteLabel;
+
+  /// No description provided for @logNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The pan ran hot, so I pulled it early'**
+  String get logNoteHint;
+
+  /// No description provided for @logChangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'what did you change'**
+  String get logChangeLabel;
+
+  /// No description provided for @logChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'More lime, 2 minutes less, air-fried instead'**
+  String get logChangeHint;
+
+  /// No description provided for @logSaveWithPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Save with photo'**
+  String get logSaveWithPhoto;
+
+  /// No description provided for @logSaveTonight.
+  ///
+  /// In en, this message translates to:
+  /// **'Save tonight'**
+  String get logSaveTonight;
+
+  /// Save button when the log carries changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & upgrade to v{version}'**
+  String logSaveUpgrade(int version);
+
+  /// No description provided for @logSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save that cook'**
+  String get logSaveFailed;
+
+  /// Snackbar after a plain log.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged as v{version}'**
+  String logSaved(int version);
+
+  /// Snackbar after a log that picked an outcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged as v{version} · {outcome}'**
+  String logSavedWithOutcome(int version, String outcome);
+
+  /// No description provided for @debriefTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How did it go?'**
+  String get debriefTitle;
+
+  /// Dish title and the version this cook will create.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · becomes v{version}'**
+  String debriefSubtitle(String title, int version);
+
+  /// No description provided for @debriefAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD PHOTO'**
+  String get debriefAddPhoto;
+
+  /// No description provided for @debriefChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'CHANGE PHOTO'**
+  String get debriefChangePhoto;
+
+  /// No description provided for @debriefRating.
+  ///
+  /// In en, this message translates to:
+  /// **'rating'**
+  String get debriefRating;
+
+  /// No description provided for @debriefMoodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'what kind of cook was it'**
+  String get debriefMoodLabel;
+
+  /// No description provided for @debriefChangesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'what altered from the original'**
+  String get debriefChangesLabel;
+
+  /// No description provided for @debriefNoChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet — add what you did differently.'**
+  String get debriefNoChanges;
+
+  /// No description provided for @debriefChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 2 tbsp honey instead of 3'**
+  String get debriefChangeHint;
+
+  /// No description provided for @debriefNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'what was missing'**
+  String get debriefNoteLabel;
+
+  /// No description provided for @debriefNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'“needed more acid, next time add lime”'**
+  String get debriefNoteHint;
+
+  /// No description provided for @debriefPantryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'used from pantry'**
+  String get debriefPantryLabel;
+
+  /// No description provided for @debriefDeduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct what matches'**
+  String get debriefDeduct;
+
+  /// Pantry lines the fridge could not deduct.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 line not deducted} other{{count} lines not deducted}}'**
+  String debriefSkipped(int count);
+
+  /// Save button with no changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as v{version}'**
+  String debriefSave(int version);
+
+  /// Save button when the cook altered the recipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & upgrade to v{version}'**
+  String debriefSaveUpgrade(int version);
+
+  /// No description provided for @debriefSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this cook'**
+  String get debriefSaveFailed;
+
+  /// Snackbar after a cook is committed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as v{version} · {mood}'**
+  String debriefSaved(int version, String mood);
+
+  /// No description provided for @wallSubtitleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Reels people imported'**
+  String get wallSubtitleEmpty;
+
+  /// Count of reels on the Wall header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reel} other{{count} reels}}'**
+  String wallReelCount(int count);
+
+  /// No description provided for @wallMoreBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'more below'**
+  String get wallMoreBelow;
+
+  /// No description provided for @wallReelGone.
+  ///
+  /// In en, this message translates to:
+  /// **'That reel is no longer on the server'**
+  String get wallReelGone;
+
+  /// Snackbar after adding a Wall reel to the cookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {title} to your cookbook'**
+  String wallSavedToCookbook(String title);
+
+  /// No description provided for @wallInCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'In your cookbook'**
+  String get wallInCookbook;
+
+  /// No description provided for @wallSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get wallSaving;
+
+  /// No description provided for @wallAddToCookbook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to cookbook'**
+  String get wallAddToCookbook;
+
+  /// No description provided for @wallLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The Wall did not load'**
+  String get wallLoadFailed;
+
+  /// No description provided for @wallEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been imported yet'**
+  String get wallEmptyTitle;
+
+  /// No description provided for @wallEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a reel and it lands here, for everyone.'**
+  String get wallEmptyBody;
+
+  /// No description provided for @wallImportReel.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a reel'**
+  String get wallImportReel;
+
+  /// No description provided for @wallLoadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load more — try again'**
+  String get wallLoadMoreFailed;
+
+  /// No description provided for @wallMoreReels.
+  ///
+  /// In en, this message translates to:
+  /// **'More reels'**
+  String get wallMoreReels;
+
+  /// No description provided for @wallEndOfFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'That is every reel for now'**
+  String get wallEndOfFeed;
+
+  /// Steps count on a Wall card or detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 step} other{{count} steps}}'**
+  String wallStepsCount(int count);
+
+  /// Ingredients count in the Wall detail meta line.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ingredient} other{{count} ingredients}}'**
+  String wallIngredientsCount(int count);
+
+  /// No description provided for @wallMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'method'**
+  String get wallMethod;
+
+  /// No description provided for @wallReelLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This reel did not load'**
+  String get wallReelLoadFailed;
+
+  /// No description provided for @actionMarkCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as cooked'**
+  String get actionMarkCooked;
+
+  /// No description provided for @actionMoveBackToCook.
+  ///
+  /// In en, this message translates to:
+  /// **'Move back to To cook'**
+  String get actionMoveBackToCook;
+
+  /// No description provided for @actionNeverCooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Never cooked'**
+  String get actionNeverCooked;
+
+  /// How many times a dish has been cooked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Cooked 1 time} other{Cooked {count} times}}'**
+  String actionCookedCount(int count);
+
+  /// No description provided for @actionStatusCookedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves to Cooked. You can put it back.'**
+  String get actionStatusCookedBody;
+
+  /// No description provided for @actionStatusToCookBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves to To cook, ready to make again.'**
+  String get actionStatusToCookBody;
+
+  /// No description provided for @actionDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves your journal. Asks first.'**
+  String get actionDeleteBody;
+
+  /// No description provided for @actionKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get actionKeep;
+
+  /// No description provided for @actionRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this dish?'**
+  String get actionRemoveTitle;
+
+  /// Delete confirmation body; the title is the dish name.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} leaves your journal, along with its versions and its cooks. The reel is still out there if you want to import it again — this copy is not coming back.'**
+  String actionRemoveBody(String title);
+
+  /// No description provided for @actionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get actionRemove;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The record of what you have actually cooked.'**
+  String get profileSubtitle;
+
+  /// No description provided for @profileAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'account'**
+  String get profileAccount;
+
+  /// No description provided for @profileComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get profileComingSoon;
+
+  /// No description provided for @profileNutritionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A future lens on how your versions change a dish.'**
+  String get profileNutritionBody;
+
+  /// No description provided for @profileSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'soon'**
+  String get profileSoon;
+
+  /// No description provided for @profileAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'appearance'**
+  String get profileAppearance;
+
+  /// No description provided for @profileThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM'**
+  String get profileThemeSystem;
+
+  /// No description provided for @profileThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'LIGHT'**
+  String get profileThemeLight;
+
+  /// No description provided for @profileThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'DARK'**
+  String get profileThemeDark;
+
+  /// No description provided for @profileHowItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How Shoku works'**
+  String get profileHowItWorks;
+
+  /// No description provided for @profileHowItWorksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The share gesture, in three steps'**
+  String get profileHowItWorksBody;
+
+  /// No description provided for @profileResetJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset journal'**
+  String get profileResetJournal;
+
+  /// No description provided for @profileFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoku · evening kitchen'**
+  String get profileFooter;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & feedback'**
+  String get helpTitle;
+
+  /// No description provided for @helpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short answers to the things people ask first.'**
+  String get helpSubtitle;
+
+  /// No description provided for @helpStillStuck.
+  ///
+  /// In en, this message translates to:
+  /// **'still stuck'**
+  String get helpStillStuck;
+
+  /// No description provided for @helpStillStuckBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the reel link and what you expected. It makes the fix much faster.'**
+  String get helpStillStuckBody;
+
+  /// No description provided for @nutritionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get nutritionTitle;
+
+  /// No description provided for @nutritionComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'COMING SOON'**
+  String get nutritionComingSoon;
+
+  /// No description provided for @nutritionHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'A lens on how your cooking changes.'**
+  String get nutritionHeadline;
+
+  /// No description provided for @nutritionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your journal works without it. When it lands, it will read only the meals you cook here.'**
+  String get nutritionBody;
+
+  /// No description provided for @nutritionBackToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to You'**
+  String get nutritionBackToYou;
+
+  /// No description provided for @exitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Shoku?'**
+  String get exitTitle;
+
+  /// No description provided for @exitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your journal is saved. Nothing is lost.'**
+  String get exitBody;
+
+  /// No description provided for @exitKeepCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep cooking'**
+  String get exitKeepCooking;
+
+  /// No description provided for @exitExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exitExit;
+
+  /// Accessibility label on the floating assistant orb.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get orbAssistant;
+
+  /// Accessibility label on the in-step assistant chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this step'**
+  String get orbAskAboutStep;
+
+  /// Offer to start a timer suggested by the step.
+  ///
+  /// In en, this message translates to:
+  /// **'start {minutes} min timer'**
+  String timerStart(int minutes);
+
+  /// No description provided for @timerTimesUp.
+  ///
+  /// In en, this message translates to:
+  /// **'time\'s up'**
+  String get timerTimesUp;
+
+  /// No description provided for @timerPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'paused'**
+  String get timerPaused;
+
+  /// No description provided for @timerRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'running'**
+  String get timerRunning;
+
+  /// A timer that belongs to a step other than the one on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'step {step} · {state}'**
+  String timerOnStep(int step, String state);
+
+  /// No description provided for @timerStartAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Start again'**
+  String get timerStartAgain;
+
+  /// No description provided for @timerResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get timerResume;
+
+  /// No description provided for @timerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get timerPause;
+
+  /// No description provided for @timerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get timerStop;
+
+  /// No description provided for @timerAlertsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'alerts are off — enable notifications for Shoku'**
+  String get timerAlertsOff;
+
+  /// No description provided for @timerAlertsLate.
+  ///
+  /// In en, this message translates to:
+  /// **'alerts may arrive late — allow exact alarms in settings'**
+  String get timerAlertsLate;
+
+  /// No description provided for @cookLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this cook?'**
+  String get cookLeaveTitle;
+
+  /// No description provided for @cookLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You are part-way through. Nothing is saved yet.'**
+  String get cookLeaveBody;
+
+  /// Leave confirmation when changes were made during cook mode.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change in this cook will be discarded.} other{{count} changes in this cook will be discarded.}}'**
+  String cookLeaveChanges(int count);
+
+  /// Chip in cook mode counting the edits made so far.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 changed} other{{count} changed}}'**
+  String cookChangedCount(int count);
+
+  /// Step header; the step number is zero-padded by the caller.
+  ///
+  /// In en, this message translates to:
+  /// **'step {step}'**
+  String cookStepLabel(String step);
+
+  /// No description provided for @cookTimerCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer cleared — this dish has a new version'**
+  String get cookTimerCleared;
+
+  /// No description provided for @cookBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get cookBack;
+
+  /// No description provided for @cookFinishLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish & log'**
+  String get cookFinishLog;
+
+  /// No description provided for @cookNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get cookNextStep;
+
+  /// Shown when an imported dish has no parsed steps yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the recipe.'**
+  String get cookNoSteps;
+
+  /// No description provided for @micHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type or hold the mic'**
+  String get micHint;
+
+  /// No description provided for @micListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get micListening;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recipes, notes, handles'**
+  String get searchHint;
+
+  /// Streak length in the compact badge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1d} other{{count}d}}'**
+  String hudStreakDays(int count);
+
+  /// Level in the compact badge; the caller zero-pads to two digits.
+  ///
+  /// In en, this message translates to:
+  /// **'LVL {level}'**
+  String hudLevel(String level);
 }
 
 class _AppLocalizationsDelegate
