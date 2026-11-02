@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/pantry_item.dart';
 import '../../../data/services/ocr_service.dart';
+import '../../../data/services/pantry_ai_service.dart';
 import '../../state/pantry_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
@@ -37,6 +39,16 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
   bool _busy = false;
   _Door _door = _Door.typed;
   String? _note;
+
+  /// The fallback is in flight: quiet, because it is an improvement to a list
+  /// that already exists, not a thing the cook is waiting on.
+  bool _readingAi = false;
+
+  /// The day's receipts are spent. Set once, never retried.
+  String? _capNote;
+
+  /// Guards an in-flight call: a review started after this one owns the sheet.
+  int _generation = 0;
 
   @override
   void dispose() {
@@ -90,11 +102,13 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
 
   void _review({bool? strict}) {
     final manager = ref.read(pantryStoreProvider.notifier);
+    final vocabulary = manager.vocabulary;
     final lines = PantryParser.parse(
       _text.text,
       strict: strict ?? _door == _Door.photo,
-      vocabulary: manager.vocabulary,
+      vocabulary: vocabulary,
     );
+    final generation = ++_generation;
     setState(() {
       _lines = lines;
       _checked
@@ -105,7 +119,67 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         ]);
       _reviewing = lines.isNotEmpty;
       _note = null;
+      _capNote = null;
+      _readingAi = false;
     });
+    unawaited(_readTheRest(generation, vocabulary));
+  }
+
+  /// One batched call for the lines the device could not be trusted with.
+  ///
+  /// Never one per line, and never at all when the receipt parsed cleanly. The
+  /// image is not here either: this sends the leftover text and nothing else.
+  Future<void> _readTheRest(int generation, Set<String> vocabulary) async {
+    final leftovers = <String>{
+      for (final line in _lines)
+        if (PantryParser.needsHelp(line, vocabulary)) line.raw.trim(),
+    }.take(PantryAiService.maxLines).toList();
+    if (leftovers.isEmpty || generation != _generation) return;
+
+    setState(() => _readingAi = true);
+    PantryAiResult? result;
+    String? cap;
+    try {
+      result = await ref.read(pantryAiServiceProvider).read(leftovers);
+    } on PantryCapReached {
+      cap = 'AI reads used up for today — type them instead';
+    } catch (_) {
+      // Offline, or the server is having a day. The parsed rows still stand and
+      // a failed call never blocks adding them.
+    }
+    if (!mounted || generation != _generation) return;
+    setState(() {
+      _readingAi = false;
+      _capNote = cap;
+      if (result != null) _mergeAi(result.items);
+    });
+  }
+
+  /// The server echoes each line so it can be matched back by its own words.
+  /// A line the model omitted keeps whatever the device made of it.
+  void _mergeAi(List<AiPantryLine> items) {
+    if (items.isEmpty) return;
+    final byLine = <String, AiPantryLine>{};
+    for (final item in items) {
+      byLine.putIfAbsent(item.line.trim(), () => item);
+    }
+    final merged = [..._lines];
+    for (var i = 0; i < merged.length; i++) {
+      final hit = byLine[merged[i].raw.trim()];
+      if (hit == null) continue;
+      // The model's name wins, but a model that states no amount must not
+      // erase one the device already read.
+      merged[i] = ParsedPantryLine(
+        raw: merged[i].raw,
+        name: hit.name,
+        quantity: hit.quantity ?? merged[i].quantity,
+        unit: hit.quantity == null ? merged[i].unit : hit.unit,
+        confident: true,
+        fromAi: true,
+      );
+      _checked.add(i);
+    }
+    _lines = merged;
   }
 
   /// The review is a proposal; the cook can fix a name before it is written.
@@ -260,6 +334,23 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                 if (_reviewing) ...[
                   const SizedBox(height: ShokuSpace.lg),
                   const ShokuLabel('to add'),
+                  if (_readingAi) ...[
+                    const SizedBox(height: ShokuSpace.xs),
+                    Text(
+                      'Reading the rest…',
+                      key: const ValueKey('pantry-ai-reading'),
+                      style: ShokuType.label
+                          .copyWith(fontSize: 9, color: c.inkMuted),
+                    ),
+                  ],
+                  if (_capNote != null) ...[
+                    const SizedBox(height: ShokuSpace.xs),
+                    Text(
+                      _capNote!,
+                      key: const ValueKey('pantry-ai-cap'),
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                    ),
+                  ],
                   const SizedBox(height: ShokuSpace.xs),
                   for (var i = 0; i < _lines.length; i++)
                     if (_lines[i].confident)
@@ -282,6 +373,23 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                                   style: ShokuType.bodySmall
                                       .copyWith(color: c.ink)),
                             ),
+                            if (_lines[i].fromAi)
+                              Container(
+                                key: ValueKey('pantry-ai-chip-$i'),
+                                margin:
+                                    const EdgeInsets.only(right: ShokuSpace.xs),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: c.surfaceAlt,
+                                  borderRadius:
+                                      BorderRadius.circular(ShokuRadius.chip),
+                                  border: Border.all(color: c.hairline),
+                                ),
+                                child: Text('AI',
+                                    style: ShokuType.label.copyWith(
+                                        fontSize: 8, color: c.inkMuted)),
+                              ),
                             ShokuPressable(
                               key: ValueKey('pantry-line-edit-$i'),
                               onTap: () => _rename(i),

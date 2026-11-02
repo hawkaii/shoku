@@ -140,6 +140,7 @@ class ParsedPantryLine {
     this.quantity,
     this.unit,
     this.confident = true,
+    this.fromAi = false,
   });
 
   final String raw;
@@ -149,6 +150,10 @@ class ParsedPantryLine {
 
   /// False when the line could not be parsed: it is kept raw, never guessed.
   final bool confident;
+
+  /// Read by the server's fallback, not on this device. The review says so,
+  /// because a model misreading a pack size should be visible before it lands.
+  final bool fromAi;
 
   String? get amountLabel {
     if (quantity == null) return null;
@@ -243,6 +248,19 @@ class PantryParser {
         parts.indexWhere((word) => vocabulary.contains(singular(word)));
     if (firstKnown <= 0) return parts.join(' ');
     return parts.sublist(firstKnown).join(' ');
+  }
+
+  /// A line the device cannot be trusted with, for the server's fallback.
+  ///
+  /// The parser named nothing, or it named something with no word this kitchen
+  /// knows. "HALDIRAM BHUJIA" is a brand in front of a product nobody here has
+  /// typed yet, and a receipt is full of those. A line that carries one known
+  /// word needs no help: the rest of it is a description, not a mystery.
+  static bool needsHelp(ParsedPantryLine line, Set<String> vocabulary) {
+    if (!line.confident) return true;
+    final parts = words(line.name);
+    if (parts.isEmpty) return true;
+    return !parts.any((word) => vocabulary.contains(singular(word)));
   }
 
   /// A name must name something: "500G" left over from a lifted amount is not

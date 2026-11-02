@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/pantry_repository.dart';
 import '../../data/models/pantry_item.dart';
 import '../../data/services/api_client.dart';
+import '../../data/services/pantry_ai_service.dart';
 import '../../data/services/suggestions_service.dart';
 import 'journal_store.dart';
 import 'sync_providers.dart';
@@ -180,6 +181,12 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
 
 /// Bumped after every write so the shelf re-scores against the new shelf.
 final pantryRevisionProvider = StateProvider<int>((ref) => 0);
+
+final pantryAiServiceProvider = Provider<PantryAiService>(
+  (ref) => PantryAiService(
+    api: ApiClient(auth: ref.watch(authServiceProvider)),
+  ),
+);
 
 final suggestionsServiceProvider = Provider<SuggestionsService>(
   (ref) => SuggestionsService(
