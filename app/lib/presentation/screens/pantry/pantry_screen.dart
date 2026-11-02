@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/pantry_item.dart';
+import '../../../data/services/ocr_service.dart';
 import '../../state/pantry_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
@@ -275,6 +279,50 @@ class _PantryCaptureSheetState extends ConsumerState<PantryCaptureSheet> {
     super.dispose();
   }
 
+  /// Receipt or screenshot: read on the device, then the same parser and the
+  /// same review. The image is never uploaded.
+  Future<void> _fromPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: context.colors.canvas,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Screenshot or photo'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Camera'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final picked = await ImagePicker().pickImage(
+      source: source,
+      maxWidth: 2200,
+      imageQuality: 90,
+    );
+    if (picked == null || !mounted) return;
+
+    final text = await OcrService().readText(File(picked.path));
+    if (!mounted) return;
+    if (text == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reading text is not available here')),
+      );
+      return;
+    }
+    _parse(text);
+  }
+
   void _parse(String text) {
     final lines = PantryParser.parse(text);
     setState(() {
@@ -339,22 +387,48 @@ class _PantryCaptureSheetState extends ConsumerState<PantryCaptureSheet> {
           const SizedBox(height: ShokuSpace.md),
           MicField(controller: _text, hint: '2 kg rice', maxLines: 3),
           const SizedBox(height: ShokuSpace.sm),
-          ShokuPressable(
-            key: const ValueKey('pantry-parse'),
+          Row(
+            children: [
+              Expanded(
+                child: ShokuPressable(
+                  key: const ValueKey('pantry-photo'),
+                  onTap: _fromPhoto,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    decoration: BoxDecoration(
+                      color: c.surface,
+                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                      border: Border.all(color: c.hairline),
+                    ),
+                    child: Center(
+                      child: Text('Photo or screenshot',
+                          style: ShokuType.label
+                              .copyWith(fontSize: 10, color: c.ink)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: ShokuSpace.sm),
+              Expanded(
+                child: ShokuPressable(
+                  key: const ValueKey('pantry-parse'),
             onTap: () => _parse(_text.text),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              decoration: BoxDecoration(
-                color: c.surfaceAlt,
-                borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                border: Border.all(color: c.hairline),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    decoration: BoxDecoration(
+                      color: c.surfaceAlt,
+                      borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                      border: Border.all(color: c.hairline),
+                    ),
+                    child: Center(
+                      child: Text('Review',
+                          style: ShokuType.title
+                              .copyWith(color: c.ink, fontSize: 13)),
+                    ),
+                  ),
+                ),
               ),
-              child: Center(
-                child: Text('Review',
-                    style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
-              ),
-            ),
+            ],
           ),
           if (_reviewing) ...[
             const SizedBox(height: ShokuSpace.md),
