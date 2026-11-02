@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/data/db/app_database.dart';
+import 'package:food_finder/data/db/assistant_turn_repository.dart';
 import 'package:food_finder/data/db/cook_timer_repository.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
@@ -112,6 +113,26 @@ void main() {
     final upgraded = AppDatabase(NativeDatabase(file));
     final cooks = await upgraded.select(upgraded.cookLogRows).get();
     expect(cooks, isEmpty);
+    await upgraded.close();
+  });
+
+  test('a v8 database gains the local chat table', () async {
+    final file = await oldDatabase(version: 8, undo: [
+      'DROP TABLE assistant_turn_rows',
+    ]);
+
+    final upgraded = AppDatabase(NativeDatabase(file));
+    expect(await upgraded.select(upgraded.assistantTurnRows).get(), isEmpty);
+    await AssistantTurnRepository(upgraded).add(
+      dishId: 'd1',
+      versionId: 'v1',
+      role: 'user',
+      text: 'is this spicy?',
+    );
+    expect(
+      (await AssistantTurnRepository(upgraded).load('d1')).single.text,
+      'is this spicy?',
+    );
     await upgraded.close();
   });
 
