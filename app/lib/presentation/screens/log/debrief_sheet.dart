@@ -9,7 +9,9 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/photo_service.dart';
 import '../../../data/mock/journal_data.dart';
+import '../../../data/models/pantry_item.dart';
 import '../../state/journal_store.dart';
+import '../../state/pantry_providers.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
@@ -48,6 +50,12 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
   CookMood _mood = CookMood.comfort;
   File? _photo;
   bool _saving = false;
+
+  /// Pantry lines the cook confirmed as used, and the amount they edited.
+  final _usage = <String, double>{};
+  final _checked = <String>{};
+  List<PantryItem>? _undoSnapshot;
+  int _skipped = 0;
 
   @override
   void dispose() {
@@ -118,10 +126,66 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
     }
   }
 
+  /// Pantry items the user has aliases (or a name) for, in this dish's lines.
+  /// Nothing is inferred: an item with no confirmed match is not offered.
+  List<PantryItem> _matched(List<PantryItem> pantry) {
+    final lines = (widget.dish.versions.isEmpty
+            ? widget.dish.steps
+            : widget.dish.versions.last.ingredients)
+        .map((l) => l.toLowerCase())
+        .toList();
+    return pantry
+        .where((p) => p.quantity != null && p.unit != null)
+        .where((p) =>
+            lines.any((l) => l.contains(p.name.toLowerCase())) ||
+            p.aliases.any((a) =>
+                a.trim().isNotEmpty && lines.any((l) => l.contains(a.toLowerCase()))))
+        .toList();
+  }
+
+  Future<void> _deduct(List<PantryItem> matched) async {
+    final chosen = matched.where((p) => _checked.contains(p.id)).toList();
+    if (chosen.isEmpty) return;
+    final store = ref.read(pantryStoreProvider.notifier);
+    _undoSnapshot = [for (final item in chosen) item];
+    final skipped = await store.deduct([
+      for (final item in chosen)
+        (
+          item: item,
+          amount: _usage[item.id] ?? item.quantity!,
+          unit: item.unit!,
+        ),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      _skipped = skipped;
+      _checked.clear();
+    });
+  }
+
+  Future<void> _undo() async {
+    final snapshot = _undoSnapshot;
+    if (snapshot == null) return;
+    final store = ref.read(pantryStoreProvider.notifier);
+    for (final item in snapshot) {
+      await store.save(item);
+    }
+    if (!mounted) return;
+    setState(() {
+      _undoSnapshot = null;
+      _skipped = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final nextVersion = widget.dish.versions.length + 1;
+    final matched = _matched(ref.watch(pantryStoreProvider));
+    for (final item in matched) {
+      _usage.putIfAbsent(item.id, () => item.quantity!);
+      _checked.add(item.id);
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -325,6 +389,68 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             const ShokuLabel('what was missing'),
             const SizedBox(height: ShokuSpace.sm),
             MicField(controller: _note, hint: '“needed more acid, next time add lime”'),
+
+            if (matched.isNotEmpty) ...[
+              const SizedBox(height: ShokuSpace.lg),
+              const ShokuLabel('used from pantry'),
+              const SizedBox(height: ShokuSpace.sm),
+              for (final item in matched)
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _checked.contains(item.id),
+                      onChanged: (value) => setState(() {
+                        if (value == true) {
+                          _checked.add(item.id);
+                        } else {
+                          _checked.remove(item.id);
+                        }
+                      }),
+                    ),
+                    Expanded(
+                      child: Text(item.name,
+                          style: ShokuType.bodySmall.copyWith(color: c.ink)),
+                    ),
+                    SizedBox(
+                      width: 72,
+                      child: TextFormField(
+                        key: ValueKey('deduct-${item.id}'),
+                        initialValue: '${item.quantity}',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) => _usage[item.id] =
+                            double.tryParse(value) ?? item.quantity!,
+                        style: ShokuType.bodySmall.copyWith(color: c.ink),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(item.unit!.label,
+                        style: ShokuType.label.copyWith(color: c.inkMuted)),
+                  ],
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      key: const ValueKey('deduct-matches'),
+                      onPressed:
+                          _checked.isEmpty ? null : () => _deduct(matched),
+                      child: const Text('Deduct what matches'),
+                    ),
+                  ),
+                  if (_undoSnapshot != null)
+                    TextButton(
+                      key: const ValueKey('deduct-undo'),
+                      onPressed: _undo,
+                      child: const Text('Undo'),
+                    ),
+                ],
+              ),
+              if (_skipped > 0)
+                Text('$_skipped lines not deducted',
+                    key: const ValueKey('deduct-skipped'),
+                    style: ShokuType.label.copyWith(color: c.inkMuted)),
+            ],
+
             const SizedBox(height: ShokuSpace.lg),
 
             ShokuPressable(

@@ -2,13 +2,20 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/db/pantry_repository.dart';
+import 'dart:convert';
+
 import 'package:food_finder/data/models/pantry_item.dart';
+import 'package:food_finder/data/services/api_client.dart';
+import 'package:food_finder/data/services/suggestions_service.dart';
 import 'package:food_finder/data/sync/sync_repository.dart';
 import 'package:food_finder/presentation/screens/pantry/pantry_screen.dart';
+import 'package:food_finder/presentation/state/pantry_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 
 void main() {
@@ -128,6 +135,89 @@ void main() {
       final row = (payload['pantry_items'] ?? const []).single;
       expect(row['name'], 'rice');
       expect(row['unit'], 'kg');
+    });
+  });
+
+  group('suggestions', () {
+    test('a fixture scores a reel and names what is missing', () async {
+      final client = ApiClient(
+        baseUrl: 'https://api.test',
+        tokenProvider: () => 'jwt',
+        httpClient: MockClient((request) async {
+          expect(request.url.path, '/v1/feed/suggestions');
+          return http.Response(
+            jsonEncode({
+              'items': [
+                {
+                  'shortcode': 'ABC',
+                  'title': 'Paneer Tikka',
+                  'thumbnail_url': '',
+                  'creator': 'Ravi',
+                  'platform': 'instagram',
+                  'ingredients': ['paneer', 'garlic', 'chilli', 'lime'],
+                  'match': {
+                    'have': 3,
+                    'total': 4,
+                    'missing': ['lime'],
+                  },
+                },
+              ],
+            }),
+            200,
+          );
+        }),
+      );
+
+      final reels = await SuggestionsService(api: client).fetch();
+
+      expect(reels.single.title, 'Paneer Tikka');
+      expect(reels.single.scoreLabel, '3 of 4');
+      expect(reels.single.missing, ['lime']);
+      expect(reels.single.asFeedItem.shortcode, 'ABC');
+    });
+
+    test('an endpoint that is not there yet is an empty shelf', () async {
+      final client = ApiClient(
+        baseUrl: 'https://api.test',
+        tokenProvider: () => 'jwt',
+        httpClient: MockClient((_) async => http.Response('{}', 404)),
+      );
+      expect(await SuggestionsService(api: client).fetch(), isEmpty);
+    });
+  });
+
+  group('deduction', () {
+    late AppDatabase db;
+    late PantryStore store;
+
+    setUp(() async {
+      db = AppDatabase(NativeDatabase.memory());
+      await PantryRepository(db).add(
+          name: 'rice', quantity: 2, unit: PantryUnit.kg);
+    });
+    tearDown(() async => db.close());
+
+    test('comparable units deduct, incompatible ones are reported', () async {
+      final container = ProviderContainer(
+        overrides: [databaseProvider.overrideWithValue(db)],
+      );
+      addTearDown(container.dispose);
+      store = container.read(pantryStoreProvider.notifier);
+      await Future<void>.delayed(Duration.zero);
+
+      final rice = (await PantryRepository(db).load()).single;
+      final skipped = await store.deduct([
+        (item: rice, amount: 500, unit: PantryUnit.g),
+      ]);
+      expect(skipped, 0);
+      expect((await PantryRepository(db).load()).single.quantity, 1.5);
+
+      final again = (await PantryRepository(db).load()).single;
+      final skipped2 = await store.deduct([
+        (item: again, amount: 1, unit: PantryUnit.pcs),
+      ]);
+      expect(skipped2, 1, reason: 'a piece is not a weight');
+      expect((await PantryRepository(db).load()).single.quantity, 1.5);
     });
   });
 

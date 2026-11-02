@@ -2,15 +2,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/pantry_repository.dart';
 import '../../data/models/pantry_item.dart';
+import '../../data/services/api_client.dart';
+import '../../data/services/suggestions_service.dart';
 import 'journal_store.dart';
+import 'sync_providers.dart';
 
 /// The pantry in memory, loaded from disk and refreshed after every write.
 class PantryStore extends StateNotifier<List<PantryItem>> {
-  PantryStore(this._repo) : super(const []) {
+  PantryStore(this._repo, this._ref) : super(const []) {
     _load();
   }
 
   final PantryRepository _repo;
+  final Ref _ref;
   bool _ready = false;
   bool get isReady => _ready;
 
@@ -24,7 +28,10 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
     }
   }
 
-  Future<void> refresh() async => state = await _repo.load();
+  Future<void> refresh() async {
+    state = await _repo.load();
+    _ref.read(pantryRevisionProvider.notifier).state++;
+  }
 
   Future<void> add({
     required String name,
@@ -86,11 +93,25 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
   }
 }
 
+/// Bumped after every write so the shelf re-scores against the new shelf.
+final pantryRevisionProvider = StateProvider<int>((ref) => 0);
+
+final suggestionsServiceProvider = Provider<SuggestionsService>(
+  (ref) => SuggestionsService(
+    api: ApiClient(auth: ref.watch(authServiceProvider)),
+  ),
+);
+
+final suggestionsProvider = FutureProvider<List<FeedSuggestion>>((ref) {
+  ref.watch(pantryRevisionProvider);
+  return ref.watch(suggestionsServiceProvider).fetch();
+});
+
 final pantryRepositoryProvider = Provider<PantryRepository>(
   (ref) => PantryRepository(ref.watch(databaseProvider)),
 );
 
 final pantryStoreProvider =
     StateNotifierProvider<PantryStore, List<PantryItem>>(
-  (ref) => PantryStore(ref.watch(pantryRepositoryProvider)),
+  (ref) => PantryStore(ref.watch(pantryRepositoryProvider), ref),
 );

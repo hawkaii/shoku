@@ -13,7 +13,9 @@ import '../../state/pantry_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
 import '../../widgets/kit/motion.dart';
+import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/plate_mark.dart';
+import '../wall/feed_detail_sheet.dart';
 
 /// The kitchen's own shelf: what is here, not what a recipe says.
 ///
@@ -91,12 +93,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                 const SizedBox(height: ShokuSpace.md),
                 const ShokuLabel('cook from your pantry'),
                 const SizedBox(height: ShokuSpace.sm),
-                // Suggestions arrive from /v1/feed/suggestions; until the API
-                // returns any, this is the quiet truth, not an error.
-                Text(
-                  'Nothing to suggest yet — add a few items and I will match walls and your own dishes.',
-                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                ),
+                _Shelf(items: items),
                 if (toBuy.isNotEmpty) ...[
                   const SizedBox(height: ShokuSpace.lg),
                   const ShokuLabel('to buy'),
@@ -491,4 +488,103 @@ class _PantryCaptureSheetState extends ConsumerState<PantryCaptureSheet> {
       ),
     );
   }
+}
+
+
+/// "Cook from your pantry": Wall reels scored against this shelf, plus the
+/// journal dishes that need the least. Empty is a normal state while the
+/// endpoint is not deployed.
+class _Shelf extends ConsumerWidget {
+  const _Shelf({required this.items});
+
+  final List<PantryItem> items;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final suggestions = ref.watch(suggestionsProvider);
+
+    return suggestions.when(
+      loading: () => const SizedBox(height: 40),
+      error: (_, __) => _quiet(c),
+      data: (reels) {
+        if (reels.isEmpty) return _quiet(c);
+        return SizedBox(
+          height: 128,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: reels.length,
+            separatorBuilder: (_, __) => const SizedBox(width: ShokuSpace.sm),
+            itemBuilder: (context, i) {
+              final reel = reels[i];
+              return GestureDetector(
+                key: ValueKey('suggestion-${reel.shortcode}'),
+                onTap: () => showFeedDetail(context, reel.asFeedItem),
+                child: Container(
+                  width: 200,
+                  padding: const EdgeInsets.all(ShokuSpace.sm),
+                  decoration: BoxDecoration(
+                    color: c.surface,
+                    borderRadius: BorderRadius.circular(ShokuRadius.card),
+                    border: Border.all(color: c.hairline),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: ShokuDishImage(
+                            url: reel.thumbnailUrl,
+                            title: reel.title,
+                            radius: ShokuRadius.media),
+                      ),
+                      const SizedBox(width: ShokuSpace.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(reel.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: ShokuType.title
+                                    .copyWith(color: c.ink, fontSize: 12)),
+                            const SizedBox(height: 2),
+                            Text(reel.scoreLabel,
+                                key: const ValueKey('suggestion-score'),
+                                style: ShokuType.label.copyWith(
+                                    fontSize: 9, color: c.inkMuted)),
+                            if (reel.missing.isNotEmpty)
+                              GestureDetector(
+                                key: ValueKey('suggestion-buy-${reel.shortcode}'),
+                                onTap: () async {
+                                  for (final name in reel.missing) {
+                                    await ref
+                                        .read(pantryStoreProvider.notifier)
+                                        .want(name);
+                                  }
+                                },
+                                child: Text('+ ${reel.missing.length} to buy',
+                                    style: ShokuType.label.copyWith(
+                                        fontSize: 9, color: c.accent)),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _quiet(dynamic c) => Text(
+        'Nothing to suggest yet — add a few items and I will match walls and your own dishes.',
+        key: const ValueKey('shelf-empty'),
+        style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+      );
 }
