@@ -80,7 +80,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get authSheetBody =>
-      'সাইন ইন করার আগে রান্না এই ফোনেই থাকে। সাইন ইন করলে তা আপনার সব ডিভাইসে চলে যায়।';
+      'সাইন ইন না করা পর্যন্ত রান্না এই ফোনেই থাকে। সাইন ইন করলে তা আপনার সব ডিভাইসে চলে যায়।';
 
   @override
   String get authEmail => 'ইমেল';
@@ -142,7 +142,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get tabJournal => 'জার্নাল';
 
   @override
-  String get tabCookbook => 'কুকবুক';
+  String get tabCookbook => 'রান্নার বই';
 
   @override
   String get tabFridge => 'ফ্রিজ';
@@ -164,7 +164,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি পদ',
-      one: '১টি পদ',
+      one: '$countটি পদ',
       zero: 'এখনও কোনো পদ নেই',
     );
     return '$_temp0';
@@ -176,7 +176,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি উন্নতি',
-      one: '১টি উন্নতি',
+      one: '$countটি উন্নতি',
       zero: 'কোনো উন্নতি নেই',
     );
     return '$_temp0';
@@ -210,7 +210,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি এন্ট্রি',
-      one: '১টি এন্ট্রি',
+      one: '$countটি এন্ট্রি',
       zero: 'কোনো এন্ট্রি নেই',
     );
     return '$_temp0';
@@ -220,7 +220,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get journalOnTheCounter => 'কাউন্টারে';
 
   @override
-  String get journalCookLog => 'কুক লগ';
+  String get journalCookLog => 'রান্নার লগ';
 
   @override
   String get journalCook => 'রান্না করুন';
@@ -255,7 +255,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get journalSaveRecipe => 'একটি রেসিপি সংরক্ষণ করুন';
 
   @override
-  String get cookbookTitle => 'কুকবুক';
+  String get cookbookTitle => 'রান্নার বই';
 
   @override
   String cookbookCookedCount(int count) {
@@ -263,7 +263,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি রান্না',
-      one: '১টি রান্না',
+      one: '$countটি রান্না',
       zero: 'কিছু রান্না হয়নি',
     );
     return '$_temp0';
@@ -334,7 +334,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count মিনিট',
-      one: '১ মিনিট',
+      one: '$count মিনিট',
     );
     return '$_temp0';
   }
@@ -456,7 +456,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি জিনিস',
-      one: '১টি জিনিস',
+      one: '$countটি জিনিস',
       zero: 'কোনো জিনিস নেই',
     );
     return '$_temp0';
@@ -468,7 +468,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি জিনিস খুঁজুন',
-      one: '১টি জিনিস খুঁজুন',
+      one: '$countটি জিনিস খুঁজুন',
       zero: 'আপনার ফ্রিজে খুঁজুন',
     );
     return '$_temp0';
@@ -480,7 +480,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি নির্বাচিত',
-      one: '১টি নির্বাচিত',
+      one: '$countটি নির্বাচিত',
       zero: 'কিছু নির্বাচিত নয়',
     );
     return '$_temp0';
@@ -533,7 +533,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countStringটি মুছুন',
-      one: '১টি মুছুন',
+      one: '$countStringটি মুছুন',
     );
     return '$_temp0';
   }
@@ -544,7 +544,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি জিনিস মুছে ফেলা হয়েছে',
-      one: '১টি জিনিস মুছে ফেলা হয়েছে',
+      one: '$countটি জিনিস মুছে ফেলা হয়েছে',
     );
     return '$_temp0';
   }
@@ -572,7 +572,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '+$countটি কিনতে হবে',
-      one: '+১টি কিনতে হবে',
+      one: '+$countটি কিনতে হবে',
     );
     return '$_temp0';
   }
@@ -671,7 +671,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'পড়া যায়নি ($count)',
-      one: 'পড়া যায়নি (১)',
+      one: 'পড়া যায়নি ($count)',
     );
     return '$_temp0';
   }
@@ -689,7 +689,7 @@ class AppLocalizationsBn extends AppLocalizations {
       total,
       locale: localeName,
       other: '$totalString-এর মধ্যে $checkedString যোগ করুন',
-      one: '১-এর মধ্যে $checkedString যোগ করুন',
+      one: '$totalString-এর মধ্যে $checkedString যোগ করুন',
     );
     return '$_temp0';
   }
@@ -747,7 +747,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'ফ্রিজে $countটি জিনিস',
-      one: 'ফ্রিজে ১টি জিনিস',
+      one: 'ফ্রিজে $countটি জিনিস',
     );
     return '$_temp0';
   }
@@ -831,7 +831,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'ফ্রিজে $countটি জিনিস।',
-      one: 'ফ্রিজে ১টি জিনিস।',
+      one: 'ফ্রিজে $countটি জিনিস।',
     );
     return '$_temp0';
   }
@@ -846,7 +846,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি অনুপস্থিত যোগ করুন',
-      one: '১টি অনুপস্থিত যোগ করুন',
+      one: '$countটি অনুপস্থিত যোগ করুন',
     );
     return '$_temp0';
   }
@@ -857,7 +857,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '$countটি জিনিস আপনার তালিকায় যোগ হয়েছে',
-      one: '১টি জিনিস আপনার তালিকায় যোগ হয়েছে',
+      one: '$countটি জিনিস আপনার তালিকায় যোগ হয়েছে',
     );
     return '$_temp0';
   }
@@ -874,7 +874,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'ফ্রিজে $countটি জিনিস যোগ করুন',
-      one: 'ফ্রিজে ১টি জিনিস যোগ করুন',
+      one: 'ফ্রিজে $countটি জিনিস যোগ করুন',
     );
     return '$_temp0';
   }
@@ -908,8 +908,8 @@ class AppLocalizationsBn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'আপনার ফ্রিজে $countটি জিনিস আছে। তা দিয়ে রাতের খাবার?',
-      one: 'আপনার ফ্রিজে ১টি জিনিস আছে। তা দিয়ে রাতের খাবার?',
+      other: 'আপনার ফ্রিজে $countটি জিনিস আছে। সেগুলো দিয়ে রাতের খাবার?',
+      one: 'আপনার ফ্রিজে $countটি জিনিস আছে। সেগুলো দিয়ে রাতের খাবার?',
     );
     return '$_temp0';
   }
@@ -920,7 +920,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'আগেরগুলো দেখান ($count)',
-      one: 'আগেরটি দেখান (১)',
+      one: 'আগেরটি দেখান ($count)',
     );
     return '$_temp0';
   }
@@ -994,7 +994,7 @@ class AppLocalizationsBn extends AppLocalizations {
       count,
       locale: localeName,
       other: '+$count আরও',
-      one: '+১ আরও',
+      one: '+$count আরও',
     );
     return '$_temp0';
   }

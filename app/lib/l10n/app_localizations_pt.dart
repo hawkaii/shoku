@@ -80,7 +80,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authSheetBody =>
-      'As cozinhas ficam neste telefone até você entrar. Entrar coloca tudo em todos os seus dispositivos.';
+      'Os cozimentos ficam neste telefone até você entrar. Entrar coloca tudo em todos os seus dispositivos.';
 
   @override
   String get authEmail => 'E-mail';
@@ -133,7 +133,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get authSignedIn => 'Sessão iniciada';
 
   @override
-  String get authLocalOnly => 'As cozinhas vivem só neste telefone.';
+  String get authLocalOnly => 'Os cozimentos vivem só neste telefone.';
 
   @override
   String get authSignOut => 'Sair';
@@ -142,7 +142,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tabJournal => 'Diário';
 
   @override
-  String get tabCookbook => 'Receitas';
+  String get tabCookbook => 'Livro de receitas';
 
   @override
   String get tabFridge => 'Geladeira';
@@ -256,7 +256,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get journalSaveRecipe => 'Salvar uma receita';
 
   @override
-  String get cookbookTitle => 'Receitas';
+  String get cookbookTitle => 'Livro de receitas';
 
   @override
   String cookbookCookedCount(int count) {
@@ -427,7 +427,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Essa importação não está mais no servidor — tente o link de novo';
 
   @override
-  String get reasonInvalidRecipe => 'Não encontramos uma receita nesse';
+  String get reasonInvalidRecipe => 'Não encontramos uma receita nesse vídeo';
 
   @override
   String get reasonNoAudio => 'Esse vídeo não tem nada para ouvir';
@@ -631,7 +631,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get unitTsp => 'colher (chá)';
 
   @override
-  String get unitPcs => 'un';
+  String get unitPcs => 'un.';
 
   @override
   String get unitBunch => 'maço';

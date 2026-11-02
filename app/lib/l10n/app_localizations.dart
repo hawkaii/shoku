@@ -411,13 +411,13 @@ abstract class AppLocalizations {
   /// No description provided for @journalCooksLabel.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{cook} other{cooks}}'**
+  /// **'{count, plural, one{cook} other{cooks}}'**
   String journalCooksLabel(int count);
 
   /// No description provided for @journalUpgradesLabel.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{upgrade} other{upgrades}}'**
+  /// **'{count, plural, one{upgrade} other{upgrades}}'**
   String journalUpgradesLabel(int count);
 
   /// No description provided for @journalEntriesCount.
@@ -561,7 +561,7 @@ abstract class AppLocalizations {
   /// No description provided for @badgeCookedCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{COOKED {count}×} other{COOKED {count}×}}'**
+  /// **'{count, plural, one{COOKED {count}×} other{COOKED {count}×}}'**
   String badgeCookedCount(int count);
 
   /// No description provided for @badgeSignature.
@@ -609,7 +609,7 @@ abstract class AppLocalizations {
   /// No description provided for @minutesShort.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 min} other{{count} min}}'**
+  /// **'{count, plural, one{1 min} other{{count} min}}'**
   String minutesShort(int count);
 
   /// No description provided for @labelSample.
@@ -945,7 +945,7 @@ abstract class AppLocalizations {
   /// No description provided for @shelfBuyCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{+1 to buy} other{+{count} to buy}}'**
+  /// **'{count, plural, one{+1 to buy} other{+{count} to buy}}'**
   String shelfBuyCount(int count);
 
   /// No description provided for @shelfScore.
@@ -1461,7 +1461,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatMoreEdits.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{+1 more} other{+{count} more}}'**
+  /// **'{count, plural, one{+1 more} other{+{count} more}}'**
   String chatMoreEdits(int count);
 
   /// No description provided for @chatCreatesVersion.

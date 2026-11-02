@@ -51,7 +51,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingShareTitle =>
-      'Un geste, depuis l\'app où vous êtes déjà.';
+      'Un appui, depuis l\'app où vous êtes déjà.';
 
   @override
   String get onboardingShareTo => 'Partager avec';
@@ -258,7 +258,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get journalSaveRecipe => 'Enregistrer une recette';
 
   @override
-  String get cookbookTitle => 'Carnet de recettes';
+  String get cookbookTitle => 'Recettes';
 
   @override
   String cookbookCookedCount(int count) {
@@ -329,7 +329,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get moodProject => 'projet';
 
   @override
-  String get moodComfort => 'réconfort';
+  String get moodComfort => 'réconfortant';
 
   @override
   String minutesShort(int count) {
@@ -429,7 +429,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reasonInvalidRecipe =>
-      'Nous n\'avons pas trouvé de recette dans celle-ci';
+      'Nous n\'avons pas trouvé de recette dans cette vidéo';
 
   @override
   String get reasonNoAudio => 'Cette vidéo n\'a rien à écouter';

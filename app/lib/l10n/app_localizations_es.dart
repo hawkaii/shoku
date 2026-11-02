@@ -80,7 +80,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authSheetBody =>
-      'Las cocinas se quedan en este teléfono hasta que inicies sesión. Al iniciar sesión estarán en todos tus dispositivos.';
+      'Las cocciones se quedan en este teléfono hasta que inicies sesión. Al iniciar sesión estarán en todos tus dispositivos.';
 
   @override
   String get authEmail => 'Correo';
@@ -116,7 +116,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authErrorUnconfirmed =>
-      'Esa cuenta aún no está confirmada; revisa tu correo';
+      'Esa cuenta aún no está confirmada — revisa tu correo';
 
   @override
   String get authErrorExists => 'Ese correo ya tiene cuenta; inicia sesión';
@@ -134,7 +134,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get authSignedIn => 'Sesión iniciada';
 
   @override
-  String get authLocalOnly => 'Las cocinas viven solo en este teléfono.';
+  String get authLocalOnly => 'Las cocciones viven solo en este teléfono.';
 
   @override
   String get authSignOut => 'Cerrar sesión';
@@ -238,7 +238,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get journalNoDishes =>
-      'Aún no hay platos: importa un reel para empezar';
+      'Aún no hay platos — importa un reel para empezar';
 
   @override
   String get journalOpening => 'Abriendo tu diario';
@@ -409,7 +409,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reasonSourceBlocked =>
-      'YouTube está bloqueando nuestro servidor ahora; inténtalo más tarde o pega la receta';
+      'YouTube está bloqueando nuestro servidor ahora — inténtalo más tarde o pega la receta';
 
   @override
   String get reasonTimeout => 'Tardó demasiado; inténtalo otra vez';
@@ -427,7 +427,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esa importación ya no está en el servidor; prueba el enlace otra vez';
 
   @override
-  String get reasonInvalidRecipe => 'No encontramos una receta en ese';
+  String get reasonInvalidRecipe => 'No encontramos una receta en ese vídeo';
 
   @override
   String get reasonNoAudio => 'Ese vídeo no tiene nada que escuchar';
@@ -564,7 +564,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shelfEmpty =>
-      'Aún no hay sugerencias: añade algunos artículos y cruzaré muros y tus propios platos.';
+      'Aún no hay sugerencias — añade algunos artículos y cruzaré muros y tus propios platos.';
 
   @override
   String shelfBuyCount(int count) {

@@ -148,13 +148,13 @@ class AppLocalizationsTa extends AppLocalizations {
   String get tabJournal => 'ஜர்னல்';
 
   @override
-  String get tabCookbook => 'குக்புக்';
+  String get tabCookbook => 'சமையல் புத்தகம்';
 
   @override
   String get tabFridge => 'ஃபிரிட்ஜ்';
 
   @override
-  String get tabWall => 'வால்';
+  String get tabWall => 'சுவர்';
 
   @override
   String get tabYou => 'நீங்கள்';
@@ -262,7 +262,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get journalSaveRecipe => 'ஒரு ரெசிபியைச் சேமிக்கவும்';
 
   @override
-  String get cookbookTitle => 'குக்புக்';
+  String get cookbookTitle => 'சமையல் புத்தகம்';
 
   @override
   String cookbookCookedCount(int count) {
@@ -287,7 +287,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get cookbookNoCooksYet =>
-      'இன்னும் சமையல்கள் இல்லை. சமைக்க வேண்டியவை-ல் ஏதாவது தேர்ந்தெடுங்கள்.';
+      'இன்னும் சமையல்கள் இல்லை. சமைக்க வேண்டியவற்றில் ஏதாவது தேர்ந்தெடுங்கள்.';
 
   @override
   String get cookbookNeverCooked => 'ஒருபோதும் சமைக்கப்படவில்லை';
@@ -572,7 +572,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get shelfEmpty =>
-      'இன்னும் பரிந்துரைகள் இல்லை — சில பொருட்களைச் சேருங்கள், நான் வால் மற்றும் உங்கள் உணவுகளைப் பொருத்துவேன்.';
+      'இன்னும் பரிந்துரைகள் இல்லை — சில பொருட்களைச் சேருங்கள், நான் சுவர் மற்றும் உங்கள் உணவுகளைப் பொருத்துவேன்.';
 
   @override
   String shelfBuyCount(int count) {
@@ -637,7 +637,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get unitTsp => 'டீஸ்பூன்';
 
   @override
-  String get unitPcs => 'எண்ணிக்கை';
+  String get unitPcs => 'துண்டு';
 
   @override
   String get unitBunch => 'கட்டு';
@@ -696,8 +696,8 @@ class AppLocalizationsTa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       total,
       locale: localeName,
-      other: '$totalString-ல் $checkedString சேர்',
-      one: '1-ல் $checkedString சேர்',
+      other: '$totalString-இல் $checkedString சேர்',
+      one: '1-இல் $checkedString சேர்',
     );
     return '$_temp0';
   }
@@ -912,7 +912,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get botStarterFridge => 'உங்கள் ஃபிரிட்ஜில் என்ன இருக்கிறது?';
 
   @override
-  String get botStarterWall => 'வாலில் இருந்து ஏதாவது காட்டு';
+  String get botStarterWall => 'சுவரில் இருந்து ஏதாவது காட்டு';
 
   @override
   String get botStarterPhoto => 'என்னிடம் ஒரு உணவின் புகைப்படம் உள்ளது';

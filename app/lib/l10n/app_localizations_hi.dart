@@ -28,7 +28,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardingSkip => 'छोड़ें';
 
   @override
-  String get onboardingStartCooking => 'खाना बनाना शुरू करें';
+  String get onboardingStartCooking => 'पकाना शुरू करें';
 
   @override
   String get onboardingShareCta => 'आज़माने के लिए एक रील शेयर करें';
@@ -44,7 +44,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get onboardingIntroBody =>
-      'हर बार पकाते समय आप कुछ बदलते हैं। शोकु उन बदलावों को याद रखता है, ताकि अगली बार आप आज रात के लिए सही वर्ज़न चुन सकें।';
+      'हर बार पकाते समय आप कुछ बदलते हैं। शोकु उन बदलावों को याद रखता है, ताकि अगली बार आप आज रात के लिए सही संस्करण चुन सकें।';
 
   @override
   String get onboardingShareStepLabel => '01 · रील शेयर करें';
@@ -141,7 +141,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get tabJournal => 'जर्नल';
 
   @override
-  String get tabCookbook => 'कुकबुक';
+  String get tabCookbook => 'पाकपुस्तक';
 
   @override
   String get tabFridge => 'फ़्रिज';
@@ -219,7 +219,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get journalOnTheCounter => 'काउंटर पर';
 
   @override
-  String get journalCookLog => 'कुक लॉग';
+  String get journalCookLog => 'पकाने का लॉग';
 
   @override
   String get journalCook => 'पकाएँ';
@@ -254,7 +254,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get journalSaveRecipe => 'एक रेसिपी सहेजें';
 
   @override
-  String get cookbookTitle => 'कुकबुक';
+  String get cookbookTitle => 'पाकपुस्तक';
 
   @override
   String cookbookCookedCount(int count) {
@@ -279,7 +279,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cookbookNoCooksYet =>
-      'अभी कोई पकाना नहीं। पकाने हैं में से कुछ चुनें।';
+      'अभी कोई पकाना नहीं। पकाने हैं सूची में से कुछ चुनें।';
 
   @override
   String get cookbookNeverCooked => 'कभी नहीं पकाया';
@@ -346,7 +346,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get addSheetSubtitle =>
-      'एक रील एक व्यंजन बनती है जिसे आप पका और वर्ज़न कर सकते हैं।';
+      'एक रील एक व्यंजन बनती है जिसे आप पका और संस्करण कर सकते हैं।';
 
   @override
   String get addSheetLinkHint => 'Instagram या YouTube लिंक पेस्ट करें';

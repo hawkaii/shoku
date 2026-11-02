@@ -141,7 +141,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get tabJournal => 'जर्नल';
 
   @override
-  String get tabCookbook => 'कुकबुक';
+  String get tabCookbook => 'पाकपुस्तक';
 
   @override
   String get tabFridge => 'फ्रिज';
@@ -219,7 +219,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get journalOnTheCounter => 'काउंटरवर';
 
   @override
-  String get journalCookLog => 'कुक लॉग';
+  String get journalCookLog => 'शिजवण्याचा लॉग';
 
   @override
   String get journalCook => 'शिजवा';
@@ -254,7 +254,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get journalSaveRecipe => 'रेसिपी जतन करा';
 
   @override
-  String get cookbookTitle => 'कुकबुक';
+  String get cookbookTitle => 'पाकपुस्तक';
 
   @override
   String cookbookCookedCount(int count) {
@@ -279,7 +279,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get cookbookNoCooksYet =>
-      'अजून स्वयंपाक नाही. शिजवायचे मधून काहीतरी निवडा.';
+      'अजून स्वयंपाक नाही. शिजवायचे यादीतून काहीतरी निवडा.';
 
   @override
   String get cookbookNeverCooked => 'कधीच शिजवले नाही';
@@ -346,7 +346,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get addSheetSubtitle =>
-      'एक रील एक पदार्थ बनते जो तुम्ही शिजवू आणि व्हर्जन करू शकता.';
+      'एक रील एक पदार्थ बनते जो तुम्ही शिजवू आणि आवृत्ती करू शकता.';
 
   @override
   String get addSheetLinkHint => 'Instagram किंवा YouTube लिंक पेस्ट करा';
@@ -563,7 +563,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get shelfEmpty =>
-      'अजून सूचना नाहीत — काही वस्तू जोडा, मी वॉल आणि तुमची पदार्थ जुळवीन.';
+      'अजून सूचना नाहीत — काही वस्तू जोडा, मी वॉल आणि तुमचे पदार्थ जुळवीन.';
 
   @override
   String shelfBuyCount(int count) {

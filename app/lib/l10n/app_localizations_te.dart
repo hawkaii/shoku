@@ -44,7 +44,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get onboardingIntroBody =>
-      'ప్రతిసారీ వండేటప్పుడు మీరు ఏదో మారుస్తారు. షోకు ఆ మార్పులను గుర్తుపెట్టుకుంటుంది, తద్వారా మీరు తర్వాత ఈ రాత్రికి సరిపోయే వెర్షన్‌ను ఎంచుకోవచ్చు.';
+      'ప్రతిసారీ వండేటప్పుడు మీరు ఏదో మారుస్తారు. షోకు ఆ మార్పులను గుర్తుపెట్టుకుంటుంది, తద్వారా మీరు తర్వాత ఈ రాత్రికి సరిపోయే సంస్కరణను ఎంచుకోవచ్చు.';
 
   @override
   String get onboardingShareStepLabel => '01 · రీల్‌ను షేర్ చేయండి';
@@ -143,7 +143,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get tabJournal => 'జర్నల్';
 
   @override
-  String get tabCookbook => 'కుక్‌బుక్';
+  String get tabCookbook => 'వంట పుస్తకం';
 
   @override
   String get tabFridge => 'ఫ్రిజ్';
@@ -210,9 +210,9 @@ class AppLocalizationsTe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ఎంట్రీలు',
-      one: '1 ఎంట్రీ',
-      zero: 'ఎంట్రీలు లేవు',
+      other: '$count నమోదులు',
+      one: '1 నమోదు',
+      zero: 'నమోదులు లేవు',
     );
     return '$_temp0';
   }
@@ -256,7 +256,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get journalSaveRecipe => 'రెసిపీని సేవ్ చేయండి';
 
   @override
-  String get cookbookTitle => 'కుక్‌బుక్';
+  String get cookbookTitle => 'వంట పుస్తకం';
 
   @override
   String cookbookCookedCount(int count) {
@@ -281,7 +281,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get cookbookNoCooksYet =>
-      'ఇంకా వంటలు లేవు. వండాల్సినవి నుంచి ఏదో ఎంచుకోండి.';
+      'ఇంకా వంటలు లేవు. వండాల్సినవి జాబితా నుంచి ఏదో ఎంచుకోండి.';
 
   @override
   String get cookbookNeverCooked => 'ఎప్పుడూ వండలేదు';
@@ -550,7 +550,7 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
-  String get pantrySetAmount => 'మొత్తం సెట్ చేయండి';
+  String get pantrySetAmount => 'పరిమాణం సెట్ చేయండి';
 
   @override
   String pantryLessItem(String name) {
@@ -596,7 +596,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get pantryNameLabel => 'పేరు';
 
   @override
-  String get pantryAmountLabel => 'మొత్తం';
+  String get pantryAmountLabel => 'పరిమాణం';
 
   @override
   String get pantryAmountHelp =>
@@ -663,7 +663,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get pantryAiReading => 'మిగతాది చదువుతోంది…';
 
   @override
-  String get pantryAmountUnknown => 'మొత్తం తెలియదు';
+  String get pantryAmountUnknown => 'పరిమాణం తెలియదు';
 
   @override
   String pantryCouldNotRead(int count) {
@@ -884,7 +884,7 @@ class AppLocalizationsTe extends AppLocalizations {
   }
 
   @override
-  String get botAmountUnknown => 'మొత్తం?';
+  String get botAmountUnknown => 'పరిమాణం?';
 
   @override
   String botSuggestionMeta(String source, int have, int total) {

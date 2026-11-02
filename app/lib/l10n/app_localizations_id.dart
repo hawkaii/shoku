@@ -142,7 +142,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get tabJournal => 'Jurnal';
 
   @override
-  String get tabCookbook => 'Resep';
+  String get tabCookbook => 'Buku Resep';
 
   @override
   String get tabFridge => 'Kulkas';
@@ -215,7 +215,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get journalOnTheCounter => 'di meja';
+  String get journalOnTheCounter => 'di meja dapur';
 
   @override
   String get journalCookLog => 'catatan masak';
@@ -252,7 +252,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get journalSaveRecipe => 'Simpan resep';
 
   @override
-  String get cookbookTitle => 'Resep';
+  String get cookbookTitle => 'Buku Resep';
 
   @override
   String cookbookCookedCount(int count) {
@@ -420,7 +420,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Impor itu sudah tidak ada di server — coba tautannya lagi';
 
   @override
-  String get reasonInvalidRecipe => 'Kami tidak menemukan resep di yang itu';
+  String get reasonInvalidRecipe => 'Kami tidak menemukan resep di video itu';
 
   @override
   String get reasonNoAudio => 'Video itu tidak punya apa pun untuk didengar';
@@ -482,7 +482,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get pantryEdit => 'Edit';
+  String get pantryEdit => 'Ubah';
 
   @override
   String get pantryShelfLabel => 'masak dari kulkasmu';
@@ -585,7 +585,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get pantryEditTitle => 'Edit item';
+  String get pantryEditTitle => 'Ubah item';
 
   @override
   String get pantryNameLabel => 'nama';
@@ -624,7 +624,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get unitTsp => 'sdt';
 
   @override
-  String get unitPcs => 'pcs';
+  String get unitPcs => 'buah';
 
   @override
   String get unitBunch => 'ikat';

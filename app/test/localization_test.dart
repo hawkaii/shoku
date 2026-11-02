@@ -61,7 +61,7 @@ void main() {
     expect(find.byType(LanguagePicker), findsNothing);
     expect(find.byKey(const ValueKey('onboarding-primary')), findsOneWidget);
     // Hindi is applied immediately: the intro CTA is already in Hindi.
-    expect(find.text('खाना बनाना शुरू करें'), findsOneWidget);
+    expect(find.text('पकाना शुरू करें'), findsOneWidget);
   });
 
   testWidgets('the You language sheet persists the choice', (tester) async {

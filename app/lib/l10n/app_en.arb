@@ -86,7 +86,7 @@
       }
     }
   },
-  "journalCooksLabel": "{count, plural, =1{cook} other{cooks}}",
+  "journalCooksLabel": "{count, plural, one{cook} other{cooks}}",
   "@journalCooksLabel": {
     "placeholders": {
       "count": {
@@ -94,7 +94,7 @@
       }
     }
   },
-  "journalUpgradesLabel": "{count, plural, =1{upgrade} other{upgrades}}",
+  "journalUpgradesLabel": "{count, plural, one{upgrade} other{upgrades}}",
   "@journalUpgradesLabel": {
     "placeholders": {
       "count": {
@@ -147,7 +147,7 @@
   },
   "badgeToCook": "TO COOK",
   "badgeCooked": "COOKED",
-  "badgeCookedCount": "{count, plural, =1{COOKED {count}×} other{COOKED {count}×}}",
+  "badgeCookedCount": "{count, plural, one{COOKED {count}×} other{COOKED {count}×}}",
   "@badgeCookedCount": {
     "placeholders": {
       "count": {
@@ -162,7 +162,7 @@
   "moodQuick": "quick",
   "moodProject": "project",
   "moodComfort": "comfort",
-  "minutesShort": "{count, plural, =1{1 min} other{{count} min}}",
+  "minutesShort": "{count, plural, one{1 min} other{{count} min}}",
   "@minutesShort": {
     "placeholders": {
       "count": {
@@ -275,7 +275,7 @@
     }
   },
   "shelfEmpty": "Nothing to suggest yet — add a few items and I will match walls and your own dishes.",
-  "shelfBuyCount": "{count, plural, =1{+1 to buy} other{+{count} to buy}}",
+  "shelfBuyCount": "{count, plural, one{+1 to buy} other{+{count} to buy}}",
   "@shelfBuyCount": {
     "placeholders": {
       "count": {
@@ -541,7 +541,7 @@
       }
     }
   },
-  "chatMoreEdits": "{count, plural, =1{+1 more} other{+{count} more}}",
+  "chatMoreEdits": "{count, plural, one{+1 more} other{+{count} more}}",
   "@chatMoreEdits": {
     "placeholders": {
       "count": {
