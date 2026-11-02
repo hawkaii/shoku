@@ -16,6 +16,7 @@ import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../bot/bot_scope.dart';
 import '../bot/scope_switcher.dart';
+import '../../widgets/kit/bot_mark.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
 import '../../widgets/kit/motion.dart';
@@ -427,7 +428,17 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             ),
             Row(
               children: [
-                Icon(Icons.auto_awesome, size: 18, color: c.accent),
+                // 22 px inside a 32 px hairline ring: the bot's own face.
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: c.hairline),
+                    color: c.surface,
+                  ),
+                  child: const Center(child: BotMark(size: 22)),
+                ),
                 const SizedBox(width: ShokuSpace.sm),
                 Expanded(
                   child: Text(

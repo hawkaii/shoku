@@ -11,6 +11,7 @@ import '../../state/bot_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../state/pantry_providers.dart';
 import '../assistant/recipe_chat_sheet.dart';
+import '../../widgets/kit/bot_mark.dart';
 import '../../widgets/kit/foundation.dart';
 import '../wall/feed_detail_sheet.dart';
 import 'bot_scope.dart';
@@ -302,8 +303,19 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
         for (final turn in state.turns.reversed) _turn(context, turn),
         // Reversed list: the last child is at the top. The starters are
         // written in reading order, so reverse them to keep it.
-        if (state.turns.isEmpty && !state.thinking)
+        if (state.turns.isEmpty && !state.thinking) ...[
+          // First open: the mark, at 32, before the three doors.
+          const Padding(
+            padding: EdgeInsets.only(bottom: ShokuSpace.sm),
+            child: Center(
+              child: BotMark(
+                key: ValueKey('bot-mark-empty'),
+                size: 32,
+              ),
+            ),
+          ),
           for (final starter in starters.reversed) _starter(context, starter),
+        ],
       ],
     );
   }
@@ -326,7 +338,19 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
             borderRadius: BorderRadius.circular(ShokuRadius.card),
             border: Border.all(color: c.hairline),
           ),
-          child: Text(text, style: ShokuType.bodySmall.copyWith(color: c.ink)),
+          child: Row(
+            children: [
+              const BotMark(
+                key: ValueKey('bot-mark-starter'),
+                size: 14,
+              ),
+              const SizedBox(width: ShokuSpace.sm),
+              Flexible(
+                child: Text(text,
+                    style: ShokuType.bodySmall.copyWith(color: c.ink)),
+              ),
+            ],
+          ),
         ),
       ),
     );

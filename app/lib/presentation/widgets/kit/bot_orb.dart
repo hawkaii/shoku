@@ -5,6 +5,7 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../screens/bot/bot_scope.dart';
 import '../../screens/bot/bot_surface.dart';
 import '../../state/bot_providers.dart';
+import 'bot_mark.dart';
 import 'motion.dart';
 
 /// The assistant, everywhere it is allowed to be.
@@ -24,8 +25,12 @@ class BotOrb extends ConsumerWidget {
     final c = context.colors;
     final state = ref.watch(botControllerProvider);
     final offline = ref.watch(botOfflineProvider);
-    final filled = state.unread && !offline;
     final hasDraft = state.draft.trim().isNotEmpty;
+    final style = botOrbStyle(
+      unread: state.unread,
+      offline: offline,
+      draft: hasDraft,
+    );
 
     return Semantics(
       button: true,
@@ -37,43 +42,21 @@ class BotOrb extends ConsumerWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: filled ? c.accent : c.surface,
+            color: style.filled ? c.accent : c.surface,
             shape: BoxShape.circle,
             border: Border.all(color: c.ink, width: ShokuStroke.brutal),
             boxShadow: [
               BoxShadow(color: c.ink, offset: const Offset(0, 2), blurRadius: 0),
             ],
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(Icons.auto_awesome,
-                  size: 22, color: filled ? c.onAccent : c.ink),
-              if (offline)
-                Transform.rotate(
-                  angle: -0.785,
-                  child: Container(
-                    key: const ValueKey('bot-orb-slash'),
-                    width: 30,
-                    height: 1.5,
-                    color: filled ? c.onAccent : c.danger,
-                  ),
-                ),
-              if (hasDraft && !offline)
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: Container(
-                    key: const ValueKey('bot-orb-draft'),
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: filled ? c.onAccent : c.accent,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
+          child: Center(
+            child: BotMark(
+              key: const ValueKey('bot-mark'),
+              size: 22,
+              filled: style.filled,
+              offline: style.offline,
+              draftDot: style.draftDot,
+            ),
           ),
         ),
       ),
@@ -109,7 +92,10 @@ class BotInlineChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome, size: 14, color: c.accent),
+              const BotMark(
+                key: ValueKey('bot-mark-chip'),
+                size: 18,
+              ),
               const SizedBox(width: 6),
               Text('Ask',
                   style:
