@@ -143,6 +143,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap a language to continue'**
   String get languageTapToContinue;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingStartCooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Start cooking'**
+  String get onboardingStartCooking;
+
+  /// No description provided for @onboardingShareCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a reel to try it'**
+  String get onboardingShareCta;
+
+  /// No description provided for @onboardingContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// No description provided for @onboardingOpenJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open my journal'**
+  String get onboardingOpenJournal;
+
+  /// No description provided for @onboardingIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook it once.\nMake it yours.'**
+  String get onboardingIntroTitle;
+
+  /// No description provided for @onboardingIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every time you cook, you change something. Shoku remembers those changes, so next time you can pick the version that fits tonight.'**
+  String get onboardingIntroBody;
+
+  /// No description provided for @onboardingShareStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'01 · SHARE THE REEL'**
+  String get onboardingShareStepLabel;
+
+  /// No description provided for @onboardingShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One tap, from the app you are already in.'**
+  String get onboardingShareTitle;
+
+  /// No description provided for @onboardingShareTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Share to'**
+  String get onboardingShareTo;
+
+  /// No description provided for @onboardingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as v1 · extracted in 4 seconds'**
+  String get onboardingSaved;
+
+  /// No description provided for @onboardingJournalStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'02 · COOK IT, CHANGE IT'**
+  String get onboardingJournalStepLabel;
+
+  /// No description provided for @onboardingJournalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your journal remembers the changes.'**
+  String get onboardingJournalTitle;
+
+  /// No description provided for @onboardingJournalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook mode walks you through it. When you swap something, say so. At the end you get one version — with a photo, a rating and what altered.'**
+  String get onboardingJournalBody;
+
+  /// No description provided for @onboardingAltered.
+  ///
+  /// In en, this message translates to:
+  /// **'altered'**
+  String get onboardingAltered;
+
+  /// No description provided for @onboardingTap.
+  ///
+  /// In en, this message translates to:
+  /// **'TAP'**
+  String get onboardingTap;
+
+  /// No description provided for @authSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your journal'**
+  String get authSheetTitle;
+
+  /// No description provided for @authSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooks stay on this phone until you sign in. Signing in puts them on every device you use.'**
+  String get authSheetBody;
+
+  /// No description provided for @authEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmail;
+
+  /// No description provided for @authPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPassword;
+
+  /// No description provided for @authWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Working…'**
+  String get authWorking;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authCreateAccount;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignIn;
+
+  /// No description provided for @authHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get authHaveAccount;
+
+  /// No description provided for @authCreateAccountLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get authCreateAccountLink;
+
+  /// No description provided for @authErrorEmailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Email and a password of 6+ characters'**
+  String get authErrorEmailPassword;
+
+  /// No description provided for @authErrorConfirmEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email to confirm, then sign in'**
+  String get authErrorConfirmEmail;
+
+  /// No description provided for @authErrorMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'That email and password do not match'**
+  String get authErrorMismatch;
+
+  /// No description provided for @authErrorUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'That account is not confirmed yet — check your email'**
+  String get authErrorUnconfirmed;
+
+  /// No description provided for @authErrorExists.
+  ///
+  /// In en, this message translates to:
+  /// **'That email already has an account — sign in instead'**
+  String get authErrorExists;
+
+  /// No description provided for @authErrorNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get authErrorNoConnection;
+
+  /// No description provided for @authErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sign in'**
+  String get authErrorGeneric;
+
+  /// No description provided for @authNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get authNotSignedIn;
+
+  /// No description provided for @authSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get authSignedIn;
+
+  /// No description provided for @authLocalOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooks live on this phone only.'**
+  String get authLocalOnly;
+
+  /// No description provided for @authSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get authSignOut;
 }
 
 class _AppLocalizationsDelegate

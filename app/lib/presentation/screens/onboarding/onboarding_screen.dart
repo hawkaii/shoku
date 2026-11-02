@@ -57,6 +57,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
 
     return Scaffold(
       body: SafeArea(
@@ -70,8 +71,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   const Spacer(),
                   if (_page > 0 && _page < _pageCount - 1)
                     GestureDetector(
+                      key: const ValueKey('onboarding-skip'),
                       onTap: _finish,
-                      child: Text('Skip',
+                      child: Text(l10n.onboardingSkip,
                           style: ShokuType.label.copyWith(color: c.inkMuted)),
                     ),
                 ],
@@ -127,6 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     )
                   else
                     ShokuPressable(
+                      key: const ValueKey('onboarding-primary'),
                       onTap: _next,
                       child: Container(
                         width: double.infinity,
@@ -143,10 +146,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Center(
                           child: Text(
                             _page == 1
-                                ? 'Start cooking'
+                                ? l10n.onboardingStartCooking
                                 : _page == 2
-                                    ? (_stage == 2 ? 'Continue' : 'Share a reel to try it')
-                                    : 'Open my journal',
+                                    ? (_stage == 2
+                                        ? l10n.onboardingContinue
+                                        : l10n.onboardingShareCta)
+                                    : l10n.onboardingOpenJournal,
                             style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
                           ),
                         ),
@@ -228,7 +233,7 @@ class _IntroStep extends StatelessWidget {
           const SizedBox(height: ShokuSpace.md),
           _reveal(
             context,
-            Text('Cook it once.\nMake it yours.',
+            Text(context.l10n.onboardingIntroTitle,
                 style: ShokuType.h1.copyWith(color: c.ink, fontSize: 28)),
             delayMs: 80,
           ),
@@ -236,7 +241,7 @@ class _IntroStep extends StatelessWidget {
           _reveal(
             context,
             Text(
-              'Every time you cook, you change something. Shoku remembers those changes, so next time you can pick the version that fits tonight.',
+              context.l10n.onboardingIntroBody,
               style: ShokuType.body.copyWith(color: c.inkMuted),
             ),
             delayMs: 160,
@@ -279,9 +284,10 @@ class _ShareStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('01 · SHARE THE REEL', style: ShokuType.label.copyWith(color: c.accent)),
+          Text(context.l10n.onboardingShareStepLabel,
+              style: ShokuType.label.copyWith(color: c.accent)),
           const SizedBox(height: ShokuSpace.sm),
-          Text('One tap, from the app you are already in.',
+          Text(context.l10n.onboardingShareTitle,
               style: ShokuType.h1.copyWith(color: c.ink, fontSize: 24)),
           const SizedBox(height: ShokuSpace.md),
 
@@ -398,7 +404,7 @@ class _ShareStep extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Share to',
+                        Text(context.l10n.onboardingShareTo,
                             style: ShokuType.title.copyWith(color: c.ink, fontSize: 12)),
                         const SizedBox(height: ShokuSpace.sm),
                         Row(
@@ -429,7 +435,7 @@ class _ShareStep extends StatelessWidget {
                 children: [
                   Icon(Icons.check_circle, size: 16, color: c.ready),
                   const SizedBox(width: 6),
-                  Text('Saved as v1 · extracted in 4 seconds',
+                  Text(context.l10n.onboardingSaved,
                       style: ShokuType.bodySmall.copyWith(color: c.ready)),
                 ],
               ),
@@ -510,13 +516,14 @@ class _JournalStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('02 · COOK IT, CHANGE IT', style: ShokuType.label.copyWith(color: c.accent)),
+          Text(context.l10n.onboardingJournalStepLabel,
+              style: ShokuType.label.copyWith(color: c.accent)),
           const SizedBox(height: ShokuSpace.sm),
-          Text('Your journal remembers the changes.',
+          Text(context.l10n.onboardingJournalTitle,
               style: ShokuType.h1.copyWith(color: c.ink, fontSize: 24)),
           const SizedBox(height: ShokuSpace.md),
           Text(
-            'Cook mode walks you through it. When you swap something, say so. At the end you get one version — with a photo, a rating and what altered.',
+            context.l10n.onboardingJournalBody,
             style: ShokuType.body.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
@@ -545,7 +552,8 @@ class _JournalStep extends StatelessWidget {
                 ),
                 Text('v3', style: ShokuType.stat.copyWith(fontSize: 13, color: c.accent)),
                 const SizedBox(width: ShokuSpace.sm),
-                ShokuChip('altered', color: c.reward, filled: true),
+                ShokuChip(context.l10n.onboardingAltered,
+                    color: c.reward, filled: true),
               ],
             ),
           ),
@@ -579,7 +587,8 @@ class _ArrowHint extends StatelessWidget {
             color: c.accent,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Text('TAP', style: ShokuType.label.copyWith(fontSize: 8, color: c.onAccent)),
+          child: Text(context.l10n.onboardingTap,
+              style: ShokuType.label.copyWith(fontSize: 8, color: c.onAccent)),
         ),
         const SizedBox(height: 2),
         CustomPaint(

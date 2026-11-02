@@ -31,7 +31,7 @@ void main() {
     // the intro step where it always was.
     await tester.tap(find.text('English'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Skip'));
+    await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
     // 1.5 s: enough for the first read, well inside the 3 s sync timer, so the
     // card cannot be arriving because of a later sync pass.
     await tester.pump(const Duration(milliseconds: 600));

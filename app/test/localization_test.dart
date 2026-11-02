@@ -53,7 +53,9 @@ void main() {
     // Selecting is the continue gesture: the picker is gone and the intro is
     // on screen.
     expect(find.byType(LanguagePicker), findsNothing);
-    expect(find.text('Start cooking'), findsOneWidget);
+    expect(find.byKey(const ValueKey('onboarding-primary')), findsOneWidget);
+    // Hindi is applied immediately: the intro CTA is already in Hindi.
+    expect(find.text('खाना बनाना शुरू करें'), findsOneWidget);
   });
 
   testWidgets('the You language sheet persists the choice', (tester) async {

@@ -184,6 +184,7 @@ class _AccountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = context.l10n;
     final auth = AuthService();
     return StreamBuilder(
       stream: auth.changes,
@@ -204,13 +205,13 @@ class _AccountRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      session == null ? 'Not signed in' : 'Signed in',
+                      session == null ? l10n.authNotSignedIn : l10n.authSignedIn,
                       style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       session == null
-                          ? 'Cooks live on this phone only.'
+                          ? l10n.authLocalOnly
                           : email,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -229,14 +230,14 @@ class _AccountRow extends StatelessWidget {
                       color: c.ink,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
                     ),
-                    child: Text('Sign in',
+                    child: Text(l10n.authSignIn,
                         style: ShokuType.label.copyWith(color: c.canvas)),
                   ),
                 )
               else
                 TextButton(
                   onPressed: () => AuthService().signOut(),
-                  child: Text('Sign out',
+                  child: Text(l10n.authSignOut,
                       style: ShokuType.label.copyWith(color: c.inkMuted)),
                 ),
             ],
