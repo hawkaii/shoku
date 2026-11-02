@@ -13,12 +13,25 @@ import 'sync_providers.dart';
 class PantryStore extends StateNotifier<List<PantryItem>> {
   PantryStore(this._repo, this._ref) : super(const []) {
     _load();
+    // A pull can land rows this store never saw, so a sync that settles is a
+    // reason to re-read the shelf. Without this, the fridge only ever shows
+    // what this device typed until the app is reopened.
+    _ref.listen<SyncStatus>(syncStatusProvider, (previous, next) {
+      if (next == SyncStatus.idle && previous != SyncStatus.idle) {
+        unawaited(reload());
+      }
+    });
   }
 
   final PantryRepository _repo;
   final Ref _ref;
   bool _ready = false;
   bool get isReady => _ready;
+
+  /// What this kitchen already calls its ingredients. Receipt lines are read
+  /// against it so a brand falls off a product it has met before.
+  Set<String> get vocabulary =>
+      PantryParser.vocabularyOf(state.map((item) => item.name));
 
   Future<void> _load() async {
     try {
@@ -30,9 +43,19 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
     }
   }
 
-  Future<void> refresh() async {
-    state = await _repo.load();
+  /// Re-reads the shelf without calling back into sync. Used when a sync pass
+  /// settles: the pull is the thing that changed, not this device.
+  Future<void> reload() async {
+    try {
+      state = await _repo.load();
+    } catch (_) {
+      return;
+    }
     _ref.read(pantryRevisionProvider.notifier).state++;
+  }
+
+  Future<void> refresh() async {
+    await reload();
     // A pantry write is a local change like any other: it has to reach the
     // server, or the shelf only exists on the device that typed it.
     unawaited(_ref.read(syncHookProvider)?.call() ?? Future<void>.value());
@@ -67,6 +90,62 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
     await refresh();
   }
 
+  /// Deletes a selection. One refresh and one sync for the batch, because
+  /// clearing six rows is one action to the cook.
+  Future<void> removeMany(Iterable<String> ids) async {
+    for (final id in ids) {
+      await _repo.remove(id);
+    }
+    await refresh();
+  }
+
+  /// Adds a confirmed line. A line this shelf has already confirmed keeps its
+  /// name and amount: the receipt's raw text is remembered as an alias, so next
+  /// week's "AMUL BUTTER 500G" meets the same butter instead of a duplicate.
+  Future<PantryItem> confirmLine(
+    ParsedPantryLine line, {
+    String source = 'typed',
+  }) async {
+    final rawKey = PantryParser.key(line.raw);
+    PantryItem? known;
+    for (final item in state) {
+      if (item.aliases.any((alias) => PantryParser.key(alias) == rawKey)) {
+        known = item;
+        break;
+      }
+    }
+    if (known == null) {
+      final nameKey = PantryParser.key(line.name);
+      for (final item in state) {
+        if (PantryParser.key(item.name) == nameKey) {
+          known = item;
+          break;
+        }
+      }
+    }
+    if (known != null) {
+      final merged = known.copyWith(
+        quantity: line.quantity,
+        clearQuantity: line.quantity == null,
+        unit: line.unit,
+        clearUnit: line.unit == null,
+        aliases: {...known.aliases, line.raw}.toList(),
+        wanted: false,
+      );
+      await save(merged);
+      return merged;
+    }
+    final item = await _repo.add(
+      name: line.name,
+      quantity: line.quantity,
+      unit: line.unit,
+      aliases: [line.raw],
+      source: source,
+    );
+    await refresh();
+    return item;
+  }
+
   /// Adds a missing recipe line to "To buy", untouched and unmeasured.
   Future<void> want(String name) async {
     final key = PantryParser.key(name);
@@ -76,7 +155,8 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
 
   /// Takes matched amounts out of stock. Returns how many lines could not be
   /// deducted because their units do not compare.
-  Future<int> deduct(List<({PantryItem item, double amount, PantryUnit unit})> lines) async {
+  Future<int> deduct(
+      List<({PantryItem item, double amount, PantryUnit unit})> lines) async {
     var skipped = 0;
     for (final line in lines) {
       final left = line.item.quantity == null || line.item.unit == null
@@ -109,6 +189,10 @@ final suggestionsServiceProvider = Provider<SuggestionsService>(
 
 final suggestionsProvider = FutureProvider<List<FeedSuggestion>>((ref) {
   ref.watch(pantryRevisionProvider);
+  // A shelf asked for before the session was restored may have gone out with
+  // no bearer token and stayed empty for the life of the page. The auth stream
+  // is the wake-up: sign-in (or a refreshed token) is a reason to ask again.
+  ref.watch(authEventProvider);
   return ref.watch(suggestionsServiceProvider).fetch();
 });
 

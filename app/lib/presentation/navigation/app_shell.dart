@@ -24,9 +24,14 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
   static const _tabs = [
     ShokuTabItem(Icons.menu_book_outlined, Icons.menu_book, 'Journal'),
     ShokuTabItem(Icons.restaurant_menu_outlined, Icons.restaurant_menu, 'Cookbook'),
+    ShokuTabItem(Icons.kitchen_outlined, Icons.kitchen, 'Fridge'),
     ShokuTabItem(Icons.grid_view_outlined, Icons.grid_view, 'Wall'),
     ShokuTabItem(Icons.person_outline, Icons.person, 'You'),
   ];
+
+  /// The fridge sits in the middle of the bar as a raised door, but it is a
+  /// branch like any other — see [ShokuTabBar.centerIndex].
+  static const _fridgeBranch = 2;
 
   final _intake = ShareIntake();
 
@@ -89,14 +94,12 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
         bottomNavigationBar: ShokuTabBar(
           items: _tabs,
           index: widget.shell.currentIndex,
+          centerIndex: _fridgeBranch,
           activeUnderline: const SyncUnderline(),
           onChanged: (i) => widget.shell.goBranch(
             i,
             initialLocation: i == widget.shell.currentIndex,
           ),
-          // The centre is the pantry now. Importing lives on Home, as the
-          // "Save a recipe" row at the top of the journal.
-          onCenterTap: () => context.push('/pantry'),
         ),
       ),
     );

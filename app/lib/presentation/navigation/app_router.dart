@@ -6,6 +6,7 @@ import '../screens/cook/cook_mode_screen.dart';
 import '../screens/dish/dish_screen.dart';
 import '../screens/journal/journal_screen.dart';
 import '../screens/nutrition/nutrition_coming_soon_screen.dart';
+import '../screens/pantry/pantry_add_screen.dart';
 import '../screens/pantry/pantry_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/recipes/recipes_screen.dart';
@@ -30,6 +31,22 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [GoRoute(path: '/recipes', builder: (_, __) => const RecipesScreen())],
         ),
+        // The fridge is a destination, not a page pushed over the shell: it
+        // keeps the tab bar, deep-links at /pantry, and /fridge is its alias.
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/pantry',
+              builder: (_, __) => const PantryScreen(),
+              routes: [
+                GoRoute(
+                  path: 'add',
+                  builder: (_, __) => const PantryAddScreen(),
+                ),
+              ],
+            ),
+          ],
+        ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/wall', builder: (_, __) => const WallScreen())],
         ),
@@ -52,7 +69,8 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(path: '/nutrition', builder: (_, __) => const NutritionComingSoonScreen()),
     GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionComingSoonScreen()),
-    GoRoute(path: '/pantry', builder: (_, __) => const PantryScreen()),
+    // One screen, two words for it.
+    GoRoute(path: '/fridge', redirect: (_, __) => '/pantry'),
     GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),
   ],
 );

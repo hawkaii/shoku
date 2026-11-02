@@ -20,15 +20,23 @@ enum PantryUnit {
     final text = raw?.trim().toLowerCase();
     if (text == null || text.isEmpty) return null;
     return switch (text) {
-      'g' || 'gr' || 'gram' || 'grams' => PantryUnit.g,
+      'g' || 'gr' || 'gm' || 'gms' || 'gram' || 'grams' => PantryUnit.g,
       'kg' || 'kilo' || 'kilos' || 'kgs' => PantryUnit.kg,
       'ml' || 'millilitre' || 'milliliter' => PantryUnit.ml,
-      'l' || 'lt' || 'litre' || 'liter' || 'litres' || 'liters' => PantryUnit.l,
+      'l' ||
+      'lt' ||
+      'ltr' ||
+      'ltrs' ||
+      'litre' ||
+      'liter' ||
+      'litres' ||
+      'liters' =>
+        PantryUnit.l,
       'tbsp' || 'tablespoon' || 'tablespoons' => PantryUnit.tbsp,
       'tsp' || 'teaspoon' || 'teaspoons' => PantryUnit.tsp,
       'pcs' || 'pc' || 'piece' || 'pieces' || 'x' => PantryUnit.pcs,
       'bunch' || 'bunches' => PantryUnit.bunch,
-      'pack' || 'packet' || 'packets' => PantryUnit.pack,
+      'pack' || 'pkt' || 'pkts' || 'packet' || 'packets' => PantryUnit.pack,
       _ => null,
     };
   }
@@ -154,49 +162,165 @@ class ParsedPantryLine {
 
 /// Deterministic, offline parsing of "2 kg rice" and receipt lines.
 ///
-/// Nothing here invents an amount: a line without a leading quantity keeps the
-/// raw text and is marked unconfident, so the review sheet can leave it off.
+/// Nothing here invents an amount: a line without a quantity keeps a null
+/// amount, and a line with no readable name is unconfident so the review sheet
+/// can leave it in "Couldn't read".
+///
+/// Brand names are not a list in this file. A receipt prints the brand *before*
+/// the product ("AMUL BUTTER 500G"), so the parser keeps the words from the
+/// first one the kitchen already knows and nothing before it. Any brand falls
+/// off that way, including one nobody wrote down, and a kitchen that has never
+/// seen butter keeps "amul butter" rather than guessing what to drop.
 class PantryParser {
   static final _leading =
       RegExp(r'^\s*(\d+(?:[.,]\d+)?)\s*([a-zA-Z]+)?\s*[x*]?\s+(.+)$');
+  static final _trailingAmount =
+      RegExp(r'^(.*\S)\s+(\d+(?:[.,]\d+)?)\s*([a-zA-Z]{1,6})$');
   static final _trailingPercent = RegExp(r'\s+\d+[.,]\d{2}\s*$');
+  static final _notAName = RegExp(r"[^a-z0-9 '\-]");
+  static final _words = RegExp(r'[^a-z0-9]+');
 
-  static ParsedPantryLine parseLine(String rawLine) {
+  /// Grammar, not vocabulary: these words never name an ingredient.
+  static const _stopWords = {
+    'a',
+    'an',
+    'and',
+    'the',
+    'of',
+    'with',
+    'fresh',
+    'packet',
+    'pack',
+  };
+
+  /// A name as the shelf stores it: lowercase, no stray punctuation, no
+  /// doubled spaces. Display capitalisation is the UI's business.
+  static String cleanName(String name) {
+    var text = name.toLowerCase().replaceAll('&', ' ');
+    text = text.replaceAll(_notAName, ' ');
+    text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return text.replaceAll(RegExp(r"^[ '\-]+|[ '\-]+$"), '').trim();
+  }
+
+  /// The words a name is made of, in order: lowercase, no numbers, no grammar.
+  static List<String> words(String name) => [
+        for (final word in cleanName(name).split(_words))
+          if (word.isNotEmpty &&
+              !_stopWords.contains(word) &&
+              !RegExp(r'^\d+$').hasMatch(word))
+            word,
+      ];
+
+  /// The plural fold the server uses, so both ends of a match agree.
+  static String singular(String word) {
+    if (word.length <= 3 || word.endsWith('ss')) return word;
+    if (word.endsWith('ies') && word.length > 4) {
+      return '${word.substring(0, word.length - 3)}y';
+    }
+    for (final suffix in const ['ches', 'shes', 'sses', 'xes', 'zes', 'oes']) {
+      if (word.endsWith(suffix)) {
+        return word.substring(0, word.length - 2);
+      }
+    }
+    if (word.endsWith('s')) return word.substring(0, word.length - 1);
+    return word;
+  }
+
+  /// The kitchen's own ingredient words: what is on the shelf already.
+  ///
+  /// Names only, never aliases — an alias is the receipt's raw text, and taking
+  /// it as vocabulary would teach the parser that the brand is the product.
+  static Set<String> vocabularyOf(Iterable<String> names) => {
+        for (final name in names)
+          for (final word in words(name)) singular(word),
+      };
+
+  /// Drops the words printed before the first one this kitchen knows.
+  static String normalise(String name, Set<String> vocabulary) {
+    final parts = words(name);
+    if (parts.isEmpty || vocabulary.isEmpty) return cleanName(name);
+    final firstKnown =
+        parts.indexWhere((word) => vocabulary.contains(singular(word)));
+    if (firstKnown <= 0) return parts.join(' ');
+    return parts.sublist(firstKnown).join(' ');
+  }
+
+  /// A name must name something: "500G" left over from a lifted amount is not
+  /// an ingredient.
+  static bool _namesSomething(String name) => RegExp(r'[a-z]').hasMatch(name);
+
+  /// [strict] is for machine-read text (a receipt or a screenshot): there a
+  /// bare word may be a shop's footer, so a line must carry an amount to be
+  /// trusted. Typed and spoken lines are the cook's own words and need not.
+  static ParsedPantryLine parseLine(
+    String rawLine, {
+    bool strict = false,
+    Set<String> vocabulary = const {},
+  }) {
     var line = rawLine.trim().replaceAll(RegExp(r'\s+'), ' ');
     line = line.replaceAll(_trailingPercent, ''); // receipt totals on the line
     if (line.isEmpty) {
       return ParsedPantryLine(raw: rawLine, name: '', confident: false);
     }
 
-    final match = _leading.firstMatch(line);
-    if (match == null) {
-      return ParsedPantryLine(raw: rawLine, name: line, confident: false);
+    double? quantity;
+    PantryUnit? unit;
+    var name = '';
+
+    final leading = _leading.firstMatch(line);
+    if (leading != null) {
+      final qty = double.tryParse(leading.group(1)!.replaceAll(',', '.'));
+      final parsedUnit = PantryUnit.parse(leading.group(2));
+      // A decimal with no unit is a receipt code, not a number of things:
+      // "500 AMUL" is ambiguous, "2 potatoes" is a count.
+      if (qty != null && (parsedUnit != null || qty == qty.roundToDouble())) {
+        quantity = qty;
+        unit = parsedUnit ?? PantryUnit.pcs;
+        name = leading.group(3)!.trim();
+      }
     }
 
-    final quantity = double.tryParse(match.group(1)!.replaceAll(',', '.'));
-    final unit = PantryUnit.parse(match.group(2));
-    final name = match.group(3)!.trim();
-    if (quantity == null || name.isEmpty) {
-      return ParsedPantryLine(raw: rawLine, name: line, confident: false);
+    if (name.isEmpty) {
+      final trailing = _trailingAmount.firstMatch(line);
+      if (trailing != null) {
+        final parsedUnit = PantryUnit.parse(trailing.group(3));
+        if (parsedUnit != null) {
+          quantity = double.tryParse(trailing.group(2)!.replaceAll(',', '.'));
+          unit = parsedUnit;
+          name = trailing.group(1)!.trim();
+        }
+      }
     }
-    // A number with no unit and a word that is not a unit is ambiguous: "2
-    // potatoes" is a count, but "500 AMUL" is a receipt code. Keep the count
-    // case, drop the rest to the ambiguous pile.
-    if (unit == null && quantity != quantity.roundToDouble()) {
-      return ParsedPantryLine(raw: rawLine, name: line, confident: false);
+
+    // A line whose only amount was lifted leaves nothing to name.
+    if (name.isEmpty) name = line;
+
+    final cleaned = normalise(name, vocabulary);
+    if (cleaned.isEmpty || !_namesSomething(cleaned)) {
+      return ParsedPantryLine(raw: rawLine, name: '', confident: false);
     }
+    // Machine-read text with no amount is the ambiguous pile; the cook's own
+    // words are a name and an unknown amount, which is honest.
+    final confident = !strict || quantity != null;
     return ParsedPantryLine(
       raw: rawLine,
-      name: name,
+      name: cleaned,
       quantity: quantity,
-      unit: unit ?? PantryUnit.pcs,
+      unit: quantity == null ? null : unit,
+      confident: confident,
     );
   }
 
   /// Parses a batch; blanks drop out.
-  static List<ParsedPantryLine> parse(String text) => [
+  static List<ParsedPantryLine> parse(
+    String text, {
+    bool strict = false,
+    Set<String> vocabulary = const {},
+  }) =>
+      [
         for (final line in text.split(RegExp(r'[\n;]')))
-          if (line.trim().isNotEmpty) parseLine(line),
+          if (line.trim().isNotEmpty)
+            parseLine(line, strict: strict, vocabulary: vocabulary),
       ];
 
   /// The amount a recipe line states, expressed in [stockUnit], or null when
@@ -229,7 +353,9 @@ class PantryParser {
     required double needed,
     required PantryUnit neededUnit,
   }) {
-    if (haveUnit != neededUnit && !haveUnit.comparableTo(neededUnit)) return null;
+    if (haveUnit != neededUnit && !haveUnit.comparableTo(neededUnit)) {
+      return null;
+    }
     final inBase = needed * neededUnit.base;
     final haveBase = have * haveUnit.base;
     final leftBase = haveBase - inBase;

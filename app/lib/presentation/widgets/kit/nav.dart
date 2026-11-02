@@ -10,13 +10,16 @@ class ShokuTabItem {
   const ShokuTabItem(this.icon, this.activeIcon, this.label);
 }
 
-/// Four destinations plus a centre action. The centre button is the only
-/// permanent ingress for import/log, so Home stays a journal, not a toolbar.
+/// Four destinations around a centre door. The centre is the fridge, not a
+/// button that pushes a page: it is a destination like the others, so it keeps
+/// the bar and the back button's history honest.
 class ShokuTabBar extends StatelessWidget {
   final List<ShokuTabItem> items;
   final int index;
   final ValueChanged<int> onChanged;
-  final VoidCallback? onCenterTap;
+
+  /// Which of [items] is drawn as the raised door. It still selects a branch.
+  final int? centerIndex;
 
   /// Replaces the active tab's marker. The shell passes the sync line, so the
   /// navigation stays the one place that can say "this is still working".
@@ -27,14 +30,13 @@ class ShokuTabBar extends StatelessWidget {
     required this.items,
     required this.index,
     required this.onChanged,
-    this.onCenterTap,
+    this.centerIndex,
     this.activeUnderline,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final half = (items.length / 2).ceil();
 
     return Container(
       decoration: BoxDecoration(
@@ -47,9 +49,8 @@ class ShokuTabBar extends StatelessWidget {
           height: 64,
           child: Row(
             children: [
-              for (var i = 0; i < half; i++) _tab(context, i),
-              if (onCenterTap != null) _center(context),
-              for (var i = half; i < items.length; i++) _tab(context, i),
+              for (var i = 0; i < items.length; i++)
+                if (i == centerIndex) _center(context, i) else _tab(context, i),
             ],
           ),
         ),
@@ -103,24 +104,45 @@ class ShokuTabBar extends StatelessWidget {
     );
   }
 
-  Widget _center(BuildContext context) {
+  Widget _center(BuildContext context, int i) {
     final c = context.colors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xs),
-      child: GestureDetector(
-        onTap: onCenterTap,
-        child: Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            gradient: ShokuGradients.crimsonPress,
-            borderRadius: BorderRadius.circular(ShokuRadius.chip),
-            border: Border.all(color: c.ink, width: ShokuStroke.brutal),
-            boxShadow: [
-              BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
-            ],
+    final active = i == index;
+    final item = items[i];
+    return Semantics(
+      button: true,
+      selected: active,
+      label: item.label,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xs),
+        child: GestureDetector(
+          key: const ValueKey('tab-center'),
+          onTap: () => onChanged(i),
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: active ? null : ShokuGradients.crimsonPress,
+              color: active ? c.surfaceAlt : null,
+              borderRadius: BorderRadius.circular(ShokuRadius.chip),
+              border: Border.all(
+                color: active ? c.accent : c.ink,
+                width: ShokuStroke.brutal,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: c.ink,
+                  offset: ShokuStroke.brutalShadow,
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Icon(
+              active ? item.activeIcon : item.icon,
+              color: active ? c.accent : c.onAccent,
+              size: 22,
+            ),
           ),
-          child: Icon(Icons.add, color: c.onAccent, size: 22),
         ),
       ),
     );

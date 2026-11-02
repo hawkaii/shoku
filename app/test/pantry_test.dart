@@ -14,9 +14,13 @@ import 'package:food_finder/data/models/pantry_item.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/suggestions_service.dart';
 import 'package:food_finder/data/sync/sync_repository.dart';
+import 'package:go_router/go_router.dart';
+import 'package:food_finder/presentation/screens/pantry/pantry_add_screen.dart';
 import 'package:food_finder/presentation/screens/pantry/pantry_screen.dart';
+import 'package:food_finder/presentation/widgets/kit/nav.dart';
 import 'package:food_finder/presentation/state/pantry_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
+import 'package:food_finder/presentation/state/sync_providers.dart';
 
 void main() {
   group('units', () {
@@ -97,10 +101,36 @@ void main() {
       expect(line.unit, PantryUnit.pcs);
     });
 
-    test('an unreadable line is kept raw and marked ambiguous', () {
+    test('a brand falls off the front of a word the kitchen knows', () {
+      final line = PantryParser.parseLine(
+        'AMUL BUTTER 500G',
+        vocabulary: PantryParser.vocabularyOf(['butter']),
+      );
+      expect(line.name, 'butter');
+      expect(line.quantity, 500);
+      expect(line.unit, PantryUnit.g);
+      expect(line.confident, isTrue);
+    });
+
+    test('an unknown kitchen keeps the words rather than guessing', () {
       final line = PantryParser.parseLine('AMUL BUTTER 500G');
+      expect(line.name, 'amul butter');
+      expect(line.quantity, 500,
+          reason: 'the amount is lifted whether or not the brand is known');
+      expect(line.unit, PantryUnit.g);
+    });
+
+    test('a number with no word at all is unreadable', () {
+      final line = PantryParser.parseLine('500');
       expect(line.confident, isFalse);
-      expect(line.raw, 'AMUL BUTTER 500G');
+      expect(line.raw, '500');
+    });
+
+    test('a machine-read name with no amount stays in the unread pile', () {
+      expect(PantryParser.parseLine('TATA SALT', strict: true).confident,
+          isFalse);
+      expect(PantryParser.parseLine('salt', strict: false).confident, isTrue,
+          reason: 'the cook typed it; the name is the whole thing we know');
     });
   });
 
@@ -161,6 +191,35 @@ void main() {
         },
       ]);
       expect(await repo.load(), isEmpty);
+    });
+
+    test('a sync that settles re-reads the shelf it pulled', () async {
+      final container = ProviderContainer(
+        overrides: [databaseProvider.overrideWithValue(db)],
+      );
+      addTearDown(container.dispose);
+      container.read(pantryStoreProvider.notifier);
+      await Future<void>.delayed(Duration.zero);
+
+      await repo.applyPull([
+        {
+          'id': 'from-another-phone',
+          'name': 'rice',
+          'quantity': 2,
+          'unit': 'kg',
+          'aliases': <String>[],
+          'wanted': false,
+          'source': 'manual',
+          'created_at': '2026-01-01T00:00:00Z',
+          'updated_at': '2099-01-01T00:00:00Z',
+          'deleted_at': null,
+        },
+      ]);
+      container.read(syncStatusProvider.notifier).state = SyncStatus.syncing;
+      container.read(syncStatusProvider.notifier).state = SyncStatus.idle;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(pantryStoreProvider).single.name, 'rice');
     });
 
     test('the push payload carries pantry_items', () async {
@@ -256,6 +315,41 @@ void main() {
     });
   });
 
+  group('the bar', () {
+    testWidgets('the centre is the fridge, and it selects a destination',
+        (tester) async {
+      final semantics = tester.ensureSemantics();
+      var tapped = -1;
+      await tester.pumpWidget(MaterialApp(
+        theme: ShokuTheme.light(),
+        home: Scaffold(
+          bottomNavigationBar: ShokuTabBar(
+            items: const [
+              ShokuTabItem(Icons.menu_book, Icons.menu_book, 'Journal'),
+              ShokuTabItem(Icons.restaurant_menu, Icons.restaurant_menu, 'Cookbook'),
+              ShokuTabItem(Icons.kitchen_outlined, Icons.kitchen, 'Fridge'),
+              ShokuTabItem(Icons.grid_view, Icons.grid_view, 'Wall'),
+              ShokuTabItem(Icons.person, Icons.person, 'You'),
+            ],
+            index: 0,
+            centerIndex: 2,
+            onChanged: (i) => tapped = i,
+          ),
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byIcon(Icons.kitchen_outlined), findsOneWidget,
+          reason: 'the centre is a fridge door, not the accent plus');
+      expect(find.byIcon(Icons.add), findsNothing);
+      expect(find.bySemanticsLabel('Fridge'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('tab-center')));
+      expect(tapped, 2);
+      semantics.dispose();
+    });
+  });
+
   group('the page', () {
     late AppDatabase db;
 
@@ -264,9 +358,24 @@ void main() {
 
     Widget page() => ProviderScope(
           overrides: [databaseProvider.overrideWithValue(db)],
-          child: MaterialApp(
+          child: MaterialApp.router(
             theme: ShokuTheme.light(),
-            home: const Scaffold(body: PantryScreen()),
+            routerConfig: GoRouter(
+              initialLocation: '/pantry',
+              routes: [
+                GoRoute(
+                  path: '/pantry',
+                  builder: (_, __) => const Scaffold(body: PantryScreen()),
+                  routes: [
+                    GoRoute(
+                      path: 'add',
+                      builder: (_, __) =>
+                          const Scaffold(body: PantryAddScreen()),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
 
@@ -280,29 +389,116 @@ void main() {
       expect(find.text('Fridge'), findsOneWidget);
     });
 
-    testWidgets('typed capture reviews before anything enters stock',
+    testWidgets('add items is a page, and its review normalises a brand',
         (tester) async {
+      await PantryRepository(db).add(name: 'butter');
       await tester.pumpWidget(page());
       await tester.pump(const Duration(milliseconds: 200));
 
       await tester.tap(find.byKey(const ValueKey('pantry-add')));
       await tester.pumpAndSettle();
+      expect(find.text('Add to the fridge'), findsOneWidget,
+          reason: 'the flow is a page inside the fridge, not a sheet');
 
-      await tester.enterText(find.byType(TextField).last, '2 kg rice\nAMUL BUTTER 500G');
+      await tester.enterText(
+        find.byKey(const ValueKey('pantry-text')),
+        '2 kg rice\nAMUL BUTTER 500G\n500',
+      );
       await tester.tap(find.byKey(const ValueKey('pantry-parse')));
       await tester.pumpAndSettle();
 
-      // Confident line pre-checked, the unreadable one is not.
-      expect(find.text('Add 1 of 2'), findsOneWidget);
+      // The brand is gone because butter is already on this shelf; the receipt
+      // code with nothing but a brand and a number cannot be read.
+      expect(find.text('butter'), findsOneWidget);
+      expect(find.text('500 g'), findsOneWidget);
+      expect(find.text('Add 2 of 3'), findsOneWidget);
       expect(find.textContaining('Couldn’t read (1)'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('pantry-confirm')));
       await tester.pumpAndSettle();
 
       final items = await PantryRepository(db).load();
-      expect(items.single.name, 'rice');
-      expect(items.single.quantity, 2);
-      expect(items.single.unit, PantryUnit.kg);
+      expect([for (final i in items) i.name], containsAll(['rice', 'butter']));
+      final butter = items.firstWhere((i) => i.name == 'butter');
+      expect(butter.quantity, 500);
+      expect(butter.unit, PantryUnit.g);
+      expect(butter.aliases, contains('AMUL BUTTER 500G'),
+          reason: 'the confirmed mapping is remembered for next time');
+    });
+
+    testWidgets('the stepper changes quantity in place', (tester) async {
+      await PantryRepository(db)
+          .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      await tester.pumpWidget(page());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.byKey(const ValueKey('pantry-plus-rice')));
+      await tester.pumpAndSettle();
+      expect((await PantryRepository(db).load()).single.quantity, 2.5);
+
+      await tester.tap(find.byKey(const ValueKey('pantry-minus-rice')));
+      await tester.pumpAndSettle();
+      expect((await PantryRepository(db).load()).single.quantity, 2);
+    });
+
+    testWidgets('tapping a row opens the edit sheet and saves', (tester) async {
+      await PantryRepository(db)
+          .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      await tester.pumpWidget(page());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.byKey(const ValueKey('pantry-row-rice')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const ValueKey('pantry-edit-name')), 'basmati rice');
+      await tester.enterText(find.byKey(const ValueKey('pantry-edit-qty')), '1');
+      await tester.tap(find.byKey(const ValueKey('pantry-edit-unit-kg')));
+      await tester.tap(find.byKey(const ValueKey('pantry-edit-save')));
+      await tester.pumpAndSettle();
+
+      final item = (await PantryRepository(db).load()).single;
+      expect(item.name, 'basmati rice');
+      expect(item.quantity, 1);
+      expect(item.unit, PantryUnit.kg);
+    });
+
+    testWidgets('select mode deletes a batch', (tester) async {
+      final repo = PantryRepository(db);
+      await repo.add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      await repo.add(name: 'salt', quantity: 1, unit: PantryUnit.kg);
+      await repo.add(name: 'eggs', quantity: 6, unit: PantryUnit.pcs);
+
+      await tester.pumpWidget(page());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.byKey(const ValueKey('pantry-edit-toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('pantry-row-rice')));
+      await tester.tap(find.byKey(const ValueKey('pantry-row-salt')));
+      await tester.pumpAndSettle();
+      expect(find.text('2 selected'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('pantry-delete-selected')));
+      await tester.pumpAndSettle();
+
+      final left = await PantryRepository(db).load();
+      expect([for (final i in left) i.name], ['eggs']);
+    });
+
+    testWidgets('swiping a row deletes it', (tester) async {
+      await PantryRepository(db)
+          .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      await tester.pumpWidget(page());
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.drag(
+        find.byKey(const ValueKey('pantry-row-rice')),
+        const Offset(-500, 0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(await PantryRepository(db).load(), isEmpty);
     });
   });
 }

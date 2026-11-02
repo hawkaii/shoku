@@ -528,7 +528,7 @@ class _FridgeButton extends ConsumerWidget {
     final items = ref.watch(pantryStoreProvider).where((i) => !i.wanted).length;
     return GestureDetector(
       key: const ValueKey('fridge-button'),
-      onTap: () => context.push('/pantry'),
+      onTap: () => context.go('/pantry'),
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

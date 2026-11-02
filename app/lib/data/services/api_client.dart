@@ -28,10 +28,13 @@ class ApiClient {
 
   Uri _uri(String path) => Uri.parse('$_baseUrl$path');
 
-  Map<String, String> _headers() {
+  /// A bodyless call carries no content type: declaring one on a GET makes the
+  /// browser preflight a request that never needed to leave the same origin,
+  /// and a preflight is one more thing that can be the last thing that works.
+  Map<String, String> _headers({bool json = false}) {
     final token = _token();
     return {
-      'content-type': 'application/json',
+      if (json) 'content-type': 'application/json',
       if (token != null) 'authorization': 'Bearer $token',
     };
   }
@@ -42,7 +45,7 @@ class ApiClient {
   Future<Map<String, dynamic>> post(String path, [Object? body]) async =>
       _decode(await _http.post(
         _uri(path),
-        headers: _headers(),
+        headers: _headers(json: true),
         body: jsonEncode(body ?? const <String, dynamic>{}),
       ));
 
