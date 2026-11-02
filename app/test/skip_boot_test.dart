@@ -28,13 +28,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.text('Skip'));
+    // 1.5 s: enough for the first read, well inside the 3 s sync timer, so the
+    // card cannot be arriving because of a later sync pass.
     await tester.pump(const Duration(milliseconds: 600));
-    await tester.pump(const Duration(seconds: 4));
+    await tester.pump(const Duration(milliseconds: 900));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('pinned-card')), findsOneWidget,
         reason: 'the sample has to reach the Journal the cook is looking at');
     expect(find.text('Paneer Tikka'), findsWidgets);
+
+    // Let the shell's three-second sync timer fire before the test ends; the
+    // assertion above already happened inside that window.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpWidget(const SizedBox());
   });
 }
