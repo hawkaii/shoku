@@ -68,6 +68,11 @@ void main() {
     ])));
     await tester.pump(const Duration(milliseconds: 400));
 
+    // The method folds away behind its summary; the summary is what is on
+    // screen first.
+    await tester.tap(find.byKey(const ValueKey('steps-toggle')));
+    await tester.pumpAndSettle();
+
     expect(tester.takeException(), isNull);
     expect(find.text('Heat the oil'), findsOneWidget);
     expect(find.text('Add the garlic'), findsOneWidget);
@@ -84,6 +89,8 @@ void main() {
 
     await tester.pumpWidget(_app(_dish()));
     await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const ValueKey('steps-toggle')));
+    await tester.pumpAndSettle();
 
     expect(find.text('Heat the oil'), findsOneWidget);
     expect(find.byKey(const ValueKey('step-ingredients')), findsNothing);

@@ -154,6 +154,22 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
     await add(name: name, wanted: true, source: 'manual');
   }
 
+  /// Adds a batch of missing lines and returns the ids it created, so the
+  /// caller can offer Undo. One refresh, one sync for the whole list.
+  Future<List<String>> wantMany(Iterable<String> names) async {
+    final seen = {for (final item in state) PantryParser.key(item.name)};
+    final ids = <String>[];
+    for (final name in names) {
+      final key = PantryParser.key(name);
+      if (key.isEmpty || !seen.add(key)) continue;
+      final item =
+          await _repo.add(name: name, wanted: true, source: 'suggestion');
+      ids.add(item.id);
+    }
+    if (ids.isNotEmpty) await refresh();
+    return ids;
+  }
+
   /// Takes matched amounts out of stock. Returns how many lines could not be
   /// deducted because their units do not compare.
   Future<int> deduct(
