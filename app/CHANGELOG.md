@@ -3,6 +3,17 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.28.1] — 2026-11-03
+
+### Chores
+- V1.28.1 — the assistant stops blaming the network *(release)* — [`9e25c6e`](https://github.com/hawkaii/food-finder-app/commit/9e25c6e1e86e074fb6326198c415863d7c263b68)
+
+### Docs
+- V1.28.0 [skip ci] *(changelog)* — [`074ba57`](https://github.com/hawkaii/food-finder-app/commit/074ba57fbeadf8a9b334e9d43f5d535fa187c0b9)
+
+### Fixed
+- Only a network failure says 'no connection' *(bot)* — [`91d605c`](https://github.com/hawkaii/food-finder-app/commit/91d605cabd27f079adeb8ea4d6eb8e01845af0ba)
+
 ## [1.28.0] — 2026-11-02
 
 ### Added
