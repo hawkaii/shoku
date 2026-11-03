@@ -1776,4 +1776,11 @@ class AppLocalizationsTa extends AppLocalizations {
   String hudLevel(String level) {
     return 'நிலை $level';
   }
+
+  @override
+  String get botServerNotice =>
+      'உதவியாளருக்கு சிக்கல் ஏற்பட்டது — மீண்டும் முயலவும்.';
+
+  @override
+  String get botSignInNotice => 'உதவியாளரிடம் கேட்க உள்நுழைக.';
 }

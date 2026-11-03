@@ -397,5 +397,7 @@
   "micListening": "শুনছি…",
   "searchHint": "রেসিপি, নোট, হ্যান্ডেল খুঁজুন",
   "hudStreakDays": "{count, plural, one{1 দিন} other{{count} দিন}}",
-  "hudLevel": "লেভেল {level}"
+  "hudLevel": "লেভেল {level}",
+  "botServerNotice": "সহায়কটি সমস্যায় পড়েছে — আবার চেষ্টা করুন।",
+  "botSignInNotice": "সহায়ককে জিজ্ঞাসা করতে সাইন ইন করুন।"
 }

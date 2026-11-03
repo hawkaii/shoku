@@ -397,5 +397,7 @@
   "micListening": "Mendengar…",
   "searchHint": "Cari resep, catatan, akun",
   "hudStreakDays": "{count, plural, other{{count} hr}}",
-  "hudLevel": "LVL {level}"
+  "hudLevel": "LVL {level}",
+  "botServerNotice": "Asisten mengalami masalah — coba lagi.",
+  "botSignInNotice": "Masuk untuk bertanya kepada asisten."
 }

@@ -1743,4 +1743,10 @@ class AppLocalizationsId extends AppLocalizations {
   String hudLevel(String level) {
     return 'LVL $level';
   }
+
+  @override
+  String get botServerNotice => 'Asisten mengalami masalah — coba lagi.';
+
+  @override
+  String get botSignInNotice => 'Masuk untuk bertanya kepada asisten.';
 }

@@ -1784,4 +1784,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String hudLevel(String level) {
     return 'NIV $level';
   }
+
+  @override
+  String get botServerNotice =>
+      'L\'assistant a rencontré un problème — réessayez.';
+
+  @override
+  String get botSignInNotice => 'Connectez-vous pour interroger l\'assistant.';
 }

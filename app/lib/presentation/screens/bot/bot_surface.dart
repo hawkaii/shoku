@@ -396,9 +396,13 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 ? l10n.botCapNotice
                 : turn.text == 'offline'
                     ? l10n.botOfflineNotice
-                    : turn.text == 'added'
-                        ? l10n.botAddedToFridge(turn.count ?? 0)
-                        : turn.text,
+                    : turn.text == 'server'
+                        ? l10n.botServerNotice
+                        : turn.text == 'signin'
+                            ? l10n.botSignInNotice
+                            : turn.text == 'added'
+                                ? l10n.botAddedToFridge(turn.count ?? 0)
+                                : turn.text,
             key: const ValueKey('bot-notice'),
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),

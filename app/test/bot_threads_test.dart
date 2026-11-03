@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +16,7 @@ import 'package:food_finder/data/services/assistant_service.dart';
 import 'package:food_finder/presentation/screens/bot/bot_scope.dart';
 import 'package:food_finder/presentation/screens/bot/bot_surface.dart';
 import 'package:food_finder/presentation/state/assistant_providers.dart';
+import 'package:food_finder/presentation/state/bot_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:food_finder/presentation/state/sync_providers.dart';
 import 'package:http/http.dart' as http;
@@ -349,6 +352,52 @@ void main() {
       // The dish sheet, with the dish's own thread and its scope chip.
       expect(find.textContaining('Ask about this dish'), findsOneWidget);
       expect(find.byKey(const ValueKey('bot-scope-chip')), findsWidgets);
+    });
+  });
+
+  group('failure classification', () {
+    testWidgets('a server error is not "no connection"', (tester) async {
+      await tester.pumpWidget(sheet(
+          _FakeAssistant((_, __) async => throw ApiError('boom', 500))));
+      await tester.pumpAndSettle();
+      await send(tester, 'what can i cook');
+      expect(find.text('The assistant hit a problem — try again.'),
+          findsOneWidget);
+      expect(find.byKey(const ValueKey('bot-offline')), findsNothing);
+    });
+
+    testWidgets('a signed-out call asks for sign-in', (tester) async {
+      await tester.pumpWidget(sheet(
+          _FakeAssistant((_, __) async => throw const ApiUnauthenticated())));
+      await tester.pumpAndSettle();
+      await send(tester, 'what can i cook');
+      expect(find.text('Sign in to ask the assistant.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('bot-offline')), findsNothing);
+    });
+
+    testWidgets('only a timeout claims the connection', (tester) async {
+      await tester.pumpWidget(sheet(
+          _FakeAssistant((_, __) async => throw TimeoutException('slow'))));
+      await tester.pumpAndSettle();
+      await send(tester, 'what can i cook');
+      expect(
+          find.text(
+              'The assistant needs a connection. Nothing here is answered offline.'),
+          findsOneWidget);
+    });
+
+    test('a failed sync does not mark the bot offline', () {
+      final failed = ProviderContainer(overrides: [
+        syncStatusProvider.overrideWith((ref) => SyncStatus.failed),
+      ]);
+      addTearDown(failed.dispose);
+      expect(failed.read(botOfflineProvider), isFalse);
+
+      final offline = ProviderContainer(overrides: [
+        syncStatusProvider.overrideWith((ref) => SyncStatus.offline),
+      ]);
+      addTearDown(offline.dispose);
+      expect(offline.read(botOfflineProvider), isTrue);
     });
   });
 }

@@ -397,5 +397,7 @@
   "micListening": "Ouvindo…",
   "searchHint": "Busque receitas, notas, perfis",
   "hudStreakDays": "{count, plural, =1{1d} other{{count}d}}",
-  "hudLevel": "NÍV {level}"
+  "hudLevel": "NÍV {level}",
+  "botServerNotice": "O assistente teve um problema — tente novamente.",
+  "botSignInNotice": "Entre para perguntar ao assistente."
 }

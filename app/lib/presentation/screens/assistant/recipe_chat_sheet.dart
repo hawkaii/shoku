@@ -10,6 +10,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/db/assistant_turn_repository.dart';
 import '../../../data/mock/journal_data.dart';
+import '../../../data/services/api_client.dart';
 import '../../../data/services/assistant_service.dart';
 import '../../../data/services/speech_service.dart';
 import '../../state/assistant_providers.dart';
@@ -311,6 +312,28 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
         _thinking = false;
         _cap = true;
         _turns.add(_Turn.notice(context.l10n.botCapNotice));
+      });
+      _scrollToLatest();
+    } on ApiUnauthenticated {
+      if (!mounted) return;
+      setState(() {
+        _thinking = false;
+        _turns.add(_Turn.notice(context.l10n.botSignInNotice));
+      });
+      _scrollToLatest();
+    } on ApiError {
+      if (!mounted) return;
+      setState(() {
+        _thinking = false;
+        _turns.add(_Turn.notice(context.l10n.botServerNotice));
+      });
+      _scrollToLatest();
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() {
+        _thinking = false;
+        _offline = true;
+        _turns.add(_Turn.notice(context.l10n.botOfflineNotice));
       });
       _scrollToLatest();
     } catch (_) {

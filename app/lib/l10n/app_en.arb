@@ -1063,5 +1063,7 @@
         "example": "07"
       }
     }
-  }
+  },
+  "botServerNotice": "The assistant hit a problem — try again.",
+  "botSignInNotice": "Sign in to ask the assistant."
 }

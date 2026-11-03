@@ -397,5 +397,7 @@
   "micListening": "கேட்கிறது…",
   "searchHint": "ரெசிபிகள், குறிப்புகள், கணக்குகளைத் தேடுங்கள்",
   "hudStreakDays": "{count, plural, one{1 நாள்} other{{count} நாள்}}",
-  "hudLevel": "நிலை {level}"
+  "hudLevel": "நிலை {level}",
+  "botServerNotice": "உதவியாளருக்கு சிக்கல் ஏற்பட்டது — மீண்டும் முயலவும்.",
+  "botSignInNotice": "உதவியாளரிடம் கேட்க உள்நுழைக."
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../data/db/assistant_turn_repository.dart';
+import '../../../data/services/api_client.dart';
 import '../../../data/services/assistant_service.dart';
 import '../../../data/models/pantry_item.dart';
 import '../state/assistant_providers.dart';
@@ -44,6 +45,20 @@ class BotTurn {
   const BotTurn.offline()
       : kind = BotTurnKind.notice,
         text = 'offline',
+        suggestions = const [],
+        items = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.server()
+      : kind = BotTurnKind.notice,
+        text = 'server',
+        suggestions = const [],
+        items = const [],
+        choices = const [],
+        count = null;
+  const BotTurn.signIn()
+      : kind = BotTurnKind.notice,
+        text = 'signin',
         suggestions = const [],
         items = const [],
         choices = const [],
@@ -254,6 +269,25 @@ class BotController extends StateNotifier<BotState> {
           const BotTurn.cap(),
         ],
       );
+    } on ApiUnauthenticated {
+      if (!mounted || generation != _generation) return;
+      state = state.copyWith(
+        thinking: false,
+        turns: [...state.turns, const BotTurn.signIn()],
+      );
+    } on ApiError {
+      if (!mounted || generation != _generation) return;
+      state = state.copyWith(
+        thinking: false,
+        turns: [...state.turns, const BotTurn.server()],
+      );
+    } on TimeoutException {
+      if (!mounted || generation != _generation) return;
+      state = state.copyWith(
+        thinking: false,
+        offline: true,
+        turns: [...state.turns, const BotTurn.offline()],
+      );
     } catch (_) {
       if (!mounted || generation != _generation) return;
       // Every model intent needs the API; the bot never claims a local answer.
@@ -357,5 +391,8 @@ final botControllerProvider =
 /// and one honest sentence, and no intent is offered as if it worked offline.
 final botOfflineProvider = Provider<bool>((ref) {
   final status = ref.watch(syncStatusProvider);
-  return status == SyncStatus.offline || status == SyncStatus.failed;
+  // Only a network failure is "offline". A sync that failed for any other
+  // reason (a 401, a 500, a rejected row) means the server answered — saying
+  // "no connection" then sends people to check Wi-Fi for a server bug.
+  return status == SyncStatus.offline;
 });

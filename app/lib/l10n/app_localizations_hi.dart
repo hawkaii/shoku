@@ -1748,4 +1748,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String hudLevel(String level) {
     return 'स्तर $level';
   }
+
+  @override
+  String get botServerNotice => 'सहायक को कोई दिक्कत आई — फिर से कोशिश करें।';
+
+  @override
+  String get botSignInNotice => 'सहायक से पूछने के लिए साइन इन करें।';
 }

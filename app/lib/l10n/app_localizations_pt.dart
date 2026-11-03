@@ -1762,4 +1762,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String hudLevel(String level) {
     return 'NÍV $level';
   }
+
+  @override
+  String get botServerNotice =>
+      'O assistente teve um problema — tente novamente.';
+
+  @override
+  String get botSignInNotice => 'Entre para perguntar ao assistente.';
 }

@@ -397,5 +397,7 @@
   "micListening": "వింటోంది…",
   "searchHint": "రెసిపీలు, నోట్‌లు, ఖాతాలు వెతకండి",
   "hudStreakDays": "{count, plural, one{1 రోజు} other{{count} రోజులు}}",
-  "hudLevel": "స్థాయి {level}"
+  "hudLevel": "స్థాయి {level}",
+  "botServerNotice": "సహాయకుడికి సమస్య వచ్చింది — మళ్లీ ప్రయత్నించండి.",
+  "botSignInNotice": "సహాయకుడిని అడగడానికి సైన్ ఇన్ చేయండి."
 }

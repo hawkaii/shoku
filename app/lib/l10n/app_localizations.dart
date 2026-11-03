@@ -2501,6 +2501,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LVL {level}'**
   String hudLevel(String level);
+
+  /// No description provided for @botServerNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant hit a problem — try again.'**
+  String get botServerNotice;
+
+  /// No description provided for @botSignInNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to ask the assistant.'**
+  String get botSignInNotice;
 }
 
 class _AppLocalizationsDelegate
