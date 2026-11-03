@@ -400,5 +400,20 @@
   "hudLevel": "स्तर {level}",
   "botServerNotice": "सहाय्यकाला अडचण आली — पुन्हा प्रयत्न करा.",
   "botSignInNotice": "सहाय्यकाला विचारण्यासाठी साइन इन करा.",
-  "dishStopReading": "वाचन थांबवा"
+  "dishStopReading": "वाचन थांबवा",
+  "handsFree": "हँड्स-फ्री",
+  "handsFreeListening": "ऐकत आहोत",
+  "handsFreeConnecting": "कनेक्ट होत आहे…",
+  "handsFreeThinking": "विचार करत आहोत…",
+  "handsFreeSpeaking": "बोलत आहोत…",
+  "handsFreePaused": "थांबवले",
+  "handsFreeStart": "हँड्स-फ्री सुरू करा",
+  "handsFreeStop": "हँड्स-फ्री बंद करा",
+  "handsFreeHeard": "ऐकले: {text}",
+  "handsFreeCheckIn": "अजून शिजवत आहात? तयार झाल्यावर “पुढे” म्हणा.",
+  "handsFreeHelp": "पुढे, मागे, पुन्हा, 5 मिनिटांचा टायमर सुरू कर, मदत, किंवा हँड्स-फ्री बंद करा असे म्हणा.",
+  "handsFreeTimerStarted": "{count, plural, one{1 मिनिटाचा टायमर सुरू झाला.} other{{count} मिनिटांचा टायमर सुरू झाला.}}",
+  "handsFreeOffline": "हँड्स-फ्रीसाठी कनेक्शन हवे. पुन्हा प्रयत्न करण्यासाठी टॅप करा.",
+  "handsFreeAuth": "हँड्स-फ्रीसाठी तुम्ही मध्ये साइन इन करा.",
+  "handsFreeCap": "आजची आवाज मिनिटे संपली."
 }

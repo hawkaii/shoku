@@ -1757,4 +1757,62 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dishStopReading => 'पढ़ना बंद करें';
+
+  @override
+  String get handsFree => 'हैंड्स-फ़्री';
+
+  @override
+  String get handsFreeListening => 'सुन रहे हैं';
+
+  @override
+  String get handsFreeConnecting => 'कनेक्ट हो रहा है…';
+
+  @override
+  String get handsFreeThinking => 'सोच रहे हैं…';
+
+  @override
+  String get handsFreeSpeaking => 'बोल रहे हैं…';
+
+  @override
+  String get handsFreePaused => 'रुका हुआ';
+
+  @override
+  String get handsFreeStart => 'हैंड्स-फ़्री शुरू करें';
+
+  @override
+  String get handsFreeStop => 'हैंड्स-फ़्री बंद करें';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'सुना: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn =>
+      'अब भी पका रहे हैं? तैयार होने पर “अगला” कहें।';
+
+  @override
+  String get handsFreeHelp =>
+      'अगला, पीछे, दोहराओ, 5 मिनट का टाइमर शुरू करो, मदद, या हैंड्स-फ़्री बंद करो कहें।';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count मिनट का टाइमर शुरू हुआ।',
+      one: '1 मिनट का टाइमर शुरू हुआ।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'हैंड्स-फ़्री के लिए कनेक्शन चाहिए। फिर कोशिश करने के लिए टैप करें।';
+
+  @override
+  String get handsFreeAuth => 'हैंड्स-फ़्री के लिए आप में साइन इन करें।';
+
+  @override
+  String get handsFreeCap => 'आज की आवाज़ मिनट खत्म हो गई हैं।';
 }

@@ -1066,5 +1066,34 @@
   },
   "botServerNotice": "The assistant hit a problem — try again.",
   "botSignInNotice": "Sign in to ask the assistant.",
-  "dishStopReading": "Stop reading"
+  "dishStopReading": "Stop reading",
+  "handsFree": "Hands-free",
+  "handsFreeListening": "Listening",
+  "handsFreeConnecting": "Connecting…",
+  "handsFreeThinking": "Thinking…",
+  "handsFreeSpeaking": "Speaking…",
+  "handsFreePaused": "Paused",
+  "handsFreeStart": "Start hands-free",
+  "handsFreeStop": "Stop hands-free",
+  "handsFreeHeard": "Heard: {text}",
+  "handsFreeCheckIn": "Still cooking? Say next when you’re ready.",
+  "handsFreeHelp": "Say next, back, repeat, start a 5 minute timer, help, or stop hands-free.",
+  "handsFreeTimerStarted": "{count, plural, one{Timer started for 1 minute.} other{Timer started for {count} minutes.}}",
+  "handsFreeOffline": "Hands-free needs a connection. Tap to try again.",
+  "handsFreeAuth": "Sign in from You to use hands-free.",
+  "handsFreeCap": "Voice minutes are used up for today.",
+  "@handsFreeHeard": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@handsFreeTimerStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

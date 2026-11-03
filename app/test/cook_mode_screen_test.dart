@@ -159,4 +159,15 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('the cook header offers hands-free next to the step count',
+      (tester) async {
+    await _pumpCook(tester, db: db, dish: _dish());
+
+    expect(find.byKey(const ValueKey('hands-free-toggle')), findsOneWidget);
+    expect(find.text('Hands-free'), findsOneWidget);
+    expect(find.text('1/4'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+  });
 }

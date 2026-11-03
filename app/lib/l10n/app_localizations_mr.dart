@@ -1761,4 +1761,61 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get dishStopReading => 'वाचन थांबवा';
+
+  @override
+  String get handsFree => 'हँड्स-फ्री';
+
+  @override
+  String get handsFreeListening => 'ऐकत आहोत';
+
+  @override
+  String get handsFreeConnecting => 'कनेक्ट होत आहे…';
+
+  @override
+  String get handsFreeThinking => 'विचार करत आहोत…';
+
+  @override
+  String get handsFreeSpeaking => 'बोलत आहोत…';
+
+  @override
+  String get handsFreePaused => 'थांबवले';
+
+  @override
+  String get handsFreeStart => 'हँड्स-फ्री सुरू करा';
+
+  @override
+  String get handsFreeStop => 'हँड्स-फ्री बंद करा';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'ऐकले: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn => 'अजून शिजवत आहात? तयार झाल्यावर “पुढे” म्हणा.';
+
+  @override
+  String get handsFreeHelp =>
+      'पुढे, मागे, पुन्हा, 5 मिनिटांचा टायमर सुरू कर, मदत, किंवा हँड्स-फ्री बंद करा असे म्हणा.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count मिनिटांचा टायमर सुरू झाला.',
+      one: '1 मिनिटाचा टायमर सुरू झाला.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'हँड्स-फ्रीसाठी कनेक्शन हवे. पुन्हा प्रयत्न करण्यासाठी टॅप करा.';
+
+  @override
+  String get handsFreeAuth => 'हँड्स-फ्रीसाठी तुम्ही मध्ये साइन इन करा.';
+
+  @override
+  String get handsFreeCap => 'आजची आवाज मिनिटे संपली.';
 }

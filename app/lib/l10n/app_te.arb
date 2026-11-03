@@ -400,5 +400,20 @@
   "hudLevel": "స్థాయి {level}",
   "botServerNotice": "సహాయకుడికి సమస్య వచ్చింది — మళ్లీ ప్రయత్నించండి.",
   "botSignInNotice": "సహాయకుడిని అడగడానికి సైన్ ఇన్ చేయండి.",
-  "dishStopReading": "చదవడం ఆపు"
+  "dishStopReading": "చదవడం ఆపు",
+  "handsFree": "చేతుల్లేని",
+  "handsFreeListening": "వింటోంది",
+  "handsFreeConnecting": "కనెక్ట్ అవుతోంది…",
+  "handsFreeThinking": "ఆలోచిస్తోంది…",
+  "handsFreeSpeaking": "మాట్లాడుతోంది…",
+  "handsFreePaused": "నిలిపివేయబడింది",
+  "handsFreeStart": "చేతుల్లేని ప్రారంభించండి",
+  "handsFreeStop": "చేతుల్లేని ఆపండి",
+  "handsFreeHeard": "వినిపించింది: {text}",
+  "handsFreeCheckIn": "ఇంకా వంట చేస్తున్నారా? సిద్ధమైనప్పుడు “తదుపరి” చెప్పండి.",
+  "handsFreeHelp": "తదుపరి, వెనుక, మళ్లీ, 5 నిమిషాల టైమర్ ప్రారంభించు, సహాయం, లేదా చేతుల్లేని ఆపు అని చెప్పండి.",
+  "handsFreeTimerStarted": "{count, plural, one{1 నిమిషం టైమర్ ప్రారంభమైంది.} other{{count} నిమిషాల టైమర్ ప్రారంభమైంది.}}",
+  "handsFreeOffline": "చేతుల్లేని కోసం కనెక్షన్ కావాలి. మళ్లీ ప్రయత్నించడానికి నొక్కండి.",
+  "handsFreeAuth": "చేతుల్లేని వాడటానికి మీరు లో సైన్ ఇన్ చేయండి.",
+  "handsFreeCap": "ఈరోజు వాయిస్ నిమిషాలు అయిపోయాయి."
 }

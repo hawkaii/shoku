@@ -1794,4 +1794,64 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Arrêter la lecture';
+
+  @override
+  String get handsFree => 'Mains libres';
+
+  @override
+  String get handsFreeListening => 'Écoute';
+
+  @override
+  String get handsFreeConnecting => 'Connexion…';
+
+  @override
+  String get handsFreeThinking => 'Réflexion…';
+
+  @override
+  String get handsFreeSpeaking => 'Parle…';
+
+  @override
+  String get handsFreePaused => 'En pause';
+
+  @override
+  String get handsFreeStart => 'Activer les mains libres';
+
+  @override
+  String get handsFreeStop => 'Arrêter les mains libres';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'Entendu : $text';
+  }
+
+  @override
+  String get handsFreeCheckIn =>
+      'Toujours en cuisine ? Dites « suivant » quand vous êtes prêt.';
+
+  @override
+  String get handsFreeHelp =>
+      'Dites suivant, retour, répète, lance un minuteur de 5 minutes, aide, ou arrête les mains libres.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Minuteur de $count minutes lancé.',
+      one: 'Minuteur de 1 minute lancé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'Les mains libres ont besoin d’une connexion. Touchez pour réessayer.';
+
+  @override
+  String get handsFreeAuth =>
+      'Connectez-vous dans Vous pour utiliser les mains libres.';
+
+  @override
+  String get handsFreeCap =>
+      'Les minutes vocales sont épuisées pour aujourd’hui.';
 }

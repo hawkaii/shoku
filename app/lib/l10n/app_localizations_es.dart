@@ -1769,4 +1769,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Detener la lectura';
+
+  @override
+  String get handsFree => 'Manos libres';
+
+  @override
+  String get handsFreeListening => 'Escuchando';
+
+  @override
+  String get handsFreeConnecting => 'Conectando…';
+
+  @override
+  String get handsFreeThinking => 'Pensando…';
+
+  @override
+  String get handsFreeSpeaking => 'Hablando…';
+
+  @override
+  String get handsFreePaused => 'En pausa';
+
+  @override
+  String get handsFreeStart => 'Iniciar manos libres';
+
+  @override
+  String get handsFreeStop => 'Detener manos libres';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'Escuché: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn =>
+      '¿Sigues cocinando? Di «siguiente» cuando quieras.';
+
+  @override
+  String get handsFreeHelp =>
+      'Di siguiente, atrás, repite, inicia un temporizador de 5 minutos, ayuda o detén manos libres.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Temporizador de $count minutos iniciado.',
+      one: 'Temporizador de 1 minuto iniciado.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'Manos libres necesita conexión. Toca para reintentar.';
+
+  @override
+  String get handsFreeAuth => 'Inicia sesión en Tú para usar manos libres.';
+
+  @override
+  String get handsFreeCap => 'Los minutos de voz se agotaron por hoy.';
 }

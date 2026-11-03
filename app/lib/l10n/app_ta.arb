@@ -400,5 +400,20 @@
   "hudLevel": "நிலை {level}",
   "botServerNotice": "உதவியாளருக்கு சிக்கல் ஏற்பட்டது — மீண்டும் முயலவும்.",
   "botSignInNotice": "உதவியாளரிடம் கேட்க உள்நுழைக.",
-  "dishStopReading": "படிப்பதை நிறுத்து"
+  "dishStopReading": "படிப்பதை நிறுத்து",
+  "handsFree": "கைகள் இல்லாமல்",
+  "handsFreeListening": "கேட்கிறது",
+  "handsFreeConnecting": "இணைக்கிறது…",
+  "handsFreeThinking": "யோசிக்கிறது…",
+  "handsFreeSpeaking": "பேசுகிறது…",
+  "handsFreePaused": "இடைநிறுத்தம்",
+  "handsFreeStart": "கைகள் இல்லாமல் தொடங்கு",
+  "handsFreeStop": "கைகள் இல்லாமல் நிறுத்து",
+  "handsFreeHeard": "கேட்டது: {text}",
+  "handsFreeCheckIn": "இன்னும் சமைக்கிறீர்களா? தயாராகும்போது “அடுத்து” சொல்லுங்கள்.",
+  "handsFreeHelp": "அடுத்து, பின், மீண்டும், 5 நிமிட டைமர் தொடங்கு, உதவி, அல்லது கைகள் இல்லாமல் நிறுத்து என்று சொல்லுங்கள்.",
+  "handsFreeTimerStarted": "{count, plural, one{1 நிமிட டைமர் தொடங்கியது.} other{{count} நிமிட டைமர் தொடங்கியது.}}",
+  "handsFreeOffline": "கைகள் இல்லாமலுக்கு இணைப்பு தேவை. மீண்டும் முயற்சிக்கத் தட்டவும்.",
+  "handsFreeAuth": "கைகள் இல்லாமல் பயன்படுத்த நீங்கள் பகுதியில் உள்நுழையுங்கள்.",
+  "handsFreeCap": "இன்றைய குரல் நிமிடங்கள் முடிந்தன."
 }
