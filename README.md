@@ -35,6 +35,40 @@ Global AI Developer Hackathon**, Indie Developer track, October 2026.
 
 Every build comes from GitHub Actions. Installing updates Shoku in place.
 
+## How it fits together
+
+One phone, one small server, and one VM that only wakes up to read a video.
+Everything here is in this repository; every arrow is a call you can find.
+
+```mermaid
+flowchart TB
+    app["<b>Flutter app</b><br/>app/ · drift, offline-first"]
+    api["<b>FastAPI</b><br/>GCP e2-micro · docker · 256 MB"]
+    redis[("<b>Redis</b><br/>list shoku:imports")]
+    worker["<b>reel-worker</b><br/>started on demand · 180 s per job"]
+    pg[("<b>Supabase Postgres</b><br/>dishes · versions · cooks · photos<br/>content_cache · import_jobs<br/>assistant_usage · content_reports")]
+    gcs[("<b>GCS</b><br/>photos + covers, public read")]
+    muse["<b>Muse</b><br/>OpenAI-compatible"]
+
+    app -->|"import · poll"| api
+    app <-->|"sync push / pull"| api
+    app -->|"feed · ask"| api
+    api -->|"LPUSH job"| redis
+    redis -->|"BRPOP"| worker
+    api -.->|"wake VM, metadata token"| worker
+    worker -->|"structure, 180 s"| muse
+    worker -->|"extraction → content_cache"| pg
+    api -->|"append-only, LWW dishes"| pg
+    app -->|"presigned PUT, bytes direct"| gcs
+    api -.->|"V4 signBlob presign"| gcs
+    api -->|"scoped answer"| muse
+```
+
+Dotted edges are the API controlling something it does not own: a Compute
+Engine instance it starts, and a bucket it signs for but never uploads to.
+Voice in and out stays on the phone — speech recognition and text-to-speech
+never leave the device.
+
 ---
 
 ## What it does
@@ -153,23 +187,31 @@ Everything is cached globally by reel, so a viral recipe is parsed once, ever.
 
 ## Architecture
 
-```
-Flutter app ── sync ──> FastAPI (free e2-micro) ──> Supabase Postgres (RLS on)
-                              │
-                              └─ queue ─> worker VM (on demand)
-                                            yt-dlp · whisper · Muse
-```
+The map is above; these are the rules that are not visible in it.
 
-- **Auth** — Supabase, with the token verified server-side against the project's
-  JWKS.
+- **API** — FastAPI in Docker on `instance-20260524-054843`, an e2-micro, capped
+  at 256 MB alongside a 64 MB Redis. Supabase tokens are verified against the
+  project's JWKS; nothing trusts a client's claim about who it is.
+- **Queue** — one Redis list, `shoku:imports`: the API `LPUSH`es a job id, the
+  worker `BRPOP`s it. A job that no worker picks up is failed on a timer rather
+  than left to look pending forever.
+- **Worker** — `reel-worker`, a separate VM the API starts over the Compute REST
+  API using its own metadata token, so no key ships with the container. It reads
+  with yt-dlp, transcribes with faster-whisper, structures with Muse, and gives
+  each job 180 seconds. After 300 seconds with an empty queue it stops its own
+  instance, and the Hugging Face models live on a named volume so a cold start
+  does not re-download them.
 - **Sync** — client-generated UUIDs, append-only versions and cooks unioned by
-  id, last-write-wins on dish metadata, tombstones for deletes.
-- **Imports** — jobs on a Redis queue; the worker VM sleeps when idle and the API
-  wakes it when a job arrives.
+  id, last-write-wins on dish metadata, tombstones for deletes. A pull on an
+  empty device restores the whole journal.
 - **Assistant** — stateless on the server. The client sends the thread, and an
   edit is preconditioned on the version it was computed against.
-- **Cost** — the API runs on a free-tier VM, the worker only while importing, and
-  images live in a GCS bucket.
+- **Storage** — `shoku-media-oceanic-archery-453217-v6` holds user photos and
+  reel covers, public read. User bytes go straight from the phone on a presigned
+  PUT; the signed URL is minted by the API through `signBlob`, so the container
+  holds no bucket key. Reel covers are the one upload the server does itself,
+  because the source link is already expiring when it is fetched.
+- **Cost** — the API runs on a free-tier VM, the worker only while importing.
 
 ---
 
