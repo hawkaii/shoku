@@ -1763,4 +1763,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Stop reading';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Sign in to bring your recipes back. They live on the server, not on this phone.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Your recipes could not load. Check the connection and try again.';
 }

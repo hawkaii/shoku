@@ -1752,4 +1752,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Berhenti membaca';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Masuk untuk memulihkan resep Anda. Resep tersimpan di server, bukan di ponsel ini.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi.';
 }

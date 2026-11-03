@@ -400,5 +400,7 @@
   "hudLevel": "NIV {level}",
   "botServerNotice": "L'assistant a rencontré un problème — réessayez.",
   "botSignInNotice": "Connectez-vous pour interroger l'assistant.",
-  "dishStopReading": "Arrêter la lecture"
+  "dishStopReading": "Arrêter la lecture",
+  "cookbookEmptySignedOut": "Connectez-vous pour retrouver vos recettes. Elles sont sur le serveur, pas sur ce téléphone.",
+  "cookbookEmptyOffline": "Impossible de charger vos recettes. Vérifiez la connexion et réessayez."
 }

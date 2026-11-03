@@ -267,13 +267,23 @@ class SyncRepository {
         'created_at': _iso(row.createdAt),
       };
 
+  /// A cook's photo is a URL or nothing.
+  ///
+  /// When the upload has not happened yet the row still holds the camera's
+  /// local path (`/data/user/0/...`). Sending that to the server writes a path
+  /// that exists on one phone into everyone's journal, and after a reinstall it
+  /// points at a file that is not there. The photo_key is what carries the
+  /// upload; the URL arrives once it is public.
+  String _publicPhotoUrl(String raw) =>
+      raw.startsWith('http://') || raw.startsWith('https://') ? raw : '';
+
   Map<String, dynamic> _cookWire(CookLogRow row) => {
         'id': row.id,
         'dish_id': row.dishId,
         if (row.versionId != null) 'version_id': row.versionId,
         'version_number': row.versionNumber,
         'cooked_at': _iso(row.cookedAt),
-        'photo_url': row.photoUrl,
+        'photo_url': _publicPhotoUrl(row.photoUrl),
         'photo_state': row.photoState,
         'outcome': row.outcome,
         'mood': row.mood,

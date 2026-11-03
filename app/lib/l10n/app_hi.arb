@@ -400,5 +400,7 @@
   "hudLevel": "स्तर {level}",
   "botServerNotice": "सहायक को कोई दिक्कत आई — फिर से कोशिश करें।",
   "botSignInNotice": "सहायक से पूछने के लिए साइन इन करें।",
-  "dishStopReading": "पढ़ना बंद करें"
+  "dishStopReading": "पढ़ना बंद करें",
+  "cookbookEmptySignedOut": "अपनी रेसिपी वापस पाने के लिए साइन इन करें। वे सर्वर पर हैं, इस फ़ोन पर नहीं।",
+  "cookbookEmptyOffline": "आपकी रेसिपी लोड नहीं हो सकीं। कनेक्शन जाँचें और फिर कोशिश करें।"
 }

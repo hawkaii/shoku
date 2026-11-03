@@ -8,6 +8,8 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../state/journal_providers.dart';
+import '../../state/sync_providers.dart';
+import '../profile/sign_in_sheet.dart';
 import '../../widgets/kit/dish_image.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -23,6 +25,7 @@ class RecipesScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final dishes = ref.watch(dishesProvider);
     final filter = ref.watch(libraryFilterProvider);
+    final status = ref.watch(syncStatusProvider);
 
     final toCook = dishes.where((d) => d.status == DishStatus.toCook).toList();
     final cooked = dishes.where((d) => d.status != DishStatus.toCook).toList();
@@ -58,16 +61,11 @@ class RecipesScreen extends ConsumerWidget {
           ),
           const SizedBox(height: ShokuSpace.lg),
           if (visible.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: ShokuSpace.xxl),
-              child: Center(
-                child: Text(
-                  filter == LibraryFilter.toCook
-                      ? l10n.cookbookNothingToCook
-                      : l10n.cookbookNoCooksYet,
-                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                ),
-              ),
+            _EmptyCookbook(
+              filter: filter,
+              signedOut: dishes.isEmpty && status == SyncStatus.signedOut,
+              unreachable: dishes.isEmpty &&
+                  (status == SyncStatus.failed || status == SyncStatus.offline),
             )
           else
             // Two columns, always. The tile's height is derived from the photo
@@ -198,6 +196,71 @@ class _DishTile extends StatelessWidget {
             ShokuChip(l10n.labelSample, color: c.reward, filled: true),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// An empty cookbook has three different meanings, and saying which one matters:
+/// "you have cooked nothing yet" is a normal state, while an empty shelf after a
+/// reinstall reads as data loss. When the journal is empty and sync could not
+/// deliver, say so and offer the one action that fixes it.
+class _EmptyCookbook extends ConsumerWidget {
+  const _EmptyCookbook({
+    required this.filter,
+    required this.signedOut,
+    required this.unreachable,
+  });
+
+  final LibraryFilter filter;
+  final bool signedOut;
+  final bool unreachable;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.colors;
+    final l10n = context.l10n;
+
+    final String message;
+    if (signedOut) {
+      message = l10n.cookbookEmptySignedOut;
+    } else if (unreachable) {
+      message = l10n.cookbookEmptyOffline;
+    } else {
+      message = filter == LibraryFilter.toCook
+          ? l10n.cookbookNothingToCook
+          : l10n.cookbookNoCooksYet;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: ShokuSpace.xxl),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              message,
+              key: const ValueKey('cookbook-empty'),
+              textAlign: TextAlign.center,
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+            ),
+            if (signedOut)
+              TextButton(
+                key: const ValueKey('cookbook-sign-in'),
+                onPressed: () => showSignInSheet(context),
+                child: Text(l10n.authSignIn,
+                    style: ShokuType.label.copyWith(color: c.ink)),
+              )
+            else if (unreachable)
+              TextButton(
+                key: const ValueKey('cookbook-retry'),
+                onPressed: () =>
+                    ref.read(syncControllerProvider).syncNow(),
+                child: Text(l10n.journalTryAgain,
+                    style: ShokuType.label.copyWith(color: c.ink)),
+              ),
+          ],
+        ),
       ),
     );
   }

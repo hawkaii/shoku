@@ -400,5 +400,7 @@
   "hudLevel": "LVL {level}",
   "botServerNotice": "Asisten mengalami masalah — coba lagi.",
   "botSignInNotice": "Masuk untuk bertanya kepada asisten.",
-  "dishStopReading": "Berhenti membaca"
+  "dishStopReading": "Berhenti membaca",
+  "cookbookEmptySignedOut": "Masuk untuk memulihkan resep Anda. Resep tersimpan di server, bukan di ponsel ini.",
+  "cookbookEmptyOffline": "Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi."
 }

@@ -400,5 +400,7 @@
   "hudLevel": "লেভেল {level}",
   "botServerNotice": "সহায়কটি সমস্যায় পড়েছে — আবার চেষ্টা করুন।",
   "botSignInNotice": "সহায়ককে জিজ্ঞাসা করতে সাইন ইন করুন।",
-  "dishStopReading": "পড়া বন্ধ করুন"
+  "dishStopReading": "পড়া বন্ধ করুন",
+  "cookbookEmptySignedOut": "আপনার রেসিপি ফিরে পেতে সাইন ইন করুন। সেগুলি সার্ভারে আছে, এই ফোনে নয়।",
+  "cookbookEmptyOffline": "আপনার রেসিপি লোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।"
 }

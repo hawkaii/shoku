@@ -1786,4 +1786,12 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get dishStopReading => 'படிப்பதை நிறுத்து';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'உங்கள் ரெசிபிகளை மீட்டெடுக்க உள்நுழைக. அவை சர்வரில் உள்ளன, இந்த ஃபோனில் இல்லை.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'உங்கள் ரெசிபிகள் ஏற்றப்படவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலவும்.';
 }

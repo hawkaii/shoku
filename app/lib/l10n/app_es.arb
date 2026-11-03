@@ -400,5 +400,7 @@
   "hudLevel": "NVL {level}",
   "botServerNotice": "El asistente tuvo un problema — inténtalo de nuevo.",
   "botSignInNotice": "Inicia sesión para preguntar al asistente.",
-  "dishStopReading": "Detener la lectura"
+  "dishStopReading": "Detener la lectura",
+  "cookbookEmptySignedOut": "Inicia sesión para recuperar tus recetas. Están en el servidor, no en este teléfono.",
+  "cookbookEmptyOffline": "No se pudieron cargar tus recetas. Revisa la conexión y vuelve a intentarlo."
 }

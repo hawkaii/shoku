@@ -2519,6 +2519,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop reading'**
   String get dishStopReading;
+
+  /// No description provided for @cookbookEmptySignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to bring your recipes back. They live on the server, not on this phone.'**
+  String get cookbookEmptySignedOut;
+
+  /// No description provided for @cookbookEmptyOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recipes could not load. Check the connection and try again.'**
+  String get cookbookEmptyOffline;
 }
 
 class _AppLocalizationsDelegate

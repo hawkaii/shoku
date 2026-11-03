@@ -1761,4 +1761,12 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get dishStopReading => 'পড়া বন্ধ করুন';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'আপনার রেসিপি ফিরে পেতে সাইন ইন করুন। সেগুলি সার্ভারে আছে, এই ফোনে নয়।';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'আপনার রেসিপি লোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
 }

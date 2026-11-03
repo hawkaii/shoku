@@ -1772,4 +1772,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Parar a leitura';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Entre para recuperar as suas receitas. Elas ficam no servidor, não neste telemóvel.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Não foi possível carregar as suas receitas. Verifique a ligação e tente novamente.';
 }
