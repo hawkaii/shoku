@@ -3,6 +3,17 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.28.2] — 2026-11-03
+
+### Chores
+- V1.28.2 — the speaker stops when you tap it *(release)* — [`e900937`](https://github.com/hawkaii/food-finder-app/commit/e900937ea003550fbcf71d84887cda8d8d3b8416)
+
+### Docs
+- V1.28.1 [skip ci] *(changelog)* — [`149ad79`](https://github.com/hawkaii/food-finder-app/commit/149ad79c50c4cb9de6257a237b3dc1a8cad67446)
+
+### Fixed
+- The speaker is a toggle, not a restart *(read-aloud)* — [`09089b5`](https://github.com/hawkaii/food-finder-app/commit/09089b55862beeabd5d12ff5f8ce6c9f51e808f4)
+
 ## [1.28.1] — 2026-11-03
 
 ### Chores
