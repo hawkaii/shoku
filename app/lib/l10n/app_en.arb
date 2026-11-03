@@ -1065,5 +1065,6 @@
     }
   },
   "botServerNotice": "The assistant hit a problem — try again.",
-  "botSignInNotice": "Sign in to ask the assistant."
+  "botSignInNotice": "Sign in to ask the assistant.",
+  "dishStopReading": "Stop reading"
 }

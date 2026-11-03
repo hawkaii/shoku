@@ -1769,4 +1769,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'Entre para perguntar ao assistente.';
+
+  @override
+  String get dishStopReading => 'Parar a leitura';
 }

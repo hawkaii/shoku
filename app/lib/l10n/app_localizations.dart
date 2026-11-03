@@ -2513,6 +2513,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in to ask the assistant.'**
   String get botSignInNotice;
+
+  /// No description provided for @dishStopReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get dishStopReading;
 }
 
 class _AppLocalizationsDelegate

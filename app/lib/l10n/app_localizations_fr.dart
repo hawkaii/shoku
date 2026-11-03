@@ -1791,4 +1791,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'Connectez-vous pour interroger l\'assistant.';
+
+  @override
+  String get dishStopReading => 'Arrêter la lecture';
 }

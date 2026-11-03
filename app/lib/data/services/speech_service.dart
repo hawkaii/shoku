@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,11 +9,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// off. The toggle is remembered on this phone, not synced — it is a preference
 /// about this room, not about the recipe.
 class SpeechService {
-  SpeechService({FlutterTts? tts}) : _tts = tts ?? FlutterTts();
+  SpeechService({FlutterTts? tts}) : _tts = tts ?? FlutterTts() {
+    // The button is a toggle, so the service has to know when speech actually
+    // ends — not just when it starts.
+    _tts.setCompletionHandler(() => speaking.value = false);
+    _tts.setCancelHandler(() => speaking.value = false);
+    _tts.setErrorHandler((_) => speaking.value = false);
+  }
 
   static const _key = 'read_aloud';
 
   final FlutterTts _tts;
+
+  /// True while the engine is speaking. The header and step speakers listen to
+  /// this so a second tap stops instead of starting over.
+  final speaking = ValueNotifier<bool>(false);
 
   Future<bool> load() async {
     try {
@@ -38,9 +49,11 @@ class SpeechService {
     try {
       await _tts.stop();
       await _tts.setSpeechRate(0.48);
+      speaking.value = true;
       await _tts.speak(text);
     } catch (_) {
       // No engine here (web, a silent phone): the text is still on screen.
+      speaking.value = false;
     }
   }
 
@@ -48,6 +61,7 @@ class SpeechService {
     try {
       await _tts.stop();
     } catch (_) {}
+    speaking.value = false;
   }
 }
 

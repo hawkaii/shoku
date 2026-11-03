@@ -1754,4 +1754,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'सहायक से पूछने के लिए साइन इन करें।';
+
+  @override
+  String get dishStopReading => 'पढ़ना बंद करें';
 }

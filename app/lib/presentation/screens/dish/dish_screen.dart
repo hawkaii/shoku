@@ -271,11 +271,15 @@ class _DishScreenState extends ConsumerState<DishScreen> {
           const SizedBox(width: ShokuSpace.sm),
           StatusBadge(status: dish.status, cookCount: dish.cookCount),
           const Spacer(),
-          IconButton(
-            key: const ValueKey('dish-speak'),
-            icon: Icon(Icons.volume_up, size: 17, color: c.inkMuted),
-            tooltip: l10n.dishReadRecipe,
-            onPressed: () => _speakAll(dish, version),
+          ValueListenableBuilder<bool>(
+            valueListenable: ref.read(speechServiceProvider).speaking,
+            builder: (context, speaking, _) => IconButton(
+              key: const ValueKey('dish-speak'),
+              icon: Icon(speaking ? Icons.stop_circle_outlined : Icons.volume_up,
+                  size: 17, color: speaking ? c.accent : c.inkMuted),
+              tooltip: speaking ? l10n.dishStopReading : l10n.dishReadRecipe,
+              onPressed: () => _speakAll(dish, version),
+            ),
           ),
           PopupMenuButton<String>(
             key: const ValueKey('dish-overflow'),
@@ -316,8 +320,13 @@ class _DishScreenState extends ConsumerState<DishScreen> {
   }
 
   Future<void> _speakAll(Dish dish, RecipeVersion version) async {
+    final speech = ref.read(speechServiceProvider);
+    if (speech.speaking.value) {
+      await speech.stop();
+      return;
+    }
     final steps = version.steps.isNotEmpty ? version.steps : dish.steps;
-    await ref.read(speechServiceProvider).speak([
+    await speech.speak([
       dish.title,
       if (version.ingredients.isNotEmpty) version.ingredients.join(', '),
       for (var i = 0; i < steps.length; i++) 'Step ${i + 1}. ${steps[i]}',
@@ -582,9 +591,15 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                             children: [
                               GestureDetector(
                                 key: ValueKey('step-speak-$s'),
-                                onTap: () => ref
-                                    .read(speechServiceProvider)
-                                    .speak('Step ${s + 1}. ${steps[s]}'),
+                                onTap: () {
+                                  final speech =
+                                      ref.read(speechServiceProvider);
+                                  if (speech.speaking.value) {
+                                    speech.stop();
+                                    return;
+                                  }
+                                  speech.speak('Step ${s + 1}. ${steps[s]}');
+                                },
                                 behavior: HitTestBehavior.opaque,
                                 child: Icon(Icons.volume_up,
                                     size: 14, color: c.inkMuted),

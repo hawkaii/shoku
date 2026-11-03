@@ -399,5 +399,6 @@
   "hudStreakDays": "{count, plural, other{{count} hr}}",
   "hudLevel": "LVL {level}",
   "botServerNotice": "Asisten mengalami masalah — coba lagi.",
-  "botSignInNotice": "Masuk untuk bertanya kepada asisten."
+  "botSignInNotice": "Masuk untuk bertanya kepada asisten.",
+  "dishStopReading": "Berhenti membaca"
 }

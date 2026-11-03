@@ -399,5 +399,6 @@
   "hudStreakDays": "{count, plural, =1{1j} many{{count}j} other{{count}j}}",
   "hudLevel": "NIV {level}",
   "botServerNotice": "L'assistant a rencontré un problème — réessayez.",
-  "botSignInNotice": "Connectez-vous pour interroger l'assistant."
+  "botSignInNotice": "Connectez-vous pour interroger l'assistant.",
+  "dishStopReading": "Arrêter la lecture"
 }

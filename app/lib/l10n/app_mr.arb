@@ -399,5 +399,6 @@
   "hudStreakDays": "{count, plural, one{1 दिवस} other{{count} दिवस}}",
   "hudLevel": "स्तर {level}",
   "botServerNotice": "सहाय्यकाला अडचण आली — पुन्हा प्रयत्न करा.",
-  "botSignInNotice": "सहाय्यकाला विचारण्यासाठी साइन इन करा."
+  "botSignInNotice": "सहाय्यकाला विचारण्यासाठी साइन इन करा.",
+  "dishStopReading": "वाचन थांबवा"
 }

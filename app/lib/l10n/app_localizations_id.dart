@@ -1749,4 +1749,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'Masuk untuk bertanya kepada asisten.';
+
+  @override
+  String get dishStopReading => 'Berhenti membaca';
 }

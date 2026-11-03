@@ -1768,4 +1768,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'సహాయకుడిని అడగడానికి సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get dishStopReading => 'చదవడం ఆపు';
 }

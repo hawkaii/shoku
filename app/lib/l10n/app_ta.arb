@@ -399,5 +399,6 @@
   "hudStreakDays": "{count, plural, one{1 நாள்} other{{count} நாள்}}",
   "hudLevel": "நிலை {level}",
   "botServerNotice": "உதவியாளருக்கு சிக்கல் ஏற்பட்டது — மீண்டும் முயலவும்.",
-  "botSignInNotice": "உதவியாளரிடம் கேட்க உள்நுழைக."
+  "botSignInNotice": "உதவியாளரிடம் கேட்க உள்நுழைக.",
+  "dishStopReading": "படிப்பதை நிறுத்து"
 }

@@ -1758,4 +1758,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'सहाय्यकाला विचारण्यासाठी साइन इन करा.';
+
+  @override
+  String get dishStopReading => 'वाचन थांबवा';
 }

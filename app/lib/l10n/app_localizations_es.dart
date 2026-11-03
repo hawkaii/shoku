@@ -1766,4 +1766,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'Inicia sesión para preguntar al asistente.';
+
+  @override
+  String get dishStopReading => 'Detener la lectura';
 }

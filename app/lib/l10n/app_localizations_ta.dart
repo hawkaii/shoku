@@ -1783,4 +1783,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'உதவியாளரிடம் கேட்க உள்நுழைக.';
+
+  @override
+  String get dishStopReading => 'படிப்பதை நிறுத்து';
 }

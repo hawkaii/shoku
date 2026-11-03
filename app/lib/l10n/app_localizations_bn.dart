@@ -1758,4 +1758,7 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'সহায়ককে জিজ্ঞাসা করতে সাইন ইন করুন।';
+
+  @override
+  String get dishStopReading => 'পড়া বন্ধ করুন';
 }

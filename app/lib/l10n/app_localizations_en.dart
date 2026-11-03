@@ -1760,4 +1760,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get botSignInNotice => 'Sign in to ask the assistant.';
+
+  @override
+  String get dishStopReading => 'Stop reading';
 }
