@@ -3,6 +3,18 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.28.3] — 2026-11-03
+
+### Chores
+- V1.28.3 — the cookbook says why it is empty *(release)* — [`d3c0da0`](https://github.com/hawkaii/food-finder-app/commit/d3c0da0a0e924a4840f8acb9e6bd69fd21828fb8)
+
+### Docs
+- V1.28.2 [skip ci] *(changelog)* — [`e374c1c`](https://github.com/hawkaii/food-finder-app/commit/e374c1cd26eb39087aecfebd848776fafa8e0675)
+- The product, with the screenshots to prove it *(readme)* — [`eb5a562`](https://github.com/hawkaii/food-finder-app/commit/eb5a562d6d11c9db79f9438e8f4eaf0953a70878)
+
+### Fixed
+- An empty shelf says why, and a camera path stays on the phone *(cookbook)* — [`b5d209c`](https://github.com/hawkaii/food-finder-app/commit/b5d209c8e3b211a0c401b448950982a77aa785f2)
+
 ## [1.28.2] — 2026-11-03
 
 ### Chores
