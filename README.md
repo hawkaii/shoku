@@ -161,13 +161,27 @@ and the method is burned onto the video while someone cooks silently.
 
 The pipeline tries those in order and falls through:
 
+```mermaid
+flowchart LR
+    caption["1 caption"]
+    comment["2 comment"]
+    subtitles["3 subtitles"]
+    speech["4 speech"]
+    frames["5 frames"]
+
+    caption --> muse
+    comment --> muse
+    subtitles --> muse
+    speech --> muse
+    frames --> muse
+
+    muse["<b>Muse Spark</b><br/>json_schema · strict"]
+    muse -->|"parsed once per reel"| cache[("<b>content_cache</b>")]
+    cache --> dish["your dish"]
+    muse -.->|"model fails"| heuristic["heuristic parser"]
+    heuristic --> dish
 ```
-caption ───┐
-comment ───┤
-subtitles ─┼─→ Muse structuring (schema-constrained JSON) ─→ cache ─→ your dish
-speech ────┤                    │
-frames ────┘                    └─ heuristic fallback if the model fails
-```
+
 
 - **Meta Model API, Muse Spark** (`muse-spark-1.3`) does the structuring with
   `response_format: json_schema` and `strict`, so the decoder can only emit a
@@ -192,7 +206,7 @@ The map is above; these are the rules that are not visible in it.
 - **API** — FastAPI in Docker on `instance-20260524-054843`, an e2-micro, capped
   at 256 MB alongside a 64 MB Redis. Supabase tokens are verified against the
   project's JWKS; nothing trusts a client's claim about who it is.
-- **Queue** — one Redis list, `shoku:imports`: the API `LPUSH`es a job id, the
+- **Queue** — one Redis list, `shoku:imports`. The API `LPUSH`es a job id and the
   worker `BRPOP`s it. A job that no worker picks up is failed on a timer rather
   than left to look pending forever.
 - **Worker** — `reel-worker`, a separate VM the API starts over the Compute REST
