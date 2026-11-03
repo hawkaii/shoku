@@ -13,7 +13,7 @@ The screenshots are real captures, not mockups: a Palak Paneer reel, the page it
 became, and the same dish being cooked.
 
 [![Latest release](https://img.shields.io/github/v/release/hawkaii/shoku?color=C8372B&label=release)](https://github.com/hawkaii/shoku/releases/latest)
-[![Tests](https://img.shields.io/badge/tests-588%20passing-C8372B)](#tests)
+[![Tests](https://img.shields.io/badge/tests-596%20passing-C8372B)](#tests)
 [![Languages](https://img.shields.io/badge/languages-10-C8372B)](#ten-languages)
 [![Licence](https://img.shields.io/badge/licence-MIT-C8372B)](LICENSE)
 
@@ -194,7 +194,7 @@ cd app && flutter pub get && flutter run
 Both suites run without network, Postgres or Redis.
 
 ```bash
-cd app && flutter test     # 306 tests
+cd app && flutter test     # 314 tests
 cd api && pytest -q        # 282 tests
 ```
 
