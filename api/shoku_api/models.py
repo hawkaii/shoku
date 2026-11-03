@@ -411,6 +411,23 @@ class PantryParseAsk(Base):
     __table_args__ = (Index("ix_pantry_parse_asks_user_day", "user_id", "day"),)
 
 
+class VoiceUsage(Base):
+    """Per-user, per-UTC-day milliseconds of audio Meta actually processed.
+
+    Metered from the upstream's ``audioProcessedMs`` rather than from bytes we
+    forwarded: a client that pauses, or reconnects into a new socket, must not
+    be charged twice for the same second of speech.
+    """
+
+    __tablename__ = "voice_usage"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    audio_ms: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
 class AssistantUsage(Base):
     """Per-user, per-UTC-day counter for the assistant cap."""
 

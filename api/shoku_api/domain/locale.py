@@ -29,7 +29,7 @@ LOCALES: dict[str, str] = {
 DEFAULT = "English"
 
 
-def _tag(value: str | None) -> str | None:
+def tag(value: str | None) -> str | None:
     """``es-MX,es;q=0.9`` → ``es``; ``pt_BR`` → ``pt``."""
     if not value:
         return None
@@ -41,7 +41,7 @@ def _tag(value: str | None) -> str | None:
 
 def from_header(accept_language: str | None) -> str | None:
     """The language the client's ``Accept-Language`` asks for, if we ship it."""
-    return LOCALES.get(_tag(accept_language) or "")
+    return LOCALES.get(tag(accept_language) or "")
 
 
 def resolve(*, body_locale: str | None, accept_language: str | None) -> str:
@@ -51,5 +51,5 @@ def resolve(*, body_locale: str | None, accept_language: str | None) -> str:
     request is not overridden by a header some proxy added.
     """
     if body_locale:
-        return LOCALES.get(_tag(body_locale) or "", DEFAULT)
+        return LOCALES.get(tag(body_locale) or "", DEFAULT)
     return from_header(accept_language) or DEFAULT

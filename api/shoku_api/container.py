@@ -80,6 +80,9 @@ class AppContext:
     #: Reads a silent reel from frames. None when vision is off or unconfigured,
     #: which turns "no text" into a clear failure instead of a junk dish.
     vision: "VisionStructurer | None" = None
+    #: Opens the upstream ASR socket. None means the real websockets client, so
+    #: the test suite never reaches Meta.
+    voice_connect: Any = None
 
     # ---- convenience views for services ---------------------------------
 
@@ -156,6 +159,7 @@ def build_context(
         )
         storage = DevStorage(settings.storage_public_base_url)
 
+    voice_connect: Any = None
     assistant_model: AssistantModel = UnconfiguredAssistantModel()
     pantry_parser: PantryParser = UnconfiguredPantryParser()
     pantry_image_parser: PantryImageParser = UnconfiguredPantryImageParser()
@@ -223,6 +227,7 @@ def build_context(
         assistant_model=assistant_model,
         pantry_parser=pantry_parser,
         pantry_image_parser=pantry_image_parser,
+        voice_connect=voice_connect,
         clock=SystemClock(),
         worker_pool=worker_pool,
         waker=waker,
