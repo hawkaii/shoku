@@ -245,6 +245,15 @@ cd app && flutter pub get && flutter run
 `api/DEPLOY.md` is the two-machine runbook. The dev API runs at
 `http://35.188.27.251:8000`; `/health` is the liveness check.
 
+```bash
+# the landing page — plain HTML, no build step
+cd landing && python3 -m http.server 8100
+```
+
+`landing/` is [shoku.gradientdescent.wiki](https://shoku.gradientdescent.wiki),
+deployed by Vercel from this directory. Its own README explains the design and
+where every number on it came from.
+
 ## Tests
 
 Both suites run without network, Postgres or Redis.
