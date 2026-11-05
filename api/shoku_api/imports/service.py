@@ -9,6 +9,8 @@ import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 
+import logging
+
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
@@ -19,6 +21,8 @@ from .pipeline import EXTRACTION_VERSION
 from .queue import Queue
 from ..models import ContentCache, ImportJob
 from ..schemas import ImportResponse, ImportStatus
+
+log = logging.getLogger("shoku.imports.service")
 
 TERMINAL_STATES = ("ready", "failed")
 CANCELLED_REASON = "cancelled"
@@ -31,6 +35,11 @@ class ImportDeps:
 
     queue: Queue
     clock: Clock
+    #: The shared lease registry, when this deployment has one. Enqueueing
+    #: publishes demand; it never touches GCE.
+    registry: object | None = None
+    pool: str = "render"
+    tenant: str = "shoku"
     #: A queued job older than this never met a worker. See ``reap_unclaimed``.
     unclaimed_timeout_seconds: float = 180.0
 
@@ -100,9 +109,15 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
     # row and would drop the job.
     deps.queue.enqueue(job.id)
 
-    # Queueing work no longer wakes the machine. The pool broker owns that
-    # decision, because this API sees only its own queue and a second tenant
-    # shares the box.
+    # Queueing work publishes demand; the pool broker decides whether that
+    # means a boot. This API sees one queue, and the box has more than one
+    # tenant on it.
+    if deps.registry is not None:
+        try:
+            deps.registry.bump_demand(deps.pool, deps.tenant)
+        except Exception:  # noqa: BLE001 - a job must not fail over a lease write
+            log.warning("could not publish pool demand for %s", job.id)
+
     return ImportResponse(job_id=job.id, state="queued", cached=False, shortcode=source.shortcode)
 
 

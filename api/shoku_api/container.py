@@ -36,6 +36,7 @@ from .assistant import (
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
 from .domain.worker_pool import GceWorkerPool, NoWorkerPool, WorkerPool
+from .pool import Broker, RedisRegistry
 from .imports.interfaces import (
     Extractor,
     Structurer,
@@ -75,6 +76,10 @@ class AppContext:
     #: Opens the upstream ASR socket. None means the real websockets client, so
     #: the test suite never reaches Meta.
     voice_connect: Any = None
+    #: The shared lease registry. None when the pool has no Redis (dev, tests).
+    pool_registry: "RedisRegistry | None" = None
+    #: The process that owns start/stop. None unless the deployment runs it.
+    pool_broker: "Broker | None" = None
 
     # ---- convenience views for services ---------------------------------
 
@@ -83,6 +88,9 @@ class AppContext:
         return ImportDeps(
             queue=self.queue,
             clock=self.clock,
+            registry=self.pool_registry,
+            pool=self.settings.pool_name,
+            tenant=self.settings.pool_tenant,
             unclaimed_timeout_seconds=float(
                 self.settings.worker_unclaimed_timeout_seconds
             ),
@@ -190,6 +198,34 @@ def build_context(
     else:
         worker_pool = NoWorkerPool()
 
+    pool_registry: RedisRegistry | None = None
+    pool_broker: Broker | None = None
+    if settings.queue_backend == "redis" and settings.autostart_worker:
+        pool_registry = RedisRegistry(
+            settings.redis_url,
+            lease_ttl=settings.pool_lease_ttl,
+            demand_ttl=settings.pool_demand_ttl,
+            beat_ttl=settings.pool_beat_ttl,
+            boot_grace=settings.pool_boot_grace_seconds,
+        )
+        if settings.pool_broker_enabled and settings.gcp_project:
+            instances = [
+                name.strip()
+                for name in (settings.pool_instances or settings.worker_instance).split(",")
+                if name.strip()
+            ]
+            pool_broker = Broker(
+                pool_registry,
+                GceWorkerPool(
+                    project=settings.gcp_project,
+                    zone=settings.gcp_zone,
+                    instance=instances[0],
+                ),
+                pool=settings.pool_name,
+                idle_grace=settings.idle_shutdown_seconds,
+                boot_grace=settings.pool_boot_grace_seconds,
+            )
+
     ctx = AppContext(
         settings=settings,
         engine=engine,
@@ -208,6 +244,8 @@ def build_context(
         pantry_parser=pantry_parser,
         pantry_image_parser=pantry_image_parser,
         voice_connect=voice_connect,
+        pool_registry=pool_registry,
+        pool_broker=pool_broker,
         clock=SystemClock(),
         worker_pool=worker_pool,
         breaker=CircuitBreaker(

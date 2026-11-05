@@ -5,14 +5,18 @@ on SIGTERM/SIGINT after the job in hand, so a deploy never leaves a job in
 ``extracting`` with no process behind it.
 """
 
+import contextlib
 import logging
+import os
 import signal
-import time
+import socket
 import sys
+import time
 
 from ..config import get_settings
 from ..container import build_context
 from .pipeline import ImportWorker
+from ..pool import LeaseKeeper
 
 log = logging.getLogger(__name__)
 
@@ -74,8 +78,23 @@ def main() -> int:
             continue
         if job_id is None:
             continue
+        # A lease per running job, never per process: an idle container holds
+        # nothing, so the broker can still let the machine sleep.
+        lease = (
+            LeaseKeeper(
+                ctx.pool_registry,
+                settings.pool_name,
+                settings.pool_tenant,
+                job_id,
+                host=socket.gethostname(),
+                pid=os.getpid(),
+            )
+            if ctx.pool_registry is not None
+            else contextlib.nullcontext()
+        )
         try:
-            result = worker.process(job_id)
+            with lease:
+                result = worker.process(job_id)
         except Exception:  # noqa: BLE001 - one bad job must not kill the worker
             log.exception("job %s crashed", job_id)
             continue

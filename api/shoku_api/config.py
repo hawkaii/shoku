@@ -66,6 +66,19 @@ class Settings(BaseSettings):
     assistant_model: str = ""
     assistant_timeout: float = 60.0
 
+    # The worker pool. One broker owns start and stop for every tenant sharing
+    # the machine; tenants publish leases and demand, never GCE calls.
+    pool_name: str = "render"
+    pool_tenant: str = "shoku"
+    pool_broker_enabled: bool = False
+    pool_loop_seconds: int = 15
+    pool_lease_ttl: int = 60
+    pool_demand_ttl: int = 900
+    pool_beat_ttl: int = 120
+    pool_boot_grace_seconds: int = 180
+    #: Comma-separated. Empty means "just worker_instance".
+    pool_instances: str = ""
+
     # Hands-free voice. The upstream socket is the model's, opened with the
     # server-side key; the app never sees that key.
     voice_asr_url: str = "wss://api.meta.ai/v1/asr/realtime"
