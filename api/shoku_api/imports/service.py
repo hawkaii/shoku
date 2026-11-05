@@ -6,22 +6,15 @@ cannot be resurrected by a worker that was already holding its id.
 """
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import timedelta
 
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from ..domain.clock import Clock
-from ..domain.errors import Gone, NotFound, ShokuError
+from ..domain.errors import Gone, NotFound
 from ..domain.urls import normalise_url
-from ..domain.worker_pool import (
-    RUNNING,
-    STARTING,
-    AlwaysWakeGate,
-    NoWorkerPool,
-    WorkerWaker,
-)
 from .pipeline import EXTRACTION_VERSION
 from .queue import Queue
 from ..models import ContentCache, ImportJob
@@ -32,18 +25,12 @@ CANCELLED_REASON = "cancelled"
 WORKER_UNAVAILABLE = "worker_unavailable"
 
 
-def _offline_waker() -> WorkerWaker:
-    """The default: autostart is off, so waking is a no-op that says RUNNING."""
-    return WorkerWaker(NoWorkerPool(), AlwaysWakeGate())
-
-
 @dataclass(frozen=True)
 class ImportDeps:
     """The slice of the app context this service needs."""
 
     queue: Queue
     clock: Clock
-    waker: WorkerWaker = field(default_factory=_offline_waker)
     #: A queued job older than this never met a worker. See ``reap_unclaimed``.
     unclaimed_timeout_seconds: float = 180.0
 
@@ -113,34 +100,10 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
     # row and would drop the job.
     deps.queue.enqueue(job.id)
 
-    # Wake the VM only now, with the row and the queue entry already durable:
-    # a boot that beats the insert would find nothing to do.
-    try:
-        awake = deps.waker.ensure_awake()
-    except ShokuError:
-        # The instance refused to start. Fail the job rather than letting the
-        # client poll a queue that nothing will ever drain.
-        _fail(session, job, reason=WORKER_UNAVAILABLE, now=deps.clock.now())
-        return ImportResponse(
-            job_id=job.id, state="failed", cached=False, shortcode=source.shortcode
-        )
-
-    if awake == STARTING:
-        # Not claimed yet, and the box is booting. The worker clears this the
-        # moment it claims the row (see ImportWorker._claim).
-        job.progress_stage = STARTING
-        job.updated_at = deps.clock.now()
-        session.commit()
-
+    # Queueing work no longer wakes the machine. The pool broker owns that
+    # decision, because this API sees only its own queue and a second tenant
+    # shares the box.
     return ImportResponse(job_id=job.id, state="queued", cached=False, shortcode=source.shortcode)
-
-
-def _fail(session: Session, job: ImportJob, *, reason: str, now) -> None:
-    job.state = "failed"
-    job.reason = reason
-    job.progress_stage = "failed"
-    job.updated_at = now
-    session.commit()
 
 
 def reap_unclaimed(session: Session, deps: ImportDeps) -> int:

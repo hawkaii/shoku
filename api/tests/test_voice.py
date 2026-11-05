@@ -278,10 +278,20 @@ def test_processed_audio_is_metered(app, ctx, upstream_factory) -> None:
             with pytest.raises(WebSocketDisconnect):
                 socket.receive_text()
 
-    with ctx.session_factory() as db:
-        row = db.get(VoiceUsage, ("user-1", date.today()))
-        assert row is not None
-        assert row.audio_ms == 1500, "the later event is cumulative, not additive"
+    # The final write happens after the socket closes, so give it a moment
+    # rather than racing the assertion against the relay's shutdown.
+    import time as _time
+
+    row = None
+    for _ in range(40):
+        with ctx.session_factory() as db:
+            row = db.get(VoiceUsage, ("user-1", date.today()))
+        if row is not None:
+            break
+        _time.sleep(0.05)
+
+    assert row is not None
+    assert row.audio_ms == 1500, "the later event is cumulative, not additive"
 
 
 def test_a_session_over_the_cap_closes_4429(app, ctx, upstream_factory) -> None:

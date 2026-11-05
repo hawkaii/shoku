@@ -35,14 +35,7 @@ from .assistant import (
 )
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
-from .domain.worker_pool import (
-    AlwaysWakeGate,
-    GceWorkerPool,
-    NoWorkerPool,
-    RedisWakeGate,
-    WorkerPool,
-    WorkerWaker,
-)
+from .domain.worker_pool import GceWorkerPool, NoWorkerPool, WorkerPool
 from .imports.interfaces import (
     Extractor,
     Structurer,
@@ -76,7 +69,6 @@ class AppContext:
     breaker: CircuitBreaker
     #: Starts the worker VM when a job is queued, and stops it when idle.
     worker_pool: "WorkerPool | NoWorkerPool"
-    waker: WorkerWaker
     #: Reads a silent reel from frames. None when vision is off or unconfigured,
     #: which turns "no text" into a clear failure instead of a junk dish.
     vision: "VisionStructurer | None" = None
@@ -91,7 +83,6 @@ class AppContext:
         return ImportDeps(
             queue=self.queue,
             clock=self.clock,
-            waker=self.waker,
             unclaimed_timeout_seconds=float(
                 self.settings.worker_unclaimed_timeout_seconds
             ),
@@ -196,19 +187,8 @@ def build_context(
             zone=settings.gcp_zone,
             instance=settings.worker_instance,
         )
-        # The gate lives in Redis because it is the one store both the API and
-        # the worker can see; without it every import would ask for a boot.
-        gate = (
-            RedisWakeGate(settings.redis_url)
-            if settings.queue_backend == "redis"
-            else AlwaysWakeGate()
-        )
     else:
         worker_pool = NoWorkerPool()
-        gate = AlwaysWakeGate()
-    waker = WorkerWaker(
-        worker_pool, gate, window=settings.worker_wake_debounce_seconds
-    )
 
     ctx = AppContext(
         settings=settings,
@@ -230,7 +210,6 @@ def build_context(
         voice_connect=voice_connect,
         clock=SystemClock(),
         worker_pool=worker_pool,
-        waker=waker,
         breaker=CircuitBreaker(
             window=settings.breaker_window,
             threshold=settings.breaker_threshold,
