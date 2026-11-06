@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_finder/core/config/shoku_config.dart';
 
 /// The Android manifest is code: a missing receiver or intent filter is a
 /// feature that silently does nothing. These assertions are deliberately
@@ -69,8 +70,11 @@ void main() {
 
   group('auth return path', () {
     test('the configured redirect scheme is declared', () {
-      expect(manifest, contains('android:scheme="com.shoku.app"'));
-      expect(manifest, contains('android:host="login-callback"'));
+      // Read from the one config the app hands to Supabase: the manifest and
+      // the redirect cannot drift apart without this failing.
+      final redirect = Uri.parse(ShokuConfig.authRedirect);
+      expect(manifest, contains('android:scheme="${redirect.scheme}"'));
+      expect(manifest, contains('android:host="${redirect.host}"'));
       expect(manifest, contains('android.intent.category.BROWSABLE'));
     });
   });
