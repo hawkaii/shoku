@@ -67,7 +67,7 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
       _error = null;
     });
     try {
-      final auth = ref.watch(authServiceProvider);
+      final auth = ref.read(authServiceProvider);
       if (_creating) {
         final response = await auth.signUp(email, password);
         if (response.session == null) {

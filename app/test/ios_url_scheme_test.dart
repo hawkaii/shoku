@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_finder/core/config/shoku_config.dart';
 
 /// The email-confirmation link can only reopen the app if the OS knows the
 /// scheme. Android declares it in the manifest (see android_manifest_test.dart);
@@ -13,9 +14,12 @@ void main() {
     test('the redirect scheme is registered with iOS', () {
       expect(plist, contains('CFBundleURLTypes'));
       expect(plist, contains('CFBundleURLSchemes'));
+      // Derived from the one config the app hands to Supabase, so the plist
+      // and the redirect can never drift apart again.
+      final scheme = Uri.parse(ShokuConfig.authRedirect).scheme;
       expect(
         plist,
-        contains('<string>com.shoku.app</string>'),
+        contains('<string>$scheme</string>'),
         reason: 'without it the confirmation link opens a browser, not Shoku',
       );
     });
