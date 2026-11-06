@@ -8,10 +8,12 @@ import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/services/api_client.dart';
+import 'package:food_finder/data/services/auth_service.dart';
 import 'package:food_finder/data/services/import_service.dart';
 import 'package:food_finder/data/services/pending_import.dart';
 import 'package:food_finder/presentation/screens/add/add_sheet.dart';
 import 'package:food_finder/presentation/screens/add/import_sheet.dart';
+import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/state/import_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:http/http.dart' as http;
@@ -416,4 +418,82 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('a signed-out import offers sign-in, then retries the same link',
+      (tester) async {
+    final import = _FlakyImport(db);
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        importServiceProvider.overrideWithValue(import),
+        authServiceProvider.overrideWithValue(_SignedInAuth()),
+      ],
+      child: MaterialApp(
+        theme: ShokuTheme.light(),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showImportSheet(context, prefill: _url),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(import.calls, 1);
+    expect(find.text('Sign in to import this reel'), findsOneWidget);
+    expect(find.byKey(const ValueKey('import-sign-in')), findsOneWidget,
+        reason: 'the message is a door, not a wall');
+
+    await tester.tap(find.byKey(const ValueKey('import-sign-in')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Keep your journal'), findsOneWidget,
+        reason: 'the sign-in sheet opens from the import sheet');
+
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle();
+
+    expect(import.calls, 2, reason: 'the same link is tried again');
+    expect(find.byKey(const ValueKey('import-sign-in')), findsNothing);
+    expect(find.text('We could not start that import'), findsOneWidget);
+  });
+}
+
+/// Fails the first attempt as a signed-out client, then starts as usual.
+class _FlakyImport extends ImportService {
+  _FlakyImport(AppDatabase db)
+      : super(
+          api: ApiClient(
+            baseUrl: 'https://api.test',
+            tokenProvider: () => 'jwt',
+            httpClient: MockClient((_) async => http.Response('{}', 200)),
+          ),
+          repository: JournalRepository(db),
+        );
+
+  int calls = 0;
+
+  @override
+  Future<ImportStart> start(String url) async {
+    calls++;
+    if (calls == 1) throw const ApiUnauthenticated();
+    return const ImportStart(
+      jobId: null,
+      shortcode: '',
+      stage: ImportStage.queued,
+      cached: false,
+    );
+  }
+}
+
+/// A session the fake import can be retried with.
+class _SignedInAuth extends AuthService {
+  @override
+  bool get isSignedIn => true;
 }

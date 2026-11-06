@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/shoku_theme.dart';
 import 'data/services/prefs.dart';
+import 'data/services/share_intake.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/languages.dart';
 import 'presentation/navigation/app_router.dart';
@@ -75,6 +76,11 @@ class ShokuApp extends ConsumerWidget {
     // subscribes it to the auth stream. Without this watch there is no
     // listener, and a pass that ran too early is never retried.
     ref.watch(syncControllerProvider);
+    // Share intake belongs to the app, not to the shell: the router is on
+    // `/welcome` and `/splash` before `AppShell` exists, and a share that
+    // arrives while the gate is up used to have nobody listening. Watched here
+    // it starts on the first build and lives until the process ends.
+    ref.watch(shareIntakeProvider);
 
     return ShokuBackGuard(
       child: MaterialApp.router(
