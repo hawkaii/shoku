@@ -87,6 +87,30 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # The upload key is a repository secret, not a file in the tree. Without
+      # it the build still runs, debug-signed, so a fork can build too — it is
+      # the absence of the secret that is warned about, not an error.
+      - name: Upload key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE}" ]; then
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret; the release will be debug-signed and Play will refuse it."
+            exit 0
+          fi
+          printf '%s' "${KEYSTORE}" | base64 -d > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=${STORE_PASSWORD}
+          keyAlias=${KEY_ALIAS}
+          keyPassword=${KEY_PASSWORD}
+          EOF
+          echo "Upload key decoded for alias ${KEY_ALIAS}"
+
       # The generated AppLocalizations must build from the ARBs, and every
       # supported locale must carry every key the English template declares.
       # Missing translations are a failed check, never a silent English
@@ -131,6 +155,12 @@ jobs:
               abi=${abi%-release}
               cp "$apk" "dist/shoku-${VERSION}-${abi}.apk"
             done
+
+            # Play never installs an APK: this is the artifact that is uploaded
+            # to the console. The APKs beside it stay for direct installs.
+            flutter build appbundle --release "${defines[@]}"
+            cp build/app/outputs/bundle/release/app-release.aab \
+               "dist/shoku-${VERSION}.aab"
 
             # The owner tests on a debug build. It is built every release, next
             # to the real one, because debugging a release APK is not a thing.
@@ -209,8 +239,10 @@ jobs:
             echo
             echo "Download the APK for your phone below and open it. If you are not"
             echo "sure which one, \`arm64-v8a\` is every phone made since about 2017."
-            echo "The \`debug\` APK is the development build the owner tests with;"
-            echo "both are debug-signed, so either installs over the other."
+            echo "The \`debug\` APK is the development build the owner tests with."
+            echo "The release build is signed with the upload key and the \`.aab\`"
+            echo "beside it is the Play artifact; the debug APK is signed with the"
+            echo "debug key, so installing one over the other starts with an uninstall."
             echo "Android will ask you to allow installs from your browser or file"
             echo "manager once."
             echo
@@ -246,13 +278,13 @@ jobs:
           # an existing tag as "upload to it" rather than as a failure.
           for attempt in 1 2 3 4; do
             if gh release view "$TAG" >/dev/null 2>&1; then
-              gh release upload "$TAG" dist/*.apk --clobber
+              gh release upload "$TAG" dist/*.apk dist/*.aab --clobber
               gh release edit "$TAG" --title "Shoku v${VERSION}" \
                 --notes-file /tmp/release.md --latest
               echo "updated existing release $TAG"
               exit 0
             fi
-            if gh release create "$TAG" dist/*.apk \
+            if gh release create "$TAG" dist/*.apk dist/*.aab \
                  --title "Shoku v${VERSION}" \
                  --notes-file /tmp/release.md \
                  --latest \
@@ -272,6 +304,7 @@ jobs:
           name: shoku-apk-${{ steps.version.outputs.version }}
           path: |
             app/dist/*.apk
+            app/dist/*.aab
             app/dist/size/*
           retention-days: 30
 
