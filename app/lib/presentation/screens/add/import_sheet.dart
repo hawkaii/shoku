@@ -7,6 +7,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/import_service.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/services/pending_import.dart';
 import '../../state/auth_providers.dart';
 import '../../state/import_providers.dart';
@@ -350,7 +351,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
           _error = context.l10n.importOpenAgain;
         });
         return;
-      } catch (_) {
+      } catch (error, stack) {
+        logFailure('import: resuming could not read the job', error, stack);
         if (!mounted) return;
         setState(() {
           _busy = false;
@@ -381,7 +383,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.importSaved(dish.title))),
       );
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('import: saving a cached reel failed', error, stack);
       if (!mounted) return;
       setState(() {
         _busy = false;
@@ -404,8 +407,9 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                 ? context.l10n.importNothingToSave
                 : context.l10n.importSaved(dish.title))),
       );
-    } catch (_) {
+    } catch (error, stack) {
       // Keep the note: the parse exists, only the save failed.
+      logFailure('import: saving a finished reel failed', error, stack);
       if (!mounted) return;
       setState(() {
         _busy = false;

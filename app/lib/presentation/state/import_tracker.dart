@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/services/import_service.dart';
+import '../../core/utils/failure_log.dart';
 import '../../data/services/pending_import.dart';
 import 'import_providers.dart';
 import 'journal_store.dart';
@@ -90,8 +91,10 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
       final pending = await _store.read();
       if (pending == null || _disposed) return;
       _adopt(pending);
-    } catch (_) {
-      // No store, no tracker — the app still cooks.
+    } catch (error, stack) {
+      // No store, no tracker — the app still cooks, but the note it could not
+      // read is why an import sometimes has to be started again.
+      logFailure('import: restoring the pending note failed', error, stack);
     }
   }
 
@@ -136,8 +139,9 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
         );
         return; // a failure is not polled again
       }
-    } catch (_) {
+    } catch (error, stack) {
       // A dropped poll is not a failed import; the next tick tries again.
+      logFailure('import: polling the job failed', error, stack);
     } finally {
       _polling = false;
     }
@@ -158,8 +162,9 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
       // createDish is idempotent by shortcode, so the sheet finishing first
       // cannot produce a second dish.
       await _onDishWritten();
-    } catch (_) {
+    } catch (error, stack) {
       // Leave it running: the next tick tries again rather than losing it.
+      logFailure('import: the tracker could not save the dish', error, stack);
       if (!_disposed) _timer = Timer(pollInterval, _poll);
       return;
     }
