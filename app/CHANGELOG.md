@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.29.2] — 2026-11-06
+
+### Chores
+- Com.shoku.app, an upload key, and a bundle *(android)* — [`03665ca`](https://github.com/hawkaii/food-finder-app/commit/03665ca9cfaba6acabbd272ced06d3451d317105)
+
+### Docs
+- V1.29.1 [skip ci] *(changelog)* — [`ca32e52`](https://github.com/hawkaii/food-finder-app/commit/ca32e523c1680a97a453000b22eca1a2ddbe9492)
+
 ## [1.29.1] — 2026-11-06
 
 ### Added
