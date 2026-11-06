@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../../data/db/pantry_repository.dart';
 import '../../data/models/pantry_item.dart';
 import '../../data/services/api_client.dart';
@@ -39,7 +40,10 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
   Future<void> _load() async {
     try {
       state = await _repo.load();
-    } catch (_) {
+    } catch (error, stack) {
+      // An unreadable shelf renders as an empty one; the line says it was not
+      // empty, it just could not be read.
+      logFailure('pantry load', error, stack);
       state = const [];
     } finally {
       _ready = true;
@@ -51,7 +55,8 @@ class PantryStore extends StateNotifier<List<PantryItem>> {
   Future<void> reload() async {
     try {
       state = await _repo.load();
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('pantry reload', error, stack);
       return;
     }
     _ref.read(pantryRevisionProvider.notifier).state++;

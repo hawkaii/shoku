@@ -576,7 +576,7 @@
   "importPasteFirst": "Paste a link first",
   "importNoLink": "The reel is ready but the server sent no link for it",
   "importCouldNotStart": "We could not start that import",
-  "importSignIn": "Sign in from You to import",
+  "importSignIn": "Sign in to import this reel",
   "importUnreachable": "Could not reach the server",
   "importLostConnection": "Lost the connection — the reel is still being read. Open this again to pick it up",
   "importStillOnServer": "Could not reach the server — the reel is still on it. Open this again to pick it up",
@@ -1067,6 +1067,38 @@
   "botServerNotice": "The assistant hit a problem — try again.",
   "botSignInNotice": "Sign in to ask the assistant.",
   "dishStopReading": "Stop reading",
+  "cookbookEmptySignedOut": "Sign in to bring your recipes back. They live on the server, not on this phone.",
+  "cookbookEmptyOffline": "Your recipes could not load. Check the connection and try again.",
+  "importCapNotice": "Today's imports are used up. They come back tomorrow — or add one from the Wall, already read.",
+  "importCapWallHint": "Or add one from the Wall — those are already read.",
+  "botAsksLeft": "{count, plural, =0{no asks left today} one{1 ask left today} other{{count} asks left today}}",
+  "@botAsksLeft": {"placeholders": {"count": {"type": "int"}}},
+  "accountDelete": "Delete account",
+  "accountDeleteBody": "This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.",
+  "accountDeleteCancel": "Keep it",
+  "accountDeleteDone": "Account deleted",
+  "accountDeleteFailed": "Could not delete the account. Nothing was changed.",
+  "wallReport": "Report this reel",
+  "wallReported": "Reported. Enough reports remove it from the Wall.",
+  "wallReportFailed": "Could not report it. Try again.",
+  "timerNotificationTitle": "Timer is up",
+  "@timerNotificationTitle": {"description": "Title of the local notification posted when a cook-mode timer finishes."},
+  "timerNotificationBody": "Step {step} is done — back to the kitchen.",
+  "@timerNotificationBody": {"description": "Body of the timer notification. {step} is the 1-based step number.", "placeholders": {"step": {"type": "int"}}},
+  "timerAlertsUnavailable": "alerts are off — the timer still works while the app is open",
+  "@timerAlertsUnavailable": {"description": "Timer card note when no notification channel or plugin is available at all."},
+  "importShareNoLink": "That share didn’t include a link. Paste the reel’s URL below.",
+  "@importShareNoLink": {"description": "Import sheet note when a shared item carried no URL (for example an image-only share)."},
+  "authPasswordShow": "Show password",
+  "@authPasswordShow": {"description": "Accessibility label for the control that reveals the password field."},
+  "authPasswordHide": "Hide password",
+  "@authPasswordHide": {"description": "Accessibility label for the control that hides the password field."},
+  "routeErrorTitle": "This page isn’t here",
+  "@routeErrorTitle": {"description": "Title of the in-app screen shown when a link or path does not match a route, instead of the router's own error page."},
+  "routeErrorBody": "The link may be old or mistyped. Your journal is still where it was.",
+  "@routeErrorBody": {"description": "Body of the route error screen; tells the user their data is safe."},
+  "routeErrorBack": "Back to the journal",
+  "@routeErrorBack": {"description": "Button on the route error screen that returns to the journal tab."},
   "handsFree": "Hands-free",
   "handsFreeListening": "Listening",
   "handsFreeConnecting": "Connecting…",
@@ -1082,18 +1114,6 @@
   "handsFreeOffline": "Hands-free needs a connection. Tap to try again.",
   "handsFreeAuth": "Sign in from You to use hands-free.",
   "handsFreeCap": "Voice minutes are used up for today.",
-  "@handsFreeHeard": {
-    "placeholders": {
-      "text": {
-        "type": "String"
-      }
-    }
-  },
-  "@handsFreeTimerStarted": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "@handsFreeHeard": {"placeholders": {"text": {"type": "String"}}},
+  "@handsFreeTimerStarted": {"placeholders": {"count": {"type": "int"}}}
 }

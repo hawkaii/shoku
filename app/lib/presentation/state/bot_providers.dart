@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/utils/failure_log.dart';
 import '../../../data/db/assistant_turn_repository.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/assistant_service.dart';
@@ -183,7 +184,10 @@ class BotController extends StateNotifier<BotState> {
         ],
         starters: _starters(),
       );
-    } catch (_) {
+    } catch (error, stack) {
+      // The thread opens with its starters instead of its history; the line
+      // records that the history was lost rather than empty.
+      logFailure('bot thread load', error, stack);
       if (mounted) state = state.copyWith(starters: _starters());
     }
   }
@@ -288,7 +292,9 @@ class BotController extends StateNotifier<BotState> {
         offline: true,
         turns: [...state.turns, const BotTurn.offline()],
       );
-    } catch (_) {
+    } catch (error, stack) {
+      // The turn shows the offline notice; the log says which throw it was.
+      logFailure('bot ask', error, stack);
       if (!mounted || generation != _generation) return;
       // Every model intent needs the API; the bot never claims a local answer.
       state = state.copyWith(
@@ -354,8 +360,10 @@ class BotController extends StateNotifier<BotState> {
         role: role,
         text: text,
       );
-    } catch (_) {
-      // Memory is best-effort: losing a line must not lose the answer.
+    } catch (error, stack) {
+      // Memory is best-effort: losing a line must not lose the answer, but a
+      // memory that keeps failing is a bug worth seeing.
+      logFailure('bot remember turn', error, stack);
     }
   }
 

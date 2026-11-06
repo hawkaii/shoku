@@ -1050,7 +1050,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importCouldNotStart => 'We could not start that import';
 
   @override
-  String get importSignIn => 'Sign in from You to import';
+  String get importSignIn => 'Sign in to import this reel';
 
   @override
   String get importUnreachable => 'Could not reach the server';
@@ -1763,6 +1763,93 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Stop reading';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Sign in to bring your recipes back. They live on the server, not on this phone.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Your recipes could not load. Check the connection and try again.';
+
+  @override
+  String get importCapNotice =>
+      'Today\'s imports are used up. They come back tomorrow — or add one from the Wall, already read.';
+
+  @override
+  String get importCapWallHint =>
+      'Or add one from the Wall — those are already read.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count asks left today',
+      one: '1 ask left today',
+      zero: 'no asks left today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'Delete account';
+
+  @override
+  String get accountDeleteBody =>
+      'This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.';
+
+  @override
+  String get accountDeleteCancel => 'Keep it';
+
+  @override
+  String get accountDeleteDone => 'Account deleted';
+
+  @override
+  String get accountDeleteFailed =>
+      'Could not delete the account. Nothing was changed.';
+
+  @override
+  String get wallReport => 'Report this reel';
+
+  @override
+  String get wallReported =>
+      'Reported. Enough reports remove it from the Wall.';
+
+  @override
+  String get wallReportFailed => 'Could not report it. Try again.';
+
+  @override
+  String get timerNotificationTitle => 'Timer is up';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'Step $step is done — back to the kitchen.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'alerts are off — the timer still works while the app is open';
+
+  @override
+  String get importShareNoLink =>
+      'That share didn’t include a link. Paste the reel’s URL below.';
+
+  @override
+  String get authPasswordShow => 'Show password';
+
+  @override
+  String get authPasswordHide => 'Hide password';
+
+  @override
+  String get routeErrorTitle => 'This page isn’t here';
+
+  @override
+  String get routeErrorBody =>
+      'The link may be old or mistyped. Your journal is still where it was.';
+
+  @override
+  String get routeErrorBack => 'Back to the journal';
 
   @override
   String get handsFree => 'Hands-free';

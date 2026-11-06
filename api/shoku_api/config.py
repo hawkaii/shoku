@@ -87,6 +87,10 @@ class Settings(BaseSettings):
     #: Also the upstream connect timeout: a socket that has not opened in this
     #: long is a failure, not a slow start.
     voice_handshake_timeout: float = 10.0
+    # An import is the expensive one: it boots a worker VM and calls the model
+    # to read the video. Five a day is invisible to a normal kitchen and still
+    # bounds what one account can cost.
+    import_daily_cap: int = 5
 
     # Receipt parsing has its own allowance: a bag of shopping is not a
     # conversation, and sharing the assistant's 20 would spend it twice over.
@@ -133,6 +137,9 @@ class Settings(BaseSettings):
     # Supabase Auth: the JWT issuer is <url>/auth/v1 and user tokens carry
     # audience "authenticated". Both are required to verify an access token.
     supabase_url: str = ""
+    #: Service-role key, used only to erase an account's auth identity. Empty
+    #: means deletion removes the product data but leaves the login behind.
+    supabase_service_key: str = ""
     supabase_audience: str = "authenticated"
 
     cors_origins: list[str] = Field(default_factory=list)

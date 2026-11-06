@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/db/assistant_turn_repository.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/api_client.dart';
@@ -18,6 +19,7 @@ import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../bot/bot_scope.dart';
 import '../bot/scope_switcher.dart';
+import '../profile/sign_in_sheet.dart';
 import '../../widgets/kit/bot_mark.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/mic_field.dart';
@@ -43,23 +45,27 @@ enum _Kind { mine, answer, diff, notice, divider }
 class _Turn {
   const _Turn.mine(this.text)
       : kind = _Kind.mine,
+        retry = null,
         reply = null,
         question = null;
   const _Turn.answer(this.text)
       : kind = _Kind.answer,
+        retry = null,
         reply = null,
         question = null;
-  const _Turn.notice(this.text)
+  const _Turn.notice(this.text, {this.retry})
       : kind = _Kind.notice,
         reply = null,
         question = null;
   const _Turn.divider(this.text)
       : kind = _Kind.divider,
+        retry = null,
         reply = null,
         question = null;
   const _Turn.diff(this.reply, this.question)
       : kind = _Kind.diff,
-        text = '';
+        text = '',
+        retry = null;
 
   /// A turn read back from this device's own memory.
   factory _Turn.restored(AssistantTurnRecord turn) =>
@@ -67,6 +73,11 @@ class _Turn {
 
   final _Kind kind;
   final String text;
+
+  /// Set on a sign-in prompt: the question to ask again once there is a
+  /// session. It is what makes the notice a door instead of a sentence.
+  final String? retry;
+
   final AssistantReply? reply;
   final String? question;
 }
@@ -112,7 +123,12 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   String? _error;
   int? _appliedVersion;
   bool _cap = false;
+  /// Asks left today, when the server last said.
+  int? _remaining;
   bool _offline = false;
+
+  /// One sign-in at a time: the prompt is not a button that stacks sheets.
+  bool _signingIn = false;
 
   /// The one unresolved diff. Two at once would be two truths about the head.
   _Turn? _diff;
@@ -171,8 +187,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           ..addAll([for (final turn in last) _Turn.restored(turn)]);
         _loading = false;
       });
-    } catch (_) {
+    } catch (error, stack) {
       // A chat that cannot be read is still a chat that can be started.
+      logFailure('recipe chat history load', error, stack);
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -254,12 +271,14 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           );
       _stored.add(turn);
       _total++;
-    } catch (_) {
-      // Memory is best-effort: losing a line must not lose the answer.
+    } catch (error, stack) {
+      // Memory is best-effort: losing a line must not lose the answer, but it
+      // should still be in the log.
+      logFailure('recipe chat remember turn', error, stack);
     }
   }
 
-  Future<void> _send(String raw) async {
+  Future<void> _send(String raw, {bool retrying = false}) async {
     final question = raw.trim();
     if (question.isEmpty || !_canSend) return;
 
@@ -269,7 +288,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       // lands: the question is already in the list, so nothing is lost by
       // letting the cook start typing the next one.
       _input.clear();
-      _turns.add(_Turn.mine(question));
+      // A retry after sign-in repeats a question that is already in the thread;
+      // adding it twice would read as two asks.
+      if (!retrying) _turns.add(_Turn.mine(question));
       _thinking = true;
       _error = null;
     });
@@ -292,6 +313,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       HapticFeedback.selectionClick();
       setState(() {
         _thinking = false;
+        _remaining = reply.remaining;
         _turns.add(_Turn.answer(reply.answer));
         if (reply.isEdit) {
           final diff = _Turn.diff(reply, question);
@@ -311,6 +333,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       setState(() {
         _thinking = false;
         _cap = true;
+        _remaining = 0;
         _turns.add(_Turn.notice(context.l10n.botCapNotice));
       });
       _scrollToLatest();
@@ -318,7 +341,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       if (!mounted) return;
       setState(() {
         _thinking = false;
-        _turns.add(_Turn.notice(context.l10n.botSignInNotice));
+        _turns.add(_Turn.notice(
+          context.l10n.botSignInNotice,
+          retry: question,
+        ));
       });
       _scrollToLatest();
     } on ApiError {
@@ -336,7 +362,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
         _turns.add(_Turn.notice(context.l10n.botOfflineNotice));
       });
       _scrollToLatest();
-    } catch (_) {
+    } catch (error, stack) {
+      // The turn shows the offline notice; the log says what actually failed.
+      logFailure('recipe chat send', error, stack);
       if (!mounted) return;
       setState(() {
         _thinking = false;
@@ -383,7 +411,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           _diff = null;
         }
       });
-    } catch (_) {
+    } catch (error, stack) {
+      // The sheet already says "nothing changed"; record why it believes that.
+      logFailure('recipe chat apply', error, stack);
       if (!mounted) return;
       setState(() {
         _applying = false;
@@ -404,6 +434,25 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     final question = _diff?.question;
     _discard();
     if (question != null) await _send(question);
+  }
+
+  /// A 401 is a door, not a wall: the prompt opens the sheet, and the question
+  /// the cook already asked is sent again once a session lands. Single-flight —
+  /// one sheet, one retry, no double send.
+  Future<void> _signInAndRetry(_Turn notice) async {
+    final question = notice.retry;
+    if (question == null || _signingIn) return;
+    setState(() => _signingIn = true);
+    final signedIn = await showSignInSheet(context);
+    if (!mounted) return;
+    setState(() {
+      _signingIn = false;
+      // A successful prompt has served its purpose; a dismissed one stays so
+      // the cook can tap it again.
+      if (signedIn) _turns.remove(notice);
+    });
+    if (!signedIn || !_canSend) return;
+    await _send(question, retrying: true);
   }
 
   void _openVersion(int number) {
@@ -479,6 +528,15 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 ),
               ],
             ),
+            if (_remaining != null && _remaining! <= 5) ...[
+              const SizedBox(height: ShokuSpace.xs),
+              Text(
+                l10n.botAsksLeft(_remaining!),
+                key: const ValueKey('chat-asks-left'),
+                style: ShokuType.bodySmall
+                    .copyWith(color: c.inkMuted, fontSize: 11.5),
+              ),
+            ],
             if (widget.stepIndex != null && _stepScope) ...[
               const SizedBox(height: ShokuSpace.xs),
               Row(
@@ -608,7 +666,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             ),
           ),
         _Kind.answer => _AnswerBubble(text: turn.text),
-        _Kind.notice => _ChatNotice(text: turn.text),
+        _Kind.notice => _ChatNotice(
+            text: turn.text,
+            onTap: turn.retry == null ? null : () => _signInAndRetry(turn),
+          ),
         _Kind.divider => Padding(
             padding: const EdgeInsets.symmetric(vertical: ShokuSpace.sm),
             child: Row(
@@ -754,18 +815,54 @@ class _AnswerBubbleState extends ConsumerState<_AnswerBubble> {
 }
 
 class _ChatNotice extends StatelessWidget {
-  const _ChatNotice({required this.text});
+  const _ChatNotice({required this.text, this.onTap});
 
   final String text;
+
+  /// A notice with a door: tapping it opens sign-in and then retries.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final style = ShokuType.bodySmall.copyWith(color: c.inkMuted);
+    final action = onTap;
+    if (action == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+        child: Text(text,
+            key: const ValueKey('chat-notice'),
+            style: style),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
-      child: Text(text,
-          key: const ValueKey('chat-notice'),
-          style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+      child: GestureDetector(
+        key: const ValueKey('chat-notice-signin'),
+        onTap: action,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+            border: Border.all(color: c.accent),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.login, size: 14, color: c.accent),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(text,
+                    key: const ValueKey('chat-notice'),
+                    style: style.copyWith(color: c.ink)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

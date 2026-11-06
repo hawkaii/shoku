@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
 import '../../../data/models/recipe_content.dart';
@@ -45,6 +46,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
   RecipeContent? _content;
   bool _failed = false;
   bool _adding = false;
+  bool _reporting = false;
+  bool _reported = false;
 
   @override
   void initState() {
@@ -63,7 +66,9 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       if (!mounted) return;
       setState(() => _content = content);
       if (content == null) setState(() => _failed = true);
-    } catch (_) {
+    } catch (error, stack) {
+      // The sheet shows its retry state; the log keeps the cause.
+      logFailure('wall reel content load', error, stack);
       if (!mounted) return;
       setState(() => _failed = true);
     }
@@ -85,13 +90,33 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
             ? l10n.wallReelGone
             : l10n.wallSavedToCookbook(dish.title)),
       ));
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('wall reel add to cookbook', error, stack);
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.importUnreachable)),
       );
     } finally {
       if (mounted) setState(() => _adding = false);
+    }
+  }
+
+  Future<void> _report() async {
+    if (_reporting) return;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _reporting = true);
+    try {
+      await ref.read(feedServiceProvider).report(widget.item.shortcode);
+      if (!mounted) return;
+      setState(() => _reported = true);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.wallReported)));
+    } catch (error, stack) {
+      logFailure('wall reel report', error, stack);
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.wallReportFailed)));
+    } finally {
+      if (mounted) setState(() => _reporting = false);
     }
   }
 
@@ -212,7 +237,21 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                       ),
                     ),
                 ],
-                const SizedBox(height: ShokuSpace.md),
+                // Play requires a report path on user-generated content, and
+                // this is it: three different people hide the card.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    key: const ValueKey('feed-detail-report'),
+                    onPressed: _reporting || _reported ? null : _report,
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: Text(
+                      _reported ? l10n.wallReported : l10n.wallReport,
+                      style: ShokuType.label.copyWith(color: c.inkMuted),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: ShokuSpace.sm),
                 Row(
                   children: [
                     Expanded(

@@ -1060,7 +1060,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get importCouldNotStart => 'அந்த இறக்குமதியைத் தொடங்க முடியவில்லை';
 
   @override
-  String get importSignIn => 'இறக்குமதி செய்ய நீங்கள் பகுதியில் உள்நுழையுங்கள்';
+  String get importSignIn => 'இந்த ரீலை இறக்குமதி செய்ய உள்நுழையுங்கள்';
 
   @override
   String get importUnreachable => 'சர்வரை அடைய முடியவில்லை';
@@ -1786,6 +1786,93 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get dishStopReading => 'படிப்பதை நிறுத்து';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'உங்கள் ரெசிபிகளை மீட்டெடுக்க உள்நுழைக. அவை சர்வரில் உள்ளன, இந்த ஃபோனில் இல்லை.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'உங்கள் ரெசிபிகள் ஏற்றப்படவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலவும்.';
+
+  @override
+  String get importCapNotice =>
+      'இன்றைய இறக்குமதிகள் முடிந்துவிட்டன. அவை நாளை திரும்பும் — அல்லது வாலில் இருந்து ஒரு ரீலைச் சேர்க்கவும், அது ஏற்கனவே படிக்கப்பட்டது.';
+
+  @override
+  String get importCapWallHint =>
+      'அல்லது வாலில் இருந்து ஒன்றைச் சேர்க்கவும் — அவை ஏற்கனவே படிக்கப்பட்டவை.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'இன்று $count கேள்விகள் மீதம்',
+      one: 'இன்று 1 கேள்வி மீதம்',
+      zero: 'இன்று கேள்விகள் இல்லை',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'கணக்கை நீக்கு';
+
+  @override
+  String get accountDeleteBody =>
+      'இது உங்கள் உணவுகள், பதிப்புகள், சமையல், ஃபிரிட்ஜ் மற்றும் புகைப்படங்களை எல்லா சாதனங்களிலிருந்தும் சர்வரிலிருந்தும் அழிக்கும். மீள முடியாது.';
+
+  @override
+  String get accountDeleteCancel => 'வைத்திரு';
+
+  @override
+  String get accountDeleteDone => 'கணக்கு நீக்கப்பட்டது';
+
+  @override
+  String get accountDeleteFailed =>
+      'கணக்கை நீக்க முடியவில்லை. எதுவும் மாறவில்லை.';
+
+  @override
+  String get wallReport => 'இந்த ரீலைப் புகாரளி';
+
+  @override
+  String get wallReported =>
+      'புகார் பதிவானது. போதுமான புகார்கள் அதை வாலிலிருந்து நீக்கும்.';
+
+  @override
+  String get wallReportFailed => 'புகாரளிக்க முடியவில்லை. மீண்டும் முயலவும்.';
+
+  @override
+  String get timerNotificationTitle => 'டைமர் முடிந்தது';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'படி $step முடிந்தது — சமையலறைக்குத் திரும்புங்கள்.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'எச்சரிக்கைகள் இல்லை — செயலி திறந்திருக்கும் போது டைமர் இயங்கும்';
+
+  @override
+  String get importShareNoLink =>
+      'அந்தப் பங்கில் இணைப்பு இல்லை. கீழே ரீலின் URL-ஐ ஒட்டுங்கள்.';
+
+  @override
+  String get authPasswordShow => 'கடவுச்சொல்லைக் காட்டு';
+
+  @override
+  String get authPasswordHide => 'கடவுச்சொல்லை மறை';
+
+  @override
+  String get routeErrorTitle => 'இந்தப் பக்கம் இங்கே இல்லை';
+
+  @override
+  String get routeErrorBody =>
+      'இணைப்பு பழையதாகவோ தவறாக எழுதப்பட்டதாகவோ இருக்கலாம். உங்கள் ஜர்னல் இருந்த இடத்திலேயே உள்ளது.';
+
+  @override
+  String get routeErrorBack => 'ஜர்னலுக்குத் திரும்பு';
 
   @override
   String get handsFree => 'கைகள் இல்லாமல்';

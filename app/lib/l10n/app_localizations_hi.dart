@@ -1044,7 +1044,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get importCouldNotStart => 'वह इंपोर्ट शुरू नहीं हो सका';
 
   @override
-  String get importSignIn => 'इंपोर्ट के लिए आप में साइन इन करें';
+  String get importSignIn => 'यह रील इंपोर्ट करने के लिए साइन इन करें';
 
   @override
   String get importUnreachable => 'सर्वर तक नहीं पहुँच सके';
@@ -1757,6 +1757,92 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dishStopReading => 'पढ़ना बंद करें';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'अपनी रेसिपी वापस पाने के लिए साइन इन करें। वे सर्वर पर हैं, इस फ़ोन पर नहीं।';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'आपकी रेसिपी लोड नहीं हो सकीं। कनेक्शन जाँचें और फिर कोशिश करें।';
+
+  @override
+  String get importCapNotice =>
+      'आज के इम्पोर्ट खत्म हो गए। वे कल लौटेंगे — या वॉल से कोई रील जोड़ें, जो पहले ही पढ़ी जा चुकी है।';
+
+  @override
+  String get importCapWallHint =>
+      'या वॉल से एक जोड़ें — वे पहले ही पढ़े जा चुके हैं।';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'आज $count सवाल बचे हैं',
+      one: 'आज 1 सवाल बचा है',
+      zero: 'आज कोई सवाल नहीं बचा',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'खाता हटाएँ';
+
+  @override
+  String get accountDeleteBody =>
+      'इससे आपके व्यंजन, वर्ज़न, कुकिंग, फ्रिज और फ़ोटो सभी डिवाइस और सर्वर से मिट जाएँगे। इसे वापस नहीं लाया जा सकता।';
+
+  @override
+  String get accountDeleteCancel => 'रखें';
+
+  @override
+  String get accountDeleteDone => 'खाता हटा दिया गया';
+
+  @override
+  String get accountDeleteFailed => 'खाता हटाया नहीं जा सका। कुछ नहीं बदला।';
+
+  @override
+  String get wallReport => 'इस रील की शिकायत करें';
+
+  @override
+  String get wallReported =>
+      'शिकायत दर्ज। पर्याप्त शिकायतों पर यह वॉल से हट जाती है।';
+
+  @override
+  String get wallReportFailed => 'शिकायत दर्ज नहीं हो सकी। फिर कोशिश करें।';
+
+  @override
+  String get timerNotificationTitle => 'टाइमर खत्म हो गया';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'चरण $step पूरा — रसोई में वापस आएँ।';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'अलर्ट उपलब्ध नहीं हैं — ऐप खुला रहने पर टाइमर चलता रहेगा';
+
+  @override
+  String get importShareNoLink =>
+      'उस शेयर में लिंक नहीं था। नीचे रील का URL पेस्ट करें।';
+
+  @override
+  String get authPasswordShow => 'पासवर्ड दिखाएँ';
+
+  @override
+  String get authPasswordHide => 'पासवर्ड छिपाएँ';
+
+  @override
+  String get routeErrorTitle => 'यह पेज यहाँ नहीं है';
+
+  @override
+  String get routeErrorBody =>
+      'लिंक पुराना या गलत लिखा हो सकता है। आपकी जर्नल वहीं है जहाँ थी।';
+
+  @override
+  String get routeErrorBack => 'जर्नल पर वापस जाएँ';
 
   @override
   String get handsFree => 'हैंड्स-फ़्री';

@@ -1048,7 +1048,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importCouldNotStart => 'No pudimos iniciar esa importación';
 
   @override
-  String get importSignIn => 'Inicia sesión en Tú para importar';
+  String get importSignIn => 'Inicia sesión para importar este reel';
 
   @override
   String get importUnreachable => 'No se pudo llegar al servidor';
@@ -1769,6 +1769,92 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Detener la lectura';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Inicia sesión para recuperar tus recetas. Están en el servidor, no en este teléfono.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'No se pudieron cargar tus recetas. Revisa la conexión y vuelve a intentarlo.';
+
+  @override
+  String get importCapNotice =>
+      'Ya usaste las importaciones de hoy. Vuelven mañana — o añade un reel del Muro, que ya está leído.';
+
+  @override
+  String get importCapWallHint => 'O añade uno del Muro: ya están leídos.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'quedan $count preguntas hoy',
+      one: 'queda 1 pregunta hoy',
+      zero: 'no quedan preguntas hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'Eliminar cuenta';
+
+  @override
+  String get accountDeleteBody =>
+      'Esto borra tus platos, versiones, cocinados, nevera y fotos de todos los dispositivos y del servidor. No se puede deshacer.';
+
+  @override
+  String get accountDeleteCancel => 'Conservar';
+
+  @override
+  String get accountDeleteDone => 'Cuenta eliminada';
+
+  @override
+  String get accountDeleteFailed =>
+      'No se pudo eliminar la cuenta. No se cambió nada.';
+
+  @override
+  String get wallReport => 'Denunciar este reel';
+
+  @override
+  String get wallReported =>
+      'Denunciado. Con suficientes denuncias sale del Muro.';
+
+  @override
+  String get wallReportFailed => 'No se pudo denunciar. Inténtalo de nuevo.';
+
+  @override
+  String get timerNotificationTitle => 'El temporizador terminó';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'El paso $step está listo — vuelve a la cocina.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'las alertas no están disponibles — el temporizador sigue funcionando con la app abierta';
+
+  @override
+  String get importShareNoLink =>
+      'Ese contenido no traía un enlace. Pega la URL del reel abajo.';
+
+  @override
+  String get authPasswordShow => 'Mostrar contraseña';
+
+  @override
+  String get authPasswordHide => 'Ocultar contraseña';
+
+  @override
+  String get routeErrorTitle => 'Esta página no está aquí';
+
+  @override
+  String get routeErrorBody =>
+      'Puede que el enlace sea antiguo o esté mal escrito. Tu diario sigue donde estaba.';
+
+  @override
+  String get routeErrorBack => 'Volver al diario';
 
   @override
   String get handsFree => 'Manos libres';

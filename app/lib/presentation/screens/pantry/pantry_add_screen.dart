@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/models/pantry_item.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/pantry_ai_service.dart';
@@ -110,7 +111,13 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
 
   /// One sheet, once per device: the image leaves the phone.
   Future<void> _discloseOnce() async {
-    final seen = await Prefs.receiptVisionSeen().catchError((_) => false);
+    // A missing prefs store only means the sheet is shown again next time: the
+    // disclosure is safer repeated than skipped.
+    final seen = await Prefs.receiptVisionSeen()
+        .catchError((Object error, StackTrace stack) {
+      logFailure('vision disclosure read', error, stack);
+      return false;
+    });
     if (seen || !mounted) return;
 
     await showModalBottomSheet<void>(
@@ -119,7 +126,11 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
       builder: (context) => const _VisionDisclosure(),
     );
     // Remembered even when it is swiped away: asking twice is not consent.
-    unawaited(Prefs.setReceiptVisionSeen(true).catchError((_) {}));
+    // Failing to remember it costs one repeated sheet, never a lost entry.
+    unawaited(Prefs.setReceiptVisionSeen(true)
+        .catchError((Object error, StackTrace stack) {
+      logFailure('vision disclosure write', error, stack);
+    }));
   }
 
   Future<void> _readImage(List<int> bytes) async {
@@ -141,7 +152,10 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
       cap = 'cap';
     } on ApiError {
       // The server had a day. The rows already parsed stay; try again later.
-    } catch (_) {
+    } catch (error, stack) {
+      // The rows already parsed stay on screen; the line says why the rest did
+      // not arrive.
+      logFailure('receipt photo read', error, stack);
       offline = true;
     }
     if (!mounted) return;
@@ -233,9 +247,10 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
       result = await ref.read(pantryAiServiceProvider).read(leftovers);
     } on PantryCapReached {
       cap = 'cap';
-    } catch (_) {
+    } catch (error, stack) {
       // Offline, or the server is having a day. The parsed rows still stand and
-      // a failed call never blocks adding them.
+      // a failed call never blocks adding them — but it is no longer invisible.
+      logFailure('pantry ai read', error, stack);
     }
     if (!mounted || generation != _generation) return;
     setState(() {

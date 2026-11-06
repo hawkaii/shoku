@@ -1055,7 +1055,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importCouldNotStart => 'Impossible de lancer cette importation';
 
   @override
-  String get importSignIn => 'Connectez-vous dans Vous pour importer';
+  String get importSignIn => 'Connectez-vous pour importer ce reel';
 
   @override
   String get importUnreachable => 'Impossible d\'atteindre le serveur';
@@ -1794,6 +1794,93 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Arrêter la lecture';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Connectez-vous pour retrouver vos recettes. Elles sont sur le serveur, pas sur ce téléphone.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Impossible de charger vos recettes. Vérifiez la connexion et réessayez.';
+
+  @override
+  String get importCapNotice =>
+      'Les imports du jour sont épuisés. Ils reviennent demain — ou ajoutez un reel du Mur, déjà lu.';
+
+  @override
+  String get importCapWallHint =>
+      'Ou ajoutez-en un du Mur : ils sont déjà lus.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions restantes aujourd\'hui',
+      one: '1 question restante aujourd\'hui',
+      zero: 'plus de questions aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'Supprimer le compte';
+
+  @override
+  String get accountDeleteBody =>
+      'Cela efface vos plats, versions, cuissons, frigo et photos de tous les appareils et du serveur. Irréversible.';
+
+  @override
+  String get accountDeleteCancel => 'Garder';
+
+  @override
+  String get accountDeleteDone => 'Compte supprimé';
+
+  @override
+  String get accountDeleteFailed =>
+      'Impossible de supprimer le compte. Rien n\'a été modifié.';
+
+  @override
+  String get wallReport => 'Signaler ce reel';
+
+  @override
+  String get wallReported =>
+      'Signalé. Assez de signalements le retirent du Mur.';
+
+  @override
+  String get wallReportFailed => 'Impossible de le signaler. Réessayez.';
+
+  @override
+  String get timerNotificationTitle => 'Le minuteur est terminé';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'L’étape $step est prête — retour à la cuisine.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'les alertes ne sont pas disponibles — le minuteur fonctionne tant que l’app est ouverte';
+
+  @override
+  String get importShareNoLink =>
+      'Ce partage ne contenait pas de lien. Collez l’URL du reel ci-dessous.';
+
+  @override
+  String get authPasswordShow => 'Afficher le mot de passe';
+
+  @override
+  String get authPasswordHide => 'Masquer le mot de passe';
+
+  @override
+  String get routeErrorTitle => 'Cette page n’est pas ici';
+
+  @override
+  String get routeErrorBody =>
+      'Le lien est peut-être ancien ou mal saisi. Votre journal est toujours là où il était.';
+
+  @override
+  String get routeErrorBack => 'Retour au journal';
 
   @override
   String get handsFree => 'Mains libres';

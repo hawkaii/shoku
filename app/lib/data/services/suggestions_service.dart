@@ -1,3 +1,4 @@
+import '../../core/utils/failure_log.dart';
 import '../models/feed_item.dart';
 import 'api_client.dart';
 
@@ -79,8 +80,10 @@ class SuggestionsService {
         for (final raw in (data['items'] as List? ?? const []))
           if (FeedSuggestion.fromJson(raw) case final suggestion?) suggestion,
       ];
-    } catch (_) {
-      // Not deployed yet, or offline: the shelf shows its empty state.
+    } catch (error, stack) {
+      // Not deployed yet, or offline: the shelf shows its empty state, and the
+      // line says which of the two it was.
+      logFailure('feed suggestions', error, stack);
       return const [];
     }
   }

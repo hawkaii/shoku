@@ -204,6 +204,23 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 10;
 
+  /// Erase everything this device holds.
+  ///
+  /// Only account deletion calls this. Signing out deliberately keeps the local
+  /// kitchen; deleting the account must not, or the next person to open the app
+  /// inherits the last person's dishes.
+  Future<void> wipe() async {
+    await transaction(() async {
+      await delete(dishRows).go();
+      await delete(versionRows).go();
+      await delete(cookLogRows).go();
+      await delete(cookTimerRows).go();
+      await delete(pantryRows).go();
+      await delete(assistantTurnRows).go();
+      await delete(metaRows).go();
+    });
+  }
+
   /// Store timestamps as ISO-8601 text, not unix seconds.
   ///
   /// The default int format truncates to whole seconds, which destroys the

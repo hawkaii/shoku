@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../../data/services/auth_service.dart';
 
 /// The one auth object. It lives apart from the sync layer so a store that
@@ -18,7 +19,9 @@ final authReadyProvider = FutureProvider<void>((ref) async {
     // Four seconds is generous for a local restore; a refresh that needs the
     // network is not something the splash should wait for.
     await AuthService.init().timeout(const Duration(seconds: 4));
-  } catch (_) {
-    // No session, no network, or no plugin: signed out is a valid state.
+  } catch (error, stack) {
+    // No session, no network, or no plugin: signed out is a valid state, but a
+    // signed-out user who had an account needs this line to explain why.
+    logFailure('auth init', error, stack);
   }
 });

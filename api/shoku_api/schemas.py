@@ -377,6 +377,9 @@ class ImportRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     url: Annotated[str, StringConstraints(min_length=8, max_length=2048)]
+    #: Optional so an older APK still imports. When present, a retried POST
+    #: finds the same unit and does not spend the allowance twice.
+    request_id: Annotated[str, StringConstraints(min_length=8, max_length=64)] | None = None
 
 
 class ImportResponse(BaseModel):
@@ -385,6 +388,9 @@ class ImportResponse(BaseModel):
     state: ImportState
     cached: bool
     shortcode: str
+    #: Imports left today, and when the allowance refills.
+    remaining: int | None = None
+    reset_at: datetime | None = None
 
 
 class ImportStatus(BaseModel):

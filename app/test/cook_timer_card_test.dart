@@ -164,6 +164,24 @@ void main() {
     expect(find.textContaining('may arrive late'), findsOneWidget);
   });
 
+  testWidgets('an alert that could not be scheduled says the clock still works',
+      (tester) async {
+    await tester.pumpWidget(_harness(
+      timer: _timer(),
+      alerts: TimerAlertPermission.unavailable,
+      taps: {},
+    ));
+
+    expect(find.byKey(const ValueKey('timer-alert-note')), findsOneWidget);
+    expect(
+      find.textContaining('the timer still works while the app is open'),
+      findsOneWidget,
+      reason: 'a failed schedule that renders nothing is a silent lie',
+    );
+    // And the clock is still there, because the cook still needs it.
+    expect(find.text('10:00'), findsOneWidget);
+  });
+
   testWidgets('an exact alarm says nothing', (tester) async {
     await tester.pumpWidget(_harness(
       timer: _timer(),

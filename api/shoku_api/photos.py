@@ -32,6 +32,8 @@ class Storage(Protocol):
         self, key: str, *, content_type: str, expires_in: int
     ) -> PresignedUpload: ...
 
+    def delete(self, key: str) -> None: ...
+
     def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
         """Store bytes server-side and return their public URL.
 
@@ -58,6 +60,9 @@ class DevStorage:
     def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
         return None
 
+    def delete(self, key: str) -> None:
+        self.keys = [k for k in self.keys if k != key]
+
     def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
         return PresignedUpload(
             key=key,
@@ -78,10 +83,15 @@ class FakeStorage:
         self._base = public_base_url.rstrip("/")
         self.keys: list[str] = []
         self.written: dict[str, bytes] = {}
+        self.deleted: list[str] = []
 
     def put(self, key: str, body: bytes, *, content_type: str) -> str | None:
         self.written[key] = body
         return f"{self._base}/{quote(key)}"
+
+    def delete(self, key: str) -> None:
+        self.deleted.append(key)
+        self.written.pop(key, None)
 
     def presign_put(self, key: str, *, content_type: str, expires_in: int) -> PresignedUpload:
         self.keys.append(key)
@@ -216,6 +226,11 @@ class GcsStorage:
                 lifetime=3600,
             )
             self._signer_email = email
+
+    def delete(self, key: str) -> None:
+        # ignore_missing: an account deletion must not fail because a photo was
+        # never uploaded, or was already removed.
+        self._bucket.delete_blob(key, ignore_missing=True)
 
     def public_url(self, key: str) -> str | None:
         return f"{self._public_base}/{quote(key)}" if self._public_base else None

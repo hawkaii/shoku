@@ -24,14 +24,46 @@ class ImportService {
   final JournalRepository _repository;
 
   Future<ImportStart> start(String url) async {
-    final response = await _api.post('/v1/imports', {'url': url.trim()});
+    Map<String, dynamic> response;
+    try {
+      response = await _post(url);
+    } on ApiError catch (error) {
+      // A server older than this build rejects the unknown field outright.
+      // One retry without the id keeps the app working during a staged
+      // deploy; the only loss is idempotency for that single tap.
+      if (error.status == 422) {
+        response = await _post(url, withRequestId: false);
+      } else {
+        rethrow;
+      }
+    } on ImportCapReached {
+      rethrow;
+    }
     return ImportStart(
       jobId: response['job_id'] as String?,
       shortcode: response['shortcode'] as String? ?? '',
       stage: _stage(response['state'] as String?),
       cached: response['cached'] == true,
       reason: response['reason'] as String?,
+      remaining: (response['remaining'] as num?)?.toInt(),
+      resetAt: DateTime.tryParse('${response['reset_at'] ?? ''}'),
     );
+  }
+
+  Future<Map<String, dynamic>> _post(String url, {bool withRequestId = true}) async {
+    try {
+      return await _api.post('/v1/imports', {
+        'url': url.trim(),
+        // One id per attempt: a retried POST is the same import, not a new one,
+        // so the daily allowance is not spent twice for one tap.
+        if (withRequestId) 'request_id': _uuid.v4(),
+      });
+    } on ApiError catch (error) {
+      if (error.status == 429 || error.reason == 'daily_cap_reached') {
+        throw const ImportCapReached();
+      }
+      rethrow;
+    }
   }
 
   Future<ImportProgress> poll(String jobId) async {
@@ -110,9 +142,34 @@ class ImportService {
     return RecipeContent.fromJson(content);
   }
 
+  /// The inserts that are running right now, by shortcode.
+  ///
+  /// The duplicate scan below is a read, so it cannot stop two callers that read
+  /// "no dish yet" in the same second — and two callers is the normal case: the
+  /// tracker's poller and the open sheet's poller both finish the same job.
+  /// Callers that arrive while an insert is running share its future, so there
+  /// is one read of the content endpoint and one row.
+  final Map<String, Future<Dish?>> _inFlight = {};
+
   /// Turns a cached extraction into a dish in the journal, with the creator
   /// attached to the version. Imports land as `To cook`.
-  Future<Dish?> createDish(String shortcode) async {
+  ///
+  /// Single-flight per shortcode: concurrent callers get the same future.
+  Future<Dish?> createDish(String shortcode) {
+    final running = _inFlight[shortcode];
+    if (running != null) return running;
+
+    // Removed when it settles, failed or not: a stale entry would turn every
+    // later retry into a replay of the first failure. Braces, not an arrow:
+    // the callback must return nothing, or whenComplete would await the entry.
+    final attempt = _createDish(shortcode).whenComplete(() {
+      _inFlight.remove(shortcode);
+    });
+    _inFlight[shortcode] = attempt;
+    return attempt;
+  }
+
+  Future<Dish?> _createDish(String shortcode) async {
     // One reel, one dish. The sheet, the Journal card and a second tap can all
     // ask for the same shortcode within seconds; an existing dish wins.
     for (final dish in await _repository.loadDishes()) {
@@ -212,6 +269,14 @@ class ImportService {
   }
 }
 
+/// The day's imports are spent: a state with a date, not an error.
+class ImportCapReached implements Exception {
+  const ImportCapReached();
+
+  @override
+  String toString() => 'ImportCapReached';
+}
+
 class ImportStart {
   const ImportStart({
     required this.jobId,
@@ -219,6 +284,8 @@ class ImportStart {
     required this.stage,
     required this.cached,
     this.reason,
+    this.remaining,
+    this.resetAt,
   });
 
   final String? jobId;
@@ -226,6 +293,9 @@ class ImportStart {
   final ImportStage stage;
   final bool cached;
   final String? reason;
+  /// Imports left today, when the server said.
+  final int? remaining;
+  final DateTime? resetAt;
 }
 
 class ImportProgress {
@@ -244,53 +314,4 @@ class ImportProgress {
 
   /// The reel's own name, when the server has one. Null until it does.
   final String? title;
-
-  String get label => switch (detail) {
-        // The worker VM sleeps when idle; the first import after a pause waits
-        // for it to boot. It is a stage, not a failure.
-        'starting' => 'Waking the kitchen…',
-        _ => switch (stage) {
-            ImportStage.queued => 'Queued',
-            ImportStage.extracting => switch (detail) {
-                'transcribing' => 'Reading the audio',
-                'structuring' => 'Writing the recipe',
-                'watching' => 'Watching the video',
-                'caption_only' => 'Reading the caption',
-                _ => 'Reading the reel',
-              },
-            ImportStage.ready => 'Ready',
-            ImportStage.failed => 'Could not read this one',
-          },
-      };
-
-  /// The second line, when the wait needs explaining rather than filling.
-  String? get waitingHint => detail == 'starting'
-      ? 'The first one after a pause takes a minute'
-      : null;
 }
-
-/// What a failure reason becomes on screen.
-///
-/// Every reason the contract lists has words, and `timed_out` — the client's own
-/// reason for "I stopped waiting" — is not the same event as the server's
-/// `timeout`. Falling through to the generic line hides the one thing the user
-/// can do about it.
-String importReasonText(String? reason) => switch (reason) {
-      'unsupported_url' => 'That link is not a reel or video we can read',
-      'source_blocked' =>
-        'YouTube is blocking our server right now — try again later or paste the recipe',
-      'timeout' => 'That took too long — try again',
-      'worker_unavailable' =>
-        'The kitchen did not wake up — try again in a minute',
-      'timed_out' =>
-        'Still reading — this can take a few minutes. You can leave this and the dish will be here when it is ready',
-      'gone' => 'That import is no longer on the server — try the link again',
-      'invalid_recipe' => 'We could not find a recipe in that one',
-      'no_audio' => 'That video has nothing to listen to',
-      'no_text' => 'That reel has no caption and no speech we could read',
-      'no_recipe' => 'That video does not show a recipe',
-      'vision_failed' => 'We could not read that video — paste the recipe instead',
-      'taken_down' => 'That recipe was removed',
-      null => 'Could not read this one — paste the recipe instead',
-      _ => 'Could not read this one — paste the recipe instead',
-    };

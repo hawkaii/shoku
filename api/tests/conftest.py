@@ -38,6 +38,7 @@ def settings() -> Settings:
         auth_mode="dev",
         assistant_daily_cap=3,
         pantry_parse_daily_cap=3,
+        import_daily_cap=3,
         breaker_window=20,
         breaker_min_samples=3,
         clock_skew_allowance_seconds=300,

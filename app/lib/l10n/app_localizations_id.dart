@@ -1043,7 +1043,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get importCouldNotStart => 'Kami tidak bisa memulai impor itu';
 
   @override
-  String get importSignIn => 'Masuk dari Kamu untuk mengimpor';
+  String get importSignIn => 'Masuk untuk mengimpor reel ini';
 
   @override
   String get importUnreachable => 'Tidak bisa menghubungi server';
@@ -1752,6 +1752,92 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get dishStopReading => 'Berhenti membaca';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'Masuk untuk memulihkan resep Anda. Resep tersimpan di server, bukan di ponsel ini.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi.';
+
+  @override
+  String get importCapNotice =>
+      'Impor hari ini habis. Kembali besok — atau tambahkan reel dari Dinding, yang sudah dibaca.';
+
+  @override
+  String get importCapWallHint =>
+      'Atau tambahkan satu dari Dinding — sudah dibaca.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pertanyaan tersisa hari ini',
+      zero: 'tidak ada pertanyaan tersisa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'Hapus akun';
+
+  @override
+  String get accountDeleteBody =>
+      'Ini menghapus hidangan, versi, masakan, kulkas, dan foto Anda dari semua perangkat dan dari server. Tidak bisa dibatalkan.';
+
+  @override
+  String get accountDeleteCancel => 'Biarkan';
+
+  @override
+  String get accountDeleteDone => 'Akun dihapus';
+
+  @override
+  String get accountDeleteFailed =>
+      'Akun tidak dapat dihapus. Tidak ada yang berubah.';
+
+  @override
+  String get wallReport => 'Laporkan reel ini';
+
+  @override
+  String get wallReported =>
+      'Dilaporkan. Cukup banyak laporan menghapusnya dari Dinding.';
+
+  @override
+  String get wallReportFailed => 'Tidak dapat melaporkan. Coba lagi.';
+
+  @override
+  String get timerNotificationTitle => 'Timer selesai';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'Langkah $step selesai — kembali ke dapur.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'notifikasi tidak tersedia — timer tetap berjalan selama aplikasi terbuka';
+
+  @override
+  String get importShareNoLink =>
+      'Kiriman itu tidak berisi tautan. Tempel URL reel di bawah.';
+
+  @override
+  String get authPasswordShow => 'Tampilkan sandi';
+
+  @override
+  String get authPasswordHide => 'Sembunyikan sandi';
+
+  @override
+  String get routeErrorTitle => 'Halaman ini tidak ada di sini';
+
+  @override
+  String get routeErrorBody =>
+      'Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.';
+
+  @override
+  String get routeErrorBack => 'Kembali ke jurnal';
 
   @override
   String get handsFree => 'Bebas tangan';

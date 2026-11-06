@@ -20,7 +20,13 @@ def create_import(
     ctx: AppContext = Depends(get_context),
     user: User = Depends(current_user),
 ) -> ImportResponse:
-    result = import_service.start_import(session, ctx.import_deps, uid=user.id, url=payload.url)
+    result = import_service.start_import(
+        session,
+        ctx.import_deps,
+        uid=user.id,
+        url=payload.url,
+        request_id=payload.request_id,
+    )
     # 200 for a cache hit, 202 when work was actually queued.
     response.status_code = status.HTTP_202_ACCEPTED if not result.cached else status.HTTP_200_OK
     return result

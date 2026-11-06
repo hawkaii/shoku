@@ -1049,7 +1049,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get importCouldNotStart => 'ఆ ఇంపోర్ట్ ప్రారంభించలేకపోయాం';
 
   @override
-  String get importSignIn => 'ఇంపోర్ట్ చేయడానికి మీరు లో సైన్ ఇన్ చేయండి';
+  String get importSignIn => 'ఈ రీల్‌ను ఇంపోర్ట్ చేయడానికి సైన్ ఇన్ చేయండి';
 
   @override
   String get importUnreachable => 'సర్వర్‌ను చేరుకోలేకపోయాం';
@@ -1771,6 +1771,92 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get dishStopReading => 'చదవడం ఆపు';
+
+  @override
+  String get cookbookEmptySignedOut =>
+      'మీ రెసిపీలను తిరిగి పొందడానికి సైన్ ఇన్ చేయండి. అవి సర్వర్‌లో ఉన్నాయి, ఈ ఫోన్‌లో కాదు.';
+
+  @override
+  String get cookbookEmptyOffline =>
+      'మీ రెసిపీలు లోడ్ కాలేదు. కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get importCapNotice =>
+      'ఈరోజు ఇంపోర్ట్‌లు అయిపోయాయి. అవి రేపు తిరిగి వస్తాయి — లేదా వాల్ నుండి ఒక రీల్‌ను జోడించండి, అది ఇప్పటికే చదవబడింది.';
+
+  @override
+  String get importCapWallHint =>
+      'లేదా వాల్ నుండి ఒకటి జోడించండి — అవి ఇప్పటికే చదవబడ్డాయి.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ఈరోజు $count ప్రశ్నలు మిగిలాయి',
+      one: 'ఈరోజు 1 ప్రశ్న మిగిలింది',
+      zero: 'ఈరోజు ప్రశ్నలు లేవు',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accountDelete => 'ఖాతా తొలగించు';
+
+  @override
+  String get accountDeleteBody =>
+      'ఇది మీ వంటకాలు, వెర్షన్‌లు, వంటలు, ఫ్రిడ్జ్ మరియు ఫోటోలను అన్ని పరికరాల నుండి మరియు సర్వర్ నుండి తొలగిస్తుంది. ఇది వెనక్కి తీసుకోలేరు.';
+
+  @override
+  String get accountDeleteCancel => 'ఉంచు';
+
+  @override
+  String get accountDeleteDone => 'ఖాతా తొలగించబడింది';
+
+  @override
+  String get accountDeleteFailed => 'ఖాతాను తొలగించలేకపోయాం. ఏమీ మారలేదు.';
+
+  @override
+  String get wallReport => 'ఈ రీల్‌ను నివేదించండి';
+
+  @override
+  String get wallReported =>
+      'నివేదించబడింది. సరిపడా నివేదికలతో ఇది వాల్ నుండి తొలగిపోతుంది.';
+
+  @override
+  String get wallReportFailed => 'నివేదించలేకపోయాం. మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get timerNotificationTitle => 'టైమర్ ముగిసింది';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'దశ $step పూర్తయింది — వంటగదికి తిరిగి రండి.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'హెచ్చరికలు అందుబాటులో లేవు — యాప్ తెరిచి ఉన్నప్పుడు టైమర్ పనిచేస్తుంది';
+
+  @override
+  String get importShareNoLink =>
+      'ఆ షేర్‌లో లింక్ లేదు. క్రింద రీల్ URL పేస్ట్ చేయండి.';
+
+  @override
+  String get authPasswordShow => 'పాస్‌వర్డ్ చూపించు';
+
+  @override
+  String get authPasswordHide => 'పాస్‌వర్డ్ దాచు';
+
+  @override
+  String get routeErrorTitle => 'ఈ పేజీ ఇక్కడ లేదు';
+
+  @override
+  String get routeErrorBody =>
+      'లింక్ పాతది లేదా తప్పుగా రాసినది కావచ్చు. మీ జర్నల్ ఉన్న చోటే ఉంది.';
+
+  @override
+  String get routeErrorBack => 'జర్నల్కు తిరిగి వెళ్లండి';
 
   @override
   String get handsFree => 'చేతుల్లేని';

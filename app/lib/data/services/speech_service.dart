@@ -30,6 +30,8 @@ class SpeechService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_key) ?? false;
     } catch (_) {
+      // Optional platform work: no prefs store (web preview) means the toggle
+      // starts off, which is the shipped default anyway.
       return false;
     }
   }
@@ -39,7 +41,8 @@ class SpeechService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_key, enabled);
     } catch (_) {
-      // A toggle that does not persist still works for this session.
+      // Optional platform work: a prefs store that cannot write costs a repeat
+      // of the setting, not the setting.
     }
   }
 
@@ -52,7 +55,8 @@ class SpeechService {
       speaking.value = true;
       await _tts.speak(text);
     } catch (_) {
-      // No engine here (web, a silent phone): the text is still on screen.
+      // Optional platform work: no engine here (web, a silent phone). The text
+      // is still on screen, so the failure is the voice, not the recipe.
       speaking.value = false;
     }
   }
@@ -60,7 +64,10 @@ class SpeechService {
   Future<void> stop() async {
     try {
       await _tts.stop();
-    } catch (_) {}
+    } catch (_) {
+      // Optional platform work: no TTS engine means nothing was speaking, so
+      // there is nothing to stop. The flag is corrected below regardless.
+    }
     speaking.value = false;
   }
 }

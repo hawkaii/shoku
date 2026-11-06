@@ -35,7 +35,14 @@ from .assistant import (
 )
 from .domain.breaker import CircuitBreaker
 from .domain.clock import Clock, SystemClock
-from .domain.worker_pool import GceWorkerPool, NoWorkerPool, WorkerPool
+from .domain.worker_pool import (
+    AlwaysWakeGate,
+    GceWorkerPool,
+    NoWorkerPool,
+    RedisWakeGate,
+    WorkerPool,
+    WorkerWaker,
+)
 from .pool import Broker, RedisRegistry
 from .imports.interfaces import (
     Extractor,
@@ -70,6 +77,9 @@ class AppContext:
     breaker: CircuitBreaker
     #: Starts the worker VM when a job is queued, and stops it when idle.
     worker_pool: "WorkerPool | NoWorkerPool"
+    #: The debounced decision to wake it. Kept alongside the pool because a
+    #: deployment with a broker publishes demand instead of waking directly.
+    waker: WorkerWaker
     #: Reads a silent reel from frames. None when vision is off or unconfigured,
     #: which turns "no text" into a clear failure instead of a junk dish.
     vision: "VisionStructurer | None" = None
@@ -88,9 +98,13 @@ class AppContext:
         return ImportDeps(
             queue=self.queue,
             clock=self.clock,
+            # Both paths are kept: a broker deployment publishes demand and
+            # never calls GCE; a waker deployment wakes the VM itself.
             registry=self.pool_registry,
             pool=self.settings.pool_name,
             tenant=self.settings.pool_tenant,
+            waker=self.waker,
+            daily_cap=self.settings.import_daily_cap,
             unclaimed_timeout_seconds=float(
                 self.settings.worker_unclaimed_timeout_seconds
             ),
@@ -197,6 +211,16 @@ def build_context(
         )
     else:
         worker_pool = NoWorkerPool()
+    # The gate lives in Redis because it is the one store both the API and the
+    # worker can see; without it every import would ask for a boot.
+    gate = (
+        RedisWakeGate(settings.redis_url)
+        if settings.queue_backend == "redis"
+        else AlwaysWakeGate()
+    )
+    waker = WorkerWaker(
+        worker_pool, gate, window=settings.worker_wake_debounce_seconds
+    )
 
     pool_registry: RedisRegistry | None = None
     pool_broker: Broker | None = None
@@ -248,6 +272,7 @@ def build_context(
         pool_broker=pool_broker,
         clock=SystemClock(),
         worker_pool=worker_pool,
+        waker=waker,
         breaker=CircuitBreaker(
             window=settings.breaker_window,
             threshold=settings.breaker_threshold,
