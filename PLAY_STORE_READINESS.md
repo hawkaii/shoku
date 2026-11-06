@@ -18,7 +18,7 @@ can be argued with rather than nodded at.
 | 8 | **Content rating** | **TODO** | IARC questionnaire; the public feed means declaring user-generated content. | Owner |
 | 9 | **UGC + IP policy** | **PASS (code)** | Every Wall card has **Report**; `feed_report_threshold` (3 distinct users) unshares it; `DELETE /v1/content/{shortcode}` is the operator queue. Takedown contact lives in the terms page. | Backend |
 | 10 | **Closed test** | **CALENDAR BLOCKER** | Personal accounts need 12 testers opted in for 14 continuous days. Starts when an AAB is uploadable — it is now. | Owner |
-| 11 | **Store listing assets** | **TODO** | 512×512 icon, 1024×500 feature graphic, phone screenshots, short + full description. | Designer |
+| 11 | **Store listing assets** | **PASS (produced)** | Icon, feature graphic and four 1080×1920 screenshots in `docs/play/`, with the listing copy, data-safety answers, content-rating answers and reviewer instructions in `docs/play/README.md`. Uploading them is console work. | Backend |
 
 ## Checks that PASS
 
