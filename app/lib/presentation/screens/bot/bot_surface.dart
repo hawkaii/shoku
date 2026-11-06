@@ -15,6 +15,7 @@ import '../../state/pantry_providers.dart';
 import '../assistant/recipe_chat_sheet.dart';
 import '../../widgets/kit/bot_mark.dart';
 import '../../widgets/kit/foundation.dart';
+import '../profile/sign_in_sheet.dart';
 import '../wall/feed_detail_sheet.dart';
 import 'bot_scope.dart';
 import 'scope_switcher.dart';
@@ -57,6 +58,11 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
   final _scroll = ScrollController();
   BotSurfaceMode _mode = BotSurfaceMode.normal;
   double _drag = 0;
+
+  /// The sign-in prompt is a door: one sheet at a time, and the thread knows
+  /// once the door has been walked through.
+  bool _signingIn = false;
+  bool _signedIn = false;
 
   @override
   void initState() {
@@ -110,11 +116,65 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
     return true;
   }
 
+  static bool _isSignInNotice(BotTurn turn) =>
+      turn.kind == BotTurnKind.notice && turn.text == 'signin';
+
+  /// The question that met the 401: the last thing the cook said. Answering it
+  /// is what signing in is for.
+  String? _pendingQuestion() {
+    for (final turn in ref.read(botControllerProvider).turns.reversed) {
+      if (turn.kind == BotTurnKind.mine && turn.text.trim().isNotEmpty) {
+        return turn.text;
+      }
+    }
+    return null;
+  }
+
+  /// The 401 prompt is a door: it opens the sheet, and a cook who signs in gets
+  /// the pending question sent again. With nothing pending the composer is
+  /// already enabled, and the prompt becomes a receipt rather than a dead end.
+  Future<void> _signIn() async {
+    if (_signingIn) return;
+    final pending = _pendingQuestion();
+    setState(() => _signingIn = true);
+    final signedIn = await showSignInSheet(context);
+    if (!mounted) return;
+    setState(() {
+      _signingIn = false;
+      _signedIn = signedIn;
+    });
+    if (!signedIn || pending == null) return;
+    ref.read(botControllerProvider.notifier).send(pending);
+    _scrollToLatest();
+  }
+
+  /// The retry repeats a question already in the thread. Once it has an answer,
+  /// the copy behind the prompt is noise: keep the retry, drop the original.
+  List<BotTurn> _visibleTurns(List<BotTurn> turns) {
+    if (!_signedIn) return turns;
+    final visible = <BotTurn>[];
+    for (var i = 0; i < turns.length; i++) {
+      final turn = turns[i];
+      final next = i + 1 < turns.length ? turns[i + 1] : null;
+      final precedesPrompt = next != null && _isSignInNotice(next);
+      if (turn.kind == BotTurnKind.mine && precedesPrompt) continue;
+      visible.add(turn);
+    }
+    return visible;
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final state = ref.watch(botControllerProvider);
     final offline = ref.watch(botOfflineProvider);
+    // A new prompt means the last sign-in did not stick, so it must be a door
+    // again rather than a receipt.
+    ref.listen(botControllerProvider, (previous, next) {
+      final before = previous?.turns.where(_isSignInNotice).length ?? 0;
+      final after = next.turns.where(_isSignInNotice).length;
+      if (_signedIn && after > before) setState(() => _signedIn = false);
+    });
     final fraction = switch (_mode) {
       BotSurfaceMode.mini => 0.24,
       BotSurfaceMode.tall => 0.92,
@@ -309,7 +369,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                   style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
             ),
           ),
-        for (final turn in state.turns.reversed) _turn(context, turn),
+        for (final turn in _visibleTurns(state.turns).reversed)
+          _turn(context, turn),
         // Reversed list: the last child is at the top. The starters are
         // written in reading order, so reverse them to keep it.
         if (state.turns.isEmpty && !state.thinking) ...[
@@ -389,6 +450,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
           ),
         );
       case BotTurnKind.notice:
+        if (_isSignInNotice(turn)) return _signInNotice(context);
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
           child: Text(
@@ -398,11 +460,9 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                     ? l10n.botOfflineNotice
                     : turn.text == 'server'
                         ? l10n.botServerNotice
-                        : turn.text == 'signin'
-                            ? l10n.botSignInNotice
-                            : turn.text == 'added'
-                                ? l10n.botAddedToFridge(turn.count ?? 0)
-                                : turn.text,
+                        : turn.text == 'added'
+                            ? l10n.botAddedToFridge(turn.count ?? 0)
+                            : turn.text,
             key: const ValueKey('bot-notice'),
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
@@ -453,6 +513,60 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
           ),
         );
     }
+  }
+
+  /// The signed-out prompt. Tappable, because a sentence that tells someone to
+  /// sign in and cannot be tapped is the dead end this fixes.
+  Widget _signInNotice(BuildContext context) {
+    final c = context.colors;
+    final l10n = context.l10n;
+    if (_signedIn) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+        child: Row(
+          children: [
+            Icon(Icons.check, size: 13, color: c.ready),
+            const SizedBox(width: 6),
+            Text(
+              l10n.authSignedIn,
+              key: const ValueKey('bot-notice-signed-in'),
+              style: ShokuType.bodySmall.copyWith(color: c.ready),
+            ),
+          ],
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+      child: GestureDetector(
+        key: const ValueKey('bot-notice-signin'),
+        onTap: _signingIn ? null : _signIn,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+            border: Border.all(color: c.accent),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.login, size: 14, color: c.accent),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  l10n.botSignInNotice,
+                  key: const ValueKey('bot-notice'),
+                  style: ShokuType.bodySmall.copyWith(color: c.ink),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _suggestions(BuildContext context, List<BotSuggestion> cards) {
