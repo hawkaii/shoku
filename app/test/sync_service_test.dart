@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
+import 'package:food_finder/data/db/pantry_repository.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/sync/sync_repository.dart';
@@ -63,10 +64,16 @@ void main() {
         if (request.url.path.endsWith('/push')) {
           final body = jsonDecode(request.body) as Map<String, dynamic>;
           pushedBodies.add(body);
-          // Accept everything, the way the server does on a clean push.
+          // Accept every table, the way the server does on a clean push.
           return http.Response(
             jsonEncode({
-              for (final table in ['dishes', 'versions', 'cook_logs'])
+              for (final table in const [
+                'dishes',
+                'versions',
+                'cook_logs',
+                'photos',
+                'pantry_items',
+              ])
                 table: [
                   for (final row in (body[table] as List))
                     {'id': (row as Map)['id'], 'result': 'accepted'},
@@ -79,6 +86,44 @@ void main() {
       }),
     );
   }
+
+  /// A pull that answers one queued page at a time, recording the cursor each
+  /// request carried. The last page is repeated if the client asks again, which
+  /// is how "the server never stops paging" is spelled here.
+  ApiClient paged({
+    required List<Map<String, dynamic>> pages,
+    required List<String?> askedCursors,
+  }) {
+    var index = 0;
+    return ApiClient(
+      baseUrl: 'https://api.test',
+      tokenProvider: () => 'jwt',
+      httpClient: MockClient((request) async {
+        askedCursors.add(
+          (jsonDecode(request.body) as Map<String, dynamic>)['cursor'] as String?,
+        );
+        final page = pages[index < pages.length ? index : pages.length - 1];
+        index++;
+        return http.Response(jsonEncode(page), 200);
+      }),
+    );
+  }
+
+  Map<String, dynamic> remoteDish(String id, String title) => {
+        'id': id,
+        'title': title,
+        'subtitle': '',
+        'cover_url': '',
+        'source_handle': '',
+        'status': 'toCook',
+        'minutes': 20,
+        'baseline_kcal': 0,
+        'baseline_protein': 0,
+        'steps': const ['Fry'],
+        'created_at': '2026-02-01T10:00:00Z',
+        'updated_at': '2026-02-01T10:00:00Z',
+        'deleted_at': null,
+      };
 
   test('pushes dirty rows and marks them clean when accepted', () async {
     await local.seed([_dish()]);
@@ -360,5 +405,154 @@ void main() {
     final dish = (await local.loadDishes())
         .firstWhere((d) => d.id == 'remote-9');
     expect(dish.versions.single.stepIngredients, isNull);
+  });
+
+  group('marking a push clean', () {
+    /// One dirty row in every table the wire has: a dish, the version and cook
+    /// a `commitCook` appends, the photo projected from that cook, and a pantry
+    /// item. Anything the server accepts must stop being pushed.
+    Future<void> makeEveryTableDirty() async {
+      await local.seed([_dish()]);
+      await local.setStatus('d1', DishStatus.signature);
+      await local.commitCook(
+        dishId: 'd1',
+        mood: CookMood.comfort,
+        rating: 5,
+        note: 'good',
+        changes: const ['more garlic'],
+        photoKey: 'photos/debrief.jpg',
+      );
+      await PantryRepository(db).add(name: 'rice', quantity: 2);
+    }
+
+    test('an accepted push clears all five tables, pantry and photos included',
+        () async {
+      await makeEveryTableDirty();
+      expect(await sync.dirtyCount(), 5,
+          reason: 'one dirty row in each of dishes, versions, cook_logs, '
+              'photos and pantry_items');
+
+      await SyncService(repository: sync, api: client()).sync();
+
+      final body = pushedBodies.single;
+      expect(body['pantry_items'], hasLength(1),
+          reason: 'the pantry rides in the same push');
+      expect(body['photos'], hasLength(1),
+          reason: 'a cook with a photo_key projects one photo row');
+
+      expect(await sync.dirtyCount(), 0,
+          reason: 'a row the server accepted must never be pushed again');
+    });
+
+    test('a second pass after a clean push sends no push at all', () async {
+      await makeEveryTableDirty();
+      await SyncService(repository: sync, api: client()).sync();
+      expect(pushedBodies, hasLength(1));
+
+      await SyncService(repository: sync, api: client()).sync();
+
+      expect(pushedBodies, hasLength(1),
+          reason: 'nothing is dirty, so there is nothing to post');
+      expect(await sync.dirtyCount(), 0);
+    });
+  });
+
+  group('following every page', () {
+    test('has_more is followed until false, and the cursor lands on read rows',
+        () async {
+      final asked = <String?>[];
+      final progress = <SyncProgress>[];
+      final api = paged(
+        askedCursors: asked,
+        pages: [
+          {
+            'dishes': [remoteDish('page-1', 'Page one')],
+            'versions': <Map<String, dynamic>>[],
+            'cook_logs': <Map<String, dynamic>>[],
+            'cursor': 'c1',
+            'has_more': true,
+          },
+          {
+            'dishes': [remoteDish('page-2', 'Page two')],
+            'versions': <Map<String, dynamic>>[],
+            'cook_logs': <Map<String, dynamic>>[],
+            'cursor': null,
+            'has_more': false,
+          },
+        ],
+      );
+
+      final outcome = await SyncService(repository: sync, api: api)
+          .sync(onProgress: progress.add);
+
+      expect(
+        (await local.loadDishes()).map((d) => d.title),
+        containsAll(['Page one', 'Page two']),
+        reason: 'the page after the first one is not optional',
+      );
+      expect(asked, [null, 'c1'],
+          reason: 'the second request resumes where the first stopped');
+      expect(outcome.pages, 2);
+      expect(outcome.pulled, 2);
+      expect(progress.map((p) => p.pages), [1, 2],
+          reason: 'progress is reported per page, not once at the end');
+      expect(await sync.readCursor(), 'c1',
+          reason: 'the last cursor the server minted still points at rows the '
+              'client has actually read');
+    });
+
+    test('a server that always says has_more fails at the cap and keeps the cursor',
+        () async {
+      final asked = <String?>[];
+      final api = paged(
+        askedCursors: asked,
+        pages: [
+          {
+            'dishes': [remoteDish('endless', 'Endless')],
+            'versions': <Map<String, dynamic>>[],
+            'cook_logs': <Map<String, dynamic>>[],
+            'cursor': 'c-forever',
+            'has_more': true,
+          },
+        ],
+      );
+
+      await expectLater(
+        SyncService(repository: sync, api: api, maxPages: 3).sync(),
+        throwsA(isA<SyncPageLimitExceeded>()),
+        reason: 'a bound that returns quietly is the silent stop again',
+      );
+
+      expect(asked, hasLength(3));
+      expect(await sync.readCursor(), isNull,
+          reason: 'no cursor may be written past rows nobody has read');
+      expect(await local.loadDishes(), hasLength(1),
+          reason: 'the rows that did arrive are kept; the merge is idempotent');
+    });
+
+    test('a page that outlives the clock fails the same way', () async {
+      final asked = <String?>[];
+      final api = paged(
+        askedCursors: asked,
+        pages: [
+          {
+            'dishes': [remoteDish('slow', 'Slow')],
+            'versions': <Map<String, dynamic>>[],
+            'cook_logs': <Map<String, dynamic>>[],
+            'cursor': 'c-slow',
+            'has_more': true,
+          },
+        ],
+      );
+
+      await expectLater(
+        SyncService(repository: sync, api: api, pageTimeLimit: Duration.zero)
+            .sync(),
+        throwsA(isA<SyncPageLimitExceeded>()),
+      );
+
+      expect(asked, hasLength(1));
+      expect(await sync.readCursor(), isNull);
+    });
   });
 }
