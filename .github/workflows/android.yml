@@ -25,6 +25,11 @@ on:
 
 permissions:
   contents: write
+  # The changelog step opens a PR instead of pushing to a protected main. That
+  # needs this scope; without it the step fails with "Resource not accessible by
+  # integration (createPullRequest)" and, because the step is continue-on-error,
+  # the changelog would stop updating without turning the release red.
+  pull-requests: write
 
 # Let a release finish rather than leaving a half-published tag behind.
 concurrency:
