@@ -3,6 +3,15 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.29.5] — 2026-11-06
+
+### Chores
+- Wiki.gradientdescent.shoku *(android)* — [`7e87a1c`](https://github.com/hawkaii/food-finder-app/commit/7e87a1c49abb25a149c13d982c29084260318a75)
+
+### Docs
+- The account deletion page, served where it cannot drift — [`8944e1c`](https://github.com/hawkaii/food-finder-app/commit/8944e1c9467254cab608bdbfdf148f85ba15efcb)
+- V1.29.4 [skip ci] *(changelog)* — [`ae8d144`](https://github.com/hawkaii/food-finder-app/commit/ae8d144b400101e2ee6a8baa3dc20506c1310a7c)
+
 ## [1.29.4] — 2026-11-06
 
 ### Added
