@@ -16,10 +16,9 @@ import 'dart:math' as math;
 /// The remainder is derived from those on every read, so backgrounding, a locked
 /// screen and a cold start all agree with each other.
 ///
-/// **It will not alert you while the phone is locked.** There is no local
-/// notification and no exact-alarm permission — that decision is still open, and
-/// this class does not pretend otherwise. The clock is honest the moment the app
-/// is on screen again; it is silent while it is not.
+/// This class does not ring: the alert is a local notification scheduled
+/// alongside it by `TimerAlerts`, which is what rings when the screen is off. The
+/// clock here is still the truth, and it is what the cook sees on return.
 class CookTimer {
   const CookTimer({
     required this.dishId,

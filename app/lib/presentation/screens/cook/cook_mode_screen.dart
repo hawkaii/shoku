@@ -10,6 +10,7 @@ import '../../../core/theme/shoku_theme.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/models/cook_timer.dart';
 import '../../../data/services/speech_service.dart';
+import '../../../data/services/timer_alerts.dart';
 import '../../state/cook_timer_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
@@ -72,7 +73,11 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   /// the screen was off, the notification rang and the card catches up here.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) _pulse();
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    _pulse();
+    // A permission granted in Settings while we were away takes effect now: the
+    // store re-reads it and re-creates the running timer's alarm to match.
+    unawaited(ref.read(cookTimerProvider.notifier).refreshAlertPermission());
   }
 
   /// Keeps at most one ticker alive, and only while there is something to watch.
@@ -109,7 +114,25 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
           versionId: versionId,
           stepIndex: _step,
           duration: Duration(minutes: minutes),
+          copy: _alertCopyFor(_step),
         );
+  }
+
+  /// The notification's words, in the cook's language. Resolved here because the
+  /// store has no `BuildContext`, and the app ships ten locales.
+  TimerAlertCopy _alertCopyFor(int stepIndex) {
+    final l10n = context.l10n;
+    return TimerAlertCopy(
+      title: l10n.timerNotificationTitle,
+      // The body counts steps from one; the index counts from zero.
+      body: l10n.timerNotificationBody(stepIndex + 1),
+    );
+  }
+
+  void _resumeTimer() {
+    // The timer knows which step it belongs to; the page may have moved on.
+    final step = ref.read(cookTimerProvider)?.stepIndex ?? _step;
+    ref.read(cookTimerProvider.notifier).resume(copy: _alertCopyFor(step));
   }
 
   /// A timer that survived a kill belongs to a step, so reopening the screen
@@ -403,7 +426,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                         _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
                     onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),
                     onPause: () => ref.read(cookTimerProvider.notifier).pause(),
-                    onResume: () => ref.read(cookTimerProvider.notifier).resume(),
+                    onResume: _resumeTimer,
                     onStop: () => ref.read(cookTimerProvider.notifier).stop(),
                   ),
                 ),

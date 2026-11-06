@@ -8,6 +8,12 @@ import 'package:food_finder/presentation/state/cook_timer_providers.dart';
 
 import 'support/fake_timer_alerts.dart';
 
+/// The words the screen would pass in. The store only carries them to the alert.
+const _copy = TimerAlertCopy(
+  title: 'Timer is up',
+  body: 'Step 3 is done — back to the kitchen.',
+);
+
 void main() {
   late AppDatabase db;
   final start = DateTime(2026, 1, 1, 19, 0);
@@ -41,6 +47,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 2,
       duration: const Duration(minutes: 10),
+      copy: _copy,
       now: start,
     );
 
@@ -62,6 +69,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 0,
       duration: const Duration(minutes: 10),
+      copy: _copy,
       now: start,
     );
     await before.pause(now: start.add(const Duration(minutes: 1)));
@@ -81,12 +89,16 @@ void main() {
       versionId: 'v1',
       stepIndex: 0,
       duration: const Duration(minutes: 10),
+      copy: _copy,
       now: start,
     );
     await before.pause(now: start.add(const Duration(minutes: 1)));
 
     final after = await open();
-    await after.resume(now: start.add(const Duration(minutes: 5)));
+    await after.resume(
+      copy: _copy,
+      now: start.add(const Duration(minutes: 5)),
+    );
 
     expect(after.state!.isPaused, isFalse);
     expect(after.state!.remainingMsAt(start.add(const Duration(minutes: 6))),
@@ -100,6 +112,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 1,
       duration: const Duration(minutes: 3),
+      copy: _copy,
       now: start,
     );
     await before.stop();
@@ -116,6 +129,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 4,
       duration: const Duration(minutes: 10),
+      copy: _copy,
       now: start,
     );
 
@@ -148,6 +162,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 0,
       duration: const Duration(days: 40),
+      copy: _copy,
       now: start,
     );
     expect(store.state!.duration, CookTimer.maxDuration);
@@ -157,6 +172,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 0,
       duration: Duration.zero,
+      copy: _copy,
       now: start,
     );
     expect(store.state!.duration, CookTimer.minDuration);
@@ -169,6 +185,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 0,
       duration: const Duration(minutes: 2),
+      copy: _copy,
       now: start,
     );
     await store.start(
@@ -176,6 +193,7 @@ void main() {
       versionId: 'v1',
       stepIndex: 3,
       duration: const Duration(minutes: 7),
+      copy: _copy,
       now: start,
     );
 
@@ -191,6 +209,7 @@ void main() {
         versionId: 'v1',
         stepIndex: 2,
         duration: const Duration(minutes: 10),
+        copy: _copy,
         now: start,
       );
       return store;
@@ -223,7 +242,10 @@ void main() {
       await store.pause(now: start.add(const Duration(minutes: 1)));
       expect(alerts.cancelled, [store.state!.notificationId]);
 
-      await store.resume(now: start.add(const Duration(minutes: 2)));
+      await store.resume(
+        copy: _copy,
+        now: start.add(const Duration(minutes: 2)),
+      );
       expect(alerts.scheduled, hasLength(2));
     });
 
@@ -260,6 +282,7 @@ void main() {
         versionId: 'v1',
         stepIndex: 3,
         duration: const Duration(minutes: 2),
+        copy: _copy,
         now: start,
       );
 
@@ -286,6 +309,7 @@ void main() {
         versionId: 'v1',
         stepIndex: 0,
         duration: const Duration(minutes: 5),
+        copy: _copy,
         now: start,
       );
 
@@ -306,6 +330,7 @@ void main() {
         versionId: 'v1',
         stepIndex: 0,
         duration: const Duration(minutes: 5),
+        copy: _copy,
         now: start,
       );
 
@@ -324,6 +349,114 @@ void main() {
       expect(alerts.cancelled, contains(store.state!.notificationId));
       expect(store.state, isNotNull,
           reason: 'the card still says the timer is done');
+    });
+
+    test('the screen\'s words are what the notification says', () async {
+      final alerts = FakeTimerAlerts();
+      await started(alerts);
+
+      expect(alerts.scheduledCopies.single.title, _copy.title);
+      expect(alerts.scheduledCopies.single.body, _copy.body);
+    });
+
+    test('a schedule that fails is reported, and the timer keeps running',
+        () async {
+      final alerts = FakeTimerAlerts(scheduleSucceeds: false);
+      var reported = TimerAlertPermission.unknown;
+      final store = await openWithAlerts(
+        alerts,
+        onPermission: (p) => reported = p,
+      );
+
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 0,
+        duration: const Duration(minutes: 5),
+        copy: _copy,
+        now: start,
+      );
+
+      expect(alerts.scheduled, isEmpty);
+      expect(reported, TimerAlertPermission.unavailable,
+          reason: 'a silent failure is the bug this ticket is about');
+      expect(store.state, isNotNull);
+      expect(store.state!.remainingMsAt(start), 5 * 60 * 1000);
+    });
+  });
+
+  group('a permission that changed while the app was away', () {
+    /// These timers start at the real clock: a refresh only re-arms a timer that
+    /// has not already run out.
+    Future<CookTimerStore> running(
+      FakeTimerAlerts alerts, {
+      void Function(TimerAlertPermission)? onPermission,
+    }) async {
+      final store = await openWithAlerts(alerts, onPermission: onPermission);
+      await store.start(
+        dishId: 'd1',
+        versionId: 'v1',
+        stepIndex: 2,
+        duration: const Duration(minutes: 10),
+        copy: _copy,
+        now: DateTime.now(),
+      );
+      return store;
+    }
+
+    test('a grant made in Settings takes effect on resume, without a restart',
+        () async {
+      final alerts =
+          FakeTimerAlerts(permission: TimerAlertPermission.inexact);
+      var reported = TimerAlertPermission.unknown;
+      final store = await running(alerts, onPermission: (p) => reported = p);
+      expect(alerts.scheduledExact.single, isFalse);
+
+      // The cook allowed exact alarms in Settings and came back.
+      alerts.grant(TimerAlertPermission.allowed);
+      await store.refreshAlertPermission();
+
+      expect(reported, TimerAlertPermission.allowed);
+      expect(alerts.scheduledExact.last, isTrue,
+          reason: 'the queued alarm has to match what the card now claims');
+      expect(alerts.permissionAsks, 1,
+          reason: 'a resume reads the permission, it does not ask again');
+    });
+
+    test('a permission revoked while away cancels the queued alarm', () async {
+      final alerts = FakeTimerAlerts();
+      var reported = TimerAlertPermission.unknown;
+      final store = await running(alerts, onPermission: (p) => reported = p);
+
+      alerts.grant(TimerAlertPermission.denied);
+      await store.refreshAlertPermission();
+
+      expect(reported, TimerAlertPermission.denied);
+      expect(alerts.cancelled, contains(store.state!.notificationId));
+      expect(store.state, isNotNull, reason: 'the in-app timer still runs');
+    });
+
+    test('an unchanged permission is not re-scheduled', () async {
+      final alerts = FakeTimerAlerts();
+      final store = await running(alerts);
+
+      await store.refreshAlertPermission();
+
+      expect(alerts.permissionReads, 1);
+      expect(alerts.scheduled, hasLength(1));
+    });
+
+    test('nothing is reported before the first timer has asked', () async {
+      final alerts = FakeTimerAlerts(current: TimerAlertPermission.unknown);
+      var reported = false;
+      final store = await openWithAlerts(
+        alerts,
+        onPermission: (_) => reported = true,
+      );
+
+      await store.refreshAlertPermission();
+
+      expect(reported, isFalse, reason: 'a guess painted on the card is noise');
     });
   });
 }
