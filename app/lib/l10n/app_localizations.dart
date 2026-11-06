@@ -2633,6 +2633,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide password'**
   String get authPasswordHide;
+
+  /// Title of the in-app screen shown when a link or path does not match a route, instead of the router's own error page.
+  ///
+  /// In en, this message translates to:
+  /// **'This page isn’t here'**
+  String get routeErrorTitle;
+
+  /// Body of the route error screen; tells the user their data is safe.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may be old or mistyped. Your journal is still where it was.'**
+  String get routeErrorBody;
+
+  /// Button on the route error screen that returns to the journal tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the journal'**
+  String get routeErrorBack;
 }
 
 class _AppLocalizationsDelegate

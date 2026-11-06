@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "अलर्ट उपलब्ध नाहीत — ॲप उघडे असताना टाइमर चालू राहतो",
   "importShareNoLink": "त्या शेअरमध्ये लिंक नव्हता. खाली रीलचा URL पेस्ट करा.",
   "authPasswordShow": "पासवर्ड दाखवा",
-  "authPasswordHide": "पासवर्ड लपवा"
+  "authPasswordHide": "पासवर्ड लपवा",
+  "routeErrorTitle": "हे पान इथे नाही",
+  "routeErrorBody": "लिंक जुना किंवा चुकीचा लिहिलेला असू शकतो. तुमची जर्नल जिथे होती तिथेच आहे.",
+  "routeErrorBack": "जर्नलवर परत जा"
 }

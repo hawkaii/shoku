@@ -1863,4 +1863,14 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'கடவுச்சொல்லை மறை';
+
+  @override
+  String get routeErrorTitle => 'இந்தப் பக்கம் இங்கே இல்லை';
+
+  @override
+  String get routeErrorBody =>
+      'இணைப்பு பழையதாகவோ தவறாக எழுதப்பட்டதாகவோ இருக்கலாம். உங்கள் ஜர்னல் இருந்த இடத்திலேயே உள்ளது.';
+
+  @override
+  String get routeErrorBack => 'ஜர்னலுக்குத் திரும்பு';
 }

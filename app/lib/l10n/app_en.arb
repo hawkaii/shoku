@@ -1092,5 +1092,11 @@
   "authPasswordShow": "Show password",
   "@authPasswordShow": {"description": "Accessibility label for the control that reveals the password field."},
   "authPasswordHide": "Hide password",
-  "@authPasswordHide": {"description": "Accessibility label for the control that hides the password field."}
+  "@authPasswordHide": {"description": "Accessibility label for the control that hides the password field."},
+  "routeErrorTitle": "This page isn’t here",
+  "@routeErrorTitle": {"description": "Title of the in-app screen shown when a link or path does not match a route, instead of the router's own error page."},
+  "routeErrorBody": "The link may be old or mistyped. Your journal is still where it was.",
+  "@routeErrorBody": {"description": "Body of the route error screen; tells the user their data is safe."},
+  "routeErrorBack": "Back to the journal",
+  "@routeErrorBack": {"description": "Button on the route error screen that returns to the journal tab."}
 }

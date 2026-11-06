@@ -1840,4 +1840,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'Hide password';
+
+  @override
+  String get routeErrorTitle => 'This page isn’t here';
+
+  @override
+  String get routeErrorBody =>
+      'The link may be old or mistyped. Your journal is still where it was.';
+
+  @override
+  String get routeErrorBack => 'Back to the journal';
 }

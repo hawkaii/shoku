@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "les alertes ne sont pas disponibles — le minuteur fonctionne tant que l’app est ouverte",
   "importShareNoLink": "Ce partage ne contenait pas de lien. Collez l’URL du reel ci-dessous.",
   "authPasswordShow": "Afficher le mot de passe",
-  "authPasswordHide": "Masquer le mot de passe"
+  "authPasswordHide": "Masquer le mot de passe",
+  "routeErrorTitle": "Cette page n’est pas ici",
+  "routeErrorBody": "Le lien est peut-être ancien ou mal saisi. Votre journal est toujours là où il était.",
+  "routeErrorBack": "Retour au journal"
 }

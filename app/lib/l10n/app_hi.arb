@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "अलर्ट उपलब्ध नहीं हैं — ऐप खुला रहने पर टाइमर चलता रहेगा",
   "importShareNoLink": "उस शेयर में लिंक नहीं था। नीचे रील का URL पेस्ट करें।",
   "authPasswordShow": "पासवर्ड दिखाएँ",
-  "authPasswordHide": "पासवर्ड छिपाएँ"
+  "authPasswordHide": "पासवर्ड छिपाएँ",
+  "routeErrorTitle": "यह पेज यहाँ नहीं है",
+  "routeErrorBody": "लिंक पुराना या गलत लिखा हो सकता है। आपकी जर्नल वहीं है जहाँ थी।",
+  "routeErrorBack": "जर्नल पर वापस जाएँ"
 }

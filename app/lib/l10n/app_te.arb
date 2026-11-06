@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "హెచ్చరికలు అందుబాటులో లేవు — యాప్ తెరిచి ఉన్నప్పుడు టైమర్ పనిచేస్తుంది",
   "importShareNoLink": "ఆ షేర్‌లో లింక్ లేదు. క్రింద రీల్ URL పేస్ట్ చేయండి.",
   "authPasswordShow": "పాస్‌వర్డ్ చూపించు",
-  "authPasswordHide": "పాస్‌వర్డ్ దాచు"
+  "authPasswordHide": "పాస్‌వర్డ్ దాచు",
+  "routeErrorTitle": "ఈ పేజీ ఇక్కడ లేదు",
+  "routeErrorBody": "లింక్ పాతది లేదా తప్పుగా రాసినది కావచ్చు. మీ జర్నల్ ఉన్న చోటే ఉంది.",
+  "routeErrorBack": "జర్నల్కు తిరిగి వెళ్లండి"
 }
