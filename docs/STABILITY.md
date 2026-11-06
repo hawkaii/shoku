@@ -138,6 +138,18 @@ Acceptance: the count of unexplained `catch (_)` drops to the documented allow-l
 
 Acceptance: a new contributor can answer "where does this file go?" from the document alone.
 
+## What the reference app teaches
+
+The comparison app (`bwi-cabswalle`, ~10k active users, 51 Dart files) was read end to end. It is **not** a model to copy wholesale: it has no tests, no CI, no migrated checks, no share intake and no local notifications, and it swallows errors at the same rate this app does. What is worth taking:
+
+* **One boot gate that owns all startup async.** Its splash decides everything and nothing else does startup work. Shoku already has this shape (`AppGate` + `authReadyProvider`); the share bug is what happens when a feature ignores it. Fix the rule, not only the symptom: startup work belongs in the gate or in an app-scope provider, never in a shell that may not be mounted.
+* **Version gating that refuses to be dismissed.** An outdated client is a support burden. Out of scope for this milestone, but the mechanism (block on a minimum version) is the honest way to retire a broken build.
+* **Localisation as a first-class concern.** Its `gen-l10n` setup with a persisted locale is clean, and it guards `setLocal` against unsupported locales. Shoku is ahead here (ten locales at parity); keep the parity test as a required check.
+* **Optimistic write with rollback.** The one place it treats a remote write as fallible. Useful for the fridge later.
+* **What not to copy:** provider-as-repository, navigation through `showDialog`, `static BuildContext`, unawaited `static async` init, zero `mounted` checks, `catch`-to-empty-list, print logging, a committed keystore, and a template test that would fail if anyone ran it. Each of those has a Shoku counterpart in the findings above; that is why this program exists.
+
+The lesson that drives the plan: **the reference app's age did not make it stable, its gate did.** Every fix here ends at the gate — a test, a check, or a visible state.
+
 ## Out of scope (separate programs)
 
 * Play submission: applicationId, upload keystore, AAB, HTTPS, data-safety form, store assets. Tracked in `PLAY_STORE_READINESS.md`.
