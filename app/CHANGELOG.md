@@ -3,6 +3,20 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.29.1] — 2026-11-06
+
+### Added
+- The page moves in, with its keywords *(landing)* — [`38583d3`](https://github.com/hawkaii/food-finder-app/commit/38583d37da3c46a16292b41d590886195fd0aa85)
+- A daily import allowance, and the ask count made visible *(limits)* — [`8eaa202`](https://github.com/hawkaii/food-finder-app/commit/8eaa2026555b8d531f200d6249c5d05ec4912667)
+
+### Docs
+- V1.28.3 [skip ci] *(changelog)* — [`8ad3fe5`](https://github.com/hawkaii/food-finder-app/commit/8ad3fe5841319a915dba3cf4a5568766fad96d11)
+- The whole machine, in one diagram *(readme)* — [`ea4ed8c`](https://github.com/hawkaii/food-finder-app/commit/ea4ed8c3589caa1e7d53fbcdd0e9007d67f628f5)
+- Draw the extraction pipeline instead of typing it *(readme)* — [`52acecc`](https://github.com/hawkaii/food-finder-app/commit/52aceccc68cee896bd0e8f6ad251476cc33c6601)
+
+### Fixed
+- Fall back when the server predates the request id *(import)* — [`b972b90`](https://github.com/hawkaii/food-finder-app/commit/b972b9097835cec52a3be3816f1418c50b8c0585)
+
 ## [1.28.3] — 2026-11-03
 
 ### Chores
