@@ -3,6 +3,327 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.30.0] — 2026-11-06
+
+### Docs
+- V1.29.5 [skip ci] *(changelog)* — [`61eda16`](https://github.com/hawkaii/food-finder-app/commit/61eda16da28423f590b219ed4de0294837fdd690)
+- The bundle id is the domain's reverse, not a guess — [`f2a5d5d`](https://github.com/hawkaii/food-finder-app/commit/f2a5d5dd51d99ada16f388c1da5e72043c1b54c4)
+- The listing art and the answer sheet *(play)* — [`39f6d5b`](https://github.com/hawkaii/food-finder-app/commit/39f6d5be694bc598b2df3514423a5d8bbb42bd36)
+- The privacy page, served where it deploys *(legal)* — [`a24b979`](https://github.com/hawkaii/food-finder-app/commit/a24b97903009591336b957d5c60b20b9ee030db4)
+- The privacy page and the listing answers *(legal)* — [`6f8b220`](https://github.com/hawkaii/food-finder-app/commit/6f8b220c0a0179e2802f516a8587451be4020a6f)
+- Deletion is live, not pending *(readiness)* — [`ae36e35`](https://github.com/hawkaii/food-finder-app/commit/ae36e353852faa5f52a039c3152e2222fcff7fd9)
+
+### Other
+- Shoku 1.30.0 — the stability program (#32)
+
+* docs(stability): the program, its root causes and its gate
+
+Three reported failures plus an audit found silent data loss in sync. This
+document is the contract for the stability branch: what stable means, which
+workstreams exist, and how a change proves itself before it reaches main.
+
+* l10n: the strings the stability fixes need, in all ten locales
+
+Timer notification title and body, the unavailable-alert note, the no-link
+share note, and password visibility labels. The import sign-in notice now says
+what it does instead of pointing at a tab.
+
+Added here, once, so the three fix branches do not each edit the same ARBs.
+
+* docs(stability): what the reference app actually teaches
+
+Read end to end: it is older and has more users, not fewer defects. The one
+idea worth taking is the single boot gate, which is exactly what the share bug
+ignored. Everything else is a list of anti-patterns this app already shares.
+
+* l10n: commit the generated files in the canonical format
+
+gen-l10n writes unformatted output on this SDK, so every run left a diff that
+the drift check could never resolve. Format once, commit, and the check becomes
+idempotent: gen-l10n rewrites, dart format restores, git sees nothing.
+
+* ci: gate every pull request on analyze, l10n and both test suites (#12)
+
+android.yml only runs when a version bump reaches main, so nothing currently
+stops a broken PR from landing on dev. This adds the missing gate: Flutter
+analyze at --fatal-infos, generated-localization drift, l10n parity, the full
+widget/unit suite, and the API suite on the Python the images actually run.
+
+Flutter is pinned to the same 3.47.8 the release build uses.
+
+* android: register the parts three features were silently missing (#13)
+
+Timers: flutter_local_notifications delivers through two explicit broadcast
+components that the plugin does not merge into the app manifest. Without them
+zonedSchedule succeeds and Android drops the alarm at fire time, which is
+exactly the reported 'timer never rings'. RECEIVE_BOOT_COMPLETED and the boot
+receiver make a scheduled timer survive a restart.
+
+Sharing: accept text/* rather than only text/plain, accept video and
+SEND_MULTIPLE, and stop emptying taskAffinity so a warm share reaches the live
+activity instead of a second task.
+
+Auth: declare com.shoku.app://login-callback, the scheme ShokuConfig already
+hands to Supabase. It previously matched nothing.
+
+android_manifest_test.dart makes each of these a failing test rather than a
+sentence in a review.
+
+* docs: write down the architecture the code already implies (#14)
+
+Four layers with a one-way dependency, where async work is allowed to start,
+how a failure becomes copy, and the test each layer earns. The cost table is
+measured, not guessed: the eight files over 640 lines and what to extract first.
+
+Also records what is deliberately not done yet: stricter lint rules stay off
+until they can be enabled without a wall of ignores.
+
+* ci(release): propose the changelog as a PR, never push main (#16)
+
+main is protected by the stability ruleset, and GitHub refuses the Actions
+integration as a bypass actor for a user-owned repository. The old direct push
+would therefore fail on every release — quietly, because the step is
+continue-on-error, so the changelog would simply stop updating.
+
+The step now commits to changelog/v<version>, force-pushes that branch (reruns
+update it), and opens one PR to main. The release is unchanged and still
+cannot be turned red by a docs step.
+
+* import: delete the English copy path nobody sees, test the one users do (#19)
+
+ImportProgress.label, waitingHint and importReasonText were dead production
+code with hardcoded English in a ten-locale app; the sheet reads stageText and
+reasonText from import_card.dart. The only consumer was a test, which meant the
+copy assertions were protecting the wrong strings.
+
+The test now asserts the real widget-path copy through AppLocalizationsEn.
+
+* fix(sync): converge — every dirty table, every page, every pass (#20)
+
+#4 markClean cleared dirty for dishes, versions and cook_logs only, so an
+accepted pantry row (and a photo whose cook it could not place) was pushed
+again on the next pass, forever. All five tables are now cleared in the same
+transaction. Photos have no table of their own — they are projected from a
+cook's photo_key — so the accepting side is the cook that carries them, matched
+on the derived wire id. `ignored` is treated as settled too: the server saying
+"already applied" means the row is finally off this device's outbox.
+
+#5 the pull was one request. The server paginates at 500 rows per table and
+returns a cursor only while has_more is true, so the client stored a cursor
+sitting past rows it never received and skipped them permanently. The pull now
+loops until has_more is false, reports per-page progress, and is bounded by a
+page cap (40) and a wall-clock cap (2 min). Hitting either throws
+SyncPageLimitExceeded: rows already applied are kept (the merge is idempotent),
+the cursor is not written, and the controller reports a failed pass and retries.
+
+#6 syncNow() returned early while a pass was running, dropping the request. A
+pending flag now runs exactly one more pass when the current one ends, cleared
+as each pass starts so a burst collapses into a single follow-up. The 30 s
+retry and the resume trigger are untouched.
+
+Closes #4
+Closes #5
+Closes #6
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* fix(auth): a sign-in sheet that fits, and dead ends that lead somewhere (#21)
+
+* fix(auth): fit the sign-in sheet and make every prompt a door
+
+The sheet was a Column with keyboard padding and no scroll view, so a 5"
+phone with the keyboard up overflowed and pushed the create-account link
+off-screen. It also predated ShokuSheetHeader, built AuthService() inside
+build, and re-subscribed to a fresh auth.changes stream on every rebuild.
+
+- SafeArea + SingleChildScrollView + viewInsets padding + ShokuSheetHeader;
+  the duplicate title and body under the header are gone.
+- AutofillGroup, autofillHints, next -> done focus chain, submit on done,
+  and a password visibility toggle labelled from l10n.
+- showSignInSheet returns Future<bool> (a session exists after close) so a
+  caller can finish the action that needed one.
+- authServiceProvider is used in the sheet, in the account row and for sign
+  out; the auth stream is cached in State instead of rebuilt per build.
+- A 401 in the recipe chat opens the sheet from the notice and retries the
+  question once, single-flight. The kitchen bot's sign-in notice does the
+  same, resumes the pending question, and becomes a "signed in" receipt
+  when there is nothing to resume.
+- iOS declares the com.shoku.app URL scheme, matching the Android manifest.
+
+Tests: sheet at 320x568 with a 300 px keyboard inset has no overflow and
+every control is hittable; the toggle flips obscureText; the form carries
+autofill hints and the next/done chain; both 401 notices open the sheet;
+the iOS plist declares the scheme and stays well-formed.
+
+* auth: use the app's own scheme, and read the provider in the action
+
+The applicationId is wiki.gradientdescent.shoku and ShokuConfig.authRedirect
+already hands that scheme to Supabase; the plist had been given a different
+one, so the confirmation link would have opened a browser instead of the app.
+The iOS test now derives the expected scheme from ShokuConfig, so the two
+cannot drift again.
+
+_submit is an action, not a build: ref.read is the correct accessor.
+
+---------
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* fix(timer): make a backgrounded timer ring, and tell the truth when it cannot (#22)
+
+The manifest now registers the plugin's receivers (#13), so the alarm is no
+longer dropped by Android. Three lies remained around it:
+
+* `TimerAlerts.schedule` swallowed every failure. A build where the plugin
+  refused the alarm, or failed to initialise, left the card claiming alerts
+  were on and the kitchen silent. It now returns whether the alarm exists,
+  and the store reports `TimerAlertPermission.unavailable` on failure — the
+  in-app clock keeps running, the card says the ring will not.
+* The notification said "Timer is up" and "Step N is done" in English, in a
+  ten-locale app. The screen, which has the localizations, now resolves
+  `timerNotificationTitle` and `timerNotificationBody(step)` and passes them
+  down as a `TimerAlertCopy`; the store never formats text.
+* `canScheduleExactNotifications()` was only read when a timer started, so a
+  grant made in Settings needed an app restart to matter. `currentPermission()`
+  re-reads it on resume without prompting (the exact-alarm settings page is
+  still opened at most once per process), and `refreshAlertPermission()`
+  re-creates the alarm already queued with the new mode, or cancels it when
+  the permission went away.
+
+Also: the `cook_timer.dart` comment still claimed there was no local
+notification and no exact-alarm permission, which contradicts the shipped
+code.
+
+`flutter_local_notifications` now sits behind a narrow `TimerNotifications`
+seam. The plugin is a singleton whose platform implementations are singletons
+reading method channels, so faking it would test the fake; the seam keeps the
+decisions (copy, schedule mode, failure, stable id) in `LocalTimerAlerts`,
+where a test can see them. Production wiring is unchanged: the real plugin.
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* android: declare the scheme the app actually uses (#23)
+
+ShokuConfig.authRedirect and applicationId are wiki.gradientdescent.shoku; the
+manifest declared com.shoku.app, so a confirmation link would resolve to
+nothing. The manifest test now reads the scheme and host from ShokuConfig, the
+same way the iOS test does, so the two declarations cannot drift apart again.
+
+* fix(nav): an error screen instead of a red one, and a gate that remembers where you were going (#24)
+
+A link to an unknown path rendered GoRouter's red page, and any link opened
+before onboarding or the session was ready was thrown away by the redirect to
+/welcome or /splash.
+
+- errorBuilder: RouteErrorScreen, with copy in all ten locales, a "back to the
+  journal" action, and a debugPrint of the failed location.
+- AppGate keeps the first attempted location and appGateRedirect delivers it
+  once, after both gates are open; gate routes are never stored, and a
+  destination is not replayed during a later gate transition.
+- ShokuConfig documents why ?screen= (Uri.base) is a web-preview-only flag.
+- test/app_router_test.dart: unknown route, delivery after onboarding, a
+  branch deep link, the destination being forgotten, gate routes never stored.
+
+Closes #10
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* ci: assemble the APK when Android packaging changes (#25)
+
+The release workflow only runs on main, so a manifest or Gradle change could
+reach main without ever being assembled — which is how the missing notification
+receivers shipped. This builds a debug APK on any PR that touches android/ or
+pubspec.yaml, then asserts the *merged* manifest still carries the receivers,
+the boot permission and the share filters. It publishes nothing.
+
+* fix(import): a shared reel survives the cold start and the gate (#26)
+
+Share intake only ever started inside `AppShell`, and `AppShell` is the one
+screen the router cannot build until onboarding is done and the session has
+resolved. The launching intent was therefore read exactly once — from a shell
+that did not exist yet — or read and dropped when the process was killed. A
+share with no link took the same path and reset silently, which is
+indistinguishable from nothing happening.
+
+- start intake at app scope (`shareIntakeProvider`, watched by `ShokuApp`) so
+  it runs while `/welcome` and `/splash` are on screen, and dispose it with the
+  app rather than with the shell
+- wrap the plugin in a `ShareSource` (initial payload, stream, reset) with the
+  same three calls it made before, so a test can deliver a share without a
+  platform channel
+- write every payload to a new `PendingShareStore` before publishing it,
+  including the no-link case; take it once when it is consumed
+- consume from one place in `AppShell`: the persisted note first (that is the
+  onboarding/cold-start path), then live payloads, guarded against the
+  post-frame call and the listener both firing
+- a share with no link opens the sheet with `importShareNoLink` and an empty
+  field instead of vanishing, and an empty payload now resets too
+- a signed-out import shows the error with a real Sign in action that opens the
+  sheet and retries the same URL, plus `mounted` guards on the
+  setState-after-await paths that retry touches
+- `import_sheet.dart` scrolls inside a `SafeArea`: this is the PR that makes
+  people arrive there from a share, with the keyboard up
+
+Verification:
+  flutter analyze --fatal-infos  -> No issues found
+  flutter test                   -> 334 tests passed
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* fix(errors): log what we swallow, and stop losing async crashes (#28)
+
+Every catch (_) is now classified: optional platform work keeps its bare
+catch with a reason, a user-visible failure keeps its fallback and gains a
+logFailure line naming what failed, and nothing is caught just to vanish.
+
+main() installs FlutterError.onError and PlatformDispatcher.onError, both
+through the same seam, so a release build records a crash instead of ending
+in silence. No new dependency, no new UI, no copy changed.
+
+Closes #9
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* fix(import): one dish per share, and a sheet that can be dismissed mid-request (#29)
+
+`createDish(shortcode)` is single-flight: an in-flight future per shortcode
+means the tracker's poller and the sheet's poller share one content read and
+one insert, so a job adopted by both writes a single dish. The entry is
+removed when the call settles — failed or not — so a retry after an error is
+a real attempt, and the existing duplicate scan still wins when it can.
+
+The sheet's post-await work is guarded: `_watch` no longer opens a timer or
+a stream on a disposed state (dispose had already run, so nothing would ever
+cancel them), and the tracker notifier is read before the awaits so a sheet
+dismissed while `start` is in flight still hands its job to the app-scope
+poller instead of touching `ref` after dispose.
+
+Closes #7
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com>
+
+* errors: classify the import paths the sweep could not touch (#30)
+
+#28 left six bare catches in import_sheet.dart and import_tracker.dart because
+another branch owned those files. They are all user-visible: a resume that
+could not read the job, a save that failed, a poll that dropped, a tracker that
+could not write the dish. Each now logs with a specific label while keeping the
+same fallback, so the copy on screen is unchanged.
+
+* release: v1.30.0 — the stability program (#31)
+
+Eleven fixes, none of them a feature: timers ring, a shared reel survives the
+cold start, sign-in fits a small phone, sync clears every table and follows
+every page, one import makes one dish, and failures are logged instead of
+swallowed. The verification log records the commands and their results, and the
+six checks that still need a phone.
+
+A version bump is what asks the release workflow for an APK.
+
+---------
+
+Co-authored-by: hawkaii <hawkaii@users.noreply.github.com> — [`3bfb08d`](https://github.com/hawkaii/food-finder-app/commit/3bfb08deb0308e6513e6c6b2eb58308b6cfedf82)
+
 ## [1.29.5] — 2026-11-06
 
 ### Chores
