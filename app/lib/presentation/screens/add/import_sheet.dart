@@ -131,6 +131,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     _slowTimer?.cancel();
     final service = ref.read(importServiceProvider);
     final pendingStore = ref.read(pendingImportStoreProvider);
+    final tracker = ref.read(importTrackerProvider.notifier);
 
     try {
       final started = await service.start(url);
@@ -181,7 +182,12 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       );
       await pendingStore.write(pending);
       // The Journal shows it too, from the same record, once the sheet closes.
-      await ref.read(importTrackerProvider.notifier).adopt(pending);
+      // The notifier was read above the awaits: the sheet may be gone by now,
+      // and the job still has to be taken up by the app-scope poller.
+      await tracker.adopt(pending);
+      // Dismissed while the server was answering: the note and the poller have
+      // it, so the import survives; there is no view left to talk to.
+      if (!mounted) return;
       _watch(service, started.jobId!, started.shortcode);
     } on ImportCapReached {
       if (!mounted) return;
@@ -231,6 +237,10 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   }
 
   void _watch(ImportService service, String jobId, String shortcode) {
+    // Called after awaits (a start, a resume). A dismissed sheet must not open a
+    // timer or a stream here: dispose has already run, so nothing would cancel
+    // them and the poller would outlive the view forever.
+    if (!mounted) return;
     _sub?.cancel();
     _slowTimer?.cancel();
     _slow = false;
