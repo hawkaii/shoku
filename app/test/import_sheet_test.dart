@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/native.dart';
@@ -463,6 +464,88 @@ void main() {
     expect(find.byKey(const ValueKey('import-sign-in')), findsNothing);
     expect(find.text('We could not start that import'), findsOneWidget);
   });
+
+  testWidgets('a sheet dismissed mid-start raises nothing and writes no dish',
+      (tester) async {
+    final answer = Completer<ImportStart>();
+    var contentFetches = 0;
+    final import = _DeferredStart(
+      db,
+      answer: answer,
+      client: MockClient((request) async {
+        contentFetches++;
+        return http.Response(_content, 200);
+      }),
+    );
+
+    final errors = <FlutterErrorDetails>[];
+    final restoreOnError = _captureErrors(errors);
+
+    await tester.pumpWidget(app(import, prefill: _url));
+    await tester.tap(find.text('open'));
+    await tester.pump(); // the sheet mounts
+    await tester.pump(); // the post-frame callback starts the request
+    expect(import.calls, 1);
+
+    // The user swipes the sheet away while the server is still deciding.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+
+    answer.complete(const ImportStart(
+      jobId: 'job1',
+      shortcode: _shortcode,
+      stage: ImportStage.ready,
+      cached: true,
+    ));
+    await tester.pumpAndSettle();
+    restoreOnError();
+
+    expect(errors, isEmpty, reason: 'a dismissal is not an error');
+    expect(contentFetches, 0,
+        reason: 'the disposed sheet stopped at its mounted guard');
+    expect(await JournalRepository(db).loadDishes(), isEmpty);
+  });
+
+  testWidgets('a start that fails after the sheet is gone is not reported',
+      (tester) async {
+    final answer = Completer<ImportStart>();
+    final import = _DeferredStart(
+      db,
+      answer: answer,
+      client: MockClient((_) async => http.Response('{}', 200)),
+    );
+
+    final errors = <FlutterErrorDetails>[];
+    final restoreOnError = _captureErrors(errors);
+
+    await tester.pumpWidget(app(import, prefill: _url));
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump();
+    expect(import.calls, 1);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+
+    // The failure lands on a sheet that no longer exists: the catch branch used
+    // to setState here, and the second throw escaped as an unhandled error.
+    answer.completeError(ApiError('worker_unavailable', 503));
+    await tester.pumpAndSettle();
+    restoreOnError();
+
+    expect(errors, isEmpty, reason: 'nothing is left to tell');
+    expect(find.byType(ImportSheet), findsNothing);
+  });
+}
+
+/// Collects every error the framework reports until the returned function puts
+/// the previous handler back. Asserting on the list is how "no exception was
+/// thrown" is checked without losing the error the binding would normally make
+/// the test fail with.
+void Function() _captureErrors(List<FlutterErrorDetails> into) {
+  final previous = FlutterError.onError;
+  FlutterError.onError = into.add;
+  return () => FlutterError.onError = previous;
 }
 
 /// Fails the first attempt as a signed-out client, then starts as usual.
@@ -496,4 +579,30 @@ class _FlakyImport extends ImportService {
 class _SignedInAuth extends AuthService {
   @override
   bool get isSignedIn => true;
+}
+
+/// A start whose answer the test decides: the server is still thinking when the
+/// sheet goes away.
+class _DeferredStart extends ImportService {
+  _DeferredStart(
+    AppDatabase db, {
+    required this.answer,
+    required http.Client client,
+  }) : super(
+          api: ApiClient(
+            baseUrl: 'https://api.test',
+            tokenProvider: () => 'jwt',
+            httpClient: client,
+          ),
+          repository: JournalRepository(db),
+        );
+
+  final Completer<ImportStart> answer;
+  int calls = 0;
+
+  @override
+  Future<ImportStart> start(String url) {
+    calls++;
+    return answer.future;
+  }
 }

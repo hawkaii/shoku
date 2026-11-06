@@ -142,9 +142,34 @@ class ImportService {
     return RecipeContent.fromJson(content);
   }
 
+  /// The inserts that are running right now, by shortcode.
+  ///
+  /// The duplicate scan below is a read, so it cannot stop two callers that read
+  /// "no dish yet" in the same second — and two callers is the normal case: the
+  /// tracker's poller and the open sheet's poller both finish the same job.
+  /// Callers that arrive while an insert is running share its future, so there
+  /// is one read of the content endpoint and one row.
+  final Map<String, Future<Dish?>> _inFlight = {};
+
   /// Turns a cached extraction into a dish in the journal, with the creator
   /// attached to the version. Imports land as `To cook`.
-  Future<Dish?> createDish(String shortcode) async {
+  ///
+  /// Single-flight per shortcode: concurrent callers get the same future.
+  Future<Dish?> createDish(String shortcode) {
+    final running = _inFlight[shortcode];
+    if (running != null) return running;
+
+    // Removed when it settles, failed or not: a stale entry would turn every
+    // later retry into a replay of the first failure. Braces, not an arrow:
+    // the callback must return nothing, or whenComplete would await the entry.
+    final attempt = _createDish(shortcode).whenComplete(() {
+      _inFlight.remove(shortcode);
+    });
+    _inFlight[shortcode] = attempt;
+    return attempt;
+  }
+
+  Future<Dish?> _createDish(String shortcode) async {
     // One reel, one dish. The sheet, the Journal card and a second tap can all
     // ask for the same shortcode within seconds; an existing dish wins.
     for (final dish in await _repository.loadDishes()) {

@@ -12,6 +12,7 @@ import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/import_service.dart';
 import 'package:food_finder/data/services/pending_import.dart';
 import 'package:food_finder/presentation/navigation/import_scope.dart';
+import 'package:food_finder/presentation/screens/add/import_sheet.dart';
 import 'package:food_finder/presentation/screens/journal/import_card.dart';
 import 'package:food_finder/presentation/state/import_providers.dart';
 import 'package:food_finder/presentation/state/import_tracker.dart';
@@ -241,6 +242,81 @@ void main() {
     expect((await JournalRepository(db).loadDishes()).single.title,
         'Paneer Tikka',
         reason: 'the work finishes whether or not the tab is watched');
+    expect(await PendingImportStore().read(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a job adopted by both the tracker and the sheet writes one dish',
+      (tester) async {
+    await seedPending();
+
+    var jobPolls = 0;
+    var contentFetches = 0;
+    final client = MockClient((request) async {
+      if (request.url.path.startsWith('/v1/imports/')) {
+        jobPolls++;
+        return http.Response(_poll(state: 'ready', title: 'Paneer Tikka'), 200);
+      }
+      contentFetches++;
+      // Slow enough that both pollers are inside createDish at the same time:
+      // the duplicate scan is a read, so this is what it takes to fool it.
+      await Future<void>.delayed(const Duration(seconds: 1));
+      return http.Response(_content, 200);
+    });
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        importServiceProvider.overrideWithValue(ImportService(
+          api: ApiClient(
+            baseUrl: 'https://api.test',
+            tokenProvider: () => 'jwt',
+            httpClient: client,
+          ),
+          repository: JournalRepository(db),
+        )),
+      ],
+      child: MaterialApp(
+        theme: ShokuTheme.light(),
+        home: ImportTrackerScope(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showImportSheet(context),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // The tracker picks the job up on mount and is inside createDish already.
+    for (var i = 0; i < 20 && contentFetches == 0; i++) {
+      await tester.pump();
+    }
+    expect(contentFetches, 1, reason: 'the tracker is reading the content');
+
+    // The same job, adopted by the sheet as well.
+    await tester.tap(find.text('open'));
+    for (var i = 0; i < 20 && jobPolls < 2; i++) {
+      await tester.pump();
+    }
+    expect(jobPolls, 2, reason: 'the sheet resumed the job the tracker holds');
+    await tester.pump();
+    await tester.pump();
+
+    expect(contentFetches, 1,
+        reason: 'the sheet joined the insert already running');
+
+    // The read lands, both callers settle, and the journal has one dish.
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    final dishes = await JournalRepository(db).loadDishes();
+    expect(dishes, hasLength(1));
+    expect(dishes.single.title, 'Paneer Tikka');
     expect(await PendingImportStore().read(), isNull);
 
     await tester.pumpWidget(const SizedBox());
