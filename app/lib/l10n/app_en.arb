@@ -1072,5 +1072,10 @@
   "importCapNotice": "Today's imports are used up. They come back tomorrow — or add one from the Wall, already read.",
   "importCapWallHint": "Or add one from the Wall — those are already read.",
   "botAsksLeft": "{count, plural, =0{no asks left today} one{1 ask left today} other{{count} asks left today}}",
-  "@botAsksLeft": {"placeholders": {"count": {"type": "int"}}}
+  "@botAsksLeft": {"placeholders": {"count": {"type": "int"}}},
+  "accountDelete": "Delete account",
+  "accountDeleteBody": "This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.",
+  "accountDeleteCancel": "Keep it",
+  "accountDeleteDone": "Account deleted",
+  "accountDeleteFailed": "Could not delete the account. Nothing was changed."
 }

@@ -1779,4 +1779,21 @@ class AppLocalizationsId extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'Hapus akun';
+
+  @override
+  String get accountDeleteBody =>
+      'Ini menghapus hidangan, versi, masakan, kulkas, dan foto Anda dari semua perangkat dan dari server. Tidak bisa dibatalkan.';
+
+  @override
+  String get accountDeleteCancel => 'Biarkan';
+
+  @override
+  String get accountDeleteDone => 'Akun dihapus';
+
+  @override
+  String get accountDeleteFailed =>
+      'Akun tidak dapat dihapus. Tidak ada yang berubah.';
 }

@@ -405,5 +405,10 @@
   "cookbookEmptyOffline": "Impossible de charger vos recettes. Vérifiez la connexion et réessayez.",
   "importCapNotice": "Les imports du jour sont épuisés. Ils reviennent demain — ou ajoutez un reel du Mur, déjà lu.",
   "importCapWallHint": "Ou ajoutez-en un du Mur : ils sont déjà lus.",
-  "botAsksLeft": "{count, plural, =0{plus de questions aujourd'hui} one{1 question restante aujourd'hui} other{{count} questions restantes aujourd'hui}}"
+  "botAsksLeft": "{count, plural, =0{plus de questions aujourd'hui} one{1 question restante aujourd'hui} other{{count} questions restantes aujourd'hui}}",
+  "accountDelete": "Supprimer le compte",
+  "accountDeleteBody": "Cela efface vos plats, versions, cuissons, frigo et photos de tous les appareils et du serveur. Irréversible.",
+  "accountDeleteCancel": "Garder",
+  "accountDeleteDone": "Compte supprimé",
+  "accountDeleteFailed": "Impossible de supprimer le compte. Rien n'a été modifié."
 }

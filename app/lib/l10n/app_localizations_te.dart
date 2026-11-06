@@ -1799,4 +1799,20 @@ class AppLocalizationsTe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'ఖాతా తొలగించు';
+
+  @override
+  String get accountDeleteBody =>
+      'ఇది మీ వంటకాలు, వెర్షన్‌లు, వంటలు, ఫ్రిడ్జ్ మరియు ఫోటోలను అన్ని పరికరాల నుండి మరియు సర్వర్ నుండి తొలగిస్తుంది. ఇది వెనక్కి తీసుకోలేరు.';
+
+  @override
+  String get accountDeleteCancel => 'ఉంచు';
+
+  @override
+  String get accountDeleteDone => 'ఖాతా తొలగించబడింది';
+
+  @override
+  String get accountDeleteFailed => 'ఖాతాను తొలగించలేకపోయాం. ఏమీ మారలేదు.';
 }

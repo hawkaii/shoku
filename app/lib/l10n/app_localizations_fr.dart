@@ -1822,4 +1822,21 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'Supprimer le compte';
+
+  @override
+  String get accountDeleteBody =>
+      'Cela efface vos plats, versions, cuissons, frigo et photos de tous les appareils et du serveur. Irréversible.';
+
+  @override
+  String get accountDeleteCancel => 'Garder';
+
+  @override
+  String get accountDeleteDone => 'Compte supprimé';
+
+  @override
+  String get accountDeleteFailed =>
+      'Impossible de supprimer le compte. Rien n\'a été modifié.';
 }

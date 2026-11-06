@@ -1789,4 +1789,20 @@ class AppLocalizationsBn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'অ্যাকাউন্ট মুছুন';
+
+  @override
+  String get accountDeleteBody =>
+      'এতে আপনার পদ, সংস্করণ, রান্না, ফ্রিজ ও ছবি সব ডিভাইস ও সার্ভার থেকে মুছে যাবে। এটি ফেরানো যাবে না।';
+
+  @override
+  String get accountDeleteCancel => 'রাখুন';
+
+  @override
+  String get accountDeleteDone => 'অ্যাকাউন্ট মুছে ফেলা হয়েছে';
+
+  @override
+  String get accountDeleteFailed => 'অ্যাকাউন্ট মোছা যায়নি। কিছুই বদলায়নি।';
 }

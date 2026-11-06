@@ -1814,4 +1814,21 @@ class AppLocalizationsTa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'கணக்கை நீக்கு';
+
+  @override
+  String get accountDeleteBody =>
+      'இது உங்கள் உணவுகள், பதிப்புகள், சமையல், ஃபிரிட்ஜ் மற்றும் புகைப்படங்களை எல்லா சாதனங்களிலிருந்தும் சர்வரிலிருந்தும் அழிக்கும். மீள முடியாது.';
+
+  @override
+  String get accountDeleteCancel => 'வைத்திரு';
+
+  @override
+  String get accountDeleteDone => 'கணக்கு நீக்கப்பட்டது';
+
+  @override
+  String get accountDeleteFailed =>
+      'கணக்கை நீக்க முடியவில்லை. எதுவும் மாறவில்லை.';
 }

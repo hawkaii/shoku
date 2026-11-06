@@ -1789,4 +1789,20 @@ class AppLocalizationsMr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'खाते हटवा';
+
+  @override
+  String get accountDeleteBody =>
+      'यामुळे तुमची डिशेस, आवृत्त्या, स्वयंपाक, फ्रिज आणि फोटो सर्व उपकरणांवरून आणि सर्व्हरवरून पुसले जातील. हे पूर्ववत होऊ शकत नाही.';
+
+  @override
+  String get accountDeleteCancel => 'ठेवा';
+
+  @override
+  String get accountDeleteDone => 'खाते हटवले';
+
+  @override
+  String get accountDeleteFailed => 'खाते हटवता आले नाही. काहीही बदलले नाही.';
 }

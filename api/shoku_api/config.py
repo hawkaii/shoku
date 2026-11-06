@@ -116,6 +116,9 @@ class Settings(BaseSettings):
     # Supabase Auth: the JWT issuer is <url>/auth/v1 and user tokens carry
     # audience "authenticated". Both are required to verify an access token.
     supabase_url: str = ""
+    #: Service-role key, used only to erase an account's auth identity. Empty
+    #: means deletion removes the product data but leaves the login behind.
+    supabase_service_key: str = ""
     supabase_audience: str = "authenticated"
 
     cors_origins: list[str] = Field(default_factory=list)

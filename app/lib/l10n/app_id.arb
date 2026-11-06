@@ -405,5 +405,10 @@
   "cookbookEmptyOffline": "Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi.",
   "importCapNotice": "Impor hari ini habis. Kembali besok — atau tambahkan reel dari Dinding, yang sudah dibaca.",
   "importCapWallHint": "Atau tambahkan satu dari Dinding — sudah dibaca.",
-  "botAsksLeft": "{count, plural, =0{tidak ada pertanyaan tersisa} other{{count} pertanyaan tersisa hari ini}}"
+  "botAsksLeft": "{count, plural, =0{tidak ada pertanyaan tersisa} other{{count} pertanyaan tersisa hari ini}}",
+  "accountDelete": "Hapus akun",
+  "accountDeleteBody": "Ini menghapus hidangan, versi, masakan, kulkas, dan foto Anda dari semua perangkat dan dari server. Tidak bisa dibatalkan.",
+  "accountDeleteCancel": "Biarkan",
+  "accountDeleteDone": "Akun dihapus",
+  "accountDeleteFailed": "Akun tidak dapat dihapus. Tidak ada yang berubah."
 }

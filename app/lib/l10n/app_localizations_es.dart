@@ -1796,4 +1796,21 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'Eliminar cuenta';
+
+  @override
+  String get accountDeleteBody =>
+      'Esto borra tus platos, versiones, cocinados, nevera y fotos de todos los dispositivos y del servidor. No se puede deshacer.';
+
+  @override
+  String get accountDeleteCancel => 'Conservar';
+
+  @override
+  String get accountDeleteDone => 'Cuenta eliminada';
+
+  @override
+  String get accountDeleteFailed =>
+      'No se pudo eliminar la cuenta. No se cambió nada.';
 }

@@ -405,5 +405,10 @@
   "cookbookEmptyOffline": "No se pudieron cargar tus recetas. Revisa la conexión y vuelve a intentarlo.",
   "importCapNotice": "Ya usaste las importaciones de hoy. Vuelven mañana — o añade un reel del Muro, que ya está leído.",
   "importCapWallHint": "O añade uno del Muro: ya están leídos.",
-  "botAsksLeft": "{count, plural, =0{no quedan preguntas hoy} one{queda 1 pregunta hoy} other{quedan {count} preguntas hoy}}"
+  "botAsksLeft": "{count, plural, =0{no quedan preguntas hoy} one{queda 1 pregunta hoy} other{quedan {count} preguntas hoy}}",
+  "accountDelete": "Eliminar cuenta",
+  "accountDeleteBody": "Esto borra tus platos, versiones, cocinados, nevera y fotos de todos los dispositivos y del servidor. No se puede deshacer.",
+  "accountDeleteCancel": "Conservar",
+  "accountDeleteDone": "Cuenta eliminada",
+  "accountDeleteFailed": "No se pudo eliminar la cuenta. No se cambió nada."
 }

@@ -1791,4 +1791,21 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'Delete account';
+
+  @override
+  String get accountDeleteBody =>
+      'This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.';
+
+  @override
+  String get accountDeleteCancel => 'Keep it';
+
+  @override
+  String get accountDeleteDone => 'Account deleted';
+
+  @override
+  String get accountDeleteFailed =>
+      'Could not delete the account. Nothing was changed.';
 }

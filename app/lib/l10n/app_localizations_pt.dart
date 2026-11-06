@@ -1799,4 +1799,21 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'Eliminar conta';
+
+  @override
+  String get accountDeleteBody =>
+      'Isto apaga os seus pratos, versões, cozinhados, frigorífico e fotos de todos os dispositivos e do servidor. Não pode ser anulado.';
+
+  @override
+  String get accountDeleteCancel => 'Manter';
+
+  @override
+  String get accountDeleteDone => 'Conta eliminada';
+
+  @override
+  String get accountDeleteFailed =>
+      'Não foi possível eliminar a conta. Nada foi alterado.';
 }

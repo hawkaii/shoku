@@ -2549,6 +2549,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{no asks left today} one{1 ask left today} other{{count} asks left today}}'**
   String botAsksLeft(int count);
+
+  /// No description provided for @accountDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountDelete;
+
+  /// No description provided for @accountDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.'**
+  String get accountDeleteBody;
+
+  /// No description provided for @accountDeleteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get accountDeleteCancel;
+
+  /// No description provided for @accountDeleteDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get accountDeleteDone;
+
+  /// No description provided for @accountDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the account. Nothing was changed.'**
+  String get accountDeleteFailed;
 }
 
 class _AppLocalizationsDelegate

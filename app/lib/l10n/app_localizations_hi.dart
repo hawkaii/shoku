@@ -1785,4 +1785,20 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accountDelete => 'खाता हटाएँ';
+
+  @override
+  String get accountDeleteBody =>
+      'इससे आपके व्यंजन, वर्ज़न, कुकिंग, फ्रिज और फ़ोटो सभी डिवाइस और सर्वर से मिट जाएँगे। इसे वापस नहीं लाया जा सकता।';
+
+  @override
+  String get accountDeleteCancel => 'रखें';
+
+  @override
+  String get accountDeleteDone => 'खाता हटा दिया गया';
+
+  @override
+  String get accountDeleteFailed => 'खाता हटाया नहीं जा सका। कुछ नहीं बदला।';
 }
