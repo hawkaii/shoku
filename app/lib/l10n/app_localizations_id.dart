@@ -1796,4 +1796,14 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get accountDeleteFailed =>
       'Akun tidak dapat dihapus. Tidak ada yang berubah.';
+
+  @override
+  String get wallReport => 'Laporkan reel ini';
+
+  @override
+  String get wallReported =>
+      'Dilaporkan. Cukup banyak laporan menghapusnya dari Dinding.';
+
+  @override
+  String get wallReportFailed => 'Tidak dapat melaporkan. Coba lagi.';
 }

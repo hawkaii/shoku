@@ -1831,4 +1831,14 @@ class AppLocalizationsTa extends AppLocalizations {
   @override
   String get accountDeleteFailed =>
       'கணக்கை நீக்க முடியவில்லை. எதுவும் மாறவில்லை.';
+
+  @override
+  String get wallReport => 'இந்த ரீலைப் புகாரளி';
+
+  @override
+  String get wallReported =>
+      'புகார் பதிவானது. போதுமான புகார்கள் அதை வாலிலிருந்து நீக்கும்.';
+
+  @override
+  String get wallReportFailed => 'புகாரளிக்க முடியவில்லை. மீண்டும் முயலவும்.';
 }

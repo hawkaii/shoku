@@ -45,6 +45,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
   RecipeContent? _content;
   bool _failed = false;
   bool _adding = false;
+  bool _reporting = false;
+  bool _reported = false;
 
   @override
   void initState() {
@@ -92,6 +94,24 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       );
     } finally {
       if (mounted) setState(() => _adding = false);
+    }
+  }
+
+  Future<void> _report() async {
+    if (_reporting) return;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _reporting = true);
+    try {
+      await ref.read(feedServiceProvider).report(widget.item.shortcode);
+      if (!mounted) return;
+      setState(() => _reported = true);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.wallReported)));
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(l10n.wallReportFailed)));
+    } finally {
+      if (mounted) setState(() => _reporting = false);
     }
   }
 
@@ -212,7 +232,21 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                       ),
                     ),
                 ],
-                const SizedBox(height: ShokuSpace.md),
+                // Play requires a report path on user-generated content, and
+                // this is it: three different people hide the card.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    key: const ValueKey('feed-detail-report'),
+                    onPressed: _reporting || _reported ? null : _report,
+                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                    child: Text(
+                      _reported ? l10n.wallReported : l10n.wallReport,
+                      style: ShokuType.label.copyWith(color: c.inkMuted),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: ShokuSpace.sm),
                 Row(
                   children: [
                     Expanded(

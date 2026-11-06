@@ -2579,6 +2579,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete the account. Nothing was changed.'**
   String get accountDeleteFailed;
+
+  /// No description provided for @wallReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this reel'**
+  String get wallReport;
+
+  /// No description provided for @wallReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported. Enough reports remove it from the Wall.'**
+  String get wallReported;
+
+  /// No description provided for @wallReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not report it. Try again.'**
+  String get wallReportFailed;
 }
 
 class _AppLocalizationsDelegate

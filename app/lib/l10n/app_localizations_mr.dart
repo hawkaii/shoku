@@ -1805,4 +1805,14 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get accountDeleteFailed => 'खाते हटवता आले नाही. काहीही बदलले नाही.';
+
+  @override
+  String get wallReport => 'या रीलची तक्रार करा';
+
+  @override
+  String get wallReported =>
+      'तक्रार नोंदवली. पुरेशा तक्रारींनी ती वॉलवरून हटते.';
+
+  @override
+  String get wallReportFailed => 'तक्रार नोंदवता आली नाही. पुन्हा प्रयत्न करा.';
 }

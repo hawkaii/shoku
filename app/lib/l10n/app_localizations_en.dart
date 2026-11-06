@@ -1808,4 +1808,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountDeleteFailed =>
       'Could not delete the account. Nothing was changed.';
+
+  @override
+  String get wallReport => 'Report this reel';
+
+  @override
+  String get wallReported =>
+      'Reported. Enough reports remove it from the Wall.';
+
+  @override
+  String get wallReportFailed => 'Could not report it. Try again.';
 }

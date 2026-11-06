@@ -15,6 +15,11 @@ class FeedService {
 
   final ApiClient _api;
 
+  /// Report a card. Distinct people only; enough of them hide it for everyone.
+  Future<void> report(String shortcode) async {
+    await _api.post('/v1/content/$shortcode/report', const {});
+  }
+
   Future<FeedPage> page({String? cursor, int limit = 20}) async {
     final query = Uri(queryParameters: {
       'limit': '$limit',

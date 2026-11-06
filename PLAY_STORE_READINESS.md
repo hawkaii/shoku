@@ -8,17 +8,17 @@ can be argued with rather than nodded at.
 
 | # | Requirement | Verdict | Evidence / what it needs | Owner |
 |---|---|---|---|---|
-| 1 | **HTTPS API** | **FAIL — launch blocker** | `ShokuConfig.apiBaseUrl` defaults to `http://35.188.27.251:8000`. No `usesCleartextTraffic` in the manifest, so on targetSdk 36 the release build **cannot reach the API at all**. Debug works only because Flutter injects a debug network config. Needs a domain + TLS (or a proxy) before any release build is useful. | Backend |
-| 2 | **Release signing** | **FAIL** | `android/app/build.gradle.kts:40` → `signingConfig = signingConfigs.getByName("debug")`. No `key.properties`, no `.jks`. Play refuses debug-signed uploads. | Frontend |
-| 3 | **AAB upload** | **FAIL** | CI builds `flutter build apk` only. New apps must upload `.aab`. | Frontend |
-| 4 | **applicationId** | **DECIDE NOW** | `com.foodfinder.food_finder` — valid but ugly, and **permanent after the first upload**. Changing it later means a new listing with zero installs. | Owner decision |
-| 5 | **Account deletion** | **FAIL** | Play requires an in-app path *and* a public web URL when accounts exist. No endpoint exists for either. | Backend + Frontend |
-| 6 | **Privacy policy URL** | **FAIL** | None. Required once an email is collected. | Owner |
-| 7 | **Data safety form** | **TODO** | Must declare: email (auth), photos (synced, not local-only), and that auth is Supabase. Must match behaviour exactly or it is a policy strike. | PM |
-| 8 | **Content rating** | **TODO** | IARC questionnaire. A public feed means answering user-generated-content questions truthfully. | PM |
-| 9 | **UGC + IP policy** | **HIGHEST RISK** | The Wall serves scraped third-party reels to strangers with **no report button, no moderation queue and no removal path**. Play requires rights to distributed content and a reporting/takedown surface for UGC. This is the item most likely to sink the submission, and no amount of signing fixes it. | Product decision |
-| 10 | **Closed test** | **CALENDAR BLOCKER** | New personal accounts need **12 testers opted in, continuously, for 14 days** before production unlocks. Starts the day the AAB is uploadable, so it sets the launch date. | Owner |
-| 11 | **Store listing assets** | **TODO** | 512×512 icon, 1024×500 feature graphic, screenshots per device type, descriptions. | Designer |
+| 1 | **HTTPS API** | **FAIL — launch blocker** | `ShokuConfig.apiBaseUrl` still defaults to `http://35.188.27.251:8000`. `api.gradientdescent.wiki` has no A record yet, so the certificate cannot be issued. Needs a DNS record, then Caddy on the VM and a base URL change. | Owner + Backend |
+| 2 | **Release signing** | **PASS** | Upload keystore generated (RSA-4096, 10,000 days), stored in GitHub secrets; CI decodes it into `android/key.properties`. The `v1.29.2` AAB's signer SHA-256 matches the keystore. Back up `~/.config/shoku/shoku-upload.jks` + `upload-key-password`: losing them means a new upload key and a Play support request. | Backend |
+| 3 | **AAB upload** | **PASS** | `v1.29.2` and later publish `shoku-<version>.aab` beside the APKs; `flutter build appbundle` runs in CI. | Backend |
+| 4 | **applicationId** | **PASS** | `com.shoku.app`, matching the auth deep link. Permanent from the first upload. | Backend |
+| 5 | **Account deletion** | **PASS (code) / web page pending** | `You → Delete account` confirms, calls `DELETE /v1/account`, wipes the device and signs out. The server deletes every table with a `user_id`, the photo objects, and — with a service key — the auth identity. `shoku-landing/site/account-deletion.html` is committed; Vercel has not picked up the deploy, so the URL still 404s. | Backend + Owner |
+| 6 | **Privacy policy URL** | **PASS** | `https://shoku.gradientdescent.wiki/privacy` is live and now points at the deletion page. | Owner |
+| 7 | **Data safety form** | **TODO** | Email, photos, app activity; deletion available; no ads; encrypted in transit only after HTTPS. | Owner |
+| 8 | **Content rating** | **TODO** | IARC questionnaire; the public feed means declaring user-generated content. | Owner |
+| 9 | **UGC + IP policy** | **PASS (code)** | Every Wall card has **Report**; `feed_report_threshold` (3 distinct users) unshares it; `DELETE /v1/content/{shortcode}` is the operator queue. Takedown contact lives in the terms page. | Backend |
+| 10 | **Closed test** | **CALENDAR BLOCKER** | Personal accounts need 12 testers opted in for 14 continuous days. Starts when an AAB is uploadable — it is now. | Owner |
+| 11 | **Store listing assets** | **TODO** | 512×512 icon, 1024×500 feature graphic, phone screenshots, short + full description. | Designer |
 
 ## Checks that PASS
 

@@ -1801,4 +1801,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get accountDeleteFailed => 'खाता हटाया नहीं जा सका। कुछ नहीं बदला।';
+
+  @override
+  String get wallReport => 'इस रील की शिकायत करें';
+
+  @override
+  String get wallReported =>
+      'शिकायत दर्ज। पर्याप्त शिकायतों पर यह वॉल से हट जाती है।';
+
+  @override
+  String get wallReportFailed => 'शिकायत दर्ज नहीं हो सकी। फिर कोशिश करें।';
 }

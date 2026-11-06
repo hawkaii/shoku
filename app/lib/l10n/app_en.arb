@@ -1077,5 +1077,8 @@
   "accountDeleteBody": "This erases your dishes, versions, cooks, fridge and photos from every device and from the server. It cannot be undone.",
   "accountDeleteCancel": "Keep it",
   "accountDeleteDone": "Account deleted",
-  "accountDeleteFailed": "Could not delete the account. Nothing was changed."
+  "accountDeleteFailed": "Could not delete the account. Nothing was changed.",
+  "wallReport": "Report this reel",
+  "wallReported": "Reported. Enough reports remove it from the Wall.",
+  "wallReportFailed": "Could not report it. Try again."
 }

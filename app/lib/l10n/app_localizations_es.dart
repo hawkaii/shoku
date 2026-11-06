@@ -1813,4 +1813,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get accountDeleteFailed =>
       'No se pudo eliminar la cuenta. No se cambió nada.';
+
+  @override
+  String get wallReport => 'Denunciar este reel';
+
+  @override
+  String get wallReported =>
+      'Denunciado. Con suficientes denuncias sale del Muro.';
+
+  @override
+  String get wallReportFailed => 'No se pudo denunciar. Inténtalo de nuevo.';
 }

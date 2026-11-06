@@ -410,5 +410,8 @@
   "accountDeleteBody": "Cela efface vos plats, versions, cuissons, frigo et photos de tous les appareils et du serveur. Irréversible.",
   "accountDeleteCancel": "Garder",
   "accountDeleteDone": "Compte supprimé",
-  "accountDeleteFailed": "Impossible de supprimer le compte. Rien n'a été modifié."
+  "accountDeleteFailed": "Impossible de supprimer le compte. Rien n'a été modifié.",
+  "wallReport": "Signaler ce reel",
+  "wallReported": "Signalé. Assez de signalements le retirent du Mur.",
+  "wallReportFailed": "Impossible de le signaler. Réessayez."
 }

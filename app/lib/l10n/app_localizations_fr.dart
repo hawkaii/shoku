@@ -1839,4 +1839,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accountDeleteFailed =>
       'Impossible de supprimer le compte. Rien n\'a été modifié.';
+
+  @override
+  String get wallReport => 'Signaler ce reel';
+
+  @override
+  String get wallReported =>
+      'Signalé. Assez de signalements le retirent du Mur.';
+
+  @override
+  String get wallReportFailed => 'Impossible de le signaler. Réessayez.';
 }

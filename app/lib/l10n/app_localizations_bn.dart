@@ -1805,4 +1805,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get accountDeleteFailed => 'অ্যাকাউন্ট মোছা যায়নি। কিছুই বদলায়নি।';
+
+  @override
+  String get wallReport => 'এই রিলের রিপোর্ট করুন';
+
+  @override
+  String get wallReported =>
+      'রিপোর্ট হয়েছে। যথেষ্ট রিপোর্ট হলে এটি ওয়াল থেকে সরে যায়।';
+
+  @override
+  String get wallReportFailed => 'রিপোর্ট করা যায়নি। আবার চেষ্টা করুন।';
 }

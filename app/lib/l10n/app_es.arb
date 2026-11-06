@@ -410,5 +410,8 @@
   "accountDeleteBody": "Esto borra tus platos, versiones, cocinados, nevera y fotos de todos los dispositivos y del servidor. No se puede deshacer.",
   "accountDeleteCancel": "Conservar",
   "accountDeleteDone": "Cuenta eliminada",
-  "accountDeleteFailed": "No se pudo eliminar la cuenta. No se cambió nada."
+  "accountDeleteFailed": "No se pudo eliminar la cuenta. No se cambió nada.",
+  "wallReport": "Denunciar este reel",
+  "wallReported": "Denunciado. Con suficientes denuncias sale del Muro.",
+  "wallReportFailed": "No se pudo denunciar. Inténtalo de nuevo."
 }

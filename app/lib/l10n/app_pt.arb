@@ -410,5 +410,8 @@
   "accountDeleteBody": "Isto apaga os seus pratos, versões, cozinhados, frigorífico e fotos de todos os dispositivos e do servidor. Não pode ser anulado.",
   "accountDeleteCancel": "Manter",
   "accountDeleteDone": "Conta eliminada",
-  "accountDeleteFailed": "Não foi possível eliminar a conta. Nada foi alterado."
+  "accountDeleteFailed": "Não foi possível eliminar a conta. Nada foi alterado.",
+  "wallReport": "Denunciar este reel",
+  "wallReported": "Denunciado. Com denúncias suficientes sai do Mural.",
+  "wallReportFailed": "Não foi possível denunciar. Tente novamente."
 }

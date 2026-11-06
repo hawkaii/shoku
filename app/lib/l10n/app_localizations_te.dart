@@ -1815,4 +1815,14 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get accountDeleteFailed => 'ఖాతాను తొలగించలేకపోయాం. ఏమీ మారలేదు.';
+
+  @override
+  String get wallReport => 'ఈ రీల్‌ను నివేదించండి';
+
+  @override
+  String get wallReported =>
+      'నివేదించబడింది. సరిపడా నివేదికలతో ఇది వాల్ నుండి తొలగిపోతుంది.';
+
+  @override
+  String get wallReportFailed => 'నివేదించలేకపోయాం. మళ్లీ ప్రయత్నించండి.';
 }

@@ -410,5 +410,8 @@
   "accountDeleteBody": "Ini menghapus hidangan, versi, masakan, kulkas, dan foto Anda dari semua perangkat dan dari server. Tidak bisa dibatalkan.",
   "accountDeleteCancel": "Biarkan",
   "accountDeleteDone": "Akun dihapus",
-  "accountDeleteFailed": "Akun tidak dapat dihapus. Tidak ada yang berubah."
+  "accountDeleteFailed": "Akun tidak dapat dihapus. Tidak ada yang berubah.",
+  "wallReport": "Laporkan reel ini",
+  "wallReported": "Dilaporkan. Cukup banyak laporan menghapusnya dari Dinding.",
+  "wallReportFailed": "Tidak dapat melaporkan. Coba lagi."
 }
