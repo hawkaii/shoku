@@ -1,4 +1,4 @@
-package com.shoku.app
+package wiki.gradientdescent.shoku
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -19,8 +19,10 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     // Permanent: Play identifies the app by this, and it cannot change after the
-    // first upload. It also matches the auth deep link (com.shoku.app://...).
-    namespace = "com.shoku.app"
+    // first upload. Reverse-DNS of a domain the owner controls, so the name
+    // cannot collide with somebody else's app; it also matches the auth deep
+    // link (wiki.gradientdescent.shoku://...).
+    namespace = "wiki.gradientdescent.shoku"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -37,7 +39,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.shoku.app"
+        applicationId = "wiki.gradientdescent.shoku"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

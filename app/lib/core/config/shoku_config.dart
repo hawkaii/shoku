@@ -23,5 +23,5 @@ class ShokuConfig {
     defaultValue: 'http://35.188.27.251:8000',
   );
 
-  static const authRedirect = 'com.shoku.app://login-callback';
+  static const authRedirect = 'wiki.gradientdescent.shoku://login-callback';
 }
