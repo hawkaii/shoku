@@ -576,7 +576,7 @@
   "importPasteFirst": "Paste a link first",
   "importNoLink": "The reel is ready but the server sent no link for it",
   "importCouldNotStart": "We could not start that import",
-  "importSignIn": "Sign in from You to import",
+  "importSignIn": "Sign in to import this reel",
   "importUnreachable": "Could not reach the server",
   "importLostConnection": "Lost the connection — the reel is still being read. Open this again to pick it up",
   "importStillOnServer": "Could not reach the server — the reel is still on it. Open this again to pick it up",
@@ -1080,5 +1080,17 @@
   "accountDeleteFailed": "Could not delete the account. Nothing was changed.",
   "wallReport": "Report this reel",
   "wallReported": "Reported. Enough reports remove it from the Wall.",
-  "wallReportFailed": "Could not report it. Try again."
+  "wallReportFailed": "Could not report it. Try again.",
+  "timerNotificationTitle": "Timer is up",
+  "@timerNotificationTitle": {"description": "Title of the local notification posted when a cook-mode timer finishes."},
+  "timerNotificationBody": "Step {step} is done — back to the kitchen.",
+  "@timerNotificationBody": {"description": "Body of the timer notification. {step} is the 1-based step number.", "placeholders": {"step": {"type": "int"}}},
+  "timerAlertsUnavailable": "alerts are off — the timer still works while the app is open",
+  "@timerAlertsUnavailable": {"description": "Timer card note when no notification channel or plugin is available at all."},
+  "importShareNoLink": "That share didn’t include a link. Paste the reel’s URL below.",
+  "@importShareNoLink": {"description": "Import sheet note when a shared item carried no URL (for example an image-only share)."},
+  "authPasswordShow": "Show password",
+  "@authPasswordShow": {"description": "Accessibility label for the control that reveals the password field."},
+  "authPasswordHide": "Hide password",
+  "@authPasswordHide": {"description": "Accessibility label for the control that hides the password field."}
 }

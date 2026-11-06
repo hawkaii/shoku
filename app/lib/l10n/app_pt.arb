@@ -236,7 +236,7 @@
   "importPasteFirst": "Cole um link primeiro",
   "importNoLink": "O reel está pronto, mas o servidor não enviou um link",
   "importCouldNotStart": "Não foi possível iniciar essa importação",
-  "importSignIn": "Entre em Você para importar",
+  "importSignIn": "Entre para importar este reel",
   "importUnreachable": "Não foi possível alcançar o servidor",
   "importLostConnection": "Conexão perdida — o reel ainda está sendo lido. Abra isto de novo para retomar",
   "importStillOnServer": "Não foi possível alcançar o servidor — o reel ainda está lá. Abra isto de novo para retomar",
@@ -413,5 +413,11 @@
   "accountDeleteFailed": "Não foi possível eliminar a conta. Nada foi alterado.",
   "wallReport": "Denunciar este reel",
   "wallReported": "Denunciado. Com denúncias suficientes sai do Mural.",
-  "wallReportFailed": "Não foi possível denunciar. Tente novamente."
+  "wallReportFailed": "Não foi possível denunciar. Tente novamente.",
+  "timerNotificationTitle": "O timer terminou",
+  "timerNotificationBody": "O passo {step} está pronto — volte para a cozinha.",
+  "timerAlertsUnavailable": "os alertas não estão disponíveis — o timer continua com o app aberto",
+  "importShareNoLink": "Esse compartilhamento não tinha um link. Cole a URL do reel abaixo.",
+  "authPasswordShow": "Mostrar senha",
+  "authPasswordHide": "Ocultar senha"
 }

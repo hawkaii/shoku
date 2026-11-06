@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -587,8 +588,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String shelfScore(int have, int total) {
-    final intl.NumberFormat haveNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat haveNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String haveString = haveNumberFormat.format(have);
     final intl.NumberFormat totalNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -773,8 +775,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String botCookingStep(int step, int total) {
-    final intl.NumberFormat stepNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat stepNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String stepString = stepNumberFormat.format(step);
     final intl.NumberFormat totalNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -898,8 +901,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String botSuggestionMeta(String source, int have, int total) {
-    final intl.NumberFormat haveNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat haveNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String haveString = haveNumberFormat.format(have);
     final intl.NumberFormat totalNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -941,8 +945,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String chatAboutStep(int step) {
-    final intl.NumberFormat stepNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat stepNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String stepString = stepNumberFormat.format(step);
 
     return 'படி $stepString பற்றி';
@@ -992,11 +997,13 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String chatVersionArrow(int from, int to) {
-    final intl.NumberFormat fromNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat fromNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String fromString = fromNumberFormat.format(from);
-    final intl.NumberFormat toNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat toNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String toString = toNumberFormat.format(to);
 
     return 'v$fromString → v$toString';
@@ -1060,7 +1067,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get importCouldNotStart => 'அந்த இறக்குமதியைத் தொடங்க முடியவில்லை';
 
   @override
-  String get importSignIn => 'இறக்குமதி செய்ய நீங்கள் பகுதியில் உள்நுழையுங்கள்';
+  String get importSignIn => 'இந்த ரீலை இறக்குமதி செய்ய உள்நுழையுங்கள்';
 
   @override
   String get importUnreachable => 'சர்வரை அடைய முடியவில்லை';
@@ -1138,11 +1145,13 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String dishVersionGone(int from, int to) {
-    final intl.NumberFormat fromNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat fromNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String fromString = fromNumberFormat.format(from);
-    final intl.NumberFormat toNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat toNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String toString = toNumberFormat.format(to);
 
     return 'v$fromString இல்லை — v$toString காட்டப்படுகிறது';
@@ -1235,8 +1244,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String dishAskAboutStep(int step) {
-    final intl.NumberFormat stepNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat stepNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String stepString = stepNumberFormat.format(step);
 
     return 'படி $stepString பற்றிக் கேளுங்கள்';
@@ -1674,8 +1684,9 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String timerOnStep(int step, String state) {
-    final intl.NumberFormat stepNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat stepNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
     final String stepString = stepNumberFormat.format(step);
 
     return 'படி $stepString · $state';
@@ -1841,4 +1852,26 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'புகாரளிக்க முடியவில்லை. மீண்டும் முயலவும்.';
+
+  @override
+  String get timerNotificationTitle => 'டைமர் முடிந்தது';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'படி $step முடிந்தது — சமையலறைக்குத் திரும்புங்கள்.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'எச்சரிக்கைகள் இல்லை — செயலி திறந்திருக்கும் போது டைமர் இயங்கும்';
+
+  @override
+  String get importShareNoLink =>
+      'அந்தப் பங்கில் இணைப்பு இல்லை. கீழே ரீலின் URL-ஐ ஒட்டுங்கள்.';
+
+  @override
+  String get authPasswordShow => 'கடவுச்சொல்லைக் காட்டு';
+
+  @override
+  String get authPasswordHide => 'கடவுச்சொல்லை மறை';
 }

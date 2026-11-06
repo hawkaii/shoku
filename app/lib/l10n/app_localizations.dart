@@ -71,7 +71,7 @@ import 'app_localizations_te.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -94,11 +94,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -111,7 +111,7 @@ abstract class AppLocalizations {
     Locale('mr'),
     Locale('pt'),
     Locale('ta'),
-    Locale('te')
+    Locale('te'),
   ];
 
   /// Title of the language picker, on onboarding and in You.
@@ -1533,7 +1533,7 @@ abstract class AppLocalizations {
   /// No description provided for @importSignIn.
   ///
   /// In en, this message translates to:
-  /// **'Sign in from You to import'**
+  /// **'Sign in to import this reel'**
   String get importSignIn;
 
   /// No description provided for @importUnreachable.
@@ -2597,6 +2597,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not report it. Try again.'**
   String get wallReportFailed;
+
+  /// Title of the local notification posted when a cook-mode timer finishes.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer is up'**
+  String get timerNotificationTitle;
+
+  /// Body of the timer notification. {step} is the 1-based step number.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} is done — back to the kitchen.'**
+  String timerNotificationBody(int step);
+
+  /// Timer card note when no notification channel or plugin is available at all.
+  ///
+  /// In en, this message translates to:
+  /// **'alerts are off — the timer still works while the app is open'**
+  String get timerAlertsUnavailable;
+
+  /// Import sheet note when a shared item carried no URL (for example an image-only share).
+  ///
+  /// In en, this message translates to:
+  /// **'That share didn’t include a link. Paste the reel’s URL below.'**
+  String get importShareNoLink;
+
+  /// Accessibility label for the control that reveals the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authPasswordShow;
+
+  /// Accessibility label for the control that hides the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authPasswordHide;
 }
 
 class _AppLocalizationsDelegate
@@ -2610,17 +2646,17 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => <String>[
-        'bn',
-        'en',
-        'es',
-        'fr',
-        'hi',
-        'id',
-        'mr',
-        'pt',
-        'ta',
-        'te'
-      ].contains(locale.languageCode);
+    'bn',
+    'en',
+    'es',
+    'fr',
+    'hi',
+    'id',
+    'mr',
+    'pt',
+    'ta',
+    'te',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2652,8 +2688,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }
