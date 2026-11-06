@@ -10,9 +10,12 @@ on:
     # pubspec.yaml is the act of asking for an APK; code commits on their own
     # build nothing. That is what stops a busy day from costing 90 minutes of
     # runner time for binaries nobody installs.
+    #
+    # A change to this workflow is deliberately not a trigger either: it would
+    # republish the current version and rewrite its release assets every time the
+    # pipeline is touched. Use `workflow_dispatch` to test a workflow change.
     paths:
       - "app/pubspec.yaml"
-      - ".github/workflows/android.yml"
   workflow_dispatch:
     inputs:
       build_type:
@@ -25,6 +28,11 @@ on:
 
 permissions:
   contents: write
+  # The changelog step opens a PR instead of pushing to a protected main. That
+  # needs this scope; without it the step fails with "Resource not accessible by
+  # integration (createPullRequest)" and, because the step is continue-on-error,
+  # the changelog would stop updating without turning the release red.
+  pull-requests: write
 
 # Let a release finish rather than leaving a half-published tag behind.
 concurrency:
