@@ -144,6 +144,9 @@ class CookTimerCard extends StatelessWidget {
   String? alertNote(AppLocalizations l10n) => switch (alerts) {
         TimerAlertPermission.denied => l10n.timerAlertsOff,
         TimerAlertPermission.inexact => l10n.timerAlertsLate,
+        // The plugin refused to schedule after permission was granted. The clock
+        // still works; the ring does not, and that is said out loud.
+        TimerAlertPermission.unavailable => l10n.timerAlertsUnavailable,
         _ => null,
       };
 }

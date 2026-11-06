@@ -115,12 +115,18 @@ void main() {
 
   testWidgets('a running timer can be paused, resumed and stopped',
       (tester) async {
-    await _pumpCook(tester, db: db, dish: _dish());
+    final alerts = FakeTimerAlerts();
+    await _pumpCook(tester, db: db, dish: _dish(), alerts: alerts);
 
     // Step 1 mentions five minutes, so there is something to start.
     await tester.tap(find.byKey(const ValueKey('timer-start')));
     await tester.pump();
     expect(find.text('running'), findsOneWidget);
+
+    // The notification is in the app's language, with the step counted from one,
+    // because the screen — not the store — has the localizations.
+    expect(alerts.scheduledCopies.single.title, 'Timer is up');
+    expect(alerts.scheduledCopies.single.body, contains('Step 1'));
 
     await tester.tap(find.byKey(const ValueKey('timer-pause')));
     await tester.pump();
@@ -129,6 +135,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('timer-resume')));
     await tester.pump();
     expect(find.text('running'), findsOneWidget);
+    expect(alerts.scheduledCopies, hasLength(2), reason: 'resume re-arms it');
 
     await tester.tap(find.byKey(const ValueKey('timer-stop')));
     await tester.pump();
