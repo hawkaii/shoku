@@ -62,7 +62,7 @@ you ask.
 ```
 
 **Category** Food & Drink · **Contact email** `hello@gradientdescent.wiki` ·
-**Privacy** `https://shoku.gradientdescent.wiki/privacy` ·
+**Privacy** `https://hawkaii.github.io/shoku/privacy.html` ·
 **Account deletion** `https://hawkaii.github.io/shoku/account-deletion.html`
 
 ## Data safety
