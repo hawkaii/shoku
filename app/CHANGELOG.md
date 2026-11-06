@@ -3,6 +3,14 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.29.4] — 2026-11-06
+
+### Added
+- A report path, because the feed is user-generated *(wall)* — [`186caa5`](https://github.com/hawkaii/food-finder-app/commit/186caa5ab6f7ec28c9a7a513871671939af008d2)
+
+### Docs
+- V1.29.3 [skip ci] *(changelog)* — [`e0e6b0e`](https://github.com/hawkaii/food-finder-app/commit/e0e6b0e34f90cef6a11a20aba80c382505a0a301)
+
 ## [1.29.3] — 2026-11-06
 
 ### Added
