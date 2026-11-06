@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../../data/db/cook_timer_repository.dart';
 import '../../data/models/cook_timer.dart';
 import '../../data/services/timer_alerts.dart';
@@ -48,9 +49,11 @@ class CookTimerStore extends StateNotifier<CookTimer?> {
   Future<void> _restore() async {
     try {
       state = await _repo.read();
-    } catch (_) {
+    } catch (error, stack) {
       // A timer is convenience, never the product. A bad row must not take the
-      // cook screen down with it.
+      // cook screen down with it, but it must not disappear without a word
+      // either: a timer that silently did not restore is a lost timer.
+      logFailure('cook timer restore', error, stack);
       state = null;
     } finally {
       _restored = true;

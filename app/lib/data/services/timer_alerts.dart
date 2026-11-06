@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../core/utils/failure_log.dart';
 import '../models/cook_timer.dart';
 
 /// Whether a timer can ring with the phone in a pocket — and how punctually.
@@ -181,7 +182,8 @@ class LocalTimerAlerts implements TimerAlerts {
             try {
               await _notifications.requestExactAlarms();
             } catch (_) {
-              // No settings page on this build: inexact is the answer.
+              // Optional platform work: no settings page on this build. Inexact
+              // is the answer, and the card already says so.
             }
           }
           return TimerAlertPermission.inexact;
@@ -195,8 +197,11 @@ class LocalTimerAlerts implements TimerAlerts {
         case TimerAlertsPlatform.other:
           return TimerAlertPermission.allowed;
       }
-    } catch (_) {
-      // A notification problem is never allowed to break a cook.
+    } catch (error, stack) {
+      // A notification problem is never allowed to break a cook — but a timer
+      // that could not even be asked about must not look like one that was
+      // refused.
+      logFailure('timer alert permission', error, stack);
       return TimerAlertPermission.unavailable;
     }
   }
@@ -220,7 +225,11 @@ class LocalTimerAlerts implements TimerAlerts {
         case TimerAlertsPlatform.other:
           return TimerAlertPermission.allowed;
       }
-    } catch (_) {
+    } catch (error, stack) {
+      // Resuming is the one moment a grant made in Settings is picked up; if
+      // the read fails, the card is unknown rather than right, and the line
+      // says so.
+      logFailure('timer alert current permission', error, stack);
       return TimerAlertPermission.unavailable;
     }
   }
@@ -264,9 +273,11 @@ class LocalTimerAlerts implements TimerAlerts {
             : AndroidScheduleMode.inexactAllowWhileIdle,
       );
       return true;
-    } catch (_) {
+    } catch (error, stack) {
       // The in-app timer is unaffected, so the cook is never harmed — but the
-      // caller is told, so the card can stop pretending the alert will ring.
+      // caller is told, so the card can stop pretending the alert will ring, and
+      // the log says why it could not be scheduled.
+      logFailure('timer alert schedule', error, stack);
       return false;
     }
   }
@@ -277,9 +288,10 @@ class LocalTimerAlerts implements TimerAlerts {
     try {
       if (!await _init()) return;
       await _notifications.cancel(timer.notificationId);
-    } catch (_) {
-      // Nothing to do: a stale notification is better than a crash, and the
-      // id is stable, so the next cancel will find it.
+    } catch (error, stack) {
+      // A stale notification is better than a crash and the id is stable, so the
+      // next cancel finds it — but a cancel that never works is a bug, not noise.
+      logFailure('timer alert cancel', error, stack);
     }
   }
 }

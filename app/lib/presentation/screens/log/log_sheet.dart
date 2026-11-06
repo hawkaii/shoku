@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/l10n/labels.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/api_client.dart';
 import '../../../data/services/photo_service.dart';
@@ -99,7 +100,9 @@ class _LogSheetState extends ConsumerState<LogSheet> {
         ).upload(_photo!, role: 'debrief');
         photoKey = uploaded.key;
         photoUrl = uploaded.url;
-      } catch (_) {
+      } catch (error, stack) {
+        // The cook still saves; only the photo is missing from the entry.
+        logFailure('log sheet photo upload', error, stack);
         photoKey = null;
         photoUrl = null;
       }
@@ -129,7 +132,9 @@ class _LogSheetState extends ConsumerState<LogSheet> {
           duration: const Duration(seconds: 2),
         ),
       );
-    } catch (_) {
+    } catch (error, stack) {
+      // The user already sees `logSaveFailed`; the line says which throw it was.
+      logFailure('log sheet save', error, stack);
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(SnackBar(content: Text(l10n.logSaveFailed)));
     }

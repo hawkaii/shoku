@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/db/assistant_turn_repository.dart';
 import '../../../data/mock/journal_data.dart';
 import '../../../data/services/api_client.dart';
@@ -186,8 +187,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           ..addAll([for (final turn in last) _Turn.restored(turn)]);
         _loading = false;
       });
-    } catch (_) {
+    } catch (error, stack) {
       // A chat that cannot be read is still a chat that can be started.
+      logFailure('recipe chat history load', error, stack);
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -269,8 +271,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           );
       _stored.add(turn);
       _total++;
-    } catch (_) {
-      // Memory is best-effort: losing a line must not lose the answer.
+    } catch (error, stack) {
+      // Memory is best-effort: losing a line must not lose the answer, but it
+      // should still be in the log.
+      logFailure('recipe chat remember turn', error, stack);
     }
   }
 
@@ -358,7 +362,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
         _turns.add(_Turn.notice(context.l10n.botOfflineNotice));
       });
       _scrollToLatest();
-    } catch (_) {
+    } catch (error, stack) {
+      // The turn shows the offline notice; the log says what actually failed.
+      logFailure('recipe chat send', error, stack);
       if (!mounted) return;
       setState(() {
         _thinking = false;
@@ -405,7 +411,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           _diff = null;
         }
       });
-    } catch (_) {
+    } catch (error, stack) {
+      // The sheet already says "nothing changed"; record why it believes that.
+      logFailure('recipe chat apply', error, stack);
       if (!mounted) return;
       setState(() {
         _applying = false;

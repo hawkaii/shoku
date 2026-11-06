@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
 import '../../../data/models/recipe_content.dart';
@@ -65,7 +66,9 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       if (!mounted) return;
       setState(() => _content = content);
       if (content == null) setState(() => _failed = true);
-    } catch (_) {
+    } catch (error, stack) {
+      // The sheet shows its retry state; the log keeps the cause.
+      logFailure('wall reel content load', error, stack);
       if (!mounted) return;
       setState(() => _failed = true);
     }
@@ -87,7 +90,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
             ? l10n.wallReelGone
             : l10n.wallSavedToCookbook(dish.title)),
       ));
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('wall reel add to cookbook', error, stack);
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.importUnreachable)),
@@ -107,7 +111,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       if (!mounted) return;
       setState(() => _reported = true);
       messenger.showSnackBar(SnackBar(content: Text(l10n.wallReported)));
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('wall reel report', error, stack);
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.wallReportFailed)));
     } finally {

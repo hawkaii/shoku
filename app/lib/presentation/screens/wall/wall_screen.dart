@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../core/utils/shoku_text.dart';
 import '../../../data/models/feed_item.dart';
 import '../../state/feed_providers.dart';
@@ -172,7 +173,8 @@ class _FeedCardState extends ConsumerState<FeedCard> {
             ? l10n.wallReelGone
             : l10n.wallSavedToCookbook(dish.title)),
       ));
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('wall add to cookbook', error, stack);
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.importUnreachable)),
