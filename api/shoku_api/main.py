@@ -5,6 +5,9 @@ with fake interfaces and an in-memory database. `asgi.py` is the only module
 with import-time side effects, and it is the uvicorn target.
 """
 
+import asyncio
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -31,7 +34,26 @@ def create_app(
         # Convenience for dev and tests. A deployed environment runs Alembic.
         Base.metadata.create_all(context.engine)
 
+    @asynccontextmanager
+    async def _lifespan(_app: FastAPI):
+        # The broker owns start and stop for every tenant on the pooled
+        # machine; None unless this deployment runs it.
+        broker = context.pool_broker
+        task = (
+            asyncio.create_task(
+                broker.run_forever(loop_seconds=context.settings.pool_loop_seconds)
+            )
+            if broker is not None
+            else None
+        )
+        try:
+            yield
+        finally:
+            if task is not None:
+                task.cancel()
+
     app = FastAPI(
+        lifespan=_lifespan,
         title="Shoku API",
         version=__version__,
         docs_url="/docs" if settings.environment != "prod" else None,

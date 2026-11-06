@@ -1838,4 +1838,61 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get routeErrorBack => 'Kembali ke jurnal';
+
+  @override
+  String get handsFree => 'Bebas tangan';
+
+  @override
+  String get handsFreeListening => 'Mendengarkan';
+
+  @override
+  String get handsFreeConnecting => 'Menghubungkan…';
+
+  @override
+  String get handsFreeThinking => 'Berpikir…';
+
+  @override
+  String get handsFreeSpeaking => 'Berbicara…';
+
+  @override
+  String get handsFreePaused => 'Dijeda';
+
+  @override
+  String get handsFreeStart => 'Mulai bebas tangan';
+
+  @override
+  String get handsFreeStop => 'Hentikan bebas tangan';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'Terdengar: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn => 'Masih memasak? Bilang “lanjut” saat siap.';
+
+  @override
+  String get handsFreeHelp =>
+      'Bilang lanjut, kembali, ulangi, mulai timer 5 menit, bantuan, atau hentikan bebas tangan.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Timer $count menit dimulai.',
+      one: 'Timer 1 menit dimulai.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'Bebas tangan butuh koneksi. Ketuk untuk mencoba lagi.';
+
+  @override
+  String get handsFreeAuth => 'Masuk dari Kamu untuk memakai bebas tangan.';
+
+  @override
+  String get handsFreeCap => 'Menit suara hari ini habis.';
 }

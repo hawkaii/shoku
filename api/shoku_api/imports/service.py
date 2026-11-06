@@ -9,6 +9,8 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import timedelta
 
+import logging
+
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
@@ -17,18 +19,19 @@ from ..domain.errors import Gone, NotFound, ShokuError
 from ..domain.quota import Quota, release as release_quota, reserve as reserve_quota
 from ..domain.quota import reset_at as reset_at_for
 from ..domain.quota import used as quota_used
-from ..domain.urls import normalise_url
 from ..domain.worker_pool import (
-    RUNNING,
     STARTING,
     AlwaysWakeGate,
     NoWorkerPool,
     WorkerWaker,
 )
+from ..domain.urls import normalise_url
 from .pipeline import EXTRACTION_VERSION
 from .queue import Queue
 from ..models import ContentCache, ImportAsk, ImportJob, ImportUsage
 from ..schemas import ImportResponse, ImportStatus
+
+log = logging.getLogger("shoku.imports.service")
 
 TERMINAL_STATES = ("ready", "failed")
 CANCELLED_REASON = "cancelled"
@@ -47,7 +50,14 @@ class ImportDeps:
 
     queue: Queue
     clock: Clock
+    #: The direct waker. Unused when a broker owns the machine, but the import
+    #: service keeps it so a deployment without a broker behaves as it did.
     waker: WorkerWaker = field(default_factory=_offline_waker)
+    #: The shared lease registry, when this deployment has one. Enqueueing
+    #: publishes demand; it never touches GCE.
+    registry: object | None = None
+    pool: str = "render"
+    tenant: str = "shoku"
     #: A queued job older than this never met a worker. See ``reap_unclaimed``.
     unclaimed_timeout_seconds: float = 180.0
     #: Imports a user may queue per UTC day. 0 disables importing entirely.
@@ -166,30 +176,40 @@ def start_import(
             reset_at=reset_at_for(now),
         )
 
-    # Wake the VM only now, with the row and the queue entry already durable:
-    # a boot that beats the insert would find nothing to do.
-    try:
-        awake = deps.waker.ensure_awake()
-    except ShokuError:
-        # The instance refused to start. Fail the job rather than letting the
-        # client poll a queue that nothing will ever drain — and refund it.
-        release_quota(session, quota, uid=uid, request_id=ticket, now=now)
-        _fail(session, job, reason=WORKER_UNAVAILABLE, now=deps.clock.now())
-        return ImportResponse(
-            job_id=job.id,
-            state="failed",
-            cached=False,
-            shortcode=source.shortcode,
-            remaining=allowance(),
-            reset_at=reset_at_for(now),
-        )
+    # Two ways to get a worker, and the deployment says which one it is. With a
+    # broker, queueing work publishes demand and the broker decides whether that
+    # means a boot — the API never talks to GCE. Without one, the API wakes the
+    # VM itself, only now, with the row and the queue entry already durable: a
+    # boot that beats the insert would find nothing to do.
+    if deps.registry is not None:
+        try:
+            deps.registry.bump_demand(deps.pool, deps.tenant)
+        except Exception:  # noqa: BLE001 - a job must not fail over a lease write
+            log.warning("could not publish pool demand for %s", job.id)
+    else:
+        try:
+            awake = deps.waker.ensure_awake()
+        except ShokuError:
+            # The instance refused to start. Fail the job rather than letting
+            # the client poll a queue that nothing will ever drain — and refund
+            # the unit it reserved.
+            release_quota(session, quota, uid=uid, request_id=ticket, now=now)
+            _fail(session, job, reason=WORKER_UNAVAILABLE, now=deps.clock.now())
+            return ImportResponse(
+                job_id=job.id,
+                state="failed",
+                cached=False,
+                shortcode=source.shortcode,
+                remaining=allowance(),
+                reset_at=reset_at_for(now),
+            )
 
-    if awake == STARTING:
-        # Not claimed yet, and the box is booting. The worker clears this the
-        # moment it claims the row (see ImportWorker._claim).
-        job.progress_stage = STARTING
-        job.updated_at = deps.clock.now()
-        session.commit()
+        if awake == STARTING:
+            # Not claimed yet, and the box is booting. The worker clears this
+            # the moment it claims the row (see ImportWorker._claim).
+            job.progress_stage = STARTING
+            job.updated_at = deps.clock.now()
+            session.commit()
 
     return ImportResponse(
         job_id=job.id,

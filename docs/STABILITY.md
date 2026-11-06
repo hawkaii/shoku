@@ -197,4 +197,3 @@ The lesson that drives the plan: **the reference app's age did not make it stabl
 The machine used for this work has no Android SDK or device; the APK was
 assembled by CI, which is why the merged-manifest assertions live in the
 workflow rather than in a local script.
-

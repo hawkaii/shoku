@@ -422,5 +422,20 @@
   "authPasswordHide": "Ocultar contraseña",
   "routeErrorTitle": "Esta página no está aquí",
   "routeErrorBody": "Puede que el enlace sea antiguo o esté mal escrito. Tu diario sigue donde estaba.",
-  "routeErrorBack": "Volver al diario"
+  "routeErrorBack": "Volver al diario",
+  "handsFree": "Manos libres",
+  "handsFreeListening": "Escuchando",
+  "handsFreeConnecting": "Conectando…",
+  "handsFreeThinking": "Pensando…",
+  "handsFreeSpeaking": "Hablando…",
+  "handsFreePaused": "En pausa",
+  "handsFreeStart": "Iniciar manos libres",
+  "handsFreeStop": "Detener manos libres",
+  "handsFreeHeard": "Escuché: {text}",
+  "handsFreeCheckIn": "¿Sigues cocinando? Di «siguiente» cuando quieras.",
+  "handsFreeHelp": "Di siguiente, atrás, repite, inicia un temporizador de 5 minutos, ayuda o detén manos libres.",
+  "handsFreeTimerStarted": "{count, plural, one{Temporizador de 1 minuto iniciado.} other{Temporizador de {count} minutos iniciado.}}",
+  "handsFreeOffline": "Manos libres necesita conexión. Toca para reintentar.",
+  "handsFreeAuth": "Inicia sesión en Tú para usar manos libres.",
+  "handsFreeCap": "Los minutos de voz se agotaron por hoy."
 }

@@ -422,5 +422,20 @@
   "authPasswordHide": "पासवर्ड छिपाएँ",
   "routeErrorTitle": "यह पेज यहाँ नहीं है",
   "routeErrorBody": "लिंक पुराना या गलत लिखा हो सकता है। आपकी जर्नल वहीं है जहाँ थी।",
-  "routeErrorBack": "जर्नल पर वापस जाएँ"
+  "routeErrorBack": "जर्नल पर वापस जाएँ",
+  "handsFree": "हैंड्स-फ़्री",
+  "handsFreeListening": "सुन रहे हैं",
+  "handsFreeConnecting": "कनेक्ट हो रहा है…",
+  "handsFreeThinking": "सोच रहे हैं…",
+  "handsFreeSpeaking": "बोल रहे हैं…",
+  "handsFreePaused": "रुका हुआ",
+  "handsFreeStart": "हैंड्स-फ़्री शुरू करें",
+  "handsFreeStop": "हैंड्स-फ़्री बंद करें",
+  "handsFreeHeard": "सुना: {text}",
+  "handsFreeCheckIn": "अब भी पका रहे हैं? तैयार होने पर “अगला” कहें।",
+  "handsFreeHelp": "अगला, पीछे, दोहराओ, 5 मिनट का टाइमर शुरू करो, मदद, या हैंड्स-फ़्री बंद करो कहें।",
+  "handsFreeTimerStarted": "{count, plural, one{1 मिनट का टाइमर शुरू हुआ।} other{{count} मिनट का टाइमर शुरू हुआ।}}",
+  "handsFreeOffline": "हैंड्स-फ़्री के लिए कनेक्शन चाहिए। फिर कोशिश करने के लिए टैप करें।",
+  "handsFreeAuth": "हैंड्स-फ़्री के लिए आप में साइन इन करें।",
+  "handsFreeCap": "आज की आवाज़ मिनट खत्म हो गई हैं।"
 }

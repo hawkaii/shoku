@@ -1858,4 +1858,62 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get routeErrorBack => 'Voltar ao diário';
+
+  @override
+  String get handsFree => 'Mãos livres';
+
+  @override
+  String get handsFreeListening => 'Ouvindo';
+
+  @override
+  String get handsFreeConnecting => 'Conectando…';
+
+  @override
+  String get handsFreeThinking => 'Pensando…';
+
+  @override
+  String get handsFreeSpeaking => 'Falando…';
+
+  @override
+  String get handsFreePaused => 'Em pausa';
+
+  @override
+  String get handsFreeStart => 'Iniciar mãos livres';
+
+  @override
+  String get handsFreeStop => 'Parar mãos livres';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'Ouvi: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn =>
+      'Ainda cozinhando? Diga “próximo” quando estiver pronto.';
+
+  @override
+  String get handsFreeHelp =>
+      'Diga próximo, voltar, repete, inicia um timer de 5 minutos, ajuda ou para mãos livres.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Timer de $count minutos iniciado.',
+      one: 'Timer de 1 minuto iniciado.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'Mãos livres precisa de conexão. Toque para tentar de novo.';
+
+  @override
+  String get handsFreeAuth => 'Entre em Você para usar mãos livres.';
+
+  @override
+  String get handsFreeCap => 'Os minutos de voz acabaram por hoje.';
 }

@@ -422,5 +422,20 @@
   "authPasswordHide": "Masquer le mot de passe",
   "routeErrorTitle": "Cette page n’est pas ici",
   "routeErrorBody": "Le lien est peut-être ancien ou mal saisi. Votre journal est toujours là où il était.",
-  "routeErrorBack": "Retour au journal"
+  "routeErrorBack": "Retour au journal",
+  "handsFree": "Mains libres",
+  "handsFreeListening": "Écoute",
+  "handsFreeConnecting": "Connexion…",
+  "handsFreeThinking": "Réflexion…",
+  "handsFreeSpeaking": "Parle…",
+  "handsFreePaused": "En pause",
+  "handsFreeStart": "Activer les mains libres",
+  "handsFreeStop": "Arrêter les mains libres",
+  "handsFreeHeard": "Entendu : {text}",
+  "handsFreeCheckIn": "Toujours en cuisine ? Dites « suivant » quand vous êtes prêt.",
+  "handsFreeHelp": "Dites suivant, retour, répète, lance un minuteur de 5 minutes, aide, ou arrête les mains libres.",
+  "handsFreeTimerStarted": "{count, plural, one{Minuteur de 1 minute lancé.} other{Minuteur de {count} minutes lancé.}}",
+  "handsFreeOffline": "Les mains libres ont besoin d’une connexion. Touchez pour réessayer.",
+  "handsFreeAuth": "Connectez-vous dans Vous pour utiliser les mains libres.",
+  "handsFreeCap": "Les minutes vocales sont épuisées pour aujourd’hui."
 }

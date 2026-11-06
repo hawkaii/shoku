@@ -2651,6 +2651,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to the journal'**
   String get routeErrorBack;
+
+  /// No description provided for @handsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-free'**
+  String get handsFree;
+
+  /// No description provided for @handsFreeListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening'**
+  String get handsFreeListening;
+
+  /// No description provided for @handsFreeConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get handsFreeConnecting;
+
+  /// No description provided for @handsFreeThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get handsFreeThinking;
+
+  /// No description provided for @handsFreeSpeaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking…'**
+  String get handsFreeSpeaking;
+
+  /// No description provided for @handsFreePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get handsFreePaused;
+
+  /// No description provided for @handsFreeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start hands-free'**
+  String get handsFreeStart;
+
+  /// No description provided for @handsFreeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop hands-free'**
+  String get handsFreeStop;
+
+  /// No description provided for @handsFreeHeard.
+  ///
+  /// In en, this message translates to:
+  /// **'Heard: {text}'**
+  String handsFreeHeard(String text);
+
+  /// No description provided for @handsFreeCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Still cooking? Say next when you’re ready.'**
+  String get handsFreeCheckIn;
+
+  /// No description provided for @handsFreeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Say next, back, repeat, start a 5 minute timer, help, or stop hands-free.'**
+  String get handsFreeHelp;
+
+  /// No description provided for @handsFreeTimerStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Timer started for 1 minute.} other{Timer started for {count} minutes.}}'**
+  String handsFreeTimerStarted(int count);
+
+  /// No description provided for @handsFreeOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands-free needs a connection. Tap to try again.'**
+  String get handsFreeOffline;
+
+  /// No description provided for @handsFreeAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in from You to use hands-free.'**
+  String get handsFreeAuth;
+
+  /// No description provided for @handsFreeCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice minutes are used up for today.'**
+  String get handsFreeCap;
 }
 
 class _AppLocalizationsDelegate

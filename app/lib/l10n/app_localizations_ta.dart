@@ -1873,4 +1873,63 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get routeErrorBack => 'ஜர்னலுக்குத் திரும்பு';
+
+  @override
+  String get handsFree => 'கைகள் இல்லாமல்';
+
+  @override
+  String get handsFreeListening => 'கேட்கிறது';
+
+  @override
+  String get handsFreeConnecting => 'இணைக்கிறது…';
+
+  @override
+  String get handsFreeThinking => 'யோசிக்கிறது…';
+
+  @override
+  String get handsFreeSpeaking => 'பேசுகிறது…';
+
+  @override
+  String get handsFreePaused => 'இடைநிறுத்தம்';
+
+  @override
+  String get handsFreeStart => 'கைகள் இல்லாமல் தொடங்கு';
+
+  @override
+  String get handsFreeStop => 'கைகள் இல்லாமல் நிறுத்து';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'கேட்டது: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn =>
+      'இன்னும் சமைக்கிறீர்களா? தயாராகும்போது “அடுத்து” சொல்லுங்கள்.';
+
+  @override
+  String get handsFreeHelp =>
+      'அடுத்து, பின், மீண்டும், 5 நிமிட டைமர் தொடங்கு, உதவி, அல்லது கைகள் இல்லாமல் நிறுத்து என்று சொல்லுங்கள்.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count நிமிட டைமர் தொடங்கியது.',
+      one: '1 நிமிட டைமர் தொடங்கியது.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'கைகள் இல்லாமலுக்கு இணைப்பு தேவை. மீண்டும் முயற்சிக்கத் தட்டவும்.';
+
+  @override
+  String get handsFreeAuth =>
+      'கைகள் இல்லாமல் பயன்படுத்த நீங்கள் பகுதியில் உள்நுழையுங்கள்.';
+
+  @override
+  String get handsFreeCap => 'இன்றைய குரல் நிமிடங்கள் முடிந்தன.';
 }

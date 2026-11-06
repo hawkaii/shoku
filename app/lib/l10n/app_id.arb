@@ -422,5 +422,20 @@
   "authPasswordHide": "Sembunyikan sandi",
   "routeErrorTitle": "Halaman ini tidak ada di sini",
   "routeErrorBody": "Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.",
-  "routeErrorBack": "Kembali ke jurnal"
+  "routeErrorBack": "Kembali ke jurnal",
+  "handsFree": "Bebas tangan",
+  "handsFreeListening": "Mendengarkan",
+  "handsFreeConnecting": "Menghubungkan…",
+  "handsFreeThinking": "Berpikir…",
+  "handsFreeSpeaking": "Berbicara…",
+  "handsFreePaused": "Dijeda",
+  "handsFreeStart": "Mulai bebas tangan",
+  "handsFreeStop": "Hentikan bebas tangan",
+  "handsFreeHeard": "Terdengar: {text}",
+  "handsFreeCheckIn": "Masih memasak? Bilang “lanjut” saat siap.",
+  "handsFreeHelp": "Bilang lanjut, kembali, ulangi, mulai timer 5 menit, bantuan, atau hentikan bebas tangan.",
+  "handsFreeTimerStarted": "{count, plural, one{Timer 1 menit dimulai.} other{Timer {count} menit dimulai.}}",
+  "handsFreeOffline": "Bebas tangan butuh koneksi. Ketuk untuk mencoba lagi.",
+  "handsFreeAuth": "Masuk dari Kamu untuk memakai bebas tangan.",
+  "handsFreeCap": "Menit suara hari ini habis."
 }

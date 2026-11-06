@@ -43,6 +43,7 @@ from .domain.worker_pool import (
     WorkerPool,
     WorkerWaker,
 )
+from .pool import Broker, RedisRegistry
 from .imports.interfaces import (
     Extractor,
     Structurer,
@@ -76,10 +77,19 @@ class AppContext:
     breaker: CircuitBreaker
     #: Starts the worker VM when a job is queued, and stops it when idle.
     worker_pool: "WorkerPool | NoWorkerPool"
+    #: The debounced decision to wake it. Kept alongside the pool because a
+    #: deployment with a broker publishes demand instead of waking directly.
     waker: WorkerWaker
     #: Reads a silent reel from frames. None when vision is off or unconfigured,
     #: which turns "no text" into a clear failure instead of a junk dish.
     vision: "VisionStructurer | None" = None
+    #: Opens the upstream ASR socket. None means the real websockets client, so
+    #: the test suite never reaches Meta.
+    voice_connect: Any = None
+    #: The shared lease registry. None when the pool has no Redis (dev, tests).
+    pool_registry: "RedisRegistry | None" = None
+    #: The process that owns start/stop. None unless the deployment runs it.
+    pool_broker: "Broker | None" = None
 
     # ---- convenience views for services ---------------------------------
 
@@ -88,6 +98,11 @@ class AppContext:
         return ImportDeps(
             queue=self.queue,
             clock=self.clock,
+            # Both paths are kept: a broker deployment publishes demand and
+            # never calls GCE; a waker deployment wakes the VM itself.
+            registry=self.pool_registry,
+            pool=self.settings.pool_name,
+            tenant=self.settings.pool_tenant,
             waker=self.waker,
             daily_cap=self.settings.import_daily_cap,
             unclaimed_timeout_seconds=float(
@@ -157,6 +172,7 @@ def build_context(
         )
         storage = DevStorage(settings.storage_public_base_url)
 
+    voice_connect: Any = None
     assistant_model: AssistantModel = UnconfiguredAssistantModel()
     pantry_parser: PantryParser = UnconfiguredPantryParser()
     pantry_image_parser: PantryImageParser = UnconfiguredPantryImageParser()
@@ -193,19 +209,46 @@ def build_context(
             zone=settings.gcp_zone,
             instance=settings.worker_instance,
         )
-        # The gate lives in Redis because it is the one store both the API and
-        # the worker can see; without it every import would ask for a boot.
-        gate = (
-            RedisWakeGate(settings.redis_url)
-            if settings.queue_backend == "redis"
-            else AlwaysWakeGate()
-        )
     else:
         worker_pool = NoWorkerPool()
-        gate = AlwaysWakeGate()
+    # The gate lives in Redis because it is the one store both the API and the
+    # worker can see; without it every import would ask for a boot.
+    gate = (
+        RedisWakeGate(settings.redis_url)
+        if settings.queue_backend == "redis"
+        else AlwaysWakeGate()
+    )
     waker = WorkerWaker(
         worker_pool, gate, window=settings.worker_wake_debounce_seconds
     )
+
+    pool_registry: RedisRegistry | None = None
+    pool_broker: Broker | None = None
+    if settings.queue_backend == "redis" and settings.autostart_worker:
+        pool_registry = RedisRegistry(
+            settings.redis_url,
+            lease_ttl=settings.pool_lease_ttl,
+            demand_ttl=settings.pool_demand_ttl,
+            beat_ttl=settings.pool_beat_ttl,
+            boot_grace=settings.pool_boot_grace_seconds,
+        )
+        if settings.pool_broker_enabled and settings.gcp_project:
+            instances = [
+                name.strip()
+                for name in (settings.pool_instances or settings.worker_instance).split(",")
+                if name.strip()
+            ]
+            pool_broker = Broker(
+                pool_registry,
+                GceWorkerPool(
+                    project=settings.gcp_project,
+                    zone=settings.gcp_zone,
+                    instance=instances[0],
+                ),
+                pool=settings.pool_name,
+                idle_grace=settings.idle_shutdown_seconds,
+                boot_grace=settings.pool_boot_grace_seconds,
+            )
 
     ctx = AppContext(
         settings=settings,
@@ -224,6 +267,9 @@ def build_context(
         assistant_model=assistant_model,
         pantry_parser=pantry_parser,
         pantry_image_parser=pantry_image_parser,
+        voice_connect=voice_connect,
+        pool_registry=pool_registry,
+        pool_broker=pool_broker,
         clock=SystemClock(),
         worker_pool=worker_pool,
         waker=waker,

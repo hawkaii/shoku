@@ -1847,4 +1847,62 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get routeErrorBack => 'জার্নালে ফিরে যান';
+
+  @override
+  String get handsFree => 'হ্যান্ডস-ফ্রি';
+
+  @override
+  String get handsFreeListening => 'শুনছে';
+
+  @override
+  String get handsFreeConnecting => 'সংযোগ হচ্ছে…';
+
+  @override
+  String get handsFreeThinking => 'ভাবছে…';
+
+  @override
+  String get handsFreeSpeaking => 'বলছে…';
+
+  @override
+  String get handsFreePaused => 'থামানো';
+
+  @override
+  String get handsFreeStart => 'হ্যান্ডস-ফ্রি শুরু করুন';
+
+  @override
+  String get handsFreeStop => 'হ্যান্ডস-ফ্রি বন্ধ করুন';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'শোনা গেছে: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn => 'এখনও রান্না করছেন? প্রস্তুত হলে “পরের” বলুন।';
+
+  @override
+  String get handsFreeHelp =>
+      'পরের, পিছনে, আবার বলো, ৫ মিনিটের টাইমার শুরু করো, সাহায্য, বা হ্যান্ডস-ফ্রি বন্ধ করো বলুন।';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count মিনিটের টাইমার শুরু হয়েছে।',
+      one: '১ মিনিটের টাইমার শুরু হয়েছে।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'হ্যান্ডস-ফ্রির জন্য সংযোগ দরকার। আবার চেষ্টা করতে ট্যাপ করুন।';
+
+  @override
+  String get handsFreeAuth =>
+      'হ্যান্ডস-ফ্রি ব্যবহার করতে আপনি থেকে সাইন ইন করুন।';
+
+  @override
+  String get handsFreeCap => 'আজকের ভয়েস মিনিট শেষ।';
 }

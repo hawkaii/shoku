@@ -5,14 +5,18 @@ on SIGTERM/SIGINT after the job in hand, so a deploy never leaves a job in
 ``extracting`` with no process behind it.
 """
 
+import contextlib
 import logging
+import os
 import signal
-import time
+import socket
 import sys
+import time
 
 from ..config import get_settings
 from ..container import build_context
 from .pipeline import ImportWorker
+from ..pool import LeaseKeeper
 
 log = logging.getLogger(__name__)
 
@@ -26,21 +30,6 @@ def _warm(transcriber) -> float:
     started = time.monotonic()
     transcriber.warm()
     return time.monotonic() - started
-
-
-def _should_stop(ctx, *, idle_for: float, limit: float) -> bool:
-    """Whether the worker may stop its VM now.
-
-    Only meaningful in the empty-dequeue branch, i.e. while this process has
-    nothing claimed. The queue is re-read here instead of trusting the poll that
-    just returned None: a job that arrived during the idle window must not be
-    slept through. A cron could not make that call, which is why it lives here.
-    """
-    if limit <= 0 or not getattr(ctx.worker_pool, "can_stop", False):
-        return False
-    if idle_for < limit:
-        return False
-    return ctx.queue.depth() == 0
 
 
 def main() -> int:
@@ -77,9 +66,9 @@ def main() -> int:
 
     log.info("worker ready (queue=%s)", settings.queue_backend)
 
-    idle_limit = float(settings.idle_shutdown_seconds)
-    idle_since = time.monotonic()
-
+    # This process never powers the machine down. It sees one queue, and a
+    # quiet one here says nothing about the other tenants sharing the box — that
+    # decision belongs to the pool broker, which sees every lease.
     while not stopping:
         try:
             job_id = ctx.queue.dequeue(timeout=5)
@@ -88,23 +77,24 @@ def main() -> int:
             time.sleep(2)
             continue
         if job_id is None:
-            idle_for = time.monotonic() - idle_since
-            if _should_stop(ctx, idle_for=idle_for, limit=idle_limit):
-                log.info(
-                    "idle for %.0fs with an empty queue; stopping the worker instance",
-                    idle_for,
-                )
-                try:
-                    ctx.worker_pool.stop()
-                except Exception:  # noqa: BLE001 - powering down is best effort
-                    log.exception("could not stop the worker instance")
-                # Either the VM is going down or the stop was refused; wait a
-                # full idle window before trying again instead of spinning.
-                idle_since = time.monotonic()
             continue
-        idle_since = time.monotonic()
+        # A lease per running job, never per process: an idle container holds
+        # nothing, so the broker can still let the machine sleep.
+        lease = (
+            LeaseKeeper(
+                ctx.pool_registry,
+                settings.pool_name,
+                settings.pool_tenant,
+                job_id,
+                host=socket.gethostname(),
+                pid=os.getpid(),
+            )
+            if ctx.pool_registry is not None
+            else contextlib.nullcontext()
+        )
         try:
-            result = worker.process(job_id)
+            with lease:
+                result = worker.process(job_id)
         except Exception:  # noqa: BLE001 - one bad job must not kill the worker
             log.exception("job %s crashed", job_id)
             continue

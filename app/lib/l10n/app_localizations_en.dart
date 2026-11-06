@@ -1850,4 +1850,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routeErrorBack => 'Back to the journal';
+
+  @override
+  String get handsFree => 'Hands-free';
+
+  @override
+  String get handsFreeListening => 'Listening';
+
+  @override
+  String get handsFreeConnecting => 'Connecting…';
+
+  @override
+  String get handsFreeThinking => 'Thinking…';
+
+  @override
+  String get handsFreeSpeaking => 'Speaking…';
+
+  @override
+  String get handsFreePaused => 'Paused';
+
+  @override
+  String get handsFreeStart => 'Start hands-free';
+
+  @override
+  String get handsFreeStop => 'Stop hands-free';
+
+  @override
+  String handsFreeHeard(String text) {
+    return 'Heard: $text';
+  }
+
+  @override
+  String get handsFreeCheckIn => 'Still cooking? Say next when you’re ready.';
+
+  @override
+  String get handsFreeHelp =>
+      'Say next, back, repeat, start a 5 minute timer, help, or stop hands-free.';
+
+  @override
+  String handsFreeTimerStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Timer started for $count minutes.',
+      one: 'Timer started for 1 minute.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get handsFreeOffline =>
+      'Hands-free needs a connection. Tap to try again.';
+
+  @override
+  String get handsFreeAuth => 'Sign in from You to use hands-free.';
+
+  @override
+  String get handsFreeCap => 'Voice minutes are used up for today.';
 }

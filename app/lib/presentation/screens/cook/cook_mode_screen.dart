@@ -11,7 +11,11 @@ import '../../../data/mock/journal_data.dart';
 import '../../../data/models/cook_timer.dart';
 import '../../../data/services/speech_service.dart';
 import '../../../data/services/timer_alerts.dart';
+import '../../state/assistant_providers.dart';
+import '../../state/auth_providers.dart';
 import '../../state/cook_timer_providers.dart';
+import '../../state/hands_free_controller.dart';
+import '../../state/hands_free_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../widgets/kit/foundation.dart';
 import '../../widgets/kit/motion.dart';
@@ -49,6 +53,10 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   bool _dropScheduled = false;
   bool _timerCleared = false;
 
+  /// One hands-free session per visit to this dish. It is rebuilt only when the
+  /// cook turns it on again, so a failure leaves its notice on screen.
+  HandsFreeController? _handsFree;
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +71,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _handsFree?.dispose();
     _ticker?.cancel();
     _pages.dispose();
     super.dispose();
@@ -116,6 +125,98 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
           duration: Duration(minutes: minutes),
           copy: _alertCopyFor(_step),
         );
+  }
+
+  void _onHandsFreeChanged(HandsFreeState _) {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleHandsFree(
+    Dish dish,
+    List<String> steps,
+    String versionId,
+  ) async {
+    final existing = _handsFree;
+    if (existing != null && existing.isRunning) {
+      await existing.stop();
+      if (mounted) setState(() {});
+      return;
+    }
+    if (existing != null &&
+        existing.snapshot.phase == HandsFreePhase.paused) {
+      // A failure is not a dead end: the next tap rebuilds with a fresh token
+      // and the current step rather than retrying the old session.
+      existing.dispose();
+      _handsFree = null;
+    }
+
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final ingredients =
+        dish.versions.isEmpty ? const <String>[] : dish.versions.last.ingredients;
+    final setup = HandsFreeSetup(
+      token: ref.read(authServiceProvider).accessToken ?? '',
+      locale: locale,
+      keywords: [
+        for (final line in ingredients)
+          if (line.trim().isNotEmpty)
+            line.trim().length > 60 ? line.trim().substring(0, 60) : line.trim(),
+      ],
+      actions: VoiceActions(
+        next: () {
+          if (_step < steps.length - 1) {
+            _pages.nextPage(
+              duration: ShokuMotion.push,
+              curve: ShokuMotion.pushCurve,
+            );
+          }
+        },
+        back: () {
+          if (_step > 0) {
+            _pages.previousPage(
+              duration: ShokuMotion.push,
+              curve: ShokuMotion.pushCurve,
+            );
+          }
+        },
+        currentStep: () => steps[_step],
+        currentStepIndex: () => _step,
+        startTimer: (minutes) async => _startTimer(dish, versionId, minutes),
+        timerInFinalMinute: () {
+          final timer = ref.read(cookTimerProvider);
+          if (timer == null || timer.dishId != dish.id) return false;
+          final left = timer.remainingMsAt(DateTime.now());
+          return left > 0 && left <= 60000;
+        },
+      ),
+      copy: HandsFreeCopy(
+        checkIn: l10n.handsFreeCheckIn,
+        help: l10n.handsFreeHelp,
+        timerStarted: l10n.handsFreeTimerStarted,
+        offline: l10n.handsFreeOffline,
+        auth: l10n.handsFreeAuth,
+        cap: l10n.handsFreeCap,
+      ),
+      ask: (question, stepIndex) async {
+        final reply = await ref.read(assistantServiceProvider).ask(
+              scope: 'dish',
+              dishId: dish.id,
+              versionId: versionId,
+              stepIndex: stepIndex,
+              question: question,
+              requestId: newVoiceRequestId(),
+            );
+        return reply.answer;
+      },
+    );
+
+    final controller =
+        _handsFree ?? ref.read(handsFreeFactoryProvider)(setup);
+    if (_handsFree == null) {
+      controller.addListener(_onHandsFreeChanged);
+      setState(() => _handsFree = controller);
+    }
+    await controller.start();
   }
 
   /// The notification's words, in the cook's language. Resolved here because the
@@ -261,6 +362,22 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
     final isLast = _step == steps.length - 1;
 
     final versionId = dish.versions.isEmpty ? '' : dish.versions.last.id;
+    final handsFree = _handsFree?.snapshot;
+    final handsFreeLabel = switch (handsFree?.phase) {
+      HandsFreePhase.connecting => l10n.handsFreeConnecting,
+      HandsFreePhase.listening => l10n.handsFreeListening,
+      HandsFreePhase.thinking => l10n.handsFreeThinking,
+      HandsFreePhase.speaking => l10n.handsFreeSpeaking,
+      HandsFreePhase.paused => l10n.handsFreePaused,
+      _ => l10n.handsFree,
+    };
+    final handsFreeNotice = handsFree?.notice == HandsFreeNotice.offline
+        ? l10n.handsFreeOffline
+        : handsFree?.notice == HandsFreeNotice.auth
+            ? l10n.handsFreeAuth
+            : handsFree?.notice == HandsFreeNotice.cap
+                ? l10n.handsFreeCap
+                : null;
     final timer = ref.watch(cookTimerProvider);
     final store = ref.read(cookTimerProvider.notifier);
     final timerForThisDish = timer != null && timer.dishId == dish.id ? timer : null;
@@ -318,6 +435,70 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           color: c.reward, filled: true),
                       const SizedBox(width: ShokuSpace.sm),
                     ],
+                    Semantics(
+                      button: true,
+                      label: handsFree?.isActive == true
+                          ? l10n.handsFreeStop
+                          : l10n.handsFreeStart,
+                      child: GestureDetector(
+                        key: const ValueKey('hands-free-toggle'),
+                        onTap: () =>
+                            _toggleHandsFree(dish, steps, versionId),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: handsFree?.isActive == true
+                                ? c.accentSoft
+                                : c.surface,
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
+                            border: Border.all(
+                              color: handsFree?.isActive == true
+                                  ? c.accent
+                                  : c.hairline,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (handsFree?.phase == HandsFreePhase.listening)
+                                Container(
+                                  key: const ValueKey('hands-free-mic-dot'),
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: c.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  handsFree?.phase == HandsFreePhase.paused
+                                      ? Icons.mic_off
+                                      : Icons.mic,
+                                  size: 12,
+                                  color: handsFree?.isActive == true
+                                      ? c.accent
+                                      : c.inkMuted,
+                                ),
+                              const SizedBox(width: 4),
+                              Text(
+                                handsFreeLabel,
+                                style: ShokuType.label.copyWith(
+                                  fontSize: 8.5,
+                                  color: handsFree?.isActive == true
+                                      ? c.accent
+                                      : c.inkMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: ShokuSpace.xs),
                     Text(
                       '${_step + 1}/${steps.length}',
                       style: ShokuType.stat.copyWith(fontSize: 12, color: c.inkMuted),
@@ -332,6 +513,39 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                     horizontal: ShokuSpace.lg, vertical: ShokuSpace.sm),
                 child: ShokuProgress(value: (_step + 1) / steps.length),
               ),
+              if (handsFree != null &&
+                  (handsFree.isActive || handsFreeNotice != null))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.xs),
+                  child: Row(
+                    key: const ValueKey('hands-free-banner'),
+                    children: [
+                      Icon(
+                        handsFree.notice == HandsFreeNotice.none
+                            ? Icons.mic
+                            : Icons.info_outline,
+                        size: 12,
+                        color: handsFree.notice == HandsFreeNotice.none
+                            ? c.accent
+                            : c.inkMuted,
+                      ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          handsFreeNotice ??
+                              (handsFree.heard.isEmpty
+                                  ? handsFreeLabel
+                                  : l10n.handsFreeHeard(handsFree.heard)),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ShokuType.label
+                              .copyWith(fontSize: 9, color: c.inkMuted),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // ---- swipeable steps + floating AI ---------------------------
               Expanded(

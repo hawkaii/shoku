@@ -58,5 +58,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Shoku listens while you cook hands-free, only after you turn it on.</string>
 </dict>
 </plist>

@@ -39,6 +39,9 @@ prod = [
     # The API calls the Compute REST API to wake the worker VM. It ships in
     # prod only: the test suite and a local install never talk to GCP.
     "httpx>=0.27",
+    # Serves /v1/voice/asr and opens the upstream ASR socket. Uvicorn needs the
+    # same package to accept websocket upgrades at all.
+    "websockets>=12",
 ]
 # Only the worker image installs these: extracting media and running speech
 # recognition are the heavy, optional half of the system.

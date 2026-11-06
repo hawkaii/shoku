@@ -1098,5 +1098,22 @@
   "routeErrorBody": "The link may be old or mistyped. Your journal is still where it was.",
   "@routeErrorBody": {"description": "Body of the route error screen; tells the user their data is safe."},
   "routeErrorBack": "Back to the journal",
-  "@routeErrorBack": {"description": "Button on the route error screen that returns to the journal tab."}
+  "@routeErrorBack": {"description": "Button on the route error screen that returns to the journal tab."},
+  "handsFree": "Hands-free",
+  "handsFreeListening": "Listening",
+  "handsFreeConnecting": "Connecting…",
+  "handsFreeThinking": "Thinking…",
+  "handsFreeSpeaking": "Speaking…",
+  "handsFreePaused": "Paused",
+  "handsFreeStart": "Start hands-free",
+  "handsFreeStop": "Stop hands-free",
+  "handsFreeHeard": "Heard: {text}",
+  "handsFreeCheckIn": "Still cooking? Say next when you’re ready.",
+  "handsFreeHelp": "Say next, back, repeat, start a 5 minute timer, help, or stop hands-free.",
+  "handsFreeTimerStarted": "{count, plural, one{Timer started for 1 minute.} other{Timer started for {count} minutes.}}",
+  "handsFreeOffline": "Hands-free needs a connection. Tap to try again.",
+  "handsFreeAuth": "Sign in from You to use hands-free.",
+  "handsFreeCap": "Voice minutes are used up for today.",
+  "@handsFreeHeard": {"placeholders": {"text": {"type": "String"}}},
+  "@handsFreeTimerStarted": {"placeholders": {"count": {"type": "int"}}}
 }
