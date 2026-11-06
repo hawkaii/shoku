@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "সতর্কতা নেই — অ্যাপ খোলা থাকলে টাইমার চলবে",
   "importShareNoLink": "সেই শেয়ারে লিঙ্ক ছিল না। নিচে রিলের URL পেস্ট করুন।",
   "authPasswordShow": "পাসওয়ার্ড দেখান",
-  "authPasswordHide": "পাসওয়ার্ড লুকান"
+  "authPasswordHide": "পাসওয়ার্ড লুকান",
+  "routeErrorTitle": "এই পেজটি এখানে নেই",
+  "routeErrorBody": "লিংকটি পুরোনো বা ভুল লেখা হতে পারে। আপনার জার্নাল যেখানে ছিল সেখানেই আছে।",
+  "routeErrorBack": "জার্নালে ফিরে যান"
 }

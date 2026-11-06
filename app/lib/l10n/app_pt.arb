@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "os alertas não estão disponíveis — o timer continua com o app aberto",
   "importShareNoLink": "Esse compartilhamento não tinha um link. Cole a URL do reel abaixo.",
   "authPasswordShow": "Mostrar senha",
-  "authPasswordHide": "Ocultar senha"
+  "authPasswordHide": "Ocultar senha",
+  "routeErrorTitle": "Esta página não está aqui",
+  "routeErrorBody": "A ligação pode ser antiga ou estar mal escrita. O seu diário continua onde estava.",
+  "routeErrorBack": "Voltar ao diário"
 }

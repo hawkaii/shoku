@@ -1837,4 +1837,14 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'পাসওয়ার্ড লুকান';
+
+  @override
+  String get routeErrorTitle => 'এই পেজটি এখানে নেই';
+
+  @override
+  String get routeErrorBody =>
+      'লিংকটি পুরোনো বা ভুল লেখা হতে পারে। আপনার জার্নাল যেখানে ছিল সেখানেই আছে।';
+
+  @override
+  String get routeErrorBack => 'জার্নালে ফিরে যান';
 }

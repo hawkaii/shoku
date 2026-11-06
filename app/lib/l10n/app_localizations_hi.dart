@@ -1833,4 +1833,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'पासवर्ड छिपाएँ';
+
+  @override
+  String get routeErrorTitle => 'यह पेज यहाँ नहीं है';
+
+  @override
+  String get routeErrorBody =>
+      'लिंक पुराना या गलत लिखा हो सकता है। आपकी जर्नल वहीं है जहाँ थी।';
+
+  @override
+  String get routeErrorBack => 'जर्नल पर वापस जाएँ';
 }

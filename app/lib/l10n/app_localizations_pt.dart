@@ -1848,4 +1848,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'Ocultar senha';
+
+  @override
+  String get routeErrorTitle => 'Esta página não está aqui';
+
+  @override
+  String get routeErrorBody =>
+      'A ligação pode ser antiga ou estar mal escrita. O seu diário continua onde estava.';
+
+  @override
+  String get routeErrorBack => 'Voltar ao diário';
 }

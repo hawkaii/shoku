@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "notifikasi tidak tersedia — timer tetap berjalan selama aplikasi terbuka",
   "importShareNoLink": "Kiriman itu tidak berisi tautan. Tempel URL reel di bawah.",
   "authPasswordShow": "Tampilkan sandi",
-  "authPasswordHide": "Sembunyikan sandi"
+  "authPasswordHide": "Sembunyikan sandi",
+  "routeErrorTitle": "Halaman ini tidak ada di sini",
+  "routeErrorBody": "Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.",
+  "routeErrorBack": "Kembali ke jurnal"
 }

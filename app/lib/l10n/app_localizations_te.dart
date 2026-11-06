@@ -1847,4 +1847,14 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'పాస్‌వర్డ్ దాచు';
+
+  @override
+  String get routeErrorTitle => 'ఈ పేజీ ఇక్కడ లేదు';
+
+  @override
+  String get routeErrorBody =>
+      'లింక్ పాతది లేదా తప్పుగా రాసినది కావచ్చు. మీ జర్నల్ ఉన్న చోటే ఉంది.';
+
+  @override
+  String get routeErrorBack => 'జర్నల్కు తిరిగి వెళ్లండి';
 }

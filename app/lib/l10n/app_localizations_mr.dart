@@ -1837,4 +1837,14 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'पासवर्ड लपवा';
+
+  @override
+  String get routeErrorTitle => 'हे पान इथे नाही';
+
+  @override
+  String get routeErrorBody =>
+      'लिंक जुना किंवा चुकीचा लिहिलेला असू शकतो. तुमची जर्नल जिथे होती तिथेच आहे.';
+
+  @override
+  String get routeErrorBack => 'जर्नलवर परत जा';
 }

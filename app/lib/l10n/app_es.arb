@@ -419,5 +419,8 @@
   "timerAlertsUnavailable": "las alertas no están disponibles — el temporizador sigue funcionando con la app abierta",
   "importShareNoLink": "Ese contenido no traía un enlace. Pega la URL del reel abajo.",
   "authPasswordShow": "Mostrar contraseña",
-  "authPasswordHide": "Ocultar contraseña"
+  "authPasswordHide": "Ocultar contraseña",
+  "routeErrorTitle": "Esta página no está aquí",
+  "routeErrorBody": "Puede que el enlace sea antiguo o esté mal escrito. Tu diario sigue donde estaba.",
+  "routeErrorBack": "Volver al diario"
 }

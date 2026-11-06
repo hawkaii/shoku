@@ -1845,4 +1845,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'Ocultar contraseña';
+
+  @override
+  String get routeErrorTitle => 'Esta página no está aquí';
+
+  @override
+  String get routeErrorBody =>
+      'Puede que el enlace sea antiguo o esté mal escrito. Tu diario sigue donde estaba.';
+
+  @override
+  String get routeErrorBack => 'Volver al diario';
 }

@@ -24,4 +24,9 @@ class ShokuConfig {
   );
 
   static const authRedirect = 'wiki.gradientdescent.shoku://login-callback';
+
+  // The web preview's `?screen=` is read from `Uri.base`, which is the launch
+  // URL: on web that is the address bar, but on Android `Uri.base` is the
+  // launch URL too, never the intent, so a link cannot open a preview screen on
+  // a device. `previewScreen` is a debug affordance for the web preview only.
 }

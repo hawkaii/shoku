@@ -1828,4 +1828,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get authPasswordHide => 'Sembunyikan sandi';
+
+  @override
+  String get routeErrorTitle => 'Halaman ini tidak ada di sini';
+
+  @override
+  String get routeErrorBody =>
+      'Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.';
+
+  @override
+  String get routeErrorBack => 'Kembali ke jurnal';
 }
