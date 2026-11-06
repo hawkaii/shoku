@@ -47,6 +47,17 @@ class SyncController {
   int _signedOutRetries = 0;
   bool _disposed = false;
 
+  /// A pass is in flight right now.
+  bool _passRunning = false;
+
+  /// Something asked for a pass while one was running.
+  ///
+  /// That request used to be dropped on the floor (`if (status == syncing)
+  /// return;`), so an edit made in the middle of a pass waited for resume, the
+  /// 30 s retry, or the next edit before it left the device. It is now
+  /// remembered and run exactly once when the current pass ends.
+  bool _pending = false;
+
   /// Signed out has a ceiling. Retrying with no token is a local no-op, so a
   /// phone that has never signed in should not own a timer forever — the auth
   /// stream is what wakes it, and it does so immediately.
@@ -91,8 +102,26 @@ class SyncController {
 
   Future<void> syncNow() async {
     if (_disposed) return;
-    if (_ref.read(syncStatusProvider) == SyncStatus.syncing) return;
+    if (_passRunning) {
+      // Not dropped: remembered. The flag is cleared as each pass starts, so a
+      // burst of requests during one pass collapses into a single follow-up.
+      _pending = true;
+      return;
+    }
 
+    _passRunning = true;
+    try {
+      do {
+        _pending = false;
+        await _pass();
+      } while (_pending && !_disposed);
+    } finally {
+      _passRunning = false;
+    }
+  }
+
+  /// One pass. [syncNow] decides when this runs; this decides what it does.
+  Future<void> _pass() async {
     _retry?.cancel();
     _retry = null;
 
@@ -106,7 +135,9 @@ class SyncController {
 
     _set(SyncStatus.syncing);
     try {
-      await _ref.read(syncServiceProvider).sync();
+      await _ref.read(syncServiceProvider).sync(
+            onProgress: _setProgress,
+          );
       _attempt = 0;
       _signedOutRetries = 0;
       _set(SyncStatus.idle);
@@ -115,13 +146,23 @@ class SyncController {
       _scheduleSignedOutRetry();
     } on ApiError {
       _fail(SyncStatus.failed);
+    } on SyncPageLimitExceeded {
+      // Not "offline": the network answered, it just would not stop paging.
+      // Reported as a failed pass so the retry loop owns it.
+      _fail(SyncStatus.failed);
     } catch (_) {
       // No network, DNS failure, server down: all the same to the user.
       _fail(SyncStatus.offline);
     } finally {
+      _setProgress(null);
       // Whatever happened, the journal may have changed.
       await _ref.read(journalStoreProvider.notifier).refresh();
     }
+  }
+
+  void _setProgress(SyncProgress? progress) {
+    if (_disposed) return;
+    _ref.read(syncProgressProvider.notifier).state = progress;
   }
 
   void _fail(SyncStatus status) {
@@ -153,6 +194,15 @@ class SyncController {
 }
 
 final syncStatusProvider = StateProvider<SyncStatus>((ref) => SyncStatus.idle);
+
+/// How far a paginated restore has got, or null when no pass is running.
+///
+/// A separate provider on purpose: the status enum is a switch the sync line and
+/// its tests read by value, and growing it with a `restoring` case would change
+/// what every existing `syncing` test means. This carries the number instead, so
+/// "restoring 2 pages / 1,000 rows" is available to the UI without moving the
+/// line's contract.
+final syncProgressProvider = StateProvider<SyncProgress?>((ref) => null);
 
 /// Supabase's session events, as the app actually cares about them.
 ///

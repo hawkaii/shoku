@@ -73,6 +73,15 @@ class SyncRepository {
 
   /// Marks rows the server confirmed. Anything it rejected stays dirty so the
   /// next attempt retries it instead of pretending it was saved.
+  ///
+  /// A row the server reports as `ignored` is settled as well: `ignored` means
+  /// it already holds exactly this row (an append-only duplicate, or a dish
+  /// with the same `updated_at`). Leaving those dirty is how a response lost in
+  /// transit turns into a row that is re-pushed on every pass forever.
+  ///
+  /// All five tables are cleared in one transaction. A table left out of it is
+  /// a table that is accepted by the server and then handed straight back to
+  /// the next push, which is what made the sync line never settle.
   Future<void> markClean(Map<String, dynamic> pushResponse) async {
     final accepted = <String, Set<String>>{};
     for (final table in [
@@ -86,7 +95,7 @@ class SyncRepository {
       if (rows is! List) continue;
       accepted[table] = {
         for (final row in rows)
-          if (row is Map && row['result'] == 'accepted') row['id'] as String,
+          if (row is Map && _isSettled(row['result'])) row['id'] as String,
       };
     }
 
@@ -103,8 +112,35 @@ class SyncRepository {
         await (_db.update(_db.cookLogRows)..where((c) => c.id.equals(id)))
             .write(const CookLogRowsCompanion(dirty: Value(0)));
       }
+      // The pantry is keyed by `pantryRows.id`, like every other table here.
+      // Nothing references it by id, so it is cleared on its own list.
+      for (final id in accepted['pantry_items'] ?? const <String>{}) {
+        await (_db.update(_db.pantryRows)..where((p) => p.id.equals(id)))
+            .write(const PantryRowsCompanion(dirty: Value(0)));
+      }
+      // A photo has no table of its own: it is projected from a cook row's
+      // photo_key, and its wire id is derived from that cook (see [_photoWire]).
+      // So the row to clean is the cook that carries it. Matching on the
+      // derived id is safe in both directions — the server will not accept a
+      // photo whose cook it does not already hold (`unknown_cook`), so an
+      // accepted photo proves the cook row reached it.
+      final photos = accepted['photos'] ?? const <String>{};
+      if (photos.isNotEmpty) {
+        final carriers = await (_db.select(_db.cookLogRows)
+              ..where((c) => c.photoKey.equals('').not()))
+            .get();
+        for (final row in carriers) {
+          if (!photos.contains(_photoId(row.id))) continue;
+          await (_db.update(_db.cookLogRows)..where((c) => c.id.equals(row.id)))
+              .write(const CookLogRowsCompanion(dirty: Value(0)));
+        }
+      }
     });
   }
+
+  /// The server has the row, so it is no longer this device's to push.
+  static bool _isSettled(Object? result) =>
+      result == 'accepted' || result == 'ignored';
 
   /// Applies a pull response. Never deletes anything, never overwrites a local
   /// row that is newer, and never lets a server row clobber an unsynced edit.
@@ -309,13 +345,18 @@ class SyncRepository {
   /// it belongs to. The id is deterministic from the cook, so a retried push
   /// cannot duplicate it.
   Map<String, dynamic> _photoWire(CookLogRow row) => {
-        'id': const Uuid().v5(Namespace.url.value, 'photo:${row.id}'),
+        'id': _photoId(row.id),
         'role': 'debrief',
         'cook_id': row.id,
         'key': row.photoKey,
         'created_at': _iso(row.cookedAt),
         'deleted_at': null,
       };
+
+  /// The wire id of a cook's photo. `markClean` needs the same derivation the
+  /// push used, or it cannot tell which row the server just accepted.
+  static String _photoId(String cookId) =>
+      const Uuid().v5(Namespace.url.value, 'photo:$cookId');
 
   static String _iso(DateTime value) => value.toUtc().toIso8601String();
 
