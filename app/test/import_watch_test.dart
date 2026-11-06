@@ -6,10 +6,13 @@ import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/import_service.dart';
+import 'package:food_finder/l10n/app_localizations_en.dart';
+import 'package:food_finder/presentation/screens/journal/import_card.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  final l10n = AppLocalizationsEn();
   late AppDatabase db;
   var requests = 0;
 
@@ -115,7 +118,7 @@ void main() {
 
       expect(seen.single.stage, ImportStage.failed);
       expect(seen.single.reason, 'timed_out');
-      expect(importReasonText('timed_out'), contains('You can leave this'));
+      expect(reasonText(l10n, 'timed_out'), contains('You can leave this'));
     });
   });
 
@@ -126,8 +129,10 @@ void main() {
         detail: 'starting',
         shortcode: 'SC',
       );
-      expect(waking.label, 'Waking the kitchen…');
-      expect(waking.waitingHint, 'The first one after a pause takes a minute');
+      expect(stageText(l10n, waking), l10n.importWaking);
+      // The hint under a waking worker is fixed copy, not derived from the
+      // stage; the sheet reads the key directly.
+      expect(l10n.importWaitingHint, isNotEmpty);
       expect(waking.stage, isNot(ImportStage.failed));
 
       // Whichever job state the server pairs it with, the copy holds.
@@ -136,12 +141,16 @@ void main() {
         detail: 'starting',
         shortcode: 'SC',
       );
-      expect(queued.label, 'Waking the kitchen…');
+      expect(stageText(l10n, queued), l10n.importWaking);
     });
 
     test('the other stages read exactly as they did', () {
-      String label(String detail, {ImportStage stage = ImportStage.extracting}) =>
-          ImportProgress(stage: stage, detail: detail, shortcode: 'SC').label;
+      String? label(String detail,
+              {ImportStage stage = ImportStage.extracting}) =>
+          stageText(
+              l10n,
+              ImportProgress(
+                  stage: stage, detail: detail, shortcode: 'SC'));
 
       expect(label('extracting'), 'Reading the reel');
       expect(label('transcribing'), 'Reading the audio');
@@ -149,40 +158,42 @@ void main() {
       expect(label('structuring'), 'Writing the recipe');
       expect(label('caption_only'), 'Reading the caption');
       expect(
-        const ImportProgress(stage: ImportStage.queued, shortcode: 'SC').label,
-        'Queued',
+        stageText(
+            l10n, const ImportProgress(stage: ImportStage.queued, shortcode: 'SC')),
+        l10n.importQueued,
       );
       expect(
-        const ImportProgress(stage: ImportStage.ready, shortcode: 'SC').label,
-        'Ready',
+        stageText(
+            l10n, const ImportProgress(stage: ImportStage.ready, shortcode: 'SC')),
+        l10n.importReady,
       );
     });
 
     test('a kitchen that would not wake says so, in its own sentence', () {
-      final text = importReasonText('worker_unavailable');
+      final text = reasonText(l10n, 'worker_unavailable');
 
       expect(text, 'The kitchen did not wake up — try again in a minute');
-      expect(text, isNot(importReasonText(null)));
+      expect(text, isNot(reasonText(l10n, null)));
       expect(text, isNot(contains('Could not read this one')));
     });
   });
 
   group('failure copy', () {
     test('a client timeout is not the generic message', () {
-      final text = importReasonText('timed_out');
+      final text = reasonText(l10n, 'timed_out');
 
       expect(text, contains('Still reading'));
-      expect(text, isNot(importReasonText(null)));
-      expect(text, isNot(importReasonText('failed')));
+      expect(text, isNot(reasonText(l10n, null)));
+      expect(text, isNot(reasonText(l10n, 'failed')));
     });
 
     test('the server timeout keeps its own words', () {
-      expect(importReasonText('timeout'), contains('took too long'));
-      expect(importReasonText('timed_out'), isNot(importReasonText('timeout')));
+      expect(reasonText(l10n, 'timeout'), contains('took too long'));
+      expect(reasonText(l10n, 'timed_out'), isNot(reasonText(l10n, 'timeout')));
     });
 
     test('a job the server forgot says so', () {
-      expect(importReasonText('gone'), contains('no longer on the server'));
+      expect(reasonText(l10n, 'gone'), contains('no longer on the server'));
     });
   });
 }

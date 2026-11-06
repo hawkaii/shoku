@@ -3,6 +3,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import 'motion.dart';
 
 /// Push-to-talk text field. The mic is live only while pressed — that press is
@@ -37,7 +38,11 @@ class _MicFieldState extends State<MicField> {
     super.initState();
     _speech.initialize().then((ok) {
       if (mounted) setState(() => _available = ok);
-    }).catchError((_) {});
+    }).catchError((Object error, StackTrace stack) {
+      // Speech is optional platform work: no engine on this build means the
+      // field stays a plain text field, which is a complete input method.
+      logFailure('speech initialize', error, stack);
+    });
   }
 
   Future<void> _start() async {
@@ -53,7 +58,9 @@ class _MicFieldState extends State<MicField> {
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
       );
-    } catch (_) {
+    } catch (error, stack) {
+      // Typing still works; only this press of the mic did not.
+      logFailure('speech listen', error, stack);
       setState(() => _listening = false);
     }
   }
@@ -62,7 +69,10 @@ class _MicFieldState extends State<MicField> {
     setState(() => _listening = false);
     try {
       await _speech.stop();
-    } catch (_) {}
+    } catch (_) {
+      // Optional platform work: no engine means nothing was listening, so there
+      // is nothing to stop. The widget's own state is corrected below.
+    }
   }
 
   @override

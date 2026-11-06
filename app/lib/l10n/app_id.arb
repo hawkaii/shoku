@@ -236,7 +236,7 @@
   "importPasteFirst": "Tempel tautan dulu",
   "importNoLink": "Reel siap tetapi server tidak mengirim tautan",
   "importCouldNotStart": "Kami tidak bisa memulai impor itu",
-  "importSignIn": "Masuk dari Kamu untuk mengimpor",
+  "importSignIn": "Masuk untuk mengimpor reel ini",
   "importUnreachable": "Tidak bisa menghubungi server",
   "importLostConnection": "Koneksi hilang — reel masih dibaca. Buka ini lagi untuk melanjutkan",
   "importStillOnServer": "Tidak bisa menghubungi server — reel masih di sana. Buka ini lagi untuk melanjutkan",
@@ -413,5 +413,14 @@
   "accountDeleteFailed": "Akun tidak dapat dihapus. Tidak ada yang berubah.",
   "wallReport": "Laporkan reel ini",
   "wallReported": "Dilaporkan. Cukup banyak laporan menghapusnya dari Dinding.",
-  "wallReportFailed": "Tidak dapat melaporkan. Coba lagi."
+  "wallReportFailed": "Tidak dapat melaporkan. Coba lagi.",
+  "timerNotificationTitle": "Timer selesai",
+  "timerNotificationBody": "Langkah {step} selesai — kembali ke dapur.",
+  "timerAlertsUnavailable": "notifikasi tidak tersedia — timer tetap berjalan selama aplikasi terbuka",
+  "importShareNoLink": "Kiriman itu tidak berisi tautan. Tempel URL reel di bawah.",
+  "authPasswordShow": "Tampilkan sandi",
+  "authPasswordHide": "Sembunyikan sandi",
+  "routeErrorTitle": "Halaman ini tidak ada di sini",
+  "routeErrorBody": "Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.",
+  "routeErrorBack": "Kembali ke jurnal"
 }

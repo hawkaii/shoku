@@ -1049,7 +1049,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get importCouldNotStart => 'ఆ ఇంపోర్ట్ ప్రారంభించలేకపోయాం';
 
   @override
-  String get importSignIn => 'ఇంపోర్ట్ చేయడానికి మీరు లో సైన్ ఇన్ చేయండి';
+  String get importSignIn => 'ఈ రీల్‌ను ఇంపోర్ట్ చేయడానికి సైన్ ఇన్ చేయండి';
 
   @override
   String get importUnreachable => 'సర్వర్‌ను చేరుకోలేకపోయాం';
@@ -1825,4 +1825,36 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'నివేదించలేకపోయాం. మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get timerNotificationTitle => 'టైమర్ ముగిసింది';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'దశ $step పూర్తయింది — వంటగదికి తిరిగి రండి.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'హెచ్చరికలు అందుబాటులో లేవు — యాప్ తెరిచి ఉన్నప్పుడు టైమర్ పనిచేస్తుంది';
+
+  @override
+  String get importShareNoLink =>
+      'ఆ షేర్‌లో లింక్ లేదు. క్రింద రీల్ URL పేస్ట్ చేయండి.';
+
+  @override
+  String get authPasswordShow => 'పాస్‌వర్డ్ చూపించు';
+
+  @override
+  String get authPasswordHide => 'పాస్‌వర్డ్ దాచు';
+
+  @override
+  String get routeErrorTitle => 'ఈ పేజీ ఇక్కడ లేదు';
+
+  @override
+  String get routeErrorBody =>
+      'లింక్ పాతది లేదా తప్పుగా రాసినది కావచ్చు. మీ జర్నల్ ఉన్న చోటే ఉంది.';
+
+  @override
+  String get routeErrorBack => 'జర్నల్కు తిరిగి వెళ్లండి';
 }

@@ -1043,7 +1043,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get importCouldNotStart => 'Kami tidak bisa memulai impor itu';
 
   @override
-  String get importSignIn => 'Masuk dari Kamu untuk mengimpor';
+  String get importSignIn => 'Masuk untuk mengimpor reel ini';
 
   @override
   String get importUnreachable => 'Tidak bisa menghubungi server';
@@ -1806,4 +1806,36 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'Tidak dapat melaporkan. Coba lagi.';
+
+  @override
+  String get timerNotificationTitle => 'Timer selesai';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'Langkah $step selesai — kembali ke dapur.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'notifikasi tidak tersedia — timer tetap berjalan selama aplikasi terbuka';
+
+  @override
+  String get importShareNoLink =>
+      'Kiriman itu tidak berisi tautan. Tempel URL reel di bawah.';
+
+  @override
+  String get authPasswordShow => 'Tampilkan sandi';
+
+  @override
+  String get authPasswordHide => 'Sembunyikan sandi';
+
+  @override
+  String get routeErrorTitle => 'Halaman ini tidak ada di sini';
+
+  @override
+  String get routeErrorBody =>
+      'Tautannya mungkin sudah lama atau salah ketik. Jurnal Anda tetap di tempatnya.';
+
+  @override
+  String get routeErrorBack => 'Kembali ke jurnal';
 }

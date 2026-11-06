@@ -1533,7 +1533,7 @@ abstract class AppLocalizations {
   /// No description provided for @importSignIn.
   ///
   /// In en, this message translates to:
-  /// **'Sign in from You to import'**
+  /// **'Sign in to import this reel'**
   String get importSignIn;
 
   /// No description provided for @importUnreachable.
@@ -2597,6 +2597,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not report it. Try again.'**
   String get wallReportFailed;
+
+  /// Title of the local notification posted when a cook-mode timer finishes.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer is up'**
+  String get timerNotificationTitle;
+
+  /// Body of the timer notification. {step} is the 1-based step number.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} is done — back to the kitchen.'**
+  String timerNotificationBody(int step);
+
+  /// Timer card note when no notification channel or plugin is available at all.
+  ///
+  /// In en, this message translates to:
+  /// **'alerts are off — the timer still works while the app is open'**
+  String get timerAlertsUnavailable;
+
+  /// Import sheet note when a shared item carried no URL (for example an image-only share).
+  ///
+  /// In en, this message translates to:
+  /// **'That share didn’t include a link. Paste the reel’s URL below.'**
+  String get importShareNoLink;
+
+  /// Accessibility label for the control that reveals the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authPasswordShow;
+
+  /// Accessibility label for the control that hides the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authPasswordHide;
+
+  /// Title of the in-app screen shown when a link or path does not match a route, instead of the router's own error page.
+  ///
+  /// In en, this message translates to:
+  /// **'This page isn’t here'**
+  String get routeErrorTitle;
+
+  /// Body of the route error screen; tells the user their data is safe.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may be old or mistyped. Your journal is still where it was.'**
+  String get routeErrorBody;
+
+  /// Button on the route error screen that returns to the journal tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the journal'**
+  String get routeErrorBack;
 }
 
 class _AppLocalizationsDelegate

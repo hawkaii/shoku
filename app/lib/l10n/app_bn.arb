@@ -236,7 +236,7 @@
   "importPasteFirst": "আগে একটি লিংক পেস্ট করুন",
   "importNoLink": "রিল প্রস্তুত কিন্তু সার্ভার কোনো লিংক পাঠায়নি",
   "importCouldNotStart": "ওই ইমপোর্ট শুরু করা যায়নি",
-  "importSignIn": "ইমপোর্ট করতে আপনি থেকে সাইন ইন করুন",
+  "importSignIn": "এই রিলটি ইমপোর্ট করতে সাইন ইন করুন",
   "importUnreachable": "সার্ভারে পৌঁছানো যায়নি",
   "importLostConnection": "সংযোগ চলে গেছে — রিল এখনও পড়া হচ্ছে। আবার খুলে চালিয়ে যান",
   "importStillOnServer": "সার্ভারে পৌঁছানো যায়নি — রিল এখনও সেখানে। আবার খুলে চালিয়ে যান",
@@ -413,5 +413,14 @@
   "accountDeleteFailed": "অ্যাকাউন্ট মোছা যায়নি। কিছুই বদলায়নি।",
   "wallReport": "এই রিলের রিপোর্ট করুন",
   "wallReported": "রিপোর্ট হয়েছে। যথেষ্ট রিপোর্ট হলে এটি ওয়াল থেকে সরে যায়।",
-  "wallReportFailed": "রিপোর্ট করা যায়নি। আবার চেষ্টা করুন।"
+  "wallReportFailed": "রিপোর্ট করা যায়নি। আবার চেষ্টা করুন।",
+  "timerNotificationTitle": "টাইমার শেষ",
+  "timerNotificationBody": "ধাপ {step} শেষ — রান্নাঘরে ফিরে আসুন।",
+  "timerAlertsUnavailable": "সতর্কতা নেই — অ্যাপ খোলা থাকলে টাইমার চলবে",
+  "importShareNoLink": "সেই শেয়ারে লিঙ্ক ছিল না। নিচে রিলের URL পেস্ট করুন।",
+  "authPasswordShow": "পাসওয়ার্ড দেখান",
+  "authPasswordHide": "পাসওয়ার্ড লুকান",
+  "routeErrorTitle": "এই পেজটি এখানে নেই",
+  "routeErrorBody": "লিংকটি পুরোনো বা ভুল লেখা হতে পারে। আপনার জার্নাল যেখানে ছিল সেখানেই আছে।",
+  "routeErrorBack": "জার্নালে ফিরে যান"
 }

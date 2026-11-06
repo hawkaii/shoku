@@ -43,6 +43,9 @@ flutter analyze
 flutter test
 ```
 
+The layer rules, module map and test conventions are in
+[../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).
+
 ## Design
 
 The visual language is documented in [DESIGN.md](DESIGN.md): paper, ink, crimson,

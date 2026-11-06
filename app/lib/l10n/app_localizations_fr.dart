@@ -1055,7 +1055,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importCouldNotStart => 'Impossible de lancer cette importation';
 
   @override
-  String get importSignIn => 'Connectez-vous dans Vous pour importer';
+  String get importSignIn => 'Connectez-vous pour importer ce reel';
 
   @override
   String get importUnreachable => 'Impossible d\'atteindre le serveur';
@@ -1849,4 +1849,36 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'Impossible de le signaler. Réessayez.';
+
+  @override
+  String get timerNotificationTitle => 'Le minuteur est terminé';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'L’étape $step est prête — retour à la cuisine.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'les alertes ne sont pas disponibles — le minuteur fonctionne tant que l’app est ouverte';
+
+  @override
+  String get importShareNoLink =>
+      'Ce partage ne contenait pas de lien. Collez l’URL du reel ci-dessous.';
+
+  @override
+  String get authPasswordShow => 'Afficher le mot de passe';
+
+  @override
+  String get authPasswordHide => 'Masquer le mot de passe';
+
+  @override
+  String get routeErrorTitle => 'Cette page n’est pas ici';
+
+  @override
+  String get routeErrorBody =>
+      'Le lien est peut-être ancien ou mal saisi. Votre journal est toujours là où il était.';
+
+  @override
+  String get routeErrorBack => 'Retour au journal';
 }

@@ -227,6 +227,10 @@ The map is above; these are the rules that are not visible in it.
   because the source link is already expiring when it is fetched.
 - **Cost** — the API runs on a free-tier VM, the worker only while importing.
 
+The layer rules, the module map and the test conventions are in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). What the app is currently fixing,
+and why, is in [docs/STABILITY.md](docs/STABILITY.md).
+
 ---
 
 ## Running it

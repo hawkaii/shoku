@@ -1047,7 +1047,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get importCouldNotStart => 'ते इंपोर्ट सुरू होऊ शकले नाही';
 
   @override
-  String get importSignIn => 'इंपोर्टसाठी तुम्ही मध्ये साइन इन करा';
+  String get importSignIn => 'ही रील इंपोर्ट करण्यासाठी साइन इन करा';
 
   @override
   String get importUnreachable => 'सर्व्हरपर्यंत पोहोचता आले नाही';
@@ -1815,4 +1815,36 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'तक्रार नोंदवता आली नाही. पुन्हा प्रयत्न करा.';
+
+  @override
+  String get timerNotificationTitle => 'टाइमर संपला';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'पायरी $step पूर्ण — स्वयंपाकघरात परत या.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'अलर्ट उपलब्ध नाहीत — ॲप उघडे असताना टाइमर चालू राहतो';
+
+  @override
+  String get importShareNoLink =>
+      'त्या शेअरमध्ये लिंक नव्हता. खाली रीलचा URL पेस्ट करा.';
+
+  @override
+  String get authPasswordShow => 'पासवर्ड दाखवा';
+
+  @override
+  String get authPasswordHide => 'पासवर्ड लपवा';
+
+  @override
+  String get routeErrorTitle => 'हे पान इथे नाही';
+
+  @override
+  String get routeErrorBody =>
+      'लिंक जुना किंवा चुकीचा लिहिलेला असू शकतो. तुमची जर्नल जिथे होती तिथेच आहे.';
+
+  @override
+  String get routeErrorBack => 'जर्नलवर परत जा';
 }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/l10n/l10n.dart';
+import '../../data/services/pending_share.dart';
 import '../../data/services/share_intake.dart';
 import '../../l10n/app_localizations.dart';
 import '../screens/add/import_sheet.dart';
@@ -41,13 +42,19 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
   /// branch like any other — see [ShokuTabBar.centerIndex].
   static const _fridgeBranch = 2;
 
-  final _intake = ShareIntake();
+  /// True while the share is being taken, so the post-frame call and the
+  /// listener cannot both open the sheet for one share.
+  bool _takingShare = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _intake.start(ref);
+    // Intake itself runs at app scope (see `shareIntakeProvider`); this is only
+    // the hand-over, and it has two sources. The persisted note is the
+    // cold-start path — a share that arrived while onboarding or the splash was
+    // up, or before the process died — so it is read first. The live listener in
+    // `build` covers a share that arrives while the shell is already up.
     WidgetsBinding.instance.addPostFrameCallback((_) => _consumePendingShare());
     // Pull whatever changed while the app was closed. Quiet by design: a
     // failed sync is a state, not an error the user has to dismiss. The auth
@@ -78,21 +85,41 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _intake.dispose();
     super.dispose();
   }
 
-  void _consumePendingShare() {
-    final url = ref.read(pendingShareProvider);
-    if (url == null || !mounted) return;
-    ref.read(pendingShareProvider.notifier).state = null;
-    HapticFeedback.mediumImpact();
-    showImportSheet(context, prefill: url);
+  /// Hands one pending share to the import sheet, once.
+  ///
+  /// The store is read first: it is the copy that outlived onboarding, the
+  /// splash and a killed process. The in-memory provider covers a share the live
+  /// listener delivered a moment ago, and wins when both name one, because
+  /// intake writes the note before it publishes. Both are cleared before the
+  /// sheet opens, so nothing can open it twice for the same share.
+  Future<void> _consumePendingShare() async {
+    if (!mounted || _takingShare) return;
+    _takingShare = true;
+    try {
+      final stored = await ref.read(pendingShareStoreProvider).take();
+      // The live value is at least as new as the note (intake writes the note
+      // first), so it wins when both name a share.
+      final pending = ref.read(pendingShareProvider) ?? stored;
+      if (pending == null || !mounted) return;
+      ref.read(pendingShareProvider.notifier).state = null;
+      HapticFeedback.mediumImpact();
+      showImportSheet(
+        context,
+        prefill: pending.url,
+        // A share with no link is not silence: the sheet says why it is empty.
+        notice: pending.hasUrl ? null : context.l10n.importShareNoLink,
+      );
+    } finally {
+      _takingShare = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<String?>(pendingShareProvider, (previous, next) {
+    ref.listen<PendingShare?>(pendingShareProvider, (previous, next) {
       if (next != null) {
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _consumePendingShare());

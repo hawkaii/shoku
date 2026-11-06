@@ -10,13 +10,25 @@ import 'package:food_finder/data/db/journal_repository.dart';
 import 'package:food_finder/data/mock/journal_data.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/assistant_service.dart';
+import 'package:food_finder/data/services/auth_service.dart';
 import 'package:food_finder/presentation/screens/assistant/recipe_chat_sheet.dart';
 import 'package:food_finder/presentation/state/assistant_providers.dart';
+import 'package:food_finder/presentation/state/auth_providers.dart';
 import 'package:food_finder/presentation/state/journal_store.dart';
 import 'package:food_finder/presentation/widgets/kit/mic_field.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// Signed out, offline: the sheet must be openable without a Supabase client.
+class _FakeAuth extends AuthService {
+  @override
+  Session? get session => null;
+
+  @override
+  Stream<AuthState> get changes => const Stream.empty();
+}
 
 class _FakeAssistant extends AssistantService {
   _FakeAssistant(this._reply)
@@ -99,6 +111,7 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(db),
           assistantServiceProvider.overrideWithValue(service),
+          authServiceProvider.overrideWithValue(_FakeAuth()),
         ],
         child: MaterialApp(
           theme: ShokuTheme.light(),
@@ -121,6 +134,26 @@ void main() {
     final field = tester.widget<TextField>(find.byType(TextField));
     expect(field.enabled, isFalse, reason: 'nothing typed can be sent');
     expect(find.text('No connection'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a 401 notice is a door to sign-in, not a dead end',
+      (tester) async {
+    await tester.pumpWidget(chat(_FakeAssistant(
+      () async => throw const ApiUnauthenticated(),
+    )));
+    await send(tester, 'is this done?');
+
+    final notice = find.byKey(const ValueKey('chat-notice-signin'));
+    expect(notice, findsOneWidget,
+        reason: 'the prompt must be tappable, not a sentence');
+
+    await tester.tap(notice);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Keep your journal'), findsOneWidget,
+        reason: 'tapping the notice opens the sign-in sheet');
 
     await tester.pumpWidget(const SizedBox());
   });

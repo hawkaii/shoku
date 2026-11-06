@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config/shoku_config.dart';
+import '../../core/utils/failure_log.dart';
 
 /// The only auth changes the rest of the app acts on.
 ///
@@ -81,7 +82,10 @@ class AuthService {
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
       return true;
-    } catch (_) {
+    } catch (error, stack) {
+      // The button is only shown once the provider is enabled, so this is the
+      // case that would otherwise be a user reporting "Google does nothing".
+      logFailure('google sign-in', error, stack);
       return false;
     }
   }

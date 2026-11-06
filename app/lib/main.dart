@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart'
+    show FlutterError, PlatformDispatcher, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/shoku_theme.dart';
+import 'core/utils/failure_log.dart';
 import 'data/services/prefs.dart';
+import 'data/services/share_intake.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/languages.dart';
 import 'presentation/navigation/app_router.dart';
@@ -14,6 +18,7 @@ import 'presentation/state/sync_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  installErrorHandlers();
 
   // Read the persisted flags before the first frame so onboarding never flashes
   // and the first paint is already in the chosen language.
@@ -47,6 +52,30 @@ Future<void> main() async {
   );
 }
 
+/// The last net before a crash vanishes.
+///
+/// Two different failures arrive here. A synchronous framework error (a build
+/// threw, a layout failed) goes through [FlutterError.onError]; anything that
+/// escaped an unawaited `Future` reaches [PlatformDispatcher.onError]. Neither
+/// was written down before: in a release build both were silence, which is the
+/// one kind of failure nobody can act on.
+///
+/// Returning true from the async handler means "handled": the app keeps running
+/// with the screen it has, instead of the isolate dying on a dropped future.
+void installErrorHandlers() {
+  FlutterError.onError = (details) {
+    logFailure('framework error', details.exception, details.stack);
+    // The red screen and the console dump are development tools; in a release
+    // build they are noise around the line above.
+    if (kDebugMode) FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    logFailure('uncaught async error', error, stack);
+    return true;
+  };
+}
+
 class ShokuApp extends ConsumerWidget {
   const ShokuApp({super.key});
 
@@ -75,6 +104,11 @@ class ShokuApp extends ConsumerWidget {
     // subscribes it to the auth stream. Without this watch there is no
     // listener, and a pass that ran too early is never retried.
     ref.watch(syncControllerProvider);
+    // Share intake belongs to the app, not to the shell: the router is on
+    // `/welcome` and `/splash` before `AppShell` exists, and a share that
+    // arrives while the gate is up used to have nobody listening. Watched here
+    // it starts on the first build and lives until the process ends.
+    ref.watch(shareIntakeProvider);
 
     return ShokuBackGuard(
       child: MaterialApp.router(

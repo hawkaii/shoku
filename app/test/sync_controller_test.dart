@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/data/db/app_database.dart';
 import 'package:food_finder/data/db/journal_repository.dart';
+import 'package:food_finder/data/db/pantry_repository.dart';
 import 'package:food_finder/data/services/api_client.dart';
 import 'package:food_finder/data/services/auth_service.dart';
 import 'package:food_finder/data/sync/sync_repository.dart';
@@ -291,5 +292,87 @@ void main() {
     await controller.onResume();
 
     expect(calls, 1, reason: 'an idle journal is not worth a request');
+  });
+
+  testWidgets('a sync asked for mid-pass runs once more, and carries the edit',
+      (tester) async {
+    final pushBodies = <Map<String, dynamic>>[];
+    final firstPullStarted = Completer<void>();
+    final releaseFirstPull = Completer<void>();
+    var pulls = 0;
+
+    final client = MockClient((request) async {
+      if (request.url.path.endsWith('/push')) {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        pushBodies.add(body);
+        return http.Response(
+          jsonEncode({
+            for (final table in const [
+              'dishes',
+              'versions',
+              'cook_logs',
+              'photos',
+              'pantry_items',
+            ])
+              table: [
+                for (final row in (body[table] as List))
+                  {'id': (row as Map)['id'], 'result': 'accepted'},
+              ],
+          }),
+          200,
+        );
+      }
+      // The first pull is held open. That is the window a real edit and its
+      // syncNow() land in: after the push was accepted, before the pass ends.
+      pulls++;
+      if (pulls == 1) {
+        firstPullStarted.complete();
+        await releaseFirstPull.future;
+      }
+      return _okPull();
+    });
+
+    final container = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        authServiceProvider.overrideWithValue(_FakeAuth(token: 'jwt')),
+        syncServiceProvider.overrideWith(
+          (ref) => SyncService(
+            repository: SyncRepository(db, JournalRepository(db)),
+            api: ApiClient(
+              baseUrl: 'https://api.test',
+              tokenProvider: () => 'jwt',
+              httpClient: client,
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final pantry = PantryRepository(db);
+    await pantry.add(name: 'salt');
+
+    final controller = container.read(syncControllerProvider);
+    final firstPass = controller.syncNow();
+    await firstPullStarted.future;
+
+    await pantry.add(name: 'rice');
+    await controller.syncNow(); // asked for while the pass is still running
+    await controller.syncNow(); // and again: a burst is still one follow-up
+
+    releaseFirstPull.complete();
+    await firstPass;
+
+    expect(pushBodies, hasLength(2),
+        reason: 'the request is queued, not dropped, and it is queued once');
+    expect(
+      (pushBodies.last['pantry_items'] as List)
+          .map((row) => (row as Map)['name']),
+      contains('rice'),
+      reason: 'the follow-up pass is what gets the mid-pass edit to the server',
+    );
+    expect(await SyncRepository(db, JournalRepository(db)).dirtyCount(), 0);
+    expect(container.read(syncStatusProvider), SyncStatus.idle);
   });
 }

@@ -1048,7 +1048,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importCouldNotStart => 'No pudimos iniciar esa importación';
 
   @override
-  String get importSignIn => 'Inicia sesión en Tú para importar';
+  String get importSignIn => 'Inicia sesión para importar este reel';
 
   @override
   String get importUnreachable => 'No se pudo llegar al servidor';
@@ -1823,4 +1823,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'No se pudo denunciar. Inténtalo de nuevo.';
+
+  @override
+  String get timerNotificationTitle => 'El temporizador terminó';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'El paso $step está listo — vuelve a la cocina.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'las alertas no están disponibles — el temporizador sigue funcionando con la app abierta';
+
+  @override
+  String get importShareNoLink =>
+      'Ese contenido no traía un enlace. Pega la URL del reel abajo.';
+
+  @override
+  String get authPasswordShow => 'Mostrar contraseña';
+
+  @override
+  String get authPasswordHide => 'Ocultar contraseña';
+
+  @override
+  String get routeErrorTitle => 'Esta página no está aquí';
+
+  @override
+  String get routeErrorBody =>
+      'Puede que el enlace sea antiguo o esté mal escrito. Tu diario sigue donde estaba.';
+
+  @override
+  String get routeErrorBack => 'Volver al diario';
 }

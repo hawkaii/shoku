@@ -1050,7 +1050,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importCouldNotStart => 'We could not start that import';
 
   @override
-  String get importSignIn => 'Sign in from You to import';
+  String get importSignIn => 'Sign in to import this reel';
 
   @override
   String get importUnreachable => 'Could not reach the server';
@@ -1818,4 +1818,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'Could not report it. Try again.';
+
+  @override
+  String get timerNotificationTitle => 'Timer is up';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'Step $step is done — back to the kitchen.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'alerts are off — the timer still works while the app is open';
+
+  @override
+  String get importShareNoLink =>
+      'That share didn’t include a link. Paste the reel’s URL below.';
+
+  @override
+  String get authPasswordShow => 'Show password';
+
+  @override
+  String get authPasswordHide => 'Hide password';
+
+  @override
+  String get routeErrorTitle => 'This page isn’t here';
+
+  @override
+  String get routeErrorBody =>
+      'The link may be old or mistyped. Your journal is still where it was.';
+
+  @override
+  String get routeErrorBack => 'Back to the journal';
 }

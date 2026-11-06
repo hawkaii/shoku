@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../../data/models/feed_item.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/feed_service.dart';
@@ -68,7 +69,9 @@ class FeedStore extends StateNotifier<FeedState> {
         cursor: page.cursor,
         hasMore: page.hasMore,
       );
-    } catch (_) {
+    } catch (error, stack) {
+      // The Wall shows its muted failed line; the log keeps the reason.
+      logFailure('wall feed load', error, stack);
       state = state.copyWith(loading: false, failed: true);
     }
   }
@@ -92,7 +95,8 @@ class FeedStore extends StateNotifier<FeedState> {
         hasMore: page.hasMore,
         loadingMore: false,
       );
-    } catch (_) {
+    } catch (error, stack) {
+      logFailure('wall feed more', error, stack);
       state = state.copyWith(loadingMore: false, failed: true);
     }
   }

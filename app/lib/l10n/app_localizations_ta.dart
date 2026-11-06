@@ -1060,7 +1060,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get importCouldNotStart => 'அந்த இறக்குமதியைத் தொடங்க முடியவில்லை';
 
   @override
-  String get importSignIn => 'இறக்குமதி செய்ய நீங்கள் பகுதியில் உள்நுழையுங்கள்';
+  String get importSignIn => 'இந்த ரீலை இறக்குமதி செய்ய உள்நுழையுங்கள்';
 
   @override
   String get importUnreachable => 'சர்வரை அடைய முடியவில்லை';
@@ -1841,4 +1841,36 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get wallReportFailed => 'புகாரளிக்க முடியவில்லை. மீண்டும் முயலவும்.';
+
+  @override
+  String get timerNotificationTitle => 'டைமர் முடிந்தது';
+
+  @override
+  String timerNotificationBody(int step) {
+    return 'படி $step முடிந்தது — சமையலறைக்குத் திரும்புங்கள்.';
+  }
+
+  @override
+  String get timerAlertsUnavailable =>
+      'எச்சரிக்கைகள் இல்லை — செயலி திறந்திருக்கும் போது டைமர் இயங்கும்';
+
+  @override
+  String get importShareNoLink =>
+      'அந்தப் பங்கில் இணைப்பு இல்லை. கீழே ரீலின் URL-ஐ ஒட்டுங்கள்.';
+
+  @override
+  String get authPasswordShow => 'கடவுச்சொல்லைக் காட்டு';
+
+  @override
+  String get authPasswordHide => 'கடவுச்சொல்லை மறை';
+
+  @override
+  String get routeErrorTitle => 'இந்தப் பக்கம் இங்கே இல்லை';
+
+  @override
+  String get routeErrorBody =>
+      'இணைப்பு பழையதாகவோ தவறாக எழுதப்பட்டதாகவோ இருக்கலாம். உங்கள் ஜர்னல் இருந்த இடத்திலேயே உள்ளது.';
+
+  @override
+  String get routeErrorBack => 'ஜர்னலுக்குத் திரும்பு';
 }
