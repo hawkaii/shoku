@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/failure_log.dart';
 import 'auth_providers.dart';
 
 import '../../data/db/app_database.dart';
@@ -87,8 +88,10 @@ class JournalStore extends StateNotifier<List<Dish>> {
       // it belongs to its cook, and a second dish would be an imposition.
       if (await _repo.countDishes() > 0) return;
       await _repo.seedSample(sample);
-    } catch (_) {
-      // A sample is a kindness, not a dependency.
+    } catch (error, stack) {
+      // A sample is a kindness, not a dependency — but a sample that did not
+      // arrive is still worth a line.
+      logFailure('sample recipe seed', error, stack);
     }
   }
 
@@ -169,8 +172,10 @@ class JournalStore extends StateNotifier<List<Dish>> {
   Future<void> reload() async {
     try {
       state = await _repo.loadDishes();
-    } catch (_) {
-      // The Journal already has a state it can render.
+    } catch (error, stack) {
+      // The Journal already has a state it can render; the line says why this
+      // re-read changed nothing.
+      logFailure('journal reload', error, stack);
     }
   }
 
@@ -192,8 +197,10 @@ class JournalStore extends StateNotifier<List<Dish>> {
       }
       await _repo.seedSample(sample);
       state = await _repo.loadDishes();
-    } catch (_) {
-      // Leave the journal as it was; the empty state is a valid screen.
+    } catch (error, stack) {
+      // Leave the journal as it was; the empty state is a valid screen, and the
+      // failure is now on the record.
+      logFailure('journal sample ensure', error, stack);
     }
   }
 
@@ -205,8 +212,9 @@ class JournalStore extends StateNotifier<List<Dish>> {
         await _repo.removeSample(sampleId);
         state = await _repo.loadDishes();
       }
-    } catch (_) {
+    } catch (error, stack) {
       // Signing in must not fail because a local delete did.
+      logFailure('journal sample drop', error, stack);
     }
   }
 }

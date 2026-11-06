@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/shoku_theme.dart';
+import '../../../core/utils/failure_log.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
 import '../../../l10n/languages.dart';
@@ -341,7 +342,9 @@ class _DeleteAccountButtonState extends ConsumerState<_DeleteAccountButton> {
       await ref.read(databaseProvider).wipe();
       await ref.read(authServiceProvider).signOut();
       messenger.showSnackBar(SnackBar(content: Text(l10n.accountDeleteDone)));
-    } catch (_) {
+    } catch (error, stack) {
+      // The snackbar already says the delete failed; the log says which step.
+      logFailure('account delete', error, stack);
       messenger.showSnackBar(SnackBar(content: Text(l10n.accountDeleteFailed)));
     } finally {
       if (mounted) setState(() => _busy = false);

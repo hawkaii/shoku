@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../models/pantry_item.dart';
 import 'app_database.dart';
 
@@ -147,7 +148,10 @@ class PantryRepository {
       final decoded = jsonDecode(raw);
       if (decoded is! List) return const [];
       return decoded.map((e) => e.toString()).toList();
-    } catch (_) {
+    } catch (error, stack) {
+      // A corrupt column is already wrong on disk; the shelf renders without it
+      // rather than crashing, and the row is named in the log.
+      logFailure('pantry column decode', error, stack);
       return const [];
     }
   }

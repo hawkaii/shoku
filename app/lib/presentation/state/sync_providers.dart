@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/failure_log.dart';
 import '../../data/mock/sample_recipe.dart';
 import '../../data/services/api_client.dart';
 import '../../data/services/auth_service.dart';
@@ -150,8 +151,10 @@ class SyncController {
       // Not "offline": the network answered, it just would not stop paging.
       // Reported as a failed pass so the retry loop owns it.
       _fail(SyncStatus.failed);
-    } catch (_) {
-      // No network, DNS failure, server down: all the same to the user.
+    } catch (error, stack) {
+      // No network, DNS failure, server down: all the same to the user, and the
+      // line is what tells them apart later.
+      logFailure('sync pass', error, stack);
       _fail(SyncStatus.offline);
     } finally {
       _setProgress(null);
