@@ -1,0 +1,89 @@
+name: Android build
+
+# The release workflow only runs on main, so before this existed a change to the
+# manifest, Gradle files or pubspec could reach main without ever having been
+# assembled. That is exactly how a missing notification receiver ships.
+#
+# This builds a debug APK whenever Android packaging could have changed, and on
+# demand. It publishes nothing.
+on:
+  pull_request:
+    paths:
+      - "app/android/**"
+      - "app/pubspec.yaml"
+      - ".github/workflows/android-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.8
+
+jobs:
+  assemble:
+    name: Assemble debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+
+      # The same JDK the release build uses. A different one can turn a green
+      # release red only after it is already on main.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: Build
+        run: flutter build apk --debug
+
+      # A build that succeeds while the merged manifest lost the receivers is
+      # still broken. Assert on what Gradle actually produced, not on the source
+      # file it started from.
+      - name: Verify the merged manifest
+        run: |
+          set -euo pipefail
+          manifest=$(find build/app/intermediates -type f -name AndroidManifest.xml \
+            | grep -E "merged_manifest" | head -1)
+          if [ -z "$manifest" ]; then
+            echo "::error::could not find the merged AndroidManifest.xml"
+            exit 1
+          fi
+          echo "merged manifest: $manifest"
+          for needle in \
+            ScheduledNotificationReceiver \
+            ScheduledNotificationBootReceiver \
+            RECEIVE_BOOT_COMPLETED \
+            'android.intent.action.SEND_MULTIPLE'; do
+            if ! grep -q "$needle" "$manifest"; then
+              echo "::error::merged manifest is missing $needle"
+              exit 1
+            fi
+            echo "ok: $needle"
+          done
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: debug-apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
