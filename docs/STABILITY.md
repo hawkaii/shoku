@@ -158,4 +158,43 @@ The lesson that drives the plan: **the reference app's age did not make it stabl
 
 ## Verification log
 
-Appended as each workstream lands. A claim here without a command and its output is not allowed.
+### 2026-11-06 — `dev` at `1b91825`, released as `1.30.0`
+
+| Gate | Command | Result |
+|---|---|---|
+| Analyzer | `flutter analyze --fatal-infos` | No issues found |
+| Flutter tests | `flutter test` | **387 passed, 0 failed** |
+| API tests | `docker run python:3.12-slim … pytest` | **292 passed** |
+| l10n | `gen-l10n && dart format && git diff --exit-code` | stable, 10 locales at parity |
+| Android packaging | CI `Android build` on `dev` (run `42215997782`) | APK assembled; merged manifest contains both notification receivers, `RECEIVE_BOOT_COMPLETED`, `SEND_MULTIPLE` |
+
+| Workstream | PR | Evidence |
+|---|---|---|
+| WS0 gate | #12, #25 | a deliberately broken commit goes red; the APK job asserts the **merged** manifest |
+| WS1 timers | #13, #22 | 23 new tests, including a Hindi notification body proving the copy is not hardcoded |
+| WS2 share | #13, #26 | 10 new tests: cold start, warm, no-link, persisted-after-gate, consume-once |
+| WS3 sign-in | #21, #23 | 320×568 + 300 px keyboard inset with no overflow; signed-out surfaces open the sheet and retry |
+| WS4 sync | #20 | dirty reaches 0 for all five tables; `has_more` pages loop with a bound; a pass during a pass is queued |
+| WS5 import | #29 | dismiss mid-request raises nothing; concurrent `createDish` produces one dish |
+| WS6 errors | #28, #30 | 56 bare catches → 0 unexplained; global framework and async handlers |
+| WS7 docs | #14, #24 | architecture, module map, measured debt; in-app route error |
+
+**Not verifiable in this environment, still required on a phone:**
+
+1. A 1-minute cook timer with the screen locked rings at the minute; record the
+   schedule→fire delta.
+2. Denying notifications shows "alerts are off" while the countdown continues;
+   denying exact alarms shows "late"; granting "Alarms & reminders" while a
+   timer runs clears the note without a restart.
+3. Force-stop, share an Instagram reel: Shoku opens on the import sheet,
+   prefilled and importing. Repeat on a fresh install through onboarding.
+4. An image-only share shows the no-link notice; a signed-out share offers
+   **Sign in** and imports the same URL afterwards.
+5. A 5" phone with the keyboard up: every sign-in control is reachable.
+6. Two devices converge to `dirtyCount == 0`; a >500-row table restores fully on
+   an empty device.
+
+The machine used for this work has no Android SDK or device; the APK was
+assembled by CI, which is why the merged-manifest assertions live in the
+workflow rather than in a local script.
+
