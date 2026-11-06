@@ -8,6 +8,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/prefs.dart';
 import '../../../l10n/languages.dart';
 import '../../state/account_providers.dart';
+import '../../state/auth_providers.dart';
 import '../../state/journal_providers.dart';
 import '../../state/journal_store.dart';
 import '../../state/locale_provider.dart';
@@ -197,16 +198,38 @@ class _StatBlock extends StatelessWidget {
 
 
 /// Signed in, or a way to sign in — the one place auth surfaces in the app.
-class _AccountRow extends StatelessWidget {
+class _AccountRow extends ConsumerStatefulWidget {
   const _AccountRow();
+
+  @override
+  ConsumerState<_AccountRow> createState() => _AccountRowState();
+}
+
+class _AccountRowState extends ConsumerState<_AccountRow> {
+  /// Cached once. A stream built in `build` re-subscribes on every rebuild and
+  /// can miss the event that arrived between the old and new subscription.
+  late final Stream<ShokuAuthEvent> _changes;
+
+  @override
+  void initState() {
+    super.initState();
+    _changes = ref.read(authServiceProvider).events;
+  }
+
+  Future<void> _signIn() async {
+    final signedIn = await showSignInSheet(context);
+    // The session is live before the stream event reaches this row; read it
+    // now rather than waiting for a second frame of the right answer.
+    if (signedIn && mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final l10n = context.l10n;
-    final auth = AuthService();
-    return StreamBuilder(
-      stream: auth.changes,
+    final auth = ref.watch(authServiceProvider);
+    return StreamBuilder<ShokuAuthEvent>(
+      stream: _changes,
       builder: (context, _) {
         final session = auth.session;
         final email = session?.user.email ?? '';
@@ -242,7 +265,7 @@ class _AccountRow extends StatelessWidget {
               const SizedBox(width: ShokuSpace.sm),
               if (session == null)
                 ShokuPressable(
-                  onTap: () => showSignInSheet(context),
+                  onTap: _signIn,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
@@ -258,7 +281,7 @@ class _AccountRow extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextButton(
-                      onPressed: () => AuthService().signOut(),
+                      onPressed: () => auth.signOut(),
                       child: Text(l10n.authSignOut,
                           style: ShokuType.label.copyWith(color: c.inkMuted)),
                     ),
@@ -316,7 +339,7 @@ class _DeleteAccountButtonState extends ConsumerState<_DeleteAccountButton> {
     try {
       await ref.read(accountServiceProvider).deleteAccount();
       await ref.read(databaseProvider).wipe();
-      await AuthService().signOut();
+      await ref.read(authServiceProvider).signOut();
       messenger.showSnackBar(SnackBar(content: Text(l10n.accountDeleteDone)));
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(l10n.accountDeleteFailed)));
