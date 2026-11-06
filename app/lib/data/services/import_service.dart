@@ -24,18 +24,19 @@ class ImportService {
   final JournalRepository _repository;
 
   Future<ImportStart> start(String url) async {
-    final Map<String, dynamic> response;
+    Map<String, dynamic> response;
     try {
-      response = await _api.post('/v1/imports', {
-        'url': url.trim(),
-        // One id per attempt: a retried POST is the same import, not a new one,
-        // so the daily allowance is not spent twice for one tap.
-        'request_id': _uuid.v4(),
-      });
+      response = await _post(url);
     } on ApiError catch (error) {
-      if (error.status == 429 || error.reason == 'daily_cap_reached') {
-        throw const ImportCapReached();
+      // A server older than this build rejects the unknown field outright.
+      // One retry without the id keeps the app working during a staged
+      // deploy; the only loss is idempotency for that single tap.
+      if (error.status == 422) {
+        response = await _post(url, withRequestId: false);
+      } else {
+        rethrow;
       }
+    } on ImportCapReached {
       rethrow;
     }
     return ImportStart(
@@ -47,6 +48,22 @@ class ImportService {
       remaining: (response['remaining'] as num?)?.toInt(),
       resetAt: DateTime.tryParse('${response['reset_at'] ?? ''}'),
     );
+  }
+
+  Future<Map<String, dynamic>> _post(String url, {bool withRequestId = true}) async {
+    try {
+      return await _api.post('/v1/imports', {
+        'url': url.trim(),
+        // One id per attempt: a retried POST is the same import, not a new one,
+        // so the daily allowance is not spent twice for one tap.
+        if (withRequestId) 'request_id': _uuid.v4(),
+      });
+    } on ApiError catch (error) {
+      if (error.status == 429 || error.reason == 'daily_cap_reached') {
+        throw const ImportCapReached();
+      }
+      rethrow;
+    }
   }
 
   Future<ImportProgress> poll(String jobId) async {
