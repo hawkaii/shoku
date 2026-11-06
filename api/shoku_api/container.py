@@ -89,6 +89,7 @@ class AppContext:
             queue=self.queue,
             clock=self.clock,
             waker=self.waker,
+            daily_cap=self.settings.import_daily_cap,
             unclaimed_timeout_seconds=float(
                 self.settings.worker_unclaimed_timeout_seconds
             ),

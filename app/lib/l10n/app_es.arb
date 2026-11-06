@@ -402,5 +402,8 @@
   "botSignInNotice": "Inicia sesión para preguntar al asistente.",
   "dishStopReading": "Detener la lectura",
   "cookbookEmptySignedOut": "Inicia sesión para recuperar tus recetas. Están en el servidor, no en este teléfono.",
-  "cookbookEmptyOffline": "No se pudieron cargar tus recetas. Revisa la conexión y vuelve a intentarlo."
+  "cookbookEmptyOffline": "No se pudieron cargar tus recetas. Revisa la conexión y vuelve a intentarlo.",
+  "importCapNotice": "Ya usaste las importaciones de hoy. Vuelven mañana — o añade un reel del Muro, que ya está leído.",
+  "importCapWallHint": "O añade uno del Muro: ya están leídos.",
+  "botAsksLeft": "{count, plural, =0{no quedan preguntas hoy} one{queda 1 pregunta hoy} other{quedan {count} preguntas hoy}}"
 }

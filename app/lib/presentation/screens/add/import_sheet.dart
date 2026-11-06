@@ -59,6 +59,9 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   ImportProgress? _progress;
   bool _busy = false;
   String? _error;
+  /// True when the failure was the daily import allowance, so the sheet can
+  /// point at the free way in: a reel the Wall has already read.
+  bool _capped = false;
 
   /// Shown instead of an error when the window runs out: the job is still on the
   /// server, so nothing has failed.
@@ -98,6 +101,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
     setState(() {
       _busy = true;
       _error = null;
+      _capped = false;
       _progress = null;
       _stillReading = null;
       _slow = false;
@@ -155,6 +159,12 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
       // The Journal shows it too, from the same record, once the sheet closes.
       await ref.read(importTrackerProvider.notifier).adopt(pending);
       _watch(service, started.jobId!, started.shortcode);
+    } on ImportCapReached {
+      setState(() {
+        _busy = false;
+        _capped = true;
+        _error = context.l10n.importCapNotice;
+      });
     } on ApiUnauthenticated {
       setState(() {
         _busy = false;
@@ -446,6 +456,14 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
           if (_error != null) ...[
             const SizedBox(height: ShokuSpace.sm),
             Text(_error!, style: ShokuType.bodySmall.copyWith(color: c.danger)),
+            if (_capped) ...[
+              const SizedBox(height: 4),
+              Text(
+                l10n.importCapWallHint,
+                key: const ValueKey('import-cap-wall-hint'),
+                style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+              ),
+            ],
           ],
           const SizedBox(height: ShokuSpace.lg),
           ShokuPressable(

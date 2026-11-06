@@ -1779,4 +1779,24 @@ class AppLocalizationsTe extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'మీ రెసిపీలు లోడ్ కాలేదు. కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get importCapNotice =>
+      'ఈరోజు ఇంపోర్ట్‌లు అయిపోయాయి. అవి రేపు తిరిగి వస్తాయి — లేదా వాల్ నుండి ఒక రీల్‌ను జోడించండి, అది ఇప్పటికే చదవబడింది.';
+
+  @override
+  String get importCapWallHint =>
+      'లేదా వాల్ నుండి ఒకటి జోడించండి — అవి ఇప్పటికే చదవబడ్డాయి.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ఈరోజు $count ప్రశ్నలు మిగిలాయి',
+      one: 'ఈరోజు 1 ప్రశ్న మిగిలింది',
+      zero: 'ఈరోజు ప్రశ్నలు లేవు',
+    );
+    return '$_temp0';
+  }
 }

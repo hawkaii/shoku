@@ -24,13 +24,28 @@ class ImportService {
   final JournalRepository _repository;
 
   Future<ImportStart> start(String url) async {
-    final response = await _api.post('/v1/imports', {'url': url.trim()});
+    final Map<String, dynamic> response;
+    try {
+      response = await _api.post('/v1/imports', {
+        'url': url.trim(),
+        // One id per attempt: a retried POST is the same import, not a new one,
+        // so the daily allowance is not spent twice for one tap.
+        'request_id': _uuid.v4(),
+      });
+    } on ApiError catch (error) {
+      if (error.status == 429 || error.reason == 'daily_cap_reached') {
+        throw const ImportCapReached();
+      }
+      rethrow;
+    }
     return ImportStart(
       jobId: response['job_id'] as String?,
       shortcode: response['shortcode'] as String? ?? '',
       stage: _stage(response['state'] as String?),
       cached: response['cached'] == true,
       reason: response['reason'] as String?,
+      remaining: (response['remaining'] as num?)?.toInt(),
+      resetAt: DateTime.tryParse('${response['reset_at'] ?? ''}'),
     );
   }
 
@@ -212,6 +227,14 @@ class ImportService {
   }
 }
 
+/// The day's imports are spent: a state with a date, not an error.
+class ImportCapReached implements Exception {
+  const ImportCapReached();
+
+  @override
+  String toString() => 'ImportCapReached';
+}
+
 class ImportStart {
   const ImportStart({
     required this.jobId,
@@ -219,6 +242,8 @@ class ImportStart {
     required this.stage,
     required this.cached,
     this.reason,
+    this.remaining,
+    this.resetAt,
   });
 
   final String? jobId;
@@ -226,6 +251,9 @@ class ImportStart {
   final ImportStage stage;
   final bool cached;
   final String? reason;
+  /// Imports left today, when the server said.
+  final int? remaining;
+  final DateTime? resetAt;
 }
 
 class ImportProgress {

@@ -1760,4 +1760,23 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi.';
+
+  @override
+  String get importCapNotice =>
+      'Impor hari ini habis. Kembali besok — atau tambahkan reel dari Dinding, yang sudah dibaca.';
+
+  @override
+  String get importCapWallHint =>
+      'Atau tambahkan satu dari Dinding — sudah dibaca.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pertanyaan tersisa hari ini',
+      zero: 'tidak ada pertanyaan tersisa',
+    );
+    return '$_temp0';
+  }
 }

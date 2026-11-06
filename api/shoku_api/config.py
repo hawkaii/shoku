@@ -66,6 +66,11 @@ class Settings(BaseSettings):
     assistant_model: str = ""
     assistant_timeout: float = 60.0
 
+    # An import is the expensive one: it boots a worker VM and calls the model
+    # to read the video. Five a day is invisible to a normal kitchen and still
+    # bounds what one account can cost.
+    import_daily_cap: int = 5
+
     # Receipt parsing has its own allowance: a bag of shopping is not a
     # conversation, and sharing the assistant's 20 would spend it twice over.
     pantry_parse_daily_cap: int = 10

@@ -1769,4 +1769,24 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'আপনার রেসিপি লোড করা যায়নি। সংযোগ দেখে আবার চেষ্টা করুন।';
+
+  @override
+  String get importCapNotice =>
+      'আজকের ইমপোর্ট শেষ। ওগুলো কাল ফিরবে — অথবা ওয়াল থেকে একটি রিল যোগ করুন, সেটি আগেই পড়া হয়েছে।';
+
+  @override
+  String get importCapWallHint =>
+      'অথবা ওয়াল থেকে একটি যোগ করুন — সেগুলি আগেই পড়া হয়েছে।';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'আজ $countটি প্রশ্ন বাকি',
+      one: 'আজ ১টি প্রশ্ন বাকি',
+      zero: 'আজ আর প্রশ্ন নেই',
+    );
+    return '$_temp0';
+  }
 }

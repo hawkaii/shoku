@@ -1780,4 +1780,23 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'Não foi possível carregar as suas receitas. Verifique a ligação e tente novamente.';
+
+  @override
+  String get importCapNotice =>
+      'As importações de hoje acabaram. Voltam amanhã — ou adicione um reel do Mural, que já está lido.';
+
+  @override
+  String get importCapWallHint => 'Ou adicione um do Mural: já estão lidos.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count perguntas restantes hoje',
+      one: '1 pergunta restante hoje',
+      zero: 'sem perguntas hoje',
+    );
+    return '$_temp0';
+  }
 }

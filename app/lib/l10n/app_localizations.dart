@@ -2531,6 +2531,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your recipes could not load. Check the connection and try again.'**
   String get cookbookEmptyOffline;
+
+  /// No description provided for @importCapNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s imports are used up. They come back tomorrow — or add one from the Wall, already read.'**
+  String get importCapNotice;
+
+  /// No description provided for @importCapWallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or add one from the Wall — those are already read.'**
+  String get importCapWallHint;
+
+  /// No description provided for @botAsksLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no asks left today} one{1 ask left today} other{{count} asks left today}}'**
+  String botAsksLeft(int count);
 }
 
 class _AppLocalizationsDelegate

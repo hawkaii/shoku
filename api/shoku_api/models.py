@@ -347,12 +347,51 @@ class ImportJob(Base):
     progress_stage: Mapped[str | None] = mapped_column(String(48), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+    #: The daily allowance this job spent, so a job that never ran can hand the
+    #: unit back. Null on jobs created before the allowance existed.
+    quota_request_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     __table_args__ = (
         Index("ix_import_jobs_user_created", "user_id", "created_at"),
         Index("ix_import_jobs_shortcode_state", "shortcode", "state"),
         Index("ix_import_jobs_state_created", "state", "created_at"),
     )
+
+
+class ImportUsage(Base):
+    """Per-user, per-UTC-day counter for imports.
+
+    Its own budget on purpose: an import boots a VM and calls the model, so it
+    costs orders of magnitude more than an ask, and sharing a counter would let
+    a chatty afternoon spend the afternoon's imports.
+    """
+
+    __tablename__ = "import_usage"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class ImportAsk(Base):
+    """One metered import, keyed by the client's ``request_id``.
+
+    The same idempotency as an assistant ask: a POST retried after a dropped
+    response finds its own row and does not spend a second unit.
+    """
+
+    __tablename__ = "import_requests"
+
+    user_id: Mapped[str] = mapped_column(
+        String(128), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    request_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, nullable=False)
+
+    __table_args__ = (Index("ix_import_requests_user_day", "user_id", "day"),)
 
 
 class AssistantAsk(Base):

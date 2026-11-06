@@ -1068,5 +1068,9 @@
   "botSignInNotice": "Sign in to ask the assistant.",
   "dishStopReading": "Stop reading",
   "cookbookEmptySignedOut": "Sign in to bring your recipes back. They live on the server, not on this phone.",
-  "cookbookEmptyOffline": "Your recipes could not load. Check the connection and try again."
+  "cookbookEmptyOffline": "Your recipes could not load. Check the connection and try again.",
+  "importCapNotice": "Today's imports are used up. They come back tomorrow — or add one from the Wall, already read.",
+  "importCapWallHint": "Or add one from the Wall — those are already read.",
+  "botAsksLeft": "{count, plural, =0{no asks left today} one{1 ask left today} other{{count} asks left today}}",
+  "@botAsksLeft": {"placeholders": {"count": {"type": "int"}}}
 }

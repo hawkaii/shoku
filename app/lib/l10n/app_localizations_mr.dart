@@ -1769,4 +1769,24 @@ class AppLocalizationsMr extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'तुमच्या रेसिपी लोड होऊ शकल्या नाहीत. कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.';
+
+  @override
+  String get importCapNotice =>
+      'आजचे इम्पोर्ट संपले. ते उद्या परत येतील — किंवा वॉलवरून एक रील जोडा, ती आधीच वाचली आहे.';
+
+  @override
+  String get importCapWallHint =>
+      'किंवा वॉलवरून एक जोडा — ते आधीच वाचलेले आहेत.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'आज $count प्रश्न शिल्लक आहेत',
+      one: 'आज 1 प्रश्न शिल्लक आहे',
+      zero: 'आज प्रश्न शिल्लक नाहीत',
+    );
+    return '$_temp0';
+  }
 }

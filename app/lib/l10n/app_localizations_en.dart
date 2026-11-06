@@ -1771,4 +1771,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'Your recipes could not load. Check the connection and try again.';
+
+  @override
+  String get importCapNotice =>
+      'Today\'s imports are used up. They come back tomorrow — or add one from the Wall, already read.';
+
+  @override
+  String get importCapWallHint =>
+      'Or add one from the Wall — those are already read.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count asks left today',
+      one: '1 ask left today',
+      zero: 'no asks left today',
+    );
+    return '$_temp0';
+  }
 }

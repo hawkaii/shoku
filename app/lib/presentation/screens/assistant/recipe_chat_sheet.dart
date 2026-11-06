@@ -112,6 +112,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   String? _error;
   int? _appliedVersion;
   bool _cap = false;
+  /// Asks left today, when the server last said.
+  int? _remaining;
   bool _offline = false;
 
   /// The one unresolved diff. Two at once would be two truths about the head.
@@ -292,6 +294,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       HapticFeedback.selectionClick();
       setState(() {
         _thinking = false;
+        _remaining = reply.remaining;
         _turns.add(_Turn.answer(reply.answer));
         if (reply.isEdit) {
           final diff = _Turn.diff(reply, question);
@@ -311,6 +314,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       setState(() {
         _thinking = false;
         _cap = true;
+        _remaining = 0;
         _turns.add(_Turn.notice(context.l10n.botCapNotice));
       });
       _scrollToLatest();
@@ -479,6 +483,15 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                 ),
               ],
             ),
+            if (_remaining != null && _remaining! <= 5) ...[
+              const SizedBox(height: ShokuSpace.xs),
+              Text(
+                l10n.botAsksLeft(_remaining!),
+                key: const ValueKey('chat-asks-left'),
+                style: ShokuType.bodySmall
+                    .copyWith(color: c.inkMuted, fontSize: 11.5),
+              ),
+            ],
             if (widget.stepIndex != null && _stepScope) ...[
               const SizedBox(height: ShokuSpace.xs),
               Row(

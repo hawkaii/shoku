@@ -1794,4 +1794,24 @@ class AppLocalizationsTa extends AppLocalizations {
   @override
   String get cookbookEmptyOffline =>
       'உங்கள் ரெசிபிகள் ஏற்றப்படவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலவும்.';
+
+  @override
+  String get importCapNotice =>
+      'இன்றைய இறக்குமதிகள் முடிந்துவிட்டன. அவை நாளை திரும்பும் — அல்லது வாலில் இருந்து ஒரு ரீலைச் சேர்க்கவும், அது ஏற்கனவே படிக்கப்பட்டது.';
+
+  @override
+  String get importCapWallHint =>
+      'அல்லது வாலில் இருந்து ஒன்றைச் சேர்க்கவும் — அவை ஏற்கனவே படிக்கப்பட்டவை.';
+
+  @override
+  String botAsksLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'இன்று $count கேள்விகள் மீதம்',
+      one: 'இன்று 1 கேள்வி மீதம்',
+      zero: 'இன்று கேள்விகள் இல்லை',
+    );
+    return '$_temp0';
+  }
 }

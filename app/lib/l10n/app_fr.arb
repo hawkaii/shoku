@@ -402,5 +402,8 @@
   "botSignInNotice": "Connectez-vous pour interroger l'assistant.",
   "dishStopReading": "Arrêter la lecture",
   "cookbookEmptySignedOut": "Connectez-vous pour retrouver vos recettes. Elles sont sur le serveur, pas sur ce téléphone.",
-  "cookbookEmptyOffline": "Impossible de charger vos recettes. Vérifiez la connexion et réessayez."
+  "cookbookEmptyOffline": "Impossible de charger vos recettes. Vérifiez la connexion et réessayez.",
+  "importCapNotice": "Les imports du jour sont épuisés. Ils reviennent demain — ou ajoutez un reel du Mur, déjà lu.",
+  "importCapWallHint": "Ou ajoutez-en un du Mur : ils sont déjà lus.",
+  "botAsksLeft": "{count, plural, =0{plus de questions aujourd'hui} one{1 question restante aujourd'hui} other{{count} questions restantes aujourd'hui}}"
 }

@@ -402,5 +402,8 @@
   "botSignInNotice": "Masuk untuk bertanya kepada asisten.",
   "dishStopReading": "Berhenti membaca",
   "cookbookEmptySignedOut": "Masuk untuk memulihkan resep Anda. Resep tersimpan di server, bukan di ponsel ini.",
-  "cookbookEmptyOffline": "Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi."
+  "cookbookEmptyOffline": "Resep Anda tidak dapat dimuat. Periksa koneksi lalu coba lagi.",
+  "importCapNotice": "Impor hari ini habis. Kembali besok — atau tambahkan reel dari Dinding, yang sudah dibaca.",
+  "importCapWallHint": "Atau tambahkan satu dari Dinding — sudah dibaca.",
+  "botAsksLeft": "{count, plural, =0{tidak ada pertanyaan tersisa} other{{count} pertanyaan tersisa hari ini}}"
 }

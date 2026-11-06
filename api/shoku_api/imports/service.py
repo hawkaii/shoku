@@ -14,6 +14,9 @@ from sqlalchemy.orm import Session
 
 from ..domain.clock import Clock
 from ..domain.errors import Gone, NotFound, ShokuError
+from ..domain.quota import Quota, release as release_quota, reserve as reserve_quota
+from ..domain.quota import reset_at as reset_at_for
+from ..domain.quota import used as quota_used
 from ..domain.urls import normalise_url
 from ..domain.worker_pool import (
     RUNNING,
@@ -24,11 +27,12 @@ from ..domain.worker_pool import (
 )
 from .pipeline import EXTRACTION_VERSION
 from .queue import Queue
-from ..models import ContentCache, ImportJob
+from ..models import ContentCache, ImportAsk, ImportJob, ImportUsage
 from ..schemas import ImportResponse, ImportStatus
 
 TERMINAL_STATES = ("ready", "failed")
 CANCELLED_REASON = "cancelled"
+QUEUE_UNAVAILABLE = "queue_unavailable"
 WORKER_UNAVAILABLE = "worker_unavailable"
 
 
@@ -46,6 +50,12 @@ class ImportDeps:
     waker: WorkerWaker = field(default_factory=_offline_waker)
     #: A queued job older than this never met a worker. See ``reap_unclaimed``.
     unclaimed_timeout_seconds: float = 180.0
+    #: Imports a user may queue per UTC day. 0 disables importing entirely.
+    daily_cap: int = 0
+
+
+def _quota(deps: ImportDeps) -> Quota:
+    return Quota(ImportUsage, ImportAsk, cap=deps.daily_cap, label="import")
 
 
 def _status(job: ImportJob) -> ImportStatus:
@@ -60,9 +70,24 @@ def _status(job: ImportJob) -> ImportStatus:
     )
 
 
-def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> ImportResponse:
+def start_import(
+    session: Session,
+    deps: ImportDeps,
+    *,
+    uid: str,
+    url: str,
+    request_id: str | None = None,
+) -> ImportResponse:
     source = normalise_url(url)
     reap_unclaimed(session, deps)
+
+    now = deps.clock.now()
+    quota = _quota(deps)
+    # A retry carries the same id; a fresh attempt carries a new one or none.
+    ticket = request_id or str(uuid.uuid4())
+
+    def allowance() -> int:
+        return max(0, deps.daily_cap - quota_used(session, quota, uid, now.date()))
 
     cached = session.get(ContentCache, source.shortcode)
     if cached is not None and cached.deleted_at is not None:
@@ -73,8 +98,14 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
         and cached.structured_json is not None
         and cached.extraction_version >= EXTRACTION_VERSION
     ):
+        # Already read: no worker, no model, and no unit spent.
         return ImportResponse(
-            job_id=None, state="ready", cached=True, shortcode=source.shortcode
+            job_id=None,
+            state="ready",
+            cached=True,
+            shortcode=source.shortcode,
+            remaining=allowance(),
+            reset_at=reset_at_for(now),
         )
     # Otherwise a stale parse: fall through and extract again. Serving it would
     # keep showing a dish the current pipeline would no longer produce.
@@ -91,11 +122,19 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
         .limit(1)
     ).first()
     if active is not None:
+        # Somebody's extraction is already running; joining it costs nothing.
         return ImportResponse(
-            job_id=active.id, state=active.state, cached=False, shortcode=source.shortcode
+            job_id=active.id,
+            state=active.state,
+            cached=False,
+            shortcode=source.shortcode,
+            remaining=allowance(),
+            reset_at=reset_at_for(now),
         )
 
-    now = deps.clock.now()
+    # Only now, with no cache and no live job, does this request cost anything.
+    reserve_quota(session, quota, uid=uid, request_id=ticket, now=now)
+
     job = ImportJob(
         id=str(uuid.uuid4()),
         user_id=uid,
@@ -105,13 +144,27 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
         progress_stage="queued",
         created_at=now,
         updated_at=now,
+        quota_request_id=ticket,
     )
     session.add(job)
     session.commit()
 
     # Commit before enqueueing: a worker that dequeues first would not find the
     # row and would drop the job.
-    deps.queue.enqueue(job.id)
+    try:
+        deps.queue.enqueue(job.id)
+    except Exception:
+        # A queue that refused the job never did any work; hand the unit back.
+        release_quota(session, quota, uid=uid, request_id=ticket, now=now)
+        _fail(session, job, reason=QUEUE_UNAVAILABLE, now=deps.clock.now())
+        return ImportResponse(
+            job_id=job.id,
+            state="failed",
+            cached=False,
+            shortcode=source.shortcode,
+            remaining=allowance(),
+            reset_at=reset_at_for(now),
+        )
 
     # Wake the VM only now, with the row and the queue entry already durable:
     # a boot that beats the insert would find nothing to do.
@@ -119,10 +172,16 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
         awake = deps.waker.ensure_awake()
     except ShokuError:
         # The instance refused to start. Fail the job rather than letting the
-        # client poll a queue that nothing will ever drain.
+        # client poll a queue that nothing will ever drain — and refund it.
+        release_quota(session, quota, uid=uid, request_id=ticket, now=now)
         _fail(session, job, reason=WORKER_UNAVAILABLE, now=deps.clock.now())
         return ImportResponse(
-            job_id=job.id, state="failed", cached=False, shortcode=source.shortcode
+            job_id=job.id,
+            state="failed",
+            cached=False,
+            shortcode=source.shortcode,
+            remaining=allowance(),
+            reset_at=reset_at_for(now),
         )
 
     if awake == STARTING:
@@ -132,7 +191,14 @@ def start_import(session: Session, deps: ImportDeps, *, uid: str, url: str) -> I
         job.updated_at = deps.clock.now()
         session.commit()
 
-    return ImportResponse(job_id=job.id, state="queued", cached=False, shortcode=source.shortcode)
+    return ImportResponse(
+        job_id=job.id,
+        state="queued",
+        cached=False,
+        shortcode=source.shortcode,
+        remaining=allowance(),
+        reset_at=reset_at_for(now),
+    )
 
 
 def _fail(session: Session, job: ImportJob, *, reason: str, now) -> None:
@@ -153,18 +219,36 @@ def reap_unclaimed(session: Session, deps: ImportDeps) -> int:
     """
     if deps.unclaimed_timeout_seconds <= 0:
         return 0
-    cutoff = deps.clock.now() - timedelta(seconds=deps.unclaimed_timeout_seconds)
+    now = deps.clock.now()
+    cutoff = now - timedelta(seconds=deps.unclaimed_timeout_seconds)
+    stranded = session.scalars(
+        select(ImportJob).where(
+            ImportJob.state == "queued", ImportJob.created_at < cutoff
+        )
+    ).all()
+    if not stranded:
+        return 0
     result = session.execute(
         update(ImportJob)
-        .where(ImportJob.state == "queued", ImportJob.created_at < cutoff)
+        .where(
+            ImportJob.id.in_([job.id for job in stranded]),
+            ImportJob.state == "queued",
+        )
         .values(
             state="failed",
             reason=WORKER_UNAVAILABLE,
             progress_stage="failed",
-            updated_at=deps.clock.now(),
+            updated_at=now,
         )
     )
     session.commit()
+    # Nothing read the reel, so nothing should have been charged for it.
+    quota = _quota(deps)
+    for job in stranded:
+        if job.quota_request_id:
+            release_quota(
+                session, quota, uid=job.user_id, request_id=job.quota_request_id, now=now
+            )
     return result.rowcount
 
 
@@ -185,6 +269,9 @@ def cancel_import(session: Session, deps: ImportDeps, *, uid: str, job_id: str) 
         return _status(job)
 
     now = deps.clock.now()
+    # A job cancelled before any worker claimed it never spent the VM, so it
+    # hands the daily unit back. One already extracting has already cost.
+    was_queued = job.state == "queued"
     result = session.execute(
         update(ImportJob)
         .where(
@@ -203,12 +290,21 @@ def cancel_import(session: Session, deps: ImportDeps, *, uid: str, job_id: str) 
     if result.rowcount == 0:
         session.refresh(job)
         return _status(job)
+    if was_queued and job.quota_request_id:
+        release_quota(
+            session,
+            _quota(deps),
+            uid=uid,
+            request_id=job.quota_request_id,
+            now=now,
+        )
     session.refresh(job)
     return _status(job)
 
 
 __all__ = [
     "CANCELLED_REASON",
+    "QUEUE_UNAVAILABLE",
     "ImportDeps",
     "TERMINAL_STATES",
     "WORKER_UNAVAILABLE",
