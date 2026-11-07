@@ -36,7 +36,8 @@ Widget _harness({
           alerts: alerts,
           onStart: () => taps.update('start', (v) => v + 1, ifAbsent: () => 1),
           onPause: () => taps.update('pause', (v) => v + 1, ifAbsent: () => 1),
-          onResume: () => taps.update('resume', (v) => v + 1, ifAbsent: () => 1),
+          onResume: () =>
+              taps.update('resume', (v) => v + 1, ifAbsent: () => 1),
           onStop: () => taps.update('stop', (v) => v + 1, ifAbsent: () => 1),
         ),
       ),
@@ -117,7 +118,8 @@ void main() {
     expect(taps['start'], 1);
   });
 
-  testWidgets('a timer on another step says which step', (tester) async {    await tester.pumpWidget(MaterialApp(
+  testWidgets('a timer on another step says which step', (tester) async {
+    await tester.pumpWidget(MaterialApp(
       theme: ShokuTheme.light(),
       home: Scaffold(
         body: CookTimerCard(

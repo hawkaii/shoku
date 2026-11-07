@@ -27,9 +27,12 @@ class ShokuEmptyState extends StatelessWidget {
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: ShokuSpace.lg),
-        padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.xl, vertical: ShokuSpace.xxl),
+        padding: const EdgeInsets.symmetric(
+            horizontal: ShokuSpace.xl, vertical: ShokuSpace.xxl),
         decoration: BoxDecoration(
-          gradient: context.isDark ? ShokuGradients.emberCellar : ShokuGradients.warmVellum,
+          gradient: context.isDark
+              ? ShokuGradients.emberCellar
+              : ShokuGradients.warmVellum,
           borderRadius: BorderRadius.circular(ShokuRadius.card),
         ),
         child: Column(
@@ -41,12 +44,15 @@ class ShokuEmptyState extends StatelessWidget {
               decoration: BoxDecoration(
                 color: c.surfaceAlt,
                 borderRadius: BorderRadius.circular(ShokuRadius.card),
-                border: Border.all(color: c.hairline, width: ShokuStroke.hairline),
+                border:
+                    Border.all(color: c.hairline, width: ShokuStroke.hairline),
               ),
               child: Icon(icon, color: c.inkMuted, size: 24),
             ),
             const SizedBox(height: ShokuSpace.lg),
-            Text(title, textAlign: TextAlign.center, style: ShokuType.h1.copyWith(color: c.ink)),
+            Text(title,
+                textAlign: TextAlign.center,
+                style: ShokuType.h1.copyWith(color: c.ink)),
             const SizedBox(height: ShokuSpace.sm),
             Text(
               body,
@@ -84,7 +90,8 @@ class _GhostAction extends StatelessWidget {
           border: Border.all(color: c.ink, width: ShokuStroke.hairline),
         ),
         child: Center(
-          child: Text(label, style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+          child: Text(label,
+              style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
         ),
       ),
     );
@@ -210,9 +217,12 @@ class ShokuDashedRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+                    Text(title,
+                        style: ShokuType.title
+                            .copyWith(color: c.ink, fontSize: 14)),
                     const SizedBox(height: 1),
-                    Text(subtitle, style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                    Text(subtitle,
+                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                   ],
                 ),
               ),
@@ -247,7 +257,8 @@ class _DashedBorderPainter extends CustomPainter {
       var distance = 0.0;
       while (distance < metric.length) {
         canvas.drawPath(
-          metric.extractPath(distance, (distance + dash).clamp(0, metric.length)),
+          metric.extractPath(
+              distance, (distance + dash).clamp(0, metric.length)),
           paint,
         );
         distance += dash + gap;
@@ -256,7 +267,8 @@ class _DashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class ShokuListRow extends StatelessWidget {
@@ -292,10 +304,13 @@ class ShokuListRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: ShokuType.title.copyWith(color: c.ink, fontSize: 15)),
+                  Text(title,
+                      style:
+                          ShokuType.title.copyWith(color: c.ink, fontSize: 15)),
                   if (subtitle != null) ...[
                     const SizedBox(height: 1),
-                    Text(subtitle!, style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                    Text(subtitle!,
+                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                   ],
                 ],
               ),
@@ -343,7 +358,8 @@ class ShokuSheetHeader extends StatelessWidget {
         ),
         Row(
           children: [
-            Expanded(child: Text(title, style: ShokuType.h1.copyWith(color: c.ink))),
+            Expanded(
+                child: Text(title, style: ShokuType.h1.copyWith(color: c.ink))),
             if (onClose != null)
               GestureDetector(
                 onTap: onClose,
@@ -353,7 +369,8 @@ class ShokuSheetHeader extends StatelessWidget {
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 4),
-          Text(subtitle!, style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+          Text(subtitle!,
+              style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
         ],
       ],
     );

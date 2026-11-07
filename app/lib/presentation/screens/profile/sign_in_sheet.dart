@@ -193,8 +193,8 @@ class _SignInSheetState extends ConsumerState<_SignInSheet> {
                       gradient: _busy ? null : ShokuGradients.crimsonPress,
                       color: _busy ? c.surfaceAlt : null,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                      border: Border.all(
-                          color: c.ink, width: ShokuStroke.brutal),
+                      border:
+                          Border.all(color: c.ink, width: ShokuStroke.brutal),
                     ),
                     child: Center(
                       child: Text(

@@ -172,9 +172,7 @@ void main() {
       calls: () => calls,
       respond: (call) {
         calls++;
-        return call == 0
-            ? http.Response('{"error":"boom"}', 500)
-            : _okPull();
+        return call == 0 ? http.Response('{"error":"boom"}', 500) : _okPull();
       },
     );
     addTearDown(container.dispose);
@@ -250,16 +248,13 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets('coming back to the app retries after a failure',
-      (tester) async {
+  testWidgets('coming back to the app retries after a failure', (tester) async {
     final container = _container(
       db: db,
       calls: () => calls,
       respond: (call) {
         calls++;
-        return call == 0
-            ? http.Response('{"error":"boom"}', 500)
-            : _okPull();
+        return call == 0 ? http.Response('{"error":"boom"}', 500) : _okPull();
       },
     );
     addTearDown(container.dispose);

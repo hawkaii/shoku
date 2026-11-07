@@ -212,7 +212,9 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byType(BotSurface)),
     );
-    container.read(botControllerProvider.notifier).addTurn(const BotTurn.signIn());
+    container
+        .read(botControllerProvider.notifier)
+        .addTurn(const BotTurn.signIn());
     await tester.pump();
 
     final notice = find.byKey(const ValueKey('bot-notice-signin'));

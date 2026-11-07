@@ -25,7 +25,8 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
   /// Built in `build`, not const: the five words are copy, and copy is the one
   /// thing that changes with the language.
   List<ShokuTabItem> _tabs(AppLocalizations l10n) => [

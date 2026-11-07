@@ -65,7 +65,8 @@ class BotSuggestion {
   final int total;
   final List<String> missing;
 
-  String get source => creator == null || creator!.isEmpty ? 'Wall' : 'Wall · @$creator';
+  String get source =>
+      creator == null || creator!.isEmpty ? 'Wall' : 'Wall · @$creator';
 
   static BotSuggestion? fromJson(Object? raw) {
     if (raw is! Map) return null;
@@ -80,7 +81,8 @@ class BotSuggestion {
       have: (raw['have'] as num?)?.toInt() ?? 0,
       total: (raw['total'] as num?)?.toInt() ?? 0,
       missing: [
-        for (final line in (raw['missing'] as List? ?? const [])) line.toString(),
+        for (final line in (raw['missing'] as List? ?? const []))
+          line.toString(),
       ],
     );
   }
@@ -154,7 +156,10 @@ class AssistantAppliable {
       stepIngredients: [
         for (final entry in (raw['step_ingredients'] as List? ?? const []))
           if (entry is List)
-            [for (final i in entry) if (i is num) i.toInt()]
+            [
+              for (final i in entry)
+                if (i is num) i.toInt()
+            ]
           else
             const <int>[],
       ],

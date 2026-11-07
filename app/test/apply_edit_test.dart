@@ -97,7 +97,8 @@ void main() {
       changes: const ['Added 2 potatoes'],
     );
 
-    expect(number, isNull, reason: 'never write arrays computed on a stale base');
+    expect(number, isNull,
+        reason: 'never write arrays computed on a stale base');
     final after = (await repo.loadDishes()).single;
     expect(after.versions, hasLength(before.versions.length));
     expect(after.cooks, isEmpty);

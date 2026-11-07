@@ -16,7 +16,8 @@ class ShokuBackGuard extends StatefulWidget {
   State<ShokuBackGuard> createState() => _ShokuBackGuardState();
 }
 
-class _ShokuBackGuardState extends State<ShokuBackGuard> with WidgetsBindingObserver {
+class _ShokuBackGuardState extends State<ShokuBackGuard>
+    with WidgetsBindingObserver {
   bool _dialogOpen = false;
 
   @override

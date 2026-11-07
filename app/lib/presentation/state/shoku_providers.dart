@@ -21,7 +21,8 @@ final themeModeProvider = StateProvider<ThemeMode>(
 );
 
 /// Onboarding gate. Previewing a screen skips the flow.
-final onboardingDoneProvider = StateProvider<bool>((ref) => previewScreen != null);
+final onboardingDoneProvider =
+    StateProvider<bool>((ref) => previewScreen != null);
 
 /// Feed filter for Home / Stash.
 enum FeedFilter { all, recipes, wisdom }
@@ -60,7 +61,8 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingItem>> {
     state = [
       for (var i = 0; i < state.length; i++)
         if (i == index)
-          ShoppingItem(item.name, item.quantity, item.category, done: !item.done)
+          ShoppingItem(item.name, item.quantity, item.category,
+              done: !item.done)
         else
           state[i],
     ];
@@ -68,12 +70,15 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingItem>> {
 
   void add(ShoppingItem item) => state = [...state, item];
 
-  void remove(int index) =>
-      state = [for (var i = 0; i < state.length; i++) if (i != index) state[i]];
+  void remove(int index) => state = [
+        for (var i = 0; i < state.length; i++)
+          if (i != index) state[i]
+      ];
 }
 
 final shoppingProvider =
-    StateNotifierProvider<ShoppingNotifier, List<ShoppingItem>>((ref) => ShoppingNotifier());
+    StateNotifierProvider<ShoppingNotifier, List<ShoppingItem>>(
+        (ref) => ShoppingNotifier());
 
 /// Gamification — deliberately quiet: one number each.
 final savesBalanceProvider = StateProvider<int>((ref) => 17);
@@ -87,7 +92,8 @@ final xpToNextProvider = StateProvider<int>((ref) => 320);
 final activeTimerStepProvider = StateProvider<int?>((ref) => null);
 
 final plansProvider = Provider<List<PlanTier>>((ref) => MockData.plans);
-final helpTopicsProvider = Provider<List<Map<String, String>>>((ref) => MockData.helpTopics);
+final helpTopicsProvider =
+    Provider<List<Map<String, String>>>((ref) => MockData.helpTopics);
 
 final profileNameProvider = StateProvider<String>((ref) => 'Parthib');
 final profileHandleProvider = StateProvider<String>((ref) => '@parthib');

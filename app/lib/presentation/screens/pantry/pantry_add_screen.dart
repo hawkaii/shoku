@@ -189,7 +189,8 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
         fromAi: true,
       );
       final at = merged.indexWhere(
-        (existing) => PantryParser.key(existing.raw) == PantryParser.key(item.line),
+        (existing) =>
+            PantryParser.key(existing.raw) == PantryParser.key(item.line),
       );
       if (at >= 0) {
         merged[at] = line;
@@ -512,8 +513,8 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
                         ),
                         subtitle: Text(
                           pantryAmount(l10n, locale, _lines[i].quantity,
-                                  _lines[i].unit)
-                              .isEmpty
+                                      _lines[i].unit)
+                                  .isEmpty
                               ? l10n.pantryAmountUnknown
                               : pantryAmount(l10n, locale, _lines[i].quantity,
                                   _lines[i].unit),

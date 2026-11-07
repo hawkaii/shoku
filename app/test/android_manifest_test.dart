@@ -42,7 +42,8 @@ void main() {
 
     test('the timer icon exists for the status bar', () {
       expect(
-        File('android/app/src/main/res/drawable/ic_stat_timer.xml').existsSync(),
+        File('android/app/src/main/res/drawable/ic_stat_timer.xml')
+            .existsSync(),
         isTrue,
         reason: 'initialize() falls back to a missing icon otherwise',
       );

@@ -91,7 +91,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Save a recipe'), findsOneWidget,
-        reason: 'the router took over from the splash without a rebuild of the app');
+        reason:
+            'the router took over from the splash without a rebuild of the app');
 
     // The shell schedules its three-second sync pass when it mounts.
     await tester.pump(const Duration(seconds: 4));

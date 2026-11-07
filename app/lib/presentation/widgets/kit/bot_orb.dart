@@ -50,7 +50,8 @@ class BotOrb extends ConsumerWidget {
             shape: BoxShape.circle,
             border: Border.all(color: c.ink, width: ShokuStroke.brutal),
             boxShadow: [
-              BoxShadow(color: c.ink, offset: const Offset(0, 2), blurRadius: 0),
+              BoxShadow(
+                  color: c.ink, offset: const Offset(0, 2), blurRadius: 0),
             ],
           ),
           child: Center(

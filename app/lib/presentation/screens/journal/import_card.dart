@@ -71,7 +71,8 @@ class JournalImportCard extends ConsumerWidget {
     final waking = progress?.detail == 'starting';
     final stage = stageText(l10n, progress);
     final hasName = state.title?.trim().isNotEmpty == true;
-    final headline = hasName ? state.title!.trim() : stage ?? l10n.importHeadline;
+    final headline =
+        hasName ? state.title!.trim() : stage ?? l10n.importHeadline;
     final detail = hasName ? stage : null;
 
     return Padding(

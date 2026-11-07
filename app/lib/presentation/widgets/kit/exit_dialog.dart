@@ -43,7 +43,8 @@ Future<bool> showExitDialog(BuildContext context) async {
                         ),
                       ),
                       child: Text(l10n.exitKeepCooking,
-                          style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
+                          style: ShokuType.title
+                              .copyWith(color: c.ink, fontSize: 13)),
                     ),
                   ),
                   const SizedBox(width: ShokuSpace.sm),
@@ -58,7 +59,8 @@ Future<bool> showExitDialog(BuildContext context) async {
                         ),
                       ),
                       child: Text(l10n.exitExit,
-                          style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13)),
+                          style: ShokuType.title
+                              .copyWith(color: c.canvas, fontSize: 13)),
                     ),
                   ),
                 ],

@@ -66,7 +66,9 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(ProviderScope(
-      overrides: [dishesProvider.overrideWithValue([_dish()])],
+      overrides: [
+        dishesProvider.overrideWithValue([_dish()])
+      ],
       child: MaterialApp(
         theme: ShokuTheme.light(),
         home: const Scaffold(body: JournalScreen()),

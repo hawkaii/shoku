@@ -28,7 +28,9 @@ import 'scope_switcher.dart';
 Future<void> showBotSheet(BuildContext context, {BotScope? scope}) {
   final container = ProviderScope.containerOf(context);
   final BotScope target = scope ?? container.read<BotScope>(botScopeProvider);
-  if (!target.isKitchen) return showRecipeChat(context, dish: _dish(context, target));
+  if (!target.isKitchen) {
+    return showRecipeChat(context, dish: _dish(context, target));
+  }
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -203,8 +205,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
         height: MediaQuery.of(context).size.height * fraction,
         decoration: BoxDecoration(
           color: c.canvas,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(ShokuRadius.sheet)),
+          borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(ShokuRadius.sheet)),
           border: Border.all(color: c.hairline),
         ),
         child: Column(
@@ -257,8 +259,11 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                     ? BotSurfaceMode.normal
                     : BotSurfaceMode.mini),
                 child: Text(
-                  _mode == BotSurfaceMode.mini ? l10n.botOpen : l10n.botMinimise,
-                  style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+                  _mode == BotSurfaceMode.mini
+                      ? l10n.botOpen
+                      : l10n.botMinimise,
+                  style:
+                      ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
                 ),
               ),
               const SizedBox(width: ShokuSpace.md),
@@ -313,7 +318,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
   Widget _mini(BuildContext context, BotState state) {
     final c = context.colors;
     final last = state.turns
-        .where((t) => t.kind == BotTurnKind.mine || t.kind == BotTurnKind.answer)
+        .where(
+            (t) => t.kind == BotTurnKind.mine || t.kind == BotTurnKind.answer)
         .toList();
     final shown = last.length <= 2 ? last : last.sublist(last.length - 2);
     return Expanded(
@@ -332,9 +338,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: ShokuType.bodySmall.copyWith(
-                      color: turn.kind == BotTurnKind.mine
-                          ? c.ink
-                          : c.inkMuted),
+                      color:
+                          turn.kind == BotTurnKind.mine ? c.ink : c.inkMuted),
                 ),
               ),
           ],
@@ -347,10 +352,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
     final c = context.colors;
     final l10n = context.l10n;
     final starters = ref.watch(botStartersProvider);
-    final stocked = ref
-        .watch(pantryStoreProvider)
-        .where((item) => !item.wanted)
-        .length;
+    final stocked =
+        ref.watch(pantryStoreProvider).where((item) => !item.wanted).length;
     final starterLabels = stocked == 0
         ? [l10n.botStarterFridge, l10n.botStarterWall, l10n.botStarterPhoto]
         : [l10n.botStarterDinner(stocked)];
@@ -366,7 +369,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
               padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
               child: Text(l10n.botThinking,
                   key: const ValueKey('bot-thinking'),
-                  style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                  style:
+                      ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
             ),
           ),
         for (final turn in _visibleTurns(state.turns).reversed)
@@ -486,7 +490,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                 padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.sm),
                 child: Text(turn.text,
                     key: const ValueKey('bot-divider'),
-                    style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                    style: ShokuType.label
+                        .copyWith(fontSize: 9, color: c.inkMuted)),
               ),
               Expanded(child: Divider(color: c.hairline, height: 1)),
             ],
@@ -543,8 +548,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
         onTap: _signingIn ? null : _signIn,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+              horizontal: ShokuSpace.md, vertical: 10),
           decoration: BoxDecoration(
             color: c.surface,
             borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -589,10 +594,12 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(card.title,
-                    style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+                    style:
+                        ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
                 const SizedBox(height: 2),
                 Text(l10n.botSuggestionMeta(card.source, card.have, card.total),
-                    style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                    style: ShokuType.label
+                        .copyWith(fontSize: 9, color: c.inkMuted)),
                 if (card.missing.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   Wrap(
@@ -622,8 +629,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
                               .wantMany(card.missing);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(l10n
-                                  .botAddedToList(card.missing.length))));
+                              content: Text(
+                                  l10n.botAddedToList(card.missing.length))));
                         },
                       ),
                     const Spacer(),
@@ -658,8 +665,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
           borderRadius: BorderRadius.circular(ShokuRadius.chip),
         ),
         child: Text(label,
-            style: ShokuType.label.copyWith(
-                fontSize: 9.5, color: primary ? c.onAccent : c.ink)),
+            style: ShokuType.label
+                .copyWith(fontSize: 9.5, color: primary ? c.onAccent : c.ink)),
       ),
     );
   }
@@ -692,10 +699,11 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
               ),
             ),
           const SizedBox(height: ShokuSpace.sm),
-          _cardAction(
-              context, l10n.botAddCountToFridge(items.length), () async {
-            final added =
-                await ref.read(botControllerProvider.notifier).confirmCapture(items);
+          _cardAction(context, l10n.botAddCountToFridge(items.length),
+              () async {
+            final added = await ref
+                .read(botControllerProvider.notifier)
+                .confirmCapture(items);
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.botAddedToFridge(added))));
@@ -708,8 +716,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
   static String _amountOf(
       BotCaptureItem item, AppLocalizations l10n, String locale) {
     if (item.quantity == null) return l10n.botAmountUnknown;
-    final number =
-        NumberFormat.decimalPattern(locale).format(item.quantity);
+    final number = NumberFormat.decimalPattern(locale).format(item.quantity);
     return item.unit == null ? number : '$number ${item.unit}';
   }
 
@@ -718,8 +725,8 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
     final l10n = context.l10n;
     final blocked = offline || state.cap || state.thinking;
     return Padding(
-      padding: EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.xs,
-          ShokuSpace.lg, MediaQuery.of(context).viewInsets.bottom + ShokuSpace.md),
+      padding: EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.xs, ShokuSpace.lg,
+          MediaQuery.of(context).viewInsets.bottom + ShokuSpace.md),
       child: Row(
         children: [
           Expanded(

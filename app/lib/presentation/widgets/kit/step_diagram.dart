@@ -18,16 +18,25 @@ class StepDiagram extends StatefulWidget {
   static StepMotion motionFor(String text) {
     final t = text.toLowerCase();
     if (t.contains('whisk') || t.contains('whip')) return StepMotion.whisk;
-    if (t.contains('chop') || t.contains('slice') || t.contains('cube')) return StepMotion.chop;
+    if (t.contains('chop') || t.contains('slice') || t.contains('cube')) {
+      return StepMotion.chop;
+    }
     if (t.contains('separate') || t.contains('crack') || t.contains('yolk')) {
       return StepMotion.separate;
     }
     if (t.contains('fold') || t.contains('toss')) return StepMotion.fold;
-    if (t.contains('simmer') || t.contains('boil') || t.contains('fry') || t.contains('sauce')) {
+    if (t.contains('simmer') ||
+        t.contains('boil') ||
+        t.contains('fry') ||
+        t.contains('sauce')) {
       return StepMotion.simmer;
     }
-    if (t.contains('bake') || t.contains('oven') || t.contains('roast')) return StepMotion.bake;
-    if (t.contains('chill') || t.contains('fridge') || t.contains('cool')) return StepMotion.chill;
+    if (t.contains('bake') || t.contains('oven') || t.contains('roast')) {
+      return StepMotion.bake;
+    }
+    if (t.contains('chill') || t.contains('fridge') || t.contains('cool')) {
+      return StepMotion.chill;
+    }
     return StepMotion.plate;
   }
 
@@ -35,7 +44,8 @@ class StepDiagram extends StatefulWidget {
   State<StepDiagram> createState() => _StepDiagramState();
 }
 
-class _StepDiagramState extends State<StepDiagram> with SingleTickerProviderStateMixin {
+class _StepDiagramState extends State<StepDiagram>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2600),
@@ -125,9 +135,11 @@ class _DiagramPainter extends CustomPainter {
       case StepMotion.chop:
         _chop(canvas, inkPaint, crimsonPaint, stroke, paperPaint, leafPaint);
       case StepMotion.fold:
-        _fold(canvas, inkPaint, crimsonPaint, stroke, paperPaint, leafPaint, wellPaint);
+        _fold(canvas, inkPaint, crimsonPaint, stroke, paperPaint, leafPaint,
+            wellPaint);
       case StepMotion.separate:
-        _separate(canvas, inkPaint, crimsonPaint, stroke, paperPaint, wellPaint);
+        _separate(
+            canvas, inkPaint, crimsonPaint, stroke, paperPaint, wellPaint);
       case StepMotion.simmer:
         _simmer(canvas, inkPaint, crimsonPaint, stroke, paperPaint, wellPaint);
       case StepMotion.bake:
@@ -162,11 +174,13 @@ class _DiagramPainter extends CustomPainter {
       ..close();
     canvas.drawPath(blade, inkPaint);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(158, 100, 52, 26), const Radius.circular(10)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(158, 100, 52, 26), const Radius.circular(10)),
       crimsonPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(158, 100, 52, 26), const Radius.circular(10)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(158, 100, 52, 26), const Radius.circular(10)),
       Paint()
         ..color = inkPaint.color
         ..style = PaintingStyle.stroke
@@ -189,7 +203,8 @@ class _DiagramPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 7
       ..strokeCap = StrokeCap.round;
-    canvas.drawArc(const Rect.fromLTWH(70, 130, 116, 74), angle, 1.1, false, arc);
+    canvas.drawArc(
+        const Rect.fromLTWH(70, 130, 116, 74), angle, 1.1, false, arc);
   }
 
   void whiskHead(Canvas canvas, Paint stroke) {
@@ -206,18 +221,21 @@ class _DiagramPainter extends CustomPainter {
       Paint paperPaint, Paint leafPaint) {
     // board
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(46, 150, 164, 34), const Radius.circular(10)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(46, 150, 164, 34), const Radius.circular(10)),
       inkPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(56, 156, 144, 18), const Radius.circular(6)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(56, 156, 144, 18), const Radius.circular(6)),
       paperPaint,
     );
     // onion halves
     canvas.drawCircle(const Offset(92, 138), 18, leafPaint);
     canvas.drawCircle(const Offset(124, 140), 15, leafPaint);
     // knife, rocking
-    _knife(canvas, inkPaint, crimsonPaint, -0.5 + math.sin(t * math.pi * 2) * 0.12);
+    _knife(canvas, inkPaint, crimsonPaint,
+        -0.5 + math.sin(t * math.pi * 2) * 0.12);
     // falling pieces
     for (var i = 0; i < 2; i++) {
       final p = (t + i * 0.4) % 1;
@@ -240,19 +258,22 @@ class _DiagramPainter extends CustomPainter {
     canvas.translate(96, 92);
     canvas.rotate(angle);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(-6, -6, 96, 16), const Radius.circular(8)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(-6, -6, 96, 16), const Radius.circular(8)),
       inkPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(74, -18, 40, 40), const Radius.circular(10)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(74, -18, 40, 40), const Radius.circular(10)),
       leafPaint,
     );
     canvas.restore();
-    canvas.drawArc(const Rect.fromLTWH(78, 132, 100, 56), t * math.pi * 2, 1.4, false, stroke);
+    canvas.drawArc(const Rect.fromLTWH(78, 132, 100, 56), t * math.pi * 2, 1.4,
+        false, stroke);
   }
 
-  void _separate(Canvas canvas, Paint inkPaint, Paint crimsonPaint, Paint stroke,
-      Paint paperPaint, Paint wellPaint) {
+  void _separate(Canvas canvas, Paint inkPaint, Paint crimsonPaint,
+      Paint stroke, Paint paperPaint, Paint wellPaint) {
     _bowl(canvas, inkPaint, wellPaint, paperPaint);
 
     // two yolks, deliberately off-centre so it never reads as a face
@@ -282,7 +303,8 @@ class _DiagramPainter extends CustomPainter {
     canvas.drawPath(pan, inkPaint);
     canvas.drawOval(const Rect.fromLTWH(58, 132, 106, 26), paperPaint);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(168, 146, 46, 16), const Radius.circular(8)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(168, 146, 46, 16), const Radius.circular(8)),
       inkPaint,
     );
     // sauce + bubbles
@@ -301,16 +323,19 @@ class _DiagramPainter extends CustomPainter {
       Paint paperPaint) {
     // oven
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(48, 76, 160, 132), const Radius.circular(16)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(48, 76, 160, 132), const Radius.circular(16)),
       inkPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(64, 94, 128, 76), const Radius.circular(10)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(64, 94, 128, 76), const Radius.circular(10)),
       paperPaint,
     );
     // tray with a loaf
     canvas.drawRRect(
-      RRect.fromRectAndRadius(const Rect.fromLTWH(78, 176, 100, 18), const Radius.circular(8)),
+      RRect.fromRectAndRadius(
+          const Rect.fromLTWH(78, 176, 100, 18), const Radius.circular(8)),
       crimsonPaint,
     );
     // heat lines rising inside the window

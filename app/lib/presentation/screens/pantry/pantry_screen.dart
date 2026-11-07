@@ -111,7 +111,8 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
               children: [
                 Row(
                   children: [
-                    Text(l10n.pantryTitle, style: ShokuType.h1.copyWith(color: c.ink)),
+                    Text(l10n.pantryTitle,
+                        style: ShokuType.h1.copyWith(color: c.ink)),
                     const SizedBox(width: ShokuSpace.sm),
                     Text(l10n.pantryItemCount(items.length),
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
@@ -372,8 +373,7 @@ class _Row extends ConsumerWidget {
                     onEdit: onTap,
                   )
                 else
-                  Text(
-                      pantryAmount(l10n, locale, item.quantity, item.unit),
+                  Text(pantryAmount(l10n, locale, item.quantity, item.unit),
                       style: ShokuType.stat
                           .copyWith(fontSize: 11, color: c.inkMuted)),
               ],

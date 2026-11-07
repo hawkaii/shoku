@@ -121,7 +121,8 @@ class ShokuApp extends ConsumerWidget {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: shokuSupportedLocales,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
+          data:
+              MediaQuery.of(context).copyWith(disableAnimations: previewStatic),
           child: child ?? const SizedBox.shrink(),
         ),
         routerConfig: appRouter,

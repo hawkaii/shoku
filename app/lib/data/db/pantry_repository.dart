@@ -34,7 +34,8 @@ class PantryRepository {
   }
 
   Future<PantryItem?> byId(String id) async {
-    final row = await (_db.select(_db.pantryRows)..where((p) => p.id.equals(id)))
+    final row = await (_db.select(_db.pantryRows)
+          ..where((p) => p.id.equals(id)))
         .getSingleOrNull();
     return row == null ? null : _toModel(row);
   }
@@ -67,7 +68,9 @@ class PantryRepository {
   /// Last-write-wins on `updatedAt`, and always dirty so it reaches the server.
   Future<void> save(PantryItem item) async {
     final stamped = item.copyWith(updatedAt: DateTime.now(), dirty: 1);
-    await _db.into(_db.pantryRows).insertOnConflictUpdate(_companion(stamped, dirty: 1));
+    await _db
+        .into(_db.pantryRows)
+        .insertOnConflictUpdate(_companion(stamped, dirty: 1));
   }
 
   Future<void> remove(String id) async {

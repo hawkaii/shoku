@@ -57,8 +57,7 @@ class AuthService {
   /// A state carrying no session is always `signedOut`, whatever the provider
   /// called the event. `tokenRefreshed` is kept separate because it means the
   /// next request can succeed where the last one got a 401.
-  Stream<ShokuAuthEvent> get events =>
-      changes.map((state) {
+  Stream<ShokuAuthEvent> get events => changes.map((state) {
         if (state.session == null) return ShokuAuthEvent.signedOut;
         return state.event == AuthChangeEvent.tokenRefreshed
             ? ShokuAuthEvent.tokenRefreshed

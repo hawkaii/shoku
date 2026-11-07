@@ -42,7 +42,8 @@ class SavedItem {
     this.progressTotal,
   });
 
-  String get sourceLabel => source == ItemSource.instagram ? 'Instagram' : 'YouTube';
+  String get sourceLabel =>
+      source == ItemSource.instagram ? 'Instagram' : 'YouTube';
 }
 
 class PantryItem {
@@ -92,7 +93,11 @@ class MockData {
       name: 'Free',
       price: '₹0',
       cadence: 'forever',
-      perks: ['20 saves to start', '7 free saves each week', 'Unlimited pantry'],
+      perks: [
+        '20 saves to start',
+        '7 free saves each week',
+        'Unlimited pantry'
+      ],
     ),
     PlanTier(
       name: 'Starter pack',
@@ -112,19 +117,23 @@ class MockData {
   static const List<Map<String, String>> helpTopics = [
     {
       'q': 'How do I save a reel?',
-      'a': 'Share it from Instagram or YouTube and pick Shoku from the share sheet. It lands in Home in a few seconds.',
+      'a':
+          'Share it from Instagram or YouTube and pick Shoku from the share sheet. It lands in Home in a few seconds.',
     },
     {
       'q': 'Why did my save fail?',
-      'a': 'Private accounts and region-locked videos cannot be read. Share the original post rather than a repost.',
+      'a':
+          'Private accounts and region-locked videos cannot be read. Share the original post rather than a repost.',
     },
     {
       'q': 'What counts as a save?',
-      'a': 'One successful extraction. Retrying the same link does not use another save.',
+      'a':
+          'One successful extraction. Retrying the same link does not use another save.',
     },
     {
       'q': 'Can I export a recipe?',
-      'a': 'Yes. Open any saved item and use Share to send it out as plain text.',
+      'a':
+          'Yes. Open any saved item and use Share to send it out as plain text.',
     },
   ];
 

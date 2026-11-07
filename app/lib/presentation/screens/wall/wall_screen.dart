@@ -79,7 +79,8 @@ class _WallScreenState extends ConsumerState<WallScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.tabWall, style: ShokuType.h1.copyWith(color: c.ink)),
+                        Text(l10n.tabWall,
+                            style: ShokuType.h1.copyWith(color: c.ink)),
                         const SizedBox(height: 2),
                         Text(
                           feed.items.isEmpty
@@ -122,7 +123,8 @@ class _WallScreenState extends ConsumerState<WallScreen> {
                         loading: feed.loadingMore,
                         failed: feed.failed,
                         hasMore: feed.hasMore,
-                        onMore: () => ref.read(feedStoreProvider.notifier).more(),
+                        onMore: () =>
+                            ref.read(feedStoreProvider.notifier).more(),
                       );
                     }
                     return Padding(
@@ -190,9 +192,8 @@ class _FeedCardState extends ConsumerState<FeedCard> {
     final l10n = context.l10n;
     final item = widget.item;
 
-    final imported = ref
-        .watch(importedShortcodesProvider)
-        .contains(widget.item.shortcode);
+    final imported =
+        ref.watch(importedShortcodesProvider).contains(widget.item.shortcode);
 
     return ShokuPressable(
       key: const ValueKey('feed-card'),
@@ -206,86 +207,88 @@ class _FeedCardState extends ConsumerState<FeedCard> {
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 84,
-            height: 84,
-            child: ShokuDishImage(
-              url: item.thumbnailUrl,
-              title: item.title,
-              radius: ShokuRadius.media,
+          children: [
+            SizedBox(
+              width: 84,
+              height: 84,
+              child: ShokuDishImage(
+                url: item.thumbnailUrl,
+                title: item.title,
+                radius: ShokuRadius.media,
+              ),
             ),
-          ),
-          const SizedBox(width: ShokuSpace.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.byline,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.wallStepsCount(item.steps.length),
-                  style: ShokuType.label.copyWith(
-                    fontSize: 9,
-                    color: c.inkMuted,
-                    letterSpacing: 0.6,
+            const SizedBox(width: ShokuSpace.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                   ),
-                ),
-                if (item.tags.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: [
-                      for (final tag in item.tags.take(3))
-                        ShokuChip(tag, color: c.inkMuted),
-                    ],
+                  const SizedBox(height: 2),
+                  Text(
+                    item.byline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                   ),
-                ],
-                const SizedBox(height: ShokuSpace.sm),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ShokuPressable(
-                    key: const ValueKey('feed-add-to-cookbook'),
-                    onTap: imported || _adding ? null : _addToCookbook,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: c.surfaceAlt,
-                        borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                        border: Border.all(color: c.hairline),
-                      ),
-                      child: Text(
-                        imported
-                            ? l10n.wallInCookbook
-                            : (_adding ? l10n.wallSaving : l10n.wallAddToCookbook),
-                        style: ShokuType.label.copyWith(
-                          fontSize: 9.5,
-                          color: imported ? c.inkMuted : c.ink,
-                          letterSpacing: 0.4,
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.wallStepsCount(item.steps.length),
+                    style: ShokuType.label.copyWith(
+                      fontSize: 9,
+                      color: c.inkMuted,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  if (item.tags.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: [
+                        for (final tag in item.tags.take(3))
+                          ShokuChip(tag, color: c.inkMuted),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: ShokuSpace.sm),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ShokuPressable(
+                      key: const ValueKey('feed-add-to-cookbook'),
+                      onTap: imported || _adding ? null : _addToCookbook,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: c.surfaceAlt,
+                          borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                          border: Border.all(color: c.hairline),
+                        ),
+                        child: Text(
+                          imported
+                              ? l10n.wallInCookbook
+                              : (_adding
+                                  ? l10n.wallSaving
+                                  : l10n.wallAddToCookbook),
+                          style: ShokuType.label.copyWith(
+                            fontSize: 9.5,
+                            color: imported ? c.inkMuted : c.ink,
+                            letterSpacing: 0.4,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

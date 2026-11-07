@@ -18,7 +18,8 @@ class ReceiptImage {
   static const pickOptions = (maxEdge: maxEdge, quality: jpegQuality);
 
   /// Picks [source] and returns the bytes, already downscaled.
-  static Future<List<int>?> pickFrom(ImageSource source, {ImagePicker? picker}) async {
+  static Future<List<int>?> pickFrom(ImageSource source,
+      {ImagePicker? picker}) async {
     final file = await (picker ?? ImagePicker()).pickImage(
       source: source,
       maxWidth: maxEdge.toDouble(),

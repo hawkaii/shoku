@@ -239,8 +239,8 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect((await JournalRepository(db).loadDishes()).single.title,
-        'Paneer Tikka',
+    expect(
+        (await JournalRepository(db).loadDishes()).single.title, 'Paneer Tikka',
         reason: 'the work finishes whether or not the tab is watched');
     expect(await PendingImportStore().read(), isNull);
 

@@ -86,7 +86,8 @@ class ShokuLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text.toUpperCase(),
-        style: ShokuType.label.copyWith(color: color ?? context.colors.inkMuted),
+        style:
+            ShokuType.label.copyWith(color: color ?? context.colors.inkMuted),
       );
 }
 
@@ -150,7 +151,8 @@ class ShokuChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final fg = color ?? c.inkMuted;
-    final bg = background ?? (filled ? fg.withValues(alpha: 0.12) : Colors.transparent);
+    final bg = background ??
+        (filled ? fg.withValues(alpha: 0.12) : Colors.transparent);
 
     final child = Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),

@@ -105,7 +105,8 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
         children: [
           Row(
             children: [
-              Text(l10n.pantryEditTitle, style: ShokuType.h2.copyWith(color: c.ink)),
+              Text(l10n.pantryEditTitle,
+                  style: ShokuType.h2.copyWith(color: c.ink)),
               const Spacer(),
               ShokuPressable(
                 key: const ValueKey('pantry-edit-delete'),
@@ -164,8 +165,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
                   _quantity == null
                       ? l10n.pantryAmountHelp
                       : l10n.pantrySavedAs(
-                          pantryAmount(
-                              l10n, locale, _quantity, _unit)),
+                          pantryAmount(l10n, locale, _quantity, _unit)),
                   style:
                       ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
                 ),

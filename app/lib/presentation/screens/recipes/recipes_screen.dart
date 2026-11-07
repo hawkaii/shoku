@@ -43,7 +43,8 @@ class RecipesScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text(l10n.cookbookTitle, style: ShokuType.h1.copyWith(color: c.ink)),
+              Text(l10n.cookbookTitle,
+                  style: ShokuType.h1.copyWith(color: c.ink)),
               const Spacer(),
               Text(
                 l10n.cookbookCookedCount(cooked.length),
@@ -56,8 +57,9 @@ class RecipesScreen extends ConsumerWidget {
             toCookCount: toCook.length,
             cookedCount: cooked.length,
             showingToCook: filter == LibraryFilter.toCook,
-            onChanged: (showToCook) => ref.read(libraryFilterProvider.notifier).state =
-                showToCook ? LibraryFilter.toCook : LibraryFilter.cooked,
+            onChanged: (showToCook) =>
+                ref.read(libraryFilterProvider.notifier).state =
+                    showToCook ? LibraryFilter.toCook : LibraryFilter.cooked,
           ),
           const SizedBox(height: ShokuSpace.lg),
           if (visible.isEmpty)
@@ -95,13 +97,13 @@ class RecipesScreen extends ConsumerWidget {
                         2 +
                         metaHeight,
                   ),
-              itemBuilder: (context, i) => ShokuEntrance(
-                index: i,
-                child: _DishTile(
-                  dish: visible[i],
-                  onLongPress: () => showDishActions(context, visible[i]),
-                ),
-              ),
+                  itemBuilder: (context, i) => ShokuEntrance(
+                    index: i,
+                    child: _DishTile(
+                      dish: visible[i],
+                      onLongPress: () => showDishActions(context, visible[i]),
+                    ),
+                  ),
                 );
               },
             ),
@@ -170,7 +172,8 @@ class _DishTile extends StatelessWidget {
                     ),
                     child: Text(
                       'v${dish.currentVersion}',
-                      style: ShokuType.stat.copyWith(fontSize: 10, color: c.canvas),
+                      style: ShokuType.stat
+                          .copyWith(fontSize: 10, color: c.canvas),
                     ),
                   ),
                 ),
@@ -189,7 +192,8 @@ class _DishTile extends StatelessWidget {
             meta,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11.5),
+            style:
+                ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11.5),
           ),
           if (dish.isSample) ...[
             const SizedBox(height: 4),
@@ -254,8 +258,7 @@ class _EmptyCookbook extends ConsumerWidget {
             else if (unreachable)
               TextButton(
                 key: const ValueKey('cookbook-retry'),
-                onPressed: () =>
-                    ref.read(syncControllerProvider).syncNow(),
+                onPressed: () => ref.read(syncControllerProvider).syncNow(),
                 child: Text(l10n.journalTryAgain,
                     style: ShokuType.label.copyWith(color: c.ink)),
               ),

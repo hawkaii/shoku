@@ -20,8 +20,7 @@ void main() {
         .listSync()
         .whereType<File>()
         .where((file) =>
-            file.path.endsWith('.arb') &&
-            !file.path.endsWith('app_en.arb'))
+            file.path.endsWith('.arb') && !file.path.endsWith('app_en.arb'))
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
 

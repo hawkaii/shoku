@@ -27,12 +27,18 @@ void main() {
     test('weights and volumes convert inside their family', () {
       expect(
         PantryParser.deductAmount(
-            have: 1, haveUnit: PantryUnit.kg, needed: 500, neededUnit: PantryUnit.g),
+            have: 1,
+            haveUnit: PantryUnit.kg,
+            needed: 500,
+            neededUnit: PantryUnit.g),
         0.5,
       );
       expect(
         PantryParser.deductAmount(
-            have: 500, haveUnit: PantryUnit.ml, needed: 2, neededUnit: PantryUnit.tbsp),
+            have: 500,
+            haveUnit: PantryUnit.ml,
+            needed: 2,
+            neededUnit: PantryUnit.tbsp),
         470,
       );
     });
@@ -40,12 +46,18 @@ void main() {
     test('counts never convert to weight or volume', () {
       expect(
         PantryParser.deductAmount(
-            have: 2, haveUnit: PantryUnit.bunch, needed: 200, neededUnit: PantryUnit.g),
+            have: 2,
+            haveUnit: PantryUnit.bunch,
+            needed: 200,
+            neededUnit: PantryUnit.g),
         isNull,
       );
       expect(
         PantryParser.deductAmount(
-            have: 2, haveUnit: PantryUnit.pcs, needed: 1, neededUnit: PantryUnit.pcs),
+            have: 2,
+            haveUnit: PantryUnit.pcs,
+            needed: 1,
+            neededUnit: PantryUnit.pcs),
         1,
       );
     });
@@ -75,11 +87,13 @@ void main() {
 
     test('a count line still counts', () {
       expect(
-        PantryParser.statedAmountIn(line: '3 lemons', stockUnit: PantryUnit.pcs),
+        PantryParser.statedAmountIn(
+            line: '3 lemons', stockUnit: PantryUnit.pcs),
         3,
       );
       expect(
-        PantryParser.statedAmountIn(line: '2 eggs', stockUnit: PantryUnit.bunch),
+        PantryParser.statedAmountIn(
+            line: '2 eggs', stockUnit: PantryUnit.bunch),
         isNull,
         reason: 'a bunch is not a piece',
       );
@@ -127,8 +141,8 @@ void main() {
     });
 
     test('a machine-read name with no amount stays in the unread pile', () {
-      expect(PantryParser.parseLine('TATA SALT', strict: true).confident,
-          isFalse);
+      expect(
+          PantryParser.parseLine('TATA SALT', strict: true).confident, isFalse);
       expect(PantryParser.parseLine('salt', strict: false).confident, isTrue,
           reason: 'the cook typed it; the name is the whole thing we know');
     });
@@ -146,7 +160,10 @@ void main() {
 
     test('add, edit and tombstone round-trip', () async {
       final added = await repo.add(
-          name: 'rice', quantity: 2, unit: PantryUnit.kg, aliases: const ['2 KG RICE']);
+          name: 'rice',
+          quantity: 2,
+          unit: PantryUnit.kg,
+          aliases: const ['2 KG RICE']);
       expect((await repo.load()).single.name, 'rice');
 
       await repo.save(added.copyWith(quantity: 1.5));
@@ -158,7 +175,8 @@ void main() {
     });
 
     test('a pull is last-write-wins and a tombstone hides', () async {
-      final item = await repo.add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      final item =
+          await repo.add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
 
       await repo.applyPull([
         {
@@ -286,8 +304,8 @@ void main() {
 
     setUp(() async {
       db = AppDatabase(NativeDatabase.memory());
-      await PantryRepository(db).add(
-          name: 'rice', quantity: 2, unit: PantryUnit.kg);
+      await PantryRepository(db)
+          .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
     });
     tearDown(() async => db.close());
 
@@ -326,7 +344,8 @@ void main() {
           bottomNavigationBar: ShokuTabBar(
             items: const [
               ShokuTabItem(Icons.menu_book, Icons.menu_book, 'Journal'),
-              ShokuTabItem(Icons.restaurant_menu, Icons.restaurant_menu, 'Cookbook'),
+              ShokuTabItem(
+                  Icons.restaurant_menu, Icons.restaurant_menu, 'Cookbook'),
               ShokuTabItem(Icons.kitchen_outlined, Icons.kitchen, 'Fridge'),
               ShokuTabItem(Icons.grid_view, Icons.grid_view, 'Wall'),
               ShokuTabItem(Icons.person, Icons.person, 'You'),
@@ -452,7 +471,8 @@ void main() {
 
       await tester.enterText(
           find.byKey(const ValueKey('pantry-edit-name')), 'basmati rice');
-      await tester.enterText(find.byKey(const ValueKey('pantry-edit-qty')), '1');
+      await tester.enterText(
+          find.byKey(const ValueKey('pantry-edit-qty')), '1');
       await tester.tap(find.byKey(const ValueKey('pantry-edit-unit-kg')));
       await tester.tap(find.byKey(const ValueKey('pantry-edit-save')));
       await tester.pumpAndSettle();

@@ -128,8 +128,7 @@ void main() {
         reason: 'the empty Wall opens the import sheet');
   });
 
-  testWidgets('nothing on the Wall offers to publish anything',
-      (tester) async {
+  testWidgets('nothing on the Wall offers to publish anything', (tester) async {
     final client = MockClient((request) async {
       calls.add('${request.method} ${request.url.path}');
       return http.Response(_feed([_item('ABC', 'Paneer Tikka')]), 200);
@@ -214,5 +213,4 @@ void main() {
       reason: 'the cursor the server sent is the cursor we ask with',
     );
   });
-
 }

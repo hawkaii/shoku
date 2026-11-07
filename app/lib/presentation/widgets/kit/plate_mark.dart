@@ -7,7 +7,8 @@ class PlateMark extends StatelessWidget {
   final double size;
   final String asset;
 
-  const PlateMark({super.key, this.size = 64, this.asset = 'assets/brand/mark.svg'});
+  const PlateMark(
+      {super.key, this.size = 64, this.asset = 'assets/brand/mark.svg'});
 
   @override
   Widget build(BuildContext context) {

@@ -73,6 +73,7 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   ImportProgress? _progress;
   bool _busy = false;
   String? _error;
+
   /// True when the failure was the daily import allowance, so the sheet can
   /// point at the free way in: a reel the Wall has already read.
   bool _capped = false;
@@ -321,7 +322,9 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
         if (progress.stage == ImportStage.ready) {
           await _finish(
             service,
-            progress.shortcode.isNotEmpty ? progress.shortcode : pending.shortcode,
+            progress.shortcode.isNotEmpty
+                ? progress.shortcode
+                : pending.shortcode,
           );
           return;
         }
@@ -436,9 +439,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final l10n = context.l10n;
-    final showProgress = _progress != null &&
-        _busy &&
-        _progress!.stage != ImportStage.failed;
+    final showProgress =
+        _progress != null && _busy && _progress!.stage != ImportStage.failed;
     // A sheet that opens from a share can be reached with the keyboard up on a
     // small phone, and the notice adds a line: the content scrolls rather than
     // overflowing, the same way the log sheet does.
@@ -456,7 +458,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.importSheetTitle, style: ShokuType.h2.copyWith(color: c.ink)),
+              Text(l10n.importSheetTitle,
+                  style: ShokuType.h2.copyWith(color: c.ink)),
               const SizedBox(height: 2),
               Text(
                 l10n.importSheetBody,
@@ -499,7 +502,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                     SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 1.6, color: c.accent),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 1.6, color: c.accent),
                     ),
                     const SizedBox(width: 8),
                     Flexible(
@@ -536,7 +540,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
               ],
               if (_error != null) ...[
                 const SizedBox(height: ShokuSpace.sm),
-                Text(_error!, style: ShokuType.bodySmall.copyWith(color: c.danger)),
+                Text(_error!,
+                    style: ShokuType.bodySmall.copyWith(color: c.danger)),
                 if (_capped) ...[
                   const SizedBox(height: 4),
                   Text(
@@ -561,7 +566,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                     decoration: BoxDecoration(
                       color: c.surface,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                      border: Border.all(color: c.ink, width: ShokuStroke.hairline),
+                      border:
+                          Border.all(color: c.ink, width: ShokuStroke.hairline),
                     ),
                     child: Text(
                       _signingIn ? l10n.authWorking : l10n.authSignIn,
@@ -585,7 +591,8 @@ class _ImportSheetState extends ConsumerState<ImportSheet> {
                   child: Center(
                     child: Text(
                       _busy ? l10n.importReading : l10n.importReadLink,
-                      style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                      style: ShokuType.title
+                          .copyWith(color: c.onAccent, fontSize: 14),
                     ),
                   ),
                 ),

@@ -45,7 +45,8 @@ void main() {
 
   test('a camera path never leaves the phone', () async {
     expect(
-      await pushedPhotoUrl('/data/user/0/com.foodfinder.food_finder/cache/x.jpg'),
+      await pushedPhotoUrl(
+          '/data/user/0/com.foodfinder.food_finder/cache/x.jpg'),
       '',
     );
     expect(await pushedPhotoUrl('file:///tmp/x.jpg'), '');

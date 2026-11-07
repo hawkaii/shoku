@@ -196,9 +196,13 @@ class FridgeCoverage {
   final bool unset;
 
   int get total => matches.length;
-  int get inFridge => matches.where((m) => m.state == FridgeState.inFridge || m.state == FridgeState.some).length;
+  int get inFridge => matches
+      .where(
+          (m) => m.state == FridgeState.inFridge || m.state == FridgeState.some)
+      .length;
   int get onList => matches.where((m) => m.state == FridgeState.onList).length;
-  int get missing => matches.where((m) => m.state == FridgeState.missing).length;
+  int get missing =>
+      matches.where((m) => m.state == FridgeState.missing).length;
 
   /// Missing lines deduped by name: two mentions of the same thing are one
   /// shopping-list entry, never two.

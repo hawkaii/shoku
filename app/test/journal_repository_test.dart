@@ -145,9 +145,11 @@ void main() {
 
   test('seed rows are local, not pending upload', () async {
     await repo.seed([_dish(id: 'a')]);
-    final dirty = await db.customSelect(
-      'SELECT COUNT(*) AS n FROM dish_rows WHERE dirty = 1',
-    ).getSingle();
+    final dirty = await db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM dish_rows WHERE dirty = 1',
+        )
+        .getSingle();
     expect(dirty.data['n'], 0,
         reason: 'the demo kitchen must never sync as the user journal');
   });
@@ -186,9 +188,11 @@ void main() {
     final row = await db.customSelect('SELECT * FROM dish_rows').getSingle();
     expect(row.data['title'], 'Paneer 2');
     expect(row.data['dirty'], 1);
-    final versions = await db.customSelect(
-      'SELECT COUNT(*) AS n FROM version_rows',
-    ).getSingle();
+    final versions = await db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM version_rows',
+        )
+        .getSingle();
     expect(versions.data['n'], 1);
   });
 
@@ -297,9 +301,11 @@ void main() {
 
     expect(version, isNull);
     expect(await repo.loadDish('d1'), isNull);
-    final cooks = await db.customSelect(
-      'SELECT COUNT(*) AS n FROM cook_log_rows',
-    ).getSingle();
+    final cooks = await db
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM cook_log_rows',
+        )
+        .getSingle();
     expect(cooks.data['n'], 0);
   });
 
