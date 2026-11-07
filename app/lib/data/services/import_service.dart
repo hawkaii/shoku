@@ -50,7 +50,8 @@ class ImportService {
     );
   }
 
-  Future<Map<String, dynamic>> _post(String url, {bool withRequestId = true}) async {
+  Future<Map<String, dynamic>> _post(String url,
+      {bool withRequestId = true}) async {
     try {
       return await _api.post('/v1/imports', {
         'url': url.trim(),
@@ -95,7 +96,8 @@ class ImportService {
     while (DateTime.now().isBefore(deadline)) {
       final progress = await pollOnce(jobId);
       yield progress;
-      if (progress.stage == ImportStage.ready || progress.stage == ImportStage.failed) {
+      if (progress.stage == ImportStage.ready ||
+          progress.stage == ImportStage.failed) {
         return;
       }
       await Future<void>.delayed(delay);
@@ -104,7 +106,8 @@ class ImportService {
     }
     // Still ours to lose: the record the sheet keeps is what lets a client
     // timeout be picked up again instead of thrown away.
-    yield const ImportProgress(stage: ImportStage.failed, reason: 'timed_out', shortcode: '');
+    yield const ImportProgress(
+        stage: ImportStage.failed, reason: 'timed_out', shortcode: '');
   }
 
   /// One poll, retried.
@@ -187,7 +190,8 @@ class ImportService {
       for (final raw in (recipe['ingredients'] as List? ?? const []))
         if (raw is Map)
           [
-            if ((raw['amount'] as String?)?.trim().isNotEmpty ?? false) raw['amount'],
+            if ((raw['amount'] as String?)?.trim().isNotEmpty ?? false)
+              raw['amount'],
             raw['name'],
           ].whereType<Object>().join(' ').trim(),
     ];
@@ -262,7 +266,10 @@ class ImportService {
     return [
       for (final entry in raw)
         if (entry is List)
-          [for (final index in entry) if (index is num) index.toInt()]
+          [
+            for (final index in entry)
+              if (index is num) index.toInt()
+          ]
         else
           const <int>[],
     ];
@@ -293,6 +300,7 @@ class ImportStart {
   final ImportStage stage;
   final bool cached;
   final String? reason;
+
   /// Imports left today, when the server said.
   final int? remaining;
   final DateTime? resetAt;

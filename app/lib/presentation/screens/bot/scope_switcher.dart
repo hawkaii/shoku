@@ -25,7 +25,9 @@ Future<void> showScopeSwitcher(BuildContext context) async {
   container.read(botScopeProvider.notifier).state = target;
   if (target.isKitchen) {
     // The kitchen thread lives in the sheet that is already open.
-    container.read(botControllerProvider.notifier).insertDivider(context.l10n.botNoDish);
+    container
+        .read(botControllerProvider.notifier)
+        .insertDivider(context.l10n.botNoDish);
     return;
   }
   final dish = container.read(dishProvider(target.dishId!));
@@ -77,8 +79,7 @@ class _ScopeSwitcher extends ConsumerWidget {
             leading: Icon(Icons.kitchen_outlined, size: 18, color: c.inkMuted),
             title: Text(l10n.botNoDishKitchen,
                 style: ShokuType.bodySmall.copyWith(color: c.ink)),
-            onTap: () =>
-                Navigator.of(context).pop(const BotScope.kitchen()),
+            onTap: () => Navigator.of(context).pop(const BotScope.kitchen()),
           ),
           const SizedBox(height: ShokuSpace.lg),
         ],

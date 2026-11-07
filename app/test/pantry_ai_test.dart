@@ -102,12 +102,15 @@ void main() {
     await PantryRepository(db)
         .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
     await tester.pumpWidget(
-      page([pantryAiServiceProvider.overrideWithValue(PantryAiService(api: ai.client))]),
+      page([
+        pantryAiServiceProvider
+            .overrideWithValue(PantryAiService(api: ai.client))
+      ]),
     );
     await tester.pump(const Duration(milliseconds: 200));
 
-    await review(tester,
-        '2 kg rice\nHALDIRAM BHUJIA 200G\nTATA SALT 1KG\nasdfgh');
+    await review(
+        tester, '2 kg rice\nHALDIRAM BHUJIA 200G\nTATA SALT 1KG\nasdfgh');
 
     expect(ai.requests, hasLength(1),
         reason: 'a receipt is one request, never one per line');
@@ -125,7 +128,10 @@ void main() {
     await repo.add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
     await repo.add(name: 'lemons', quantity: 3, unit: PantryUnit.pcs);
     await tester.pumpWidget(
-      page([pantryAiServiceProvider.overrideWithValue(PantryAiService(api: ai.client))]),
+      page([
+        pantryAiServiceProvider
+            .overrideWithValue(PantryAiService(api: ai.client))
+      ]),
     );
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -146,7 +152,10 @@ void main() {
           },
         ]));
     await tester.pumpWidget(
-      page([pantryAiServiceProvider.overrideWithValue(PantryAiService(api: ai.client))]),
+      page([
+        pantryAiServiceProvider
+            .overrideWithValue(PantryAiService(api: ai.client))
+      ]),
     );
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -182,27 +191,32 @@ void main() {
           headers: {'content-type': 'application/json'},
         ));
     await tester.pumpWidget(
-      page([pantryAiServiceProvider.overrideWithValue(PantryAiService(api: ai.client))]),
+      page([
+        pantryAiServiceProvider
+            .overrideWithValue(PantryAiService(api: ai.client))
+      ]),
     );
     await tester.pump(const Duration(milliseconds: 200));
 
     await review(tester, '2 kg rice\n500');
 
     expect(ai.requests, hasLength(1), reason: 'a cap is never retried');
-    expect(
-        find.text('AI reads used up for today — type them instead'), findsOneWidget);
+    expect(find.text('AI reads used up for today — type them instead'),
+        findsOneWidget);
     expect(find.textContaining('Couldn’t read (1)'), findsOneWidget);
     expect(find.text('Add 1 of 2'), findsOneWidget);
   });
 
   testWidgets('a failed call never blocks the rows that did parse',
       (tester) async {
-    final ai = _FakeAi(
-        (_) => http.Response('{"error":"unavailable"}', 503));
+    final ai = _FakeAi((_) => http.Response('{"error":"unavailable"}', 503));
     await PantryRepository(db)
         .add(name: 'rice', quantity: 2, unit: PantryUnit.kg);
     await tester.pumpWidget(
-      page([pantryAiServiceProvider.overrideWithValue(PantryAiService(api: ai.client))]),
+      page([
+        pantryAiServiceProvider
+            .overrideWithValue(PantryAiService(api: ai.client))
+      ]),
     );
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -219,17 +233,20 @@ void main() {
   });
 
   group('the service', () {
-    test('only whitelisted units survive, and none without an amount', () async {
+    test('only whitelisted units survive, and none without an amount',
+        () async {
       final ai = _FakeAi((_) => _ok([
             {'line': 'a', 'name': 'ghee', 'quantity': 100, 'unit': 'cups'},
             {'line': 'b', 'name': 'chips', 'quantity': null, 'unit': 'pcs'},
             {'line': 'c', 'name': 'rice', 'quantity': 1, 'unit': 'kg'},
           ]));
-      final service = PantryAiService(api: ai.client, newRequestId: () => 'req-1234');
+      final service =
+          PantryAiService(api: ai.client, newRequestId: () => 'req-1234');
 
       final result = await service.read(['a', 'b', 'c']);
 
-      expect(result.items[0].unit, isNull, reason: 'cups is not a unit we keep');
+      expect(result.items[0].unit, isNull,
+          reason: 'cups is not a unit we keep');
       expect(result.items[1].unit, isNull, reason: 'a unit with no amount');
       expect(result.items[2].unit, PantryUnit.kg);
       expect(result.remaining, 9);
@@ -240,8 +257,8 @@ void main() {
     });
 
     test('a 429 is a state with a date, not a failure', () async {
-      final ai = _FakeAi(
-          (_) => http.Response('{"error":"daily_cap_reached"}', 429));
+      final ai =
+          _FakeAi((_) => http.Response('{"error":"daily_cap_reached"}', 429));
       final service = PantryAiService(api: ai.client);
       await expectLater(
         service.read(['asdfgh']),

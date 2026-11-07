@@ -187,7 +187,8 @@ class HandsFreeController extends StateNotifier<HandsFreeState> {
         'sessionId': _sessionId,
       }));
       if (state.phase != HandsFreePhase.listening) {
-        _set(HandsFreeState(phase: HandsFreePhase.listening, heard: state.heard));
+        _set(HandsFreeState(
+            phase: HandsFreePhase.listening, heard: state.heard));
       }
     } catch (_) {
       await _fail(HandsFreeNotice.offline);
@@ -244,10 +245,12 @@ class HandsFreeController extends StateNotifier<HandsFreeState> {
         // flowing so the server can hear a barge-in, but its words do not
         // become commands or a new "heard" line until speechStart stops TTS.
         if (state.phase == HandsFreePhase.speaking) return;
-        final text = (data['text'] ?? data['transcript'] ?? '').toString().trim();
+        final text =
+            (data['text'] ?? data['transcript'] ?? '').toString().trim();
         if (text.isEmpty) return;
         _resetIdleTimers();
-        _set(HandsFreeState(phase: state.phase, heard: text, notice: state.notice));
+        _set(HandsFreeState(
+            phase: state.phase, heard: text, notice: state.notice));
         final finalTurn = data['final'] == true || data['is_final'] == true;
         if (finalTurn) unawaited(_handleFinal(text));
       case 'speechComplete':
@@ -363,7 +366,8 @@ class HandsFreeController extends StateNotifier<HandsFreeState> {
     } else if (code == 4402) {
       unawaited(_fail(HandsFreeNotice.offline));
     } else {
-      _set(HandsFreeState(phase: HandsFreePhase.connecting, heard: state.heard));
+      _set(
+          HandsFreeState(phase: HandsFreePhase.connecting, heard: state.heard));
       _reconnect = Timer(reconnectDelay, () => unawaited(_connect()));
     }
   }

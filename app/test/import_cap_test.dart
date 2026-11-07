@@ -19,7 +19,8 @@ void main() {
       api: ApiClient(
         baseUrl: 'https://api.test',
         tokenProvider: () => 'jwt',
-        httpClient: MockClient((_) async => http.Response(jsonEncode(body), status)),
+        httpClient:
+            MockClient((_) async => http.Response(jsonEncode(body), status)),
       ),
       repository: JournalRepository(db),
     );
@@ -54,7 +55,8 @@ void main() {
       'reset_at': '2026-11-07T00:00:00Z',
     });
 
-    final started = await service.start('https://www.instagram.com/reel/abc123/');
+    final started =
+        await service.start('https://www.instagram.com/reel/abc123/');
 
     expect(started.stage, ImportStage.queued);
     expect(started.remaining, 4);

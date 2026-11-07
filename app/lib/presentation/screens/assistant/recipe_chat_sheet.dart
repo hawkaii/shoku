@@ -123,6 +123,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
   String? _error;
   int? _appliedVersion;
   bool _cap = false;
+
   /// Asks left today, when the server last said.
   int? _remaining;
   bool _offline = false;
@@ -199,7 +200,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     final all = await repo.load(widget.dish.id, limit: _total);
     if (!mounted) return;
     final already = _stored.length;
-    final older = all.length <= already ? const <AssistantTurnRecord>[] : all.sublist(0, all.length - already);
+    final older = all.length <= already
+        ? const <AssistantTurnRecord>[]
+        : all.sublist(0, all.length - already);
     setState(() {
       _stored
         ..clear()
@@ -231,12 +234,10 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       for (final turn in _stored)
         if (turn.versionId == _versionId) turn,
     ];
-    final tail = relevant.length <= 4
-        ? relevant
-        : relevant.sublist(relevant.length - 4);
+    final tail =
+        relevant.length <= 4 ? relevant : relevant.sublist(relevant.length - 4);
     return [
-      for (final turn in tail)
-        AssistantTurn(role: turn.role, text: turn.text),
+      for (final turn in tail) AssistantTurn(role: turn.role, text: turn.text),
     ];
   }
 
@@ -298,7 +299,9 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
     unawaited(_remember('user', question));
 
     try {
-      final reply = await ref.read(assistantServiceProvider).ask(
+      final reply = await ref
+          .read(assistantServiceProvider)
+          .ask(
             scope: 'dish',
             dishId: widget.dish.id,
             versionId: _versionId,
@@ -307,7 +310,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
             question: '$_scope$question',
             requestId: _uuid.v4(),
             history: history,
-          ).timeout(const Duration(seconds: 30));
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (!mounted) return;
       HapticFeedback.selectionClick();
@@ -523,8 +527,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                   onTap: _turns.isEmpty ? null : _clear,
                   behavior: HitTestBehavior.opaque,
                   child: Text(l10n.botNewChat,
-                      style: ShokuType.label.copyWith(
-                          fontSize: 9.5, color: c.inkMuted)),
+                      style: ShokuType.label
+                          .copyWith(fontSize: 9.5, color: c.inkMuted)),
                 ),
               ],
             ),
@@ -561,7 +565,8 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
                   onTap: _showEarlier,
                   behavior: HitTestBehavior.opaque,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
                     child: Text(
                       l10n.chatEarlier(_total - _stored.length),
                       style: ShokuType.label
@@ -676,11 +681,12 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
               children: [
                 Expanded(child: Divider(color: c.hairline, height: 1)),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.sm),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: ShokuSpace.sm),
                   child: Text(l10n.chatVersionDivider(_versionNumber),
                       key: const ValueKey('chat-version-divider'),
-                      style:
-                          ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                      style: ShokuType.label
+                          .copyWith(fontSize: 9, color: c.inkMuted)),
                 ),
                 Expanded(child: Divider(color: c.hairline, height: 1)),
               ],
@@ -830,9 +836,7 @@ class _ChatNotice extends StatelessWidget {
     if (action == null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: ShokuSpace.xs),
-        child: Text(text,
-            key: const ValueKey('chat-notice'),
-            style: style),
+        child: Text(text, key: const ValueKey('chat-notice'), style: style),
       );
     }
     return Padding(
@@ -842,8 +846,8 @@ class _ChatNotice extends StatelessWidget {
         onTap: action,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
+          padding: const EdgeInsets.symmetric(
+              horizontal: ShokuSpace.md, vertical: 10),
           decoration: BoxDecoration(
             color: c.surface,
             borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -916,7 +920,8 @@ class _DiffCard extends StatelessWidget {
                   style: ShokuType.label.copyWith(fontSize: 9, color: c.ink)),
               const Spacer(),
               Text(l10n.chatVersionArrow(dish.versions.length, next),
-                  style: ShokuType.label.copyWith(fontSize: 9, color: c.accent)),
+                  style:
+                      ShokuType.label.copyWith(fontSize: 9, color: c.accent)),
             ],
           ),
           const SizedBox(height: 6),
@@ -927,7 +932,8 @@ class _DiffCard extends StatelessWidget {
           for (final edit in shown) _delta(context, edit),
           if (more > 0)
             Text(l10n.chatMoreEdits(more),
-                style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                style:
+                    ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
           const SizedBox(height: ShokuSpace.sm),
           Text(l10n.chatCreatesVersion(next),
               style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
@@ -960,9 +966,8 @@ class _DiffCard extends StatelessWidget {
                 Expanded(
                   child: _Action(
                     key: const ValueKey('diff-apply'),
-                    label: applying
-                        ? l10n.chatApplying
-                        : l10n.chatApplyAs(next),
+                    label:
+                        applying ? l10n.chatApplying : l10n.chatApplyAs(next),
                     onTap: applying ? null : onApply,
                     primary: true,
                   ),

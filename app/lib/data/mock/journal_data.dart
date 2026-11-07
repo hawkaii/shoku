@@ -1,4 +1,3 @@
-
 /// The journal model: a Dish you cook repeatedly, each attempt a version,
 /// each night a cook log. This is the whole product.
 enum DishStatus {
@@ -92,7 +91,9 @@ class RecipeVersion {
   /// this parse has no links (or none for that step).
   List<int>? stepIngredientLinks(int stepIndex) {
     final links = stepIngredients;
-    if (links == null || stepIndex < 0 || stepIndex >= links.length) return null;
+    if (links == null || stepIndex < 0 || stepIndex >= links.length) {
+      return null;
+    }
     return links[stepIndex];
   }
 }
@@ -210,7 +211,12 @@ class Dish {
 class JournalData {
   /// The demo kitchen's dish ids. The app no longer ships demo recipes; these
   /// are kept only so an install that already has them can lose them once.
-  static const List<String> demoDishIds = ['mousse', 'chicken', 'focaccia', 'noodles'];
+  static const List<String> demoDishIds = [
+    'mousse',
+    'chicken',
+    'focaccia',
+    'noodles'
+  ];
 
   const JournalData._();
 }

@@ -357,8 +357,8 @@ void main() {
 
   group('failure classification', () {
     testWidgets('a server error is not "no connection"', (tester) async {
-      await tester.pumpWidget(sheet(
-          _FakeAssistant((_, __) async => throw ApiError('boom', 500))));
+      await tester.pumpWidget(
+          sheet(_FakeAssistant((_, __) async => throw ApiError('boom', 500))));
       await tester.pumpAndSettle();
       await send(tester, 'what can i cook');
       expect(find.text('The assistant hit a problem — try again.'),

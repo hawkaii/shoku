@@ -123,7 +123,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final row = await db.select(db.dishRows).getSingle();
-    expect(row.deletedAt, isNotNull, reason: 'a tombstone, never a hard delete');
+    expect(row.deletedAt, isNotNull,
+        reason: 'a tombstone, never a hard delete');
     expect(row.dirty, 1, reason: 'the tombstone has to reach the server');
     expect(await repo.loadDishes(), isEmpty, reason: 'it leaves the journal');
     expect(find.byType(ShokuDishImage), findsNothing);

@@ -28,7 +28,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late final int _initialPage =
       (int.tryParse(Uri.base.queryParameters['onboardStep'] ?? '') ?? 0)
           .clamp(0, _pageCount - 1);
-  late final PageController _controller = PageController(initialPage: _initialPage);
+  late final PageController _controller =
+      PageController(initialPage: _initialPage);
   late int _page = _initialPage;
   int _stage = 0; // 0 = reel, 1 = share sheet, 2 = saved
 
@@ -64,10 +65,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.sm, ShokuSpace.lg, 0),
+              padding: const EdgeInsets.fromLTRB(
+                  ShokuSpace.lg, ShokuSpace.sm, ShokuSpace.lg, 0),
               child: Row(
                 children: [
-                  Text('SHOKU', style: ShokuType.label.copyWith(color: c.inkMuted)),
+                  Text('SHOKU',
+                      style: ShokuType.label.copyWith(color: c.inkMuted)),
                   const Spacer(),
                   if (_page > 0 && _page < _pageCount - 1)
                     GestureDetector(
@@ -137,10 +140,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         decoration: BoxDecoration(
                           gradient: ShokuGradients.crimsonPress,
                           borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                          border: Border.all(color: c.ink, width: ShokuStroke.brutal),
+                          border: Border.all(
+                              color: c.ink, width: ShokuStroke.brutal),
                           boxShadow: [
                             BoxShadow(
-                                color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                                color: c.ink,
+                                offset: ShokuStroke.brutalShadow,
+                                blurRadius: 0),
                           ],
                         ),
                         child: Center(
@@ -152,7 +158,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                         ? l10n.onboardingContinue
                                         : l10n.onboardingShareCta)
                                     : l10n.onboardingOpenJournal,
-                            style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                            style: ShokuType.title
+                                .copyWith(color: c.onAccent, fontSize: 14),
                           ),
                         ),
                       ),
@@ -226,7 +233,9 @@ class _IntroStep extends StatelessWidget {
               TextSpan(
                 text: 'Shoku',
                 style: ShokuType.display.copyWith(fontSize: 54, color: c.ink),
-                children: [TextSpan(text: '.', style: TextStyle(color: c.accent))],
+                children: [
+                  TextSpan(text: '.', style: TextStyle(color: c.accent))
+                ],
               ),
             ),
           ),
@@ -317,7 +326,8 @@ class _ShareStep extends StatelessWidget {
                         ),
                         child: Center(
                           child: Text('h',
-                              style: ShokuType.stat.copyWith(fontSize: 10, color: c.ink)),
+                              style: ShokuType.stat
+                                  .copyWith(fontSize: 10, color: c.ink)),
                         ),
                       ),
                       const SizedBox(width: ShokuSpace.sm),
@@ -325,7 +335,8 @@ class _ShareStep extends StatelessWidget {
                           style: ShokuType.bodySmall.copyWith(color: c.ink)),
                       const Spacer(),
                       Text('0:48',
-                          style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
+                          style: ShokuType.stat
+                              .copyWith(fontSize: 10, color: c.inkMuted)),
                     ],
                   ),
                   const SizedBox(height: ShokuSpace.sm),
@@ -338,7 +349,8 @@ class _ShareStep extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text('4-ingredient protein mousse',
-                          style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                          style:
+                              ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                     ),
                   ),
                   const SizedBox(height: ShokuSpace.sm),
@@ -347,7 +359,8 @@ class _ShareStep extends StatelessWidget {
                       Icon(Icons.favorite_border, size: 15, color: c.inkMuted),
                       const SizedBox(width: 4),
                       Text('12.4k',
-                          style: ShokuType.stat.copyWith(fontSize: 10, color: c.inkMuted)),
+                          style: ShokuType.stat
+                              .copyWith(fontSize: 10, color: c.inkMuted)),
                       const Spacer(),
                       Stack(
                         clipBehavior: Clip.none,
@@ -355,22 +368,24 @@ class _ShareStep extends StatelessWidget {
                           _GlowRing(
                             active: stage == 0,
                             child: ShokuPressable(
-                        onTap: onShareTap,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: stage == 0 ? c.accent : c.surfaceAlt,
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                            border: Border.all(
-                              color: stage == 0 ? c.ink : c.hairline,
-                              width: stage == 0 ? ShokuStroke.brutal : 1,
+                              onTap: onShareTap,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 160),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: stage == 0 ? c.accent : c.surfaceAlt,
+                                  borderRadius:
+                                      BorderRadius.circular(ShokuRadius.chip),
+                                  border: Border.all(
+                                    color: stage == 0 ? c.ink : c.hairline,
+                                    width: stage == 0 ? ShokuStroke.brutal : 1,
+                                  ),
+                                ),
+                                child: Icon(Icons.send,
+                                    size: 14,
+                                    color: stage == 0 ? c.onAccent : c.ink),
+                              ),
                             ),
-                          ),
-                          child: Icon(Icons.send,
-                              size: 14, color: stage == 0 ? c.onAccent : c.ink),
-                        ),
-                      ),
                           ),
                           if (stage == 0)
                             Positioned(
@@ -405,13 +420,20 @@ class _ShareStep extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(context.l10n.onboardingShareTo,
-                            style: ShokuType.title.copyWith(color: c.ink, fontSize: 12)),
+                            style: ShokuType.title
+                                .copyWith(color: c.ink, fontSize: 12)),
                         const SizedBox(height: ShokuSpace.sm),
                         Row(
                           children: [
-                            const _Target(label: 'Messages', text: 'M', color: Color(0xFF34C759)),
+                            const _Target(
+                                label: 'Messages',
+                                text: 'M',
+                                color: Color(0xFF34C759)),
                             const SizedBox(width: ShokuSpace.sm),
-                            const _Target(label: 'WhatsApp', text: 'W', color: Color(0xFF25D366)),
+                            const _Target(
+                                label: 'WhatsApp',
+                                text: 'W',
+                                color: Color(0xFF25D366)),
                             const SizedBox(width: ShokuSpace.sm),
                             _Target(
                               label: 'Shoku',
@@ -536,21 +558,27 @@ class _JournalStep extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text('v1', style: ShokuType.stat.copyWith(fontSize: 13, color: c.inkMuted)),
+                Text('v1',
+                    style: ShokuType.stat
+                        .copyWith(fontSize: 13, color: c.inkMuted)),
                 Container(
                   width: 18,
                   height: 1,
                   margin: const EdgeInsets.symmetric(horizontal: 6),
                   color: c.hairline,
                 ),
-                Text('v2', style: ShokuType.stat.copyWith(fontSize: 13, color: c.inkMuted)),
+                Text('v2',
+                    style: ShokuType.stat
+                        .copyWith(fontSize: 13, color: c.inkMuted)),
                 Container(
                   width: 18,
                   height: 1,
                   margin: const EdgeInsets.symmetric(horizontal: 6),
                   color: c.hairline,
                 ),
-                Text('v3', style: ShokuType.stat.copyWith(fontSize: 13, color: c.accent)),
+                Text('v3',
+                    style:
+                        ShokuType.stat.copyWith(fontSize: 13, color: c.accent)),
                 const SizedBox(width: ShokuSpace.sm),
                 ShokuChip(context.l10n.onboardingAltered,
                     color: c.reward, filled: true),
@@ -563,7 +591,6 @@ class _JournalStep extends StatelessWidget {
   }
 }
 
-
 Widget _reveal(BuildContext context, Widget child, {int delayMs = 0}) {
   if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
   return child
@@ -571,7 +598,6 @@ Widget _reveal(BuildContext context, Widget child, {int delayMs = 0}) {
       .fadeIn(duration: 320.ms)
       .slideY(begin: 0.06, end: 0);
 }
-
 
 /// A hand-drawn-looking arrow that points at the share icon, plus a label.
 class _ArrowHint extends StatelessWidget {
@@ -627,7 +653,6 @@ class _ArrowPainter extends CustomPainter {
   bool shouldRepaint(_ArrowPainter oldDelegate) => oldDelegate.color != color;
 }
 
-
 /// Gentle 6px bob, disabled when the OS asks for reduced motion.
 class _Bob extends StatefulWidget {
   final Widget child;
@@ -651,7 +676,9 @@ class _BobState extends State<_Bob> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return widget.child;
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      return widget.child;
+    }
     return AnimatedBuilder(
       animation: _c,
       builder: (context, child) => Transform.translate(
@@ -673,7 +700,8 @@ class _GlowRing extends StatefulWidget {
   State<_GlowRing> createState() => _GlowRingState();
 }
 
-class _GlowRingState extends State<_GlowRing> with SingleTickerProviderStateMixin {
+class _GlowRingState extends State<_GlowRing>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1300),

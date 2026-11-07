@@ -92,7 +92,8 @@ void main() {
         ],
         child: MaterialApp(
           theme: ShokuTheme.light(),
-          home: Scaffold(body: RecipeChatSheet(dish: dish ?? _dish(versions: 2))),
+          home:
+              Scaffold(body: RecipeChatSheet(dish: dish ?? _dish(versions: 2))),
         ),
       );
 
@@ -119,7 +120,8 @@ void main() {
       expect(await turns.count('d1'), 25);
       final last = await turns.load('d1');
       expect(last, hasLength(20));
-      expect(last.first.text, 'turn 5', reason: 'the oldest of the last twenty');
+      expect(last.first.text, 'turn 5',
+          reason: 'the oldest of the last twenty');
       expect(last.last.text, 'turn 24', reason: 'newest last');
       expect((await turns.load('d1', limit: 100)), hasLength(25));
 
@@ -235,7 +237,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('chat-version-divider')), findsOneWidget);
+      expect(
+          find.byKey(const ValueKey('chat-version-divider')), findsOneWidget);
     });
   });
 }

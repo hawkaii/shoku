@@ -39,7 +39,8 @@ class DebriefSheet extends ConsumerStatefulWidget {
   final Dish dish;
   final List<String> initialChanges;
 
-  const DebriefSheet({super.key, required this.dish, this.initialChanges = const []});
+  const DebriefSheet(
+      {super.key, required this.dish, this.initialChanges = const []});
 
   @override
   ConsumerState<DebriefSheet> createState() => _DebriefSheetState();
@@ -149,7 +150,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
         .where((p) =>
             lines.any((l) => l.contains(p.name.toLowerCase())) ||
             p.aliases.any((a) =>
-                a.trim().isNotEmpty && lines.any((l) => l.contains(a.toLowerCase()))))
+                a.trim().isNotEmpty &&
+                lines.any((l) => l.contains(a.toLowerCase()))))
         .toList();
   }
 
@@ -278,20 +280,23 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                     right: ShokuSpace.sm,
                     bottom: ShokuSpace.sm,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 5),
                       decoration: BoxDecoration(
                         color: c.canvas.withValues(alpha: 0.94),
                         borderRadius: BorderRadius.circular(ShokuRadius.chip),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.photo_camera_outlined, size: 13, color: c.ink),
+                          Icon(Icons.photo_camera_outlined,
+                              size: 13, color: c.ink),
                           const SizedBox(width: 5),
                           Text(
                               _photo == null
                                   ? l10n.debriefAddPhoto
                                   : l10n.debriefChangePhoto,
-                              style: ShokuType.label.copyWith(fontSize: 9, color: c.ink)),
+                              style: ShokuType.label
+                                  .copyWith(fontSize: 9, color: c.ink)),
                         ],
                       ),
                     ),
@@ -315,7 +320,9 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 4),
                       child: Icon(
-                        i <= _rating ? Icons.star_rounded : Icons.star_border_rounded,
+                        i <= _rating
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
                         size: 22,
                         color: i <= _rating ? c.reward : c.inkMuted,
                       ),
@@ -340,7 +347,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                         decoration: BoxDecoration(
                           color: _mood == mood ? c.ink : c.surface,
                           borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                          border: Border.all(color: _mood == mood ? c.ink : c.hairline),
+                          border: Border.all(
+                              color: _mood == mood ? c.ink : c.hairline),
                         ),
                         child: Center(
                           child: Text(
@@ -354,7 +362,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       ),
                     ),
                   ),
-                  if (mood != CookMood.values.last) const SizedBox(width: ShokuSpace.sm),
+                  if (mood != CookMood.values.last)
+                    const SizedBox(width: ShokuSpace.sm),
                 ],
               ],
             ),
@@ -382,7 +391,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: ShokuSpace.md),
                     decoration: BoxDecoration(
                       color: c.surface,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -395,7 +405,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: l10n.debriefChangeHint,
-                        hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                        hintStyle:
+                            ShokuType.bodySmall.copyWith(color: c.inkMuted),
                       ),
                       onSubmitted: (value) {
                         if (value.trim().isEmpty) return;
@@ -528,7 +539,10 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                   borderRadius: BorderRadius.circular(ShokuRadius.chip),
                   border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                   boxShadow: [
-                    BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                    BoxShadow(
+                        color: c.ink,
+                        offset: ShokuStroke.brutalShadow,
+                        blurRadius: 0),
                   ],
                 ),
                 child: Center(
@@ -536,7 +550,8 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                     _changes.isEmpty
                         ? l10n.debriefSave(nextVersion)
                         : l10n.debriefSaveUpgrade(nextVersion),
-                    style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                    style: ShokuType.title
+                        .copyWith(color: c.onAccent, fontSize: 14),
                   ),
                 ),
               ),

@@ -47,8 +47,7 @@ void main() {
         ),
       );
 
-  testWidgets('a note alone is enough to save, and it is kept',
-      (tester) async {
+  testWidgets('a note alone is enough to save, and it is kept', (tester) async {
     await tester.pumpWidget(sheet());
     await tester.pump(const Duration(milliseconds: 200));
 
@@ -71,8 +70,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('with nothing recorded there is nothing to save',
-      (tester) async {
+  testWidgets('with nothing recorded there is nothing to save', (tester) async {
     await tester.pumpWidget(sheet());
     await tester.pump(const Duration(milliseconds: 200));
 

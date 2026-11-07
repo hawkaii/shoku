@@ -42,13 +42,17 @@ class SyncRepository {
 
   /// Rows this device has changed and the server has not seen.
   Future<Map<String, List<Map<String, dynamic>>>> dirtyPayload() async {
-    final dishes = await (_db.select(_db.dishRows)..where((d) => d.dirty.equals(1))).get();
-    final versions =
-        await (_db.select(_db.versionRows)..where((v) => v.dirty.equals(1))).get();
-    final cooks =
-        await (_db.select(_db.cookLogRows)..where((c) => c.dirty.equals(1))).get();
-    final pantry =
-        await (_db.select(_db.pantryRows)..where((p) => p.dirty.equals(1))).get();
+    final dishes =
+        await (_db.select(_db.dishRows)..where((d) => d.dirty.equals(1))).get();
+    final versions = await (_db.select(_db.versionRows)
+          ..where((v) => v.dirty.equals(1)))
+        .get();
+    final cooks = await (_db.select(_db.cookLogRows)
+          ..where((c) => c.dirty.equals(1)))
+        .get();
+    final pantry = await (_db.select(_db.pantryRows)
+          ..where((p) => p.dirty.equals(1)))
+        .get();
 
     return {
       'dishes': [for (final row in dishes) _dishWire(row)],
@@ -149,9 +153,9 @@ class SyncRepository {
       for (final raw in (pull['dishes'] as List? ?? const [])) {
         final row = raw as Map<String, dynamic>;
         final id = row['id'] as String;
-        final existing =
-            await (_db.select(_db.dishRows)..where((d) => d.id.equals(id)))
-                .getSingleOrNull();
+        final existing = await (_db.select(_db.dishRows)
+              ..where((d) => d.id.equals(id)))
+            .getSingleOrNull();
         final incomingUpdated = DateTime.parse(row['updated_at'] as String);
 
         if (existing == null) {
@@ -164,7 +168,8 @@ class SyncRepository {
                   sourceHandle: Value(row['source_handle'] as String? ?? ''),
                   status: row['status'] as String,
                   minutes: Value((row['minutes'] as num?)?.toInt() ?? 0),
-                  baselineKcal: Value((row['baseline_kcal'] as num?)?.toInt() ?? 0),
+                  baselineKcal:
+                      Value((row['baseline_kcal'] as num?)?.toInt() ?? 0),
                   baselineProtein:
                       Value((row['baseline_protein'] as num?)?.toInt() ?? 0),
                   steps: Value(_encode(row['steps'])),
@@ -194,7 +199,8 @@ class SyncRepository {
             status: Value(row['status'] as String),
             minutes: Value((row['minutes'] as num?)?.toInt() ?? 0),
             baselineKcal: Value((row['baseline_kcal'] as num?)?.toInt() ?? 0),
-            baselineProtein: Value((row['baseline_protein'] as num?)?.toInt() ?? 0),
+            baselineProtein:
+                Value((row['baseline_protein'] as num?)?.toInt() ?? 0),
             steps: Value(_encode(row['steps'])),
             updatedAt: Value(incomingUpdated),
             deletedAt: Value(row['deleted_at'] == null
@@ -297,8 +303,10 @@ class SyncRepository {
         if (row.originHandle != null) 'origin_handle': row.originHandle,
         if (row.originPlatform != null) 'origin_platform': row.originPlatform,
         if (row.originUrl != null) 'origin_url': row.originUrl,
-        if (row.originShortcode != null) 'origin_shortcode': row.originShortcode,
-        if (row.parentVersionId != null) 'parent_version_id': row.parentVersionId,
+        if (row.originShortcode != null)
+          'origin_shortcode': row.originShortcode,
+        if (row.parentVersionId != null)
+          'parent_version_id': row.parentVersionId,
         'extraction_version': row.extractionVersion,
         'created_at': _iso(row.createdAt),
       };

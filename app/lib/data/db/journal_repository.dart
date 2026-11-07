@@ -23,7 +23,8 @@ class JournalRepository {
   final AppDatabase _db;
 
   Future<int> countDishes() async {
-    final query = _db.selectOnly(_db.dishRows)..addColumns([_db.dishRows.id.count()]);
+    final query = _db.selectOnly(_db.dishRows)
+      ..addColumns([_db.dishRows.id.count()]);
     final row = await query.getSingle();
     return row.read(_db.dishRows.id.count()) ?? 0;
   }
@@ -108,8 +109,10 @@ class JournalRepository {
 
     await _db.transaction(() async {
       for (final id in ids) {
-        await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id))).go();
-        await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id))).go();
+        await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id)))
+            .go();
+        await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id)))
+            .go();
         await (_db.delete(_db.dishRows)..where((d) => d.id.equals(id))).go();
       }
       await _db.into(_db.metaRows).insertOnConflictUpdate(
@@ -155,8 +158,10 @@ class JournalRepository {
   /// tombstone would travel to the server and leave a scar there.
   Future<void> removeSample(String id) async {
     await _db.transaction(() async {
-      await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id))).go();
-      await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id))).go();
+      await (_db.delete(_db.cookLogRows)..where((c) => c.dishId.equals(id)))
+          .go();
+      await (_db.delete(_db.versionRows)..where((v) => v.dishId.equals(id)))
+          .go();
       await (_db.delete(_db.dishRows)..where((d) => d.id.equals(id))).go();
       await _db.into(_db.metaRows).insertOnConflictUpdate(
             MetaRowsCompanion.insert(key: 'sample_removed', value: '1'),
@@ -230,7 +235,8 @@ class JournalRepository {
         tags: previous?.tags ?? const [],
         kcal: dish.baselineKcal + (changes.length * 18),
         protein: dish.baselineProtein + (changes.length * 2),
-        parentVersionId: (previous != null && previous.id.isNotEmpty) ? previous.id : null,
+        parentVersionId:
+            (previous != null && previous.id.isNotEmpty) ? previous.id : null,
       );
 
       final log = CookLog(
@@ -256,7 +262,9 @@ class JournalRepository {
 
       final cookCount = dish.cooks.length + 1;
 
-      await _db.into(_db.versionRows).insert(_versionCompanion(dishId, version));
+      await _db
+          .into(_db.versionRows)
+          .insert(_versionCompanion(dishId, version));
       await _db.into(_db.cookLogRows).insert(_cookCompanion(dishId, log));
       await (_db.update(_db.dishRows)..where((d) => d.id.equals(dishId))).write(
         DishRowsCompanion(
@@ -310,7 +318,9 @@ class JournalRepository {
         parentVersionId: baseVersionId,
       );
 
-      await _db.into(_db.versionRows).insert(_versionCompanion(dishId, version));
+      await _db
+          .into(_db.versionRows)
+          .insert(_versionCompanion(dishId, version));
       // The dish's own steps follow its head, because cook mode reads them.
       await (_db.update(_db.dishRows)..where((d) => d.id.equals(dishId))).write(
         DishRowsCompanion(
@@ -380,7 +390,8 @@ class JournalRepository {
             ),
           );
     } else if (!insertOnly) {
-      await (_db.update(_db.dishRows)..where((d) => d.id.equals(dish.id))).write(
+      await (_db.update(_db.dishRows)..where((d) => d.id.equals(dish.id)))
+          .write(
         DishRowsCompanion(
           title: Value(dish.title),
           subtitle: Value(dish.subtitle),
@@ -522,7 +533,8 @@ class JournalRepository {
         dirty: Value(dirty),
       );
 
-  CookLogRowsCompanion _cookCompanion(String dishId, CookLog c, {int dirty = 1}) =>
+  CookLogRowsCompanion _cookCompanion(String dishId, CookLog c,
+          {int dirty = 1}) =>
       CookLogRowsCompanion.insert(
         id: c.id.isEmpty ? _uuid.v4() : c.id,
         dishId: dishId,
@@ -531,7 +543,8 @@ class JournalRepository {
         cookedAt: c.cookedAt,
         photoUrl: Value(c.photoUrl),
         photoKey: Value(c.photoKey),
-        photoState: Value(c.photoState.isEmpty ? _photoState(c.photoUrl) : c.photoState),
+        photoState: Value(
+            c.photoState.isEmpty ? _photoState(c.photoUrl) : c.photoState),
         outcome: c.outcome.name,
         mood: c.mood.name,
         note: Value(c.note),
@@ -559,7 +572,10 @@ class JournalRepository {
     return [
       for (final entry in decoded)
         if (entry is List)
-          [for (final index in entry) if (index is num) index.toInt()]
+          [
+            for (final index in entry)
+              if (index is num) index.toInt()
+          ]
         else
           const <int>[],
     ];

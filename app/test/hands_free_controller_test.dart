@@ -363,8 +363,8 @@ void main() {
       h.controller.start();
       async.flushMicrotasks();
 
-      final hello = jsonDecode(h.factory.socket!.sentText.single)
-          as Map<String, dynamic>;
+      final hello =
+          jsonDecode(h.factory.socket!.sentText.single) as Map<String, dynamic>;
       expect(hello['authorization'], 'Bearer jwt');
       expect(hello['language'], 'hi');
       expect(hello['keywords'], ['paneer', 'jeera']);

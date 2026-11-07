@@ -99,10 +99,13 @@ void main() {
 
     test('an alias is the receipt meeting the recipe', () {
       final fridge = FridgeMatcher([
-        _item('butter', quantity: 500, unit: PantryUnit.g,
+        _item('butter',
+            quantity: 500,
+            unit: PantryUnit.g,
             aliases: const ['AMUL BUTTER 500G']),
       ]);
-      expect(fridge.match('500 g amul butter 500g').state, FridgeState.inFridge);
+      expect(
+          fridge.match('500 g amul butter 500g').state, FridgeState.inFridge);
     });
 
     test('a plural is the same shelf as its singular', () {
@@ -118,12 +121,14 @@ void main() {
     });
 
     test('looked, and it is not there', () {
-      final fridge = FridgeMatcher([_item('paneer', quantity: 200, unit: PantryUnit.g)]);
+      final fridge =
+          FridgeMatcher([_item('paneer', quantity: 200, unit: PantryUnit.g)]);
       expect(fridge.match('200 g lime').label, 'Missing');
     });
 
     test('a substring is not a match', () {
-      final fridge = FridgeMatcher([_item('oil', quantity: 1, unit: PantryUnit.l)]);
+      final fridge =
+          FridgeMatcher([_item('oil', quantity: 1, unit: PantryUnit.l)]);
       expect(fridge.match('100 g olives').label, 'Missing',
           reason: 'olives are not oil, however similar the letters');
     });
@@ -156,7 +161,8 @@ void main() {
     });
 
     test('what the fridge cannot answer is never called missing', () {
-      final fridge = FridgeMatcher([_item('paneer', quantity: 1, unit: PantryUnit.kg)]);
+      final fridge =
+          FridgeMatcher([_item('paneer', quantity: 1, unit: PantryUnit.kg)]);
 
       expect(fridge.match('to taste').state, FridgeState.notTracked);
       expect(fridge.match('1 tsp spice').state, FridgeState.notTracked);
@@ -191,7 +197,8 @@ void main() {
         ],
       );
 
-      expect(coverage.strip, '1 of 4 in your fridge · 1 on your list · 2 missing');
+      expect(
+          coverage.strip, '1 of 4 in your fridge · 1 on your list · 2 missing');
       expect(coverage.missingNames, ['salt'],
           reason: 'two mentions are one shopping-list line');
     });
@@ -225,7 +232,8 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
-      await PantryRepository(db).add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
+      await PantryRepository(db)
+          .add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 

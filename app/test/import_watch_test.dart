@@ -56,7 +56,8 @@ void main() {
 
     final seen = await service(client).watch('job1', seconds: 30).toList();
 
-    expect(seen.map((p) => p.stage), [ImportStage.extracting, ImportStage.ready]);
+    expect(
+        seen.map((p) => p.stage), [ImportStage.extracting, ImportStage.ready]);
     expect(requests, 3, reason: 'the blip cost an attempt, not the import');
   });
 
@@ -147,10 +148,8 @@ void main() {
     test('the other stages read exactly as they did', () {
       String? label(String detail,
               {ImportStage stage = ImportStage.extracting}) =>
-          stageText(
-              l10n,
-              ImportProgress(
-                  stage: stage, detail: detail, shortcode: 'SC'));
+          stageText(l10n,
+              ImportProgress(stage: stage, detail: detail, shortcode: 'SC'));
 
       expect(label('extracting'), 'Reading the reel');
       expect(label('transcribing'), 'Reading the audio');
@@ -158,13 +157,13 @@ void main() {
       expect(label('structuring'), 'Writing the recipe');
       expect(label('caption_only'), 'Reading the caption');
       expect(
-        stageText(
-            l10n, const ImportProgress(stage: ImportStage.queued, shortcode: 'SC')),
+        stageText(l10n,
+            const ImportProgress(stage: ImportStage.queued, shortcode: 'SC')),
         l10n.importQueued,
       );
       expect(
-        stageText(
-            l10n, const ImportProgress(stage: ImportStage.ready, shortcode: 'SC')),
+        stageText(l10n,
+            const ImportProgress(stage: ImportStage.ready, shortcode: 'SC')),
         l10n.importReady,
       );
     });

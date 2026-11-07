@@ -14,7 +14,15 @@ import '../state/sync_providers.dart';
 
 const _uuid = Uuid();
 
-enum BotTurnKind { mine, answer, notice, divider, suggestions, capture, choices }
+enum BotTurnKind {
+  mine,
+  answer,
+  notice,
+  divider,
+  suggestions,
+  capture,
+  choices
+}
 
 /// One line in the kitchen thread.
 class BotTurn {
@@ -171,7 +179,8 @@ class BotController extends StateNotifier<BotState> {
   final Ref _ref;
   int _generation = 0;
 
-  AssistantTurnRepository get _repo => _ref.read(assistantTurnRepositoryProvider);
+  AssistantTurnRepository get _repo =>
+      _ref.read(assistantTurnRepositoryProvider);
 
   Future<void> _load() async {
     try {
@@ -231,13 +240,16 @@ class BotController extends StateNotifier<BotState> {
     unawaited(_remember('user', question));
 
     try {
-      final reply = await _ref.read(assistantServiceProvider).ask(
+      final reply = await _ref
+          .read(assistantServiceProvider)
+          .ask(
             scope: 'kitchen',
             question: question,
             requestId: _uuid.v4(),
             history: _history(),
             exclude: exclude,
-          ).timeout(const Duration(seconds: 30));
+          )
+          .timeout(const Duration(seconds: 30));
       if (!mounted || generation != _generation) return;
 
       final turns = [...state.turns];

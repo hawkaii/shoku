@@ -70,12 +70,12 @@ class CookTimerCard extends StatelessWidget {
             ? l10n.timerPaused
             : l10n.timerRunning;
     final elsewhere = currentStep != null && timer.stepIndex != currentStep;
-    final status = elsewhere
-        ? l10n.timerOnStep(timer.stepIndex + 1, state)
-        : state;
+    final status =
+        elsewhere ? l10n.timerOnStep(timer.stepIndex + 1, state) : state;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 10),
       decoration: BoxDecoration(
         color: c.surface,
         borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -101,7 +101,8 @@ class CookTimerCard extends StatelessWidget {
                   Text(
                     status,
                     key: const ValueKey('timer-status'),
-                    style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
+                    style: ShokuType.label
+                        .copyWith(fontSize: 9, color: c.inkMuted),
                   ),
                 ],
               ),
@@ -132,7 +133,8 @@ class CookTimerCard extends StatelessWidget {
             Text(
               alertNote(l10n)!,
               key: const ValueKey('timer-alert-note'),
-              style: ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11),
+              style:
+                  ShokuType.bodySmall.copyWith(color: c.inkMuted, fontSize: 11),
             ),
           ],
         ],

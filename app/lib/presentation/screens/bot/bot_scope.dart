@@ -36,12 +36,12 @@ class BotScope {
 
 /// The scope the next turn will be sent in. Route-derived by the shell, and
 /// overridable for the thread from the chip's switcher.
-final botScopeProvider = StateProvider<BotScope>((ref) => const BotScope.kitchen());
+final botScopeProvider =
+    StateProvider<BotScope>((ref) => const BotScope.kitchen());
 
 /// Resolves the chip's words against the journal, so a renamed dish renames the
 /// chip without the scope having to store a copy of the title.
-String botScopeLabel(WidgetRef ref, BotScope scope,
-    [AppLocalizations? l10n]) {
+String botScopeLabel(WidgetRef ref, BotScope scope, [AppLocalizations? l10n]) {
   final t = l10n ?? lookupAppLocalizations(const Locale('en'));
   if (scope.isKitchen) return t.botNoDish;
   final dish = ref.watch(dishProvider(scope.dishId!));

@@ -110,15 +110,16 @@ class _MonogramWell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final initial =
-        title.trim().isEmpty ? '·' : title.trim().characters.first.toUpperCase();
+    final initial = title.trim().isEmpty
+        ? '·'
+        : title.trim().characters.first.toUpperCase();
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 96.0;
-        final height = constraints.maxHeight.isFinite
-            ? constraints.maxHeight
-            : width;
+        final width =
+            constraints.maxWidth.isFinite ? constraints.maxWidth : 96.0;
+        final height =
+            constraints.maxHeight.isFinite ? constraints.maxHeight : width;
         final size = math.min(math.min(width, height) * 0.42, 48.0);
 
         return Container(

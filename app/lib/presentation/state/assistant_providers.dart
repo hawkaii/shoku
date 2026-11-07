@@ -8,7 +8,8 @@ import 'sync_providers.dart';
 
 /// The ask door, as a provider so a test can answer without a network.
 final assistantServiceProvider = Provider<AssistantService>(
-  (ref) => AssistantService(api: ApiClient(auth: ref.watch(authServiceProvider))),
+  (ref) =>
+      AssistantService(api: ApiClient(auth: ref.watch(authServiceProvider))),
 );
 
 /// The chat's local memory. One repository, the app's one database.

@@ -221,8 +221,7 @@ void main() {
 
       expect(alerts.scheduled, hasLength(1));
       expect(alerts.scheduledIds.single, store.state!.notificationId);
-      expect(alerts.scheduledIds.single,
-          CookTimer.notificationIdFor('v1', 2));
+      expect(alerts.scheduledIds.single, CookTimer.notificationIdFor('v1', 2));
     });
 
     test('the id is derived from the version and the step', () {
@@ -297,8 +296,7 @@ void main() {
     });
 
     test('refused exactness schedules an inexact one and says so', () async {
-      final alerts =
-          FakeTimerAlerts(permission: TimerAlertPermission.inexact);
+      final alerts = FakeTimerAlerts(permission: TimerAlertPermission.inexact);
       var reported = TimerAlertPermission.unknown;
       final store = await openWithAlerts(
         alerts,
@@ -317,8 +315,7 @@ void main() {
       expect(reported, TimerAlertPermission.inexact);
     });
 
-    test('a denied permission schedules nothing and keeps the timer',
-        () async {
+    test('a denied permission schedules nothing and keeps the timer', () async {
       final alerts = FakeTimerAlerts(permission: TimerAlertPermission.denied);
       var reported = TimerAlertPermission.unknown;
       final store = await openWithAlerts(
@@ -406,8 +403,7 @@ void main() {
 
     test('a grant made in Settings takes effect on resume, without a restart',
         () async {
-      final alerts =
-          FakeTimerAlerts(permission: TimerAlertPermission.inexact);
+      final alerts = FakeTimerAlerts(permission: TimerAlertPermission.inexact);
       var reported = TimerAlertPermission.unknown;
       final store = await running(alerts, onPermission: (p) => reported = p);
       expect(alerts.scheduledExact.single, isFalse);

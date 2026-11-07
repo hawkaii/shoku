@@ -142,8 +142,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
       if (mounted) setState(() {});
       return;
     }
-    if (existing != null &&
-        existing.snapshot.phase == HandsFreePhase.paused) {
+    if (existing != null && existing.snapshot.phase == HandsFreePhase.paused) {
       // A failure is not a dead end: the next tap rebuilds with a fresh token
       // and the current step rather than retrying the old session.
       existing.dispose();
@@ -152,15 +151,18 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
 
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
-    final ingredients =
-        dish.versions.isEmpty ? const <String>[] : dish.versions.last.ingredients;
+    final ingredients = dish.versions.isEmpty
+        ? const <String>[]
+        : dish.versions.last.ingredients;
     final setup = HandsFreeSetup(
       token: ref.read(authServiceProvider).accessToken ?? '',
       locale: locale,
       keywords: [
         for (final line in ingredients)
           if (line.trim().isNotEmpty)
-            line.trim().length > 60 ? line.trim().substring(0, 60) : line.trim(),
+            line.trim().length > 60
+                ? line.trim().substring(0, 60)
+                : line.trim(),
       ],
       actions: VoiceActions(
         next: () {
@@ -210,8 +212,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
       },
     );
 
-    final controller =
-        _handsFree ?? ref.read(handsFreeFactoryProvider)(setup);
+    final controller = _handsFree ?? ref.read(handsFreeFactoryProvider)(setup);
     if (_handsFree == null) {
       controller.addListener(_onHandsFreeChanged);
       setState(() => _handsFree = controller);
@@ -246,7 +247,9 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   ) {
     if (_adoptedTimer || !store.isRestored) return;
     _adoptedTimer = true;
-    if (timer == null || timer.stepIndex == _step || timer.stepIndex >= stepCount) {
+    if (timer == null ||
+        timer.stepIndex == _step ||
+        timer.stepIndex >= stepCount) {
       return;
     }
     final page = timer.stepIndex;
@@ -298,7 +301,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.cookLeaveTitle, style: ShokuType.h1.copyWith(color: c.ink)),
+                Text(l10n.cookLeaveTitle,
+                    style: ShokuType.h1.copyWith(color: c.ink)),
                 const SizedBox(height: ShokuSpace.xs),
                 Text(
                   _changes.isEmpty
@@ -315,12 +319,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
                             side: BorderSide(color: c.hairline),
                           ),
                         ),
                         child: Text(l10n.exitKeepCooking,
-                            style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
+                            style: ShokuType.title
+                                .copyWith(color: c.ink, fontSize: 13)),
                       ),
                     ),
                     const SizedBox(width: ShokuSpace.sm),
@@ -331,11 +337,13 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           backgroundColor: c.ink,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
                           ),
                         ),
                         child: Text(l10n.chatDiscard,
-                            style: ShokuType.title.copyWith(color: c.canvas, fontSize: 13)),
+                            style: ShokuType.title
+                                .copyWith(color: c.canvas, fontSize: 13)),
                       ),
                     ),
                   ],
@@ -380,7 +388,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                 : null;
     final timer = ref.watch(cookTimerProvider);
     final store = ref.read(cookTimerProvider.notifier);
-    final timerForThisDish = timer != null && timer.dishId == dish.id ? timer : null;
+    final timerForThisDish =
+        timer != null && timer.dishId == dish.id ? timer : null;
     final remainingMs = timerForThisDish?.remainingMsAt(DateTime.now()) ?? 0;
 
     _adoptRestoredTimer(store, timerForThisDish, steps.length);
@@ -403,12 +412,15 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
             children: [
               // ---- top bar ------------------------------------------------
               Padding(
-                padding: const EdgeInsets.fromLTRB(ShokuSpace.lg, ShokuSpace.sm, ShokuSpace.lg, 0),
+                padding: const EdgeInsets.fromLTRB(
+                    ShokuSpace.lg, ShokuSpace.sm, ShokuSpace.lg, 0),
                 child: Row(
                   children: [
                     ShokuPressable(
                       onTap: () async {
-                        if (await _confirmLeave() && context.mounted) Navigator.of(context).pop();
+                        if (await _confirmLeave() && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
                       },
                       child: Container(
                         width: 36,
@@ -427,7 +439,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                         dish.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                        style: ShokuType.title
+                            .copyWith(color: c.ink, fontSize: 14),
                       ),
                     ),
                     if (_changes.isNotEmpty) ...[
@@ -442,8 +455,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           : l10n.handsFreeStart,
                       child: GestureDetector(
                         key: const ValueKey('hands-free-toggle'),
-                        onTap: () =>
-                            _toggleHandsFree(dish, steps, versionId),
+                        onTap: () => _toggleHandsFree(dish, steps, versionId),
                         behavior: HitTestBehavior.opaque,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -501,7 +513,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                     const SizedBox(width: ShokuSpace.xs),
                     Text(
                       '${_step + 1}/${steps.length}',
-                      style: ShokuType.stat.copyWith(fontSize: 12, color: c.inkMuted),
+                      style: ShokuType.stat
+                          .copyWith(fontSize: 12, color: c.inkMuted),
                     ),
                   ],
                 ),
@@ -561,7 +574,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                         if (!_adoptingPage) {
                           final timer = ref.read(cookTimerProvider);
                           if (timer != null && timer.dishId == dish.id) {
-                            unawaited(ref.read(cookTimerProvider.notifier).stop());
+                            unawaited(
+                                ref.read(cookTimerProvider.notifier).stop());
                           }
                         }
                         setState(() => _step = i);
@@ -582,14 +596,13 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            StepMotionLibrary.build(context, steps[i], height: 168),
+                            StepMotionLibrary.build(context, steps[i],
+                                height: 168),
                             const SizedBox(height: ShokuSpace.lg),
                             Row(
                               children: [
-                                ShokuLabel(
-                                    l10n.cookStepLabel(
-                                        NumberFormat('00', locale)
-                                            .format(i + 1))),
+                                ShokuLabel(l10n.cookStepLabel(
+                                    NumberFormat('00', locale).format(i + 1))),
                                 const Spacer(),
                                 // The assistant lives in the step header, not
                                 // over the timer.
@@ -638,7 +651,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                     alerts: ref.watch(timerAlertPermissionProvider),
                     suggestedMinutes:
                         _hasTime(steps[_step]) ? _minutesIn(steps[_step]) : 0,
-                    onStart: () => _startTimer(dish, versionId, _minutesIn(steps[_step])),
+                    onStart: () =>
+                        _startTimer(dish, versionId, _minutesIn(steps[_step])),
                     onPause: () => ref.read(cookTimerProvider.notifier).pause(),
                     onResume: _resumeTimer,
                     onStop: () => ref.read(cookTimerProvider.notifier).stop(),
@@ -659,7 +673,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
 
               // ---- navigation ---------------------------------------------
               Padding(
-                padding: const EdgeInsets.fromLTRB(ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.lg),
+                padding: const EdgeInsets.fromLTRB(
+                    ShokuSpace.lg, 0, ShokuSpace.lg, ShokuSpace.lg),
                 child: Row(
                   children: [
                     if (_step > 0)
@@ -672,12 +687,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                              borderRadius:
+                                  BorderRadius.circular(ShokuRadius.chip),
                               border: Border.all(color: c.hairline),
                             ),
                             child: Center(
                               child: Text(l10n.cookBack,
-                                  style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+                                  style: ShokuType.title
+                                      .copyWith(color: c.ink, fontSize: 14)),
                             ),
                           ),
                         ),
@@ -693,24 +710,30 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                               curve: ShokuMotion.pushCurve,
                             );
                           } else {
-                            showDebriefSheet(context, dish: dish, changes: _changes);
+                            showDebriefSheet(context,
+                                dish: dish, changes: _changes);
                           }
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           decoration: BoxDecoration(
                             gradient: ShokuGradients.crimsonPress,
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
-                            border: Border.all(color: c.ink, width: ShokuStroke.brutal),
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
+                            border: Border.all(
+                                color: c.ink, width: ShokuStroke.brutal),
                             boxShadow: [
                               BoxShadow(
-                                  color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                                  color: c.ink,
+                                  offset: ShokuStroke.brutalShadow,
+                                  blurRadius: 0),
                             ],
                           ),
                           child: Center(
                             child: Text(
                               isLast ? l10n.cookFinishLog : l10n.cookNextStep,
-                              style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                              style: ShokuType.title
+                                  .copyWith(color: c.onAccent, fontSize: 14),
                             ),
                           ),
                         ),
@@ -730,8 +753,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
       RegExp(r'(\d+)\s*(min|minute)', caseSensitive: false).hasMatch(step);
 
   int _minutesIn(String step) {
-    final match = RegExp(r'(\d+)\s*(min|minute)', caseSensitive: false).firstMatch(step);
+    final match =
+        RegExp(r'(\d+)\s*(min|minute)', caseSensitive: false).firstMatch(step);
     return int.tryParse(match?.group(1) ?? '5') ?? 5;
   }
 }
-

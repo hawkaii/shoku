@@ -77,7 +77,8 @@ class _ShokuPhotoState extends State<ShokuPhoto> {
       },
     );
 
-    final stream = widget.provider.resolve(createLocalImageConfiguration(context));
+    final stream =
+        widget.provider.resolve(createLocalImageConfiguration(context));
     stream.addListener(listener);
     _stream = stream;
     _listener = listener;
@@ -108,7 +109,8 @@ class _ShokuPhotoState extends State<ShokuPhoto> {
       tween: Tween(begin: 0, end: 1),
       duration: widget.fade,
       curve: Curves.easeOut,
-      builder: (context, opacity, child) => Opacity(opacity: opacity, child: child),
+      builder: (context, opacity, child) =>
+          Opacity(opacity: opacity, child: child),
       child: RawImage(image: info.image, fit: widget.fit),
     );
   }

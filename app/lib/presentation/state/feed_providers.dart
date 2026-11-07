@@ -109,7 +109,8 @@ final importedShortcodesProvider = Provider<Set<String>>((ref) {
   return {
     for (final dish in dishes)
       for (final version in dish.versions)
-        if ((version.originShortcode ?? '').isNotEmpty) version.originShortcode!,
+        if ((version.originShortcode ?? '').isNotEmpty)
+          version.originShortcode!,
   };
 });
 

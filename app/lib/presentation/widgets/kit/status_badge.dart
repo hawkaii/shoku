@@ -24,16 +24,24 @@ class StatusBadge extends StatelessWidget {
     final l10n = context.l10n;
 
     final (Color bg, Color fg, IconData icon, String text) = switch (status) {
-      DishStatus.toCook =>
-        (c.reward, c.canvas, Icons.schedule, l10n.badgeToCook),
+      DishStatus.toCook => (
+          c.reward,
+          c.canvas,
+          Icons.schedule,
+          l10n.badgeToCook
+        ),
       DishStatus.cooked => (
           c.ready,
           c.canvas,
           Icons.check,
           cookCount > 0 ? l10n.badgeCookedCount(cookCount) : l10n.badgeCooked
         ),
-      DishStatus.signature =>
-        (c.ink, c.canvas, Icons.star_rounded, l10n.badgeSignature),
+      DishStatus.signature => (
+          c.ink,
+          c.canvas,
+          Icons.star_rounded,
+          l10n.badgeSignature
+        ),
     };
 
     return Container(
@@ -118,9 +126,12 @@ class StatusToggle extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: active ? c.canvas.withValues(alpha: 0.18) : c.surfaceAlt,
+                    color: active
+                        ? c.canvas.withValues(alpha: 0.18)
+                        : c.surfaceAlt,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

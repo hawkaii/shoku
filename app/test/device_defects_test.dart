@@ -43,7 +43,8 @@ class _SlowImage extends ImageProvider<_SlowImage> {
 
 Widget _app(Widget child) => MaterialApp(
       theme: ShokuTheme.light(),
-      home: Scaffold(body: Center(child: SizedBox(width: 84, height: 84, child: child))),
+      home: Scaffold(
+          body: Center(child: SizedBox(width: 84, height: 84, child: child))),
     );
 
 String _feed({bool hasMore = false, int items = 1}) => jsonEncode({
@@ -69,7 +70,8 @@ void main() {
   group('§12.1 the image slot', () {
     testWidgets('a slot with no photo is its monogram, never grey',
         (tester) async {
-      await tester.pumpWidget(_app(const ShokuDishImage(url: '', title: 'Paneer')));
+      await tester
+          .pumpWidget(_app(const ShokuDishImage(url: '', title: 'Paneer')));
 
       expect(find.text('P'), findsOneWidget);
       // No bare grey state exists: the well is a gradient, not a flat fill.
@@ -213,7 +215,9 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(ProviderScope(
-        overrides: [dishesProvider.overrideWithValue([dish()])],
+        overrides: [
+          dishesProvider.overrideWithValue([dish()])
+        ],
         child: MaterialApp(
           theme: ShokuTheme.light(),
           home: const Scaffold(body: JournalScreen()),
@@ -237,7 +241,9 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(ProviderScope(
-        overrides: [dishesProvider.overrideWithValue([dish()])],
+        overrides: [
+          dishesProvider.overrideWithValue([dish()])
+        ],
         child: MaterialApp(
           theme: ShokuTheme.light(),
           home: const Scaffold(body: JournalScreen()),

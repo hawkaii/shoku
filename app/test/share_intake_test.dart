@@ -26,7 +26,8 @@ const _url = 'https://www.instagram.com/reel/$_shortcode/';
 
 /// The same three calls the plugin offers, without a platform channel.
 class _FakeShareSource implements ShareSource {
-  _FakeShareSource({this.initialPayload = const [], this.livePayloads = const []});
+  _FakeShareSource(
+      {this.initialPayload = const [], this.livePayloads = const []});
 
   /// What launched the process.
   final List<String> initialPayload;
@@ -70,7 +71,8 @@ void main() {
       expect(pending, isNotNull);
       expect(pending!.url, _url);
       expect(pending.hasUrl, isTrue);
-      expect(source.resets, 1, reason: 'the launching intent is acknowledged once');
+      expect(source.resets, 1,
+          reason: 'the launching intent is acknowledged once');
 
       final stored = await PendingShareStore().read();
       expect(stored?.url, _url,
@@ -90,7 +92,8 @@ void main() {
       await container.read(shareIntakeProvider).ready;
 
       final pending = container.read(pendingShareProvider);
-      expect(pending, isNotNull, reason: 'a share with no URL is still a share');
+      expect(pending, isNotNull,
+          reason: 'a share with no URL is still a share');
       expect(pending!.url, isNull);
       expect(pending.hasUrl, isFalse);
 
@@ -128,8 +131,10 @@ void main() {
       await container.read(shareIntakeProvider).ready;
       await pumpEventQueue();
 
-      expect(container.read(pendingShareProvider)?.url, 'https://youtu.be/abc123');
-      expect((await PendingShareStore().read())?.url, 'https://youtu.be/abc123');
+      expect(
+          container.read(pendingShareProvider)?.url, 'https://youtu.be/abc123');
+      expect(
+          (await PendingShareStore().read())?.url, 'https://youtu.be/abc123');
     });
 
     test('a persisted share survives with no live payload at all', () async {
@@ -160,7 +165,8 @@ void main() {
       final store = PendingShareStore();
 
       expect((await store.take())?.url, _url);
-      expect(await store.take(), isNull, reason: 'a second consumer gets nothing');
+      expect(await store.take(), isNull,
+          reason: 'a second consumer gets nothing');
       expect(await store.read(), isNull);
     });
 
