@@ -3,6 +3,29 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
+## [1.31.0] — 2026-11-07
+
+### Added
+- Hands-free listening, commands and speech *(cook)* — [`a6dd040`](https://github.com/hawkaii/food-finder-app/commit/a6dd04095edb682c527920bd1b5a1b82038f5454)
+- Relay the microphone to Meta's streaming ASR *(voice)* — [`d0a1cd8`](https://github.com/hawkaii/food-finder-app/commit/d0a1cd8aa78d555d401fcbb34d610be24c233fbb)
+- One broker owns start and stop for every tenant on the box *(pool)* — [`8728eec`](https://github.com/hawkaii/food-finder-app/commit/8728eec834a8f3f4028f8b7f537dc7ddad528b72)
+
+### CI
+- The changelog step gets the scope it needs (#35) *(release)* — [`9f91c21`](https://github.com/hawkaii/food-finder-app/commit/9f91c211fa477ad3bf05285e7ea8f60480dbe5eb)
+
+### Docs
+- V1.30.0 (#34) *(changelog)* — [`95d735b`](https://github.com/hawkaii/food-finder-app/commit/95d735b3d24a7256e7fca419ab012429312b6ab2)
+
+### Fixed
+- The import worker no longer stops the VM it shares *(worker)* — [`c59a71a`](https://github.com/hawkaii/food-finder-app/commit/c59a71a35dae388dea76d77bd0fbee3005a798e7)
+
+### Other
+- Hands-free voice and the worker pool into 1.30.0 — [`d83bbf6`](https://github.com/hawkaii/food-finder-app/commit/d83bbf674ea9dbd7c351dbb5d3743f8f65e19b0f)
+- V1.31.0 — hands-free voice — [`6556402`](https://github.com/hawkaii/food-finder-app/commit/65564027beee82fd6f7daee0045ba709f7010ed8)
+- Merge pull request #36 from hawkaii/dev
+
+Shoku 1.31.0 — hands-free voice, reconciled with the stability release — [`0636569`](https://github.com/hawkaii/food-finder-app/commit/06365698ca8ee5fd8a066cd30ff1af6e4f7dc6b8)
+
 ## [1.30.0] — 2026-11-06
 
 ### Docs
