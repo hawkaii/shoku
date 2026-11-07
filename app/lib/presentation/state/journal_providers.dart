@@ -57,7 +57,3 @@ enum LibraryFilter { toCook, cooked }
 
 final libraryFilterProvider =
     StateProvider<LibraryFilter>((ref) => LibraryFilter.toCook);
-
-/// Cook-log sheet state (mock write path).
-final pendingOutcomeProvider = StateProvider<CookOutcome?>((ref) => null);
-final pendingChangesProvider = StateProvider<String>((ref) => '');
