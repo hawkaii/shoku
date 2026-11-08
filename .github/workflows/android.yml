@@ -310,11 +310,19 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: shoku-apk-${{ steps.version.outputs.version }}
+          # The debug APK is 165 MB of the ~300 MB this step used to store, and it
+          # is already attached to the Release for the owner to install. Skipping
+          # it here keeps the account's 0.5 GB Actions storage under the cap; the
+          # size report is small and stays.
           path: |
             app/dist/*.apk
             app/dist/*.aab
             app/dist/size/*
-          retention-days: 30
+            !app/dist/*-debug.apk
+          retention-days: 7
+          # A manual debug-only run has no release APK to upload after the
+          # negation; warn rather than fail a run that did its job.
+          if-no-files-found: warn
 
       # Keep the repo's CHANGELOG.md in step with the published release.
       #
