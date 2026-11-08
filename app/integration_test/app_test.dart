@@ -1,24 +1,27 @@
-// Integration tests run on a real device or emulator, not on the host.
-//
-// `flutter test integration_test/` requires a connected device. On CI that
-// means an emulator job (see .github/workflows/integration.yml, added when
-// these tests are stable enough to gate a PR).
-//
-// What is here today is the one check that needs no hardware: the app boots and
-// paints its first screen. The rest of the critical paths (timer ring, cold-start
-// share, sync restore, import) are manual until an emulator job exists — see
-// integration_test/README.md.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_finder/main.dart' show ShokuApp;
+import 'package:integration_test/integration_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:food_finder/main.dart';
+import 'package:food_finder/presentation/state/auth_providers.dart';
+import 'package:food_finder/presentation/screens/onboarding/onboarding_screen.dart';
 
 void main() {
-  testWidgets('the app boots to its first screen', (tester) async {
-    await tester.pumpWidget(const ShokuApp());
-    await tester.pump(const Duration(seconds: 1));
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-    // Onboarding paints something; the exact copy is covered by widget tests.
-    expect(find.byType(MaterialApp), findsOneWidget);
+  testWidgets('the app boots to its first screen', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(ProviderScope(
+      overrides: [authReadyProvider.overrideWith((ref) async {})],
+      child: const ShokuApp(),
+    ));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox());
   });
 }

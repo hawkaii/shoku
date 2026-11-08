@@ -13,8 +13,8 @@ flutter test integration_test/ -d <device-id>
 
 ## What exists
 
-- `app_test.dart` — boots the app and paints the first screen. Runs anywhere a
-  device exists.
+- `app_test.dart` — boots the app and paints the first screen. Compiles under
+  `flutter analyze`; runs only on a device or emulator.
 
 ## What still needs a device (manual until an emulator job exists)
 
