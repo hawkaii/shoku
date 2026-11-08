@@ -3,7 +3,120 @@
 What changed in each Shoku build, newest first. Generated from commit history
 by [git-cliff](https://git-cliff.org) — see RELEASING.md, don't hand-edit.
 
-## [1.31.0] — 2026-11-07
+## [1.31.0+build.20] — 2026-11-08
+
+### Docs
+- V1.31.0 (#37) *(changelog)* — [`339c452`](https://github.com/hawkaii/food-finder-app/commit/339c4529eed3248925591e114fd2b65c1b1707fc)
+
+### Other
+- Shoku cleanup — dead mock state, formatting, stricter lints, integration scaffold (#50)
+
+* style: run dart format across lib and test (#44)
+
+100 files were not formatted, so a contributor could not tell a real change
+from a reformat. This is the one-time catch-up; checks.yml gains a
+--set-exit-if-changed step so it stays that way.
+
+* cleanup: remove dead mock state, hardcoded gamification data and the mock PantryItem collision (#45)
+
+shoku_providers.dart carried a block of template state that no screen reads:
+gamification numbers (17 saves, 3 used, 4 streak days, level 3, 240/320 XP),
+a hardcoded identity ('Parthib', '@parthib'), a mock shopping list, a mock
+pantry that returns const [], and plans for a paywall the app has explicitly
+deferred. journal_providers.dart had two more mock write-path providers.
+
+MockData.plans was the only thing keeping PlanTier, StashCollection,
+SavedItem, ShoppingItem, ItemKind and ItemSource alive; MockData.helpTopics
+is now inlined into helpTopicsProvider so mock_data.dart can be deleted. The
+mock PantryItem no longer shadows data/models/pantry_item.dart.
+
+No behaviour change: every deleted provider had zero readers.
+
+* cleanup: remove dead web-preview config and add backoff to import polling (#46)
+
+previewScreen/previewTheme/previewStatic read Uri.base.queryParameters on every
+platform, but on Android Uri.base is the launch URL, never the intent: a deep
+link cannot open a preview screen on a device. They are now read from
+--dart-define on non-web (and normally unset), so the mobile path no longer
+touches Uri.base.
+
+ImportTracker polled every 4s with no backoff and no cap: a dead worker pinned
+a timer and the network for as long as the app was open. It now backs off
+exponentially (capped at 30s) and gives up after 5 consecutive failures with a
+terminal 'worker_unavailable' state. The timer is released on stop.
+
+No behaviour change for the success path.
+
+* lint: enable unawaited_futures, use_build_context_synchronously and avoid_dynamic_calls (#47)
+
+All three were off even though flutter_lints ships them; the architecture
+doc already committed to turning them on one rule at a time. Nineteen sites
+needed a fix:
+
+- unawaited_futures (12): HapticFeedback calls and two fire-and-forget
+  futures, wrapped in unawaited().
+- avoid_dynamic_calls (7): four dynamic parameters in pantry_screen typed as
+  ShokuColors, and two test casts made explicit.
+- use_build_context_synchronously (0): the mounted discipline added during the
+  stability program already covers every await continuation.
+
+No behaviour change.
+
+* test: scaffold integration tests and the manual device-check list (#48)
+
+* test: scaffold integration tests and the manual device-check list
+
+integration_test/app_test.dart boots the app and paints its first screen; it
+compiles under flutter analyze but needs a device to run, which is why it is not
+yet a required check. integration_test/README.md carries the six manual checks
+from docs/STABILITY.md that cannot be automated without hardware.
+
+* test: scaffold integration tests and the manual device-check list
+
+integration_test/app_test.dart boots the app and paints its first screen; it
+compiles under flutter analyze and runs only on a device or emulator.
+integration_test/README.md carries the six manual checks from docs/STABILITY.md
+so they are version-controlled instead of living in a chat log.
+
+* refactor(cook): extract the testable decisions from cook_mode_screen (#49)
+
+* refactor(cook): extract the testable decisions from cook_mode_screen
+
+CookModeLogic now owns three pure decisions that used to be interleaved with
+setState and addPostFrameCallback on _CookModeScreenState:
+
+- alertCopyFor: the notification's words, in the cook's language.
+- restoredPage: whether a timer that survived a kill should move the page,
+  and to which step.
+- shouldDropStaleTimer: whether a forked version invalidates the running timer.
+
+The screen keeps the side effects (jumpToPage, setState, scheduling) and
+calls the logic for the decision. 13 unit tests cover the decision table;
+the screen's 424 tests are unchanged.
+
+This is the first extraction from the god-screen list in ARCHITECTURE.md. The
+screen is still 737 lines: the ticker, the hands-free toggle and the build
+method are inherently widget-bound and stay where they are.
+
+* refactor(cook): extract the testable decisions from cook_mode_screen
+
+CookModeLogic now owns three pure decisions that used to be interleaved with
+setState and addPostFrameCallback on _CookModeScreenState:
+
+- alertCopyFor: the notification's words, in the cook's language.
+- restoredPage: whether a timer that survived a kill should move the page,
+  and to which step.
+- shouldDropStaleTimer: whether a forked version invalidates the running timer.
+
+The screen keeps the side effects (jumpToPage, setState, scheduling) and
+calls the logic for the decision. 12 unit tests cover the decision table;
+the screen's tests are unchanged.
+
+First extraction from the god-screen list in ARCHITECTURE.md. The screen is
+still 737 lines: the ticker, the hands-free toggle and the build method are
+inherently widget-bound. — [`9140d6c`](https://github.com/hawkaii/food-finder-app/commit/9140d6c436dadbd1191e58a9101d57eee9f25654)
+
+## [1.31.0+build.19] — 2026-11-06
 
 ### Added
 - Hands-free listening, commands and speech *(cook)* — [`a6dd040`](https://github.com/hawkaii/food-finder-app/commit/a6dd04095edb682c527920bd1b5a1b82038f5454)
