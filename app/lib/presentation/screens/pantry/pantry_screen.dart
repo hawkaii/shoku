@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +53,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
   Future<void> _deleteSelected() async {
     final ids = _selected.toList();
     if (ids.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     setState(() {
       _selected.clear();
       _selecting = false;
@@ -384,7 +385,7 @@ class _Row extends ConsumerWidget {
     );
   }
 
-  static Color _sourceColour(String source, dynamic c) => switch (source) {
+  static Color _sourceColour(String source, ShokuColors c) => switch (source) {
         'photo' => c.reward,
         'voice' => c.ready,
         _ => c.inkMuted,
@@ -638,7 +639,7 @@ class _Shelf extends ConsumerWidget {
     );
   }
 
-  Widget _quiet(BuildContext context, dynamic c) => Text(
+  Widget _quiet(BuildContext context, ShokuColors c) => Text(
         context.l10n.shelfEmpty,
         key: const ValueKey('shelf-empty'),
         style: ShokuType.bodySmall.copyWith(color: c.inkMuted),

@@ -314,7 +314,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
           .timeout(const Duration(seconds: 30));
 
       if (!mounted) return;
-      HapticFeedback.selectionClick();
+      unawaited(HapticFeedback.selectionClick());
       setState(() {
         _thinking = false;
         _remaining = reply.remaining;
@@ -387,7 +387,7 @@ class _RecipeChatSheetState extends ConsumerState<RecipeChatSheet> {
       _applying = true;
       _error = null;
     });
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
 
     try {
       // The precondition is checked inside the write, in the same transaction:

@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -120,7 +121,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
             photoUrl: photoUrl,
             photoKey: photoKey,
           );
-      HapticFeedback.mediumImpact();
+      unawaited(HapticFeedback.mediumImpact());
       navigator.pop();
       messenger.showSnackBar(
         SnackBar(
@@ -314,7 +315,7 @@ class _DebriefSheetState extends ConsumerState<DebriefSheet> {
                 for (var i = 1; i <= 5; i++)
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.selectionClick();
+                      unawaited(HapticFeedback.selectionClick());
                       setState(() => _rating = i);
                     },
                     child: Padding(

@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,7 @@ import '../../state/journal_store.dart';
 /// A sheet, like every other "what can I do with this" in the app — not a
 /// dialog, and not a context menu borrowed from a library.
 Future<void> showDishActions(BuildContext context, Dish dish) {
-  HapticFeedback.selectionClick();
+  unawaited(HapticFeedback.selectionClick());
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: context.colors.canvas,
@@ -74,7 +75,7 @@ class DishActionsSheet extends ConsumerWidget {
                 ? l10n.actionStatusCookedBody
                 : l10n.actionStatusToCookBody,
             onTap: () {
-              HapticFeedback.selectionClick();
+              unawaited(HapticFeedback.selectionClick());
               ref
                   .read(journalStoreProvider.notifier)
                   .setStatus(dish.id, _target);
@@ -159,7 +160,7 @@ class DishActionsSheet extends ConsumerWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          unawaited(HapticFeedback.mediumImpact());
                           Navigator.of(context).pop(true);
                         },
                         style: TextButton.styleFrom(

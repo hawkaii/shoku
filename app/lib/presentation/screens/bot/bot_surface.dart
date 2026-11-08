@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,7 +100,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
     final text = _input.text;
     if (text.trim().isEmpty) return;
     _input.clear();
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
     if (!_destructive(text)) {
       ref.read(botControllerProvider.notifier).send(text);
     }
@@ -146,7 +147,7 @@ class _BotSurfaceState extends ConsumerState<BotSurface> {
       _signedIn = signedIn;
     });
     if (!signedIn || pending == null) return;
-    ref.read(botControllerProvider.notifier).send(pending);
+    unawaited(ref.read(botControllerProvider.notifier).send(pending));
     _scrollToLatest();
   }
 
