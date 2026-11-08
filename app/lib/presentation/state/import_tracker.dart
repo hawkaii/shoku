@@ -85,6 +85,13 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
   bool _polling = false;
   bool _disposed = false;
 
+  /// How many polls in a row have failed. Drives the backoff below and, past
+  /// the cap, a terminal "could not reach the server" state instead of an
+  /// infinite retry loop.
+  int _consecutiveFailures = 0;
+  static const _maxConsecutiveFailures = 5;
+  static const _maxBackoff = Duration(seconds: 30);
+
   /// Picks up an import that outlived the last opening of the app.
   Future<void> restore() async {
     try {
@@ -106,6 +113,8 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
 
   void _adopt(PendingImport pending) {
     if (pending.jobId == null) return;
+    // A new import is a new chance: the previous job's failures belong to it.
+    _consecutiveFailures = 0;
     state = ImportTrackerState(
       pending: pending,
       title: state.pending?.jobId == pending.jobId ? state.title : null,
@@ -126,6 +135,7 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
     try {
       final progress = await _service.pollOnce(pending!.jobId!);
       if (_disposed) return;
+      _consecutiveFailures = 0;
       state = state.copyWith(progress: progress, title: progress.title);
 
       if (progress.stage == ImportStage.ready) {
@@ -140,8 +150,20 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
         return; // a failure is not polled again
       }
     } catch (error, stack) {
-      // A dropped poll is not a failed import; the next tick tries again.
+      // A dropped poll is not a failed import; the next tick tries again, but
+      // not forever and not at full speed — a dead worker would otherwise pin
+      // a timer and the network for as long as the app is open.
       logFailure('import: polling the job failed', error, stack);
+      _consecutiveFailures++;
+      if (_consecutiveFailures >= _maxConsecutiveFailures) {
+        if (!_disposed) {
+          _timer?.cancel();
+          _timer = null;
+          state = const ImportTrackerState(reason: 'worker_unavailable');
+        }
+        _polling = false;
+        return;
+      }
     } finally {
       _polling = false;
     }
@@ -153,7 +175,15 @@ class ImportTracker extends StateNotifier<ImportTrackerState> {
       return;
     }
     if (_disposed) return;
-    _timer = Timer(pollInterval, _poll);
+    final backoff = Duration(
+      seconds:
+          (pollInterval.inSeconds * (1 << (_consecutiveFailures.clamp(0, 4))))
+              .clamp(
+        pollInterval.inSeconds,
+        _maxBackoff.inSeconds,
+      ),
+    );
+    _timer = Timer(backoff, _poll);
   }
 
   Future<void> _finish(PendingImport pending) async {

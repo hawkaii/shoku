@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 /// Web preview helpers: `?screen=home&theme=dark` opens a screen directly.
-/// On a real device Uri.base carries no query, so nothing changes.
-final previewScreen = Uri.base.queryParameters['screen'];
-final previewTheme = Uri.base.queryParameters['theme'];
-final previewStatic = Uri.base.queryParameters.containsKey('static');
+///
+/// On the web this comes from the address bar, which is the whole point of a
+/// preview link. On a device `Uri.base` is the launch URL, never the intent,
+/// so reading it there is dead config: a mobile build uses the
+/// `--dart-define=PREVIEW_SCREEN=...` form instead (and normally none at all).
+final _previewScreenRaw = kIsWeb
+    ? Uri.base.queryParameters['screen']
+    : const String.fromEnvironment('PREVIEW_SCREEN');
+final previewScreen = (_previewScreenRaw == null || _previewScreenRaw!.isEmpty)
+    ? null
+    : _previewScreenRaw;
+
+final _previewThemeRaw = kIsWeb
+    ? Uri.base.queryParameters['theme']
+    : const String.fromEnvironment('PREVIEW_THEME');
+final previewTheme = (_previewThemeRaw == null || _previewThemeRaw!.isEmpty)
+    ? null
+    : _previewThemeRaw;
+final previewStatic = kIsWeb
+    ? Uri.base.queryParameters.containsKey('static')
+    : const bool.fromEnvironment('PREVIEW_STATIC');
 
 /// Theme mode — Account → Appearance writes here.
 /// Default follows the phone: a dark-mode user should not be handed a bright
