@@ -25,6 +25,7 @@ import '../../widgets/kit/bot_orb.dart';
 import '../../widgets/kit/step_text.dart';
 import '../assistant/recipe_chat_sheet.dart';
 import '../log/debrief_sheet.dart';
+import 'cook_mode_logic.dart';
 import 'timer_card.dart';
 
 /// Step-by-step cook mode: one step, one instructive loop, one floating AI.
@@ -222,14 +223,8 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
 
   /// The notification's words, in the cook's language. Resolved here because the
   /// store has no `BuildContext`, and the app ships ten locales.
-  TimerAlertCopy _alertCopyFor(int stepIndex) {
-    final l10n = context.l10n;
-    return TimerAlertCopy(
-      title: l10n.timerNotificationTitle,
-      // The body counts steps from one; the index counts from zero.
-      body: l10n.timerNotificationBody(stepIndex + 1),
-    );
-  }
+  TimerAlertCopy _alertCopyFor(int stepIndex) =>
+      CookModeLogic.alertCopyFor(stepIndex, context.l10n);
 
   void _resumeTimer() {
     // The timer knows which step it belongs to; the page may have moved on.
@@ -247,12 +242,14 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   ) {
     if (_adoptedTimer || !store.isRestored) return;
     _adoptedTimer = true;
-    if (timer == null ||
-        timer.stepIndex == _step ||
-        timer.stepIndex >= stepCount) {
-      return;
-    }
-    final page = timer.stepIndex;
+    final page = CookModeLogic.restoredPage(
+      timer: timer,
+      currentStep: _step,
+      stepCount: stepCount,
+      alreadyAdopted: false,
+      isRestored: true,
+    );
+    if (page == null) return;
     _adoptingPage = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_pages.hasClients) {
@@ -269,7 +266,13 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   /// points at a different instruction, so the timer is dropped and said out
   /// loud instead of quietly inheriting somebody else's step.
   void _dropStaleTimer(CookTimer? timer, String dishId, String versionId) {
-    if (timer == null || timer.versionId == versionId || _dropScheduled) return;
+    if (!CookModeLogic.shouldDropStaleTimer(
+      timer: timer,
+      versionId: versionId,
+      alreadyScheduled: _dropScheduled,
+    )) {
+      return;
+    }
     _dropScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
