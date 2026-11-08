@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,7 @@ import '../../state/journal_store.dart';
 /// A sheet, like every other "what can I do with this" in the app — not a
 /// dialog, and not a context menu borrowed from a library.
 Future<void> showDishActions(BuildContext context, Dish dish) {
-  HapticFeedback.selectionClick();
+  unawaited(HapticFeedback.selectionClick());
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: context.colors.canvas,
@@ -31,10 +32,9 @@ class DishActionsSheet extends ConsumerWidget {
   DishStatus get _target =>
       dish.status == DishStatus.toCook ? DishStatus.cooked : DishStatus.toCook;
 
-  String _targetLabel(AppLocalizations l10n) =>
-      _target == DishStatus.cooked
-          ? l10n.actionMarkCooked
-          : l10n.actionMoveBackToCook;
+  String _targetLabel(AppLocalizations l10n) => _target == DishStatus.cooked
+      ? l10n.actionMarkCooked
+      : l10n.actionMoveBackToCook;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,6 @@ class DishActionsSheet extends ConsumerWidget {
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
-
           _Action(
             key: const ValueKey('dish-action-status'),
             icon: _target == DishStatus.cooked
@@ -76,8 +75,10 @@ class DishActionsSheet extends ConsumerWidget {
                 ? l10n.actionStatusCookedBody
                 : l10n.actionStatusToCookBody,
             onTap: () {
-              HapticFeedback.selectionClick();
-              ref.read(journalStoreProvider.notifier).setStatus(dish.id, _target);
+              unawaited(HapticFeedback.selectionClick());
+              ref
+                  .read(journalStoreProvider.notifier)
+                  .setStatus(dish.id, _target);
               Navigator.of(context).pop();
             },
           ),
@@ -145,7 +146,8 @@ class DishActionsSheet extends ConsumerWidget {
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
                             side: BorderSide(color: c.hairline),
                           ),
                         ),
@@ -158,14 +160,15 @@ class DishActionsSheet extends ConsumerWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          HapticFeedback.mediumImpact();
+                          unawaited(HapticFeedback.mediumImpact());
                           Navigator.of(context).pop(true);
                         },
                         style: TextButton.styleFrom(
                           backgroundColor: c.ink,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                            borderRadius:
+                                BorderRadius.circular(ShokuRadius.chip),
                           ),
                         ),
                         child: Text(l10n.actionRemove,

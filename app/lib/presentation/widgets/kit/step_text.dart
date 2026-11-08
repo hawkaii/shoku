@@ -52,7 +52,8 @@ class StepText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final base = ShokuType.h1.copyWith(color: c.ink, fontSize: fontSize, height: 1.3);
+    final base =
+        ShokuType.h1.copyWith(color: c.ink, fontSize: fontSize, height: 1.3);
     final words = <String>{..._verbs};
     for (final ingredient in ingredients) {
       for (final word in ingredient.toLowerCase().split(RegExp(r'[^a-z]+'))) {

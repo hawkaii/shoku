@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -65,7 +66,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
       _photo != null;
 
   Future<void> _pickPhoto() async {
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 1800,
@@ -118,7 +119,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             photoUrl: photoUrl,
             photoKey: photoKey,
           );
-      HapticFeedback.mediumImpact();
+      unawaited(HapticFeedback.mediumImpact());
       navigator.pop();
       final outcome = _outcome;
       messenger.showSnackBar(
@@ -206,13 +207,15 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.photo_camera_outlined, color: c.canvas, size: 22),
+                            Icon(Icons.photo_camera_outlined,
+                                color: c.canvas, size: 22),
                             const SizedBox(height: 4),
                             Text(
                               _photo == null
                                   ? l10n.logSnapResult
                                   : l10n.logPhotoReady,
-                              style: ShokuType.label.copyWith(color: c.canvas, fontSize: 9),
+                              style: ShokuType.label
+                                  .copyWith(color: c.canvas, fontSize: 9),
                             ),
                           ],
                         ),
@@ -232,7 +235,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                   Expanded(
                     child: ShokuPressable(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        unawaited(HapticFeedback.selectionClick());
                         setState(() => _outcome = outcome);
                       },
                       child: AnimatedContainer(
@@ -241,12 +244,16 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: _outcome == outcome
-                              ? (outcome == CookOutcome.nailedIt ? c.ready : c.surfaceAlt)
+                              ? (outcome == CookOutcome.nailedIt
+                                  ? c.ready
+                                  : c.surfaceAlt)
                               : c.surface,
                           borderRadius: BorderRadius.circular(ShokuRadius.chip),
                           border: Border.all(
                             color: _outcome == outcome ? c.ink : c.hairline,
-                            width: _outcome == outcome ? ShokuStroke.brutal : ShokuStroke.hairline,
+                            width: _outcome == outcome
+                                ? ShokuStroke.brutal
+                                : ShokuStroke.hairline,
                           ),
                         ),
                         child: Center(
@@ -254,7 +261,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                             outcomeLabel(l10n, outcome).toUpperCase(),
                             style: ShokuType.label.copyWith(
                               fontSize: 9.5,
-                              color: _outcome == outcome && outcome == CookOutcome.nailedIt
+                              color: _outcome == outcome &&
+                                      outcome == CookOutcome.nailedIt
                                   ? c.canvas
                                   : c.ink,
                             ),
@@ -263,7 +271,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                       ),
                     ),
                   ),
-                  if (outcome != CookOutcome.values.last) const SizedBox(width: ShokuSpace.sm),
+                  if (outcome != CookOutcome.values.last)
+                    const SizedBox(width: ShokuSpace.sm),
                 ],
               ],
             ),
@@ -272,7 +281,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ShokuLabel(l10n.logNoteLabel),
             const SizedBox(height: ShokuSpace.sm),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: ShokuSpace.md, vertical: 4),
               decoration: BoxDecoration(
                 color: c.surface,
                 borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -296,7 +306,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             ShokuLabel(l10n.logChangeLabel),
             const SizedBox(height: ShokuSpace.sm),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: ShokuSpace.md, vertical: 4),
               decoration: BoxDecoration(
                 color: c.surface,
                 borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -340,7 +351,10 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                     borderRadius: BorderRadius.circular(ShokuRadius.chip),
                     border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                     boxShadow: [
-                      BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                      BoxShadow(
+                          color: c.ink,
+                          offset: ShokuStroke.brutalShadow,
+                          blurRadius: 0),
                     ],
                   ),
                   child: Center(
@@ -351,7 +365,8 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                               ? l10n.logSaveTonight
                               : l10n.logSaveUpgrade(
                                   widget.dish.currentVersion + 1),
-                      style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 14),
+                      style: ShokuType.title
+                          .copyWith(color: c.onAccent, fontSize: 14),
                     ),
                   ),
                 ),

@@ -203,10 +203,14 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state, shell) => AppShell(shell: shell),
       branches: [
         StatefulShellBranch(
-          routes: [GoRoute(path: '/journal', builder: (_, __) => const JournalScreen())],
+          routes: [
+            GoRoute(path: '/journal', builder: (_, __) => const JournalScreen())
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/recipes', builder: (_, __) => const RecipesScreen())],
+          routes: [
+            GoRoute(path: '/recipes', builder: (_, __) => const RecipesScreen())
+          ],
         ),
         // The fridge is a destination, not a page pushed over the shell: it
         // keeps the tab bar, deep-links at /pantry, and /fridge is its alias.
@@ -225,10 +229,14 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/wall', builder: (_, __) => const WallScreen())],
+          routes: [
+            GoRoute(path: '/wall', builder: (_, __) => const WallScreen())
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen())],
+          routes: [
+            GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen())
+          ],
         ),
       ],
     ),
@@ -244,8 +252,12 @@ final GoRouter appRouter = GoRouter(
         dishId: state.pathParameters['id'] ?? 'mousse',
       ),
     ),
-    GoRoute(path: '/nutrition', builder: (_, __) => const NutritionComingSoonScreen()),
-    GoRoute(path: '/nutrition/setup', builder: (_, __) => const NutritionComingSoonScreen()),
+    GoRoute(
+        path: '/nutrition',
+        builder: (_, __) => const NutritionComingSoonScreen()),
+    GoRoute(
+        path: '/nutrition/setup',
+        builder: (_, __) => const NutritionComingSoonScreen()),
     // One screen, two words for it.
     GoRoute(path: '/fridge', redirect: (_, __) => '/pantry'),
     GoRoute(path: '/help', builder: (_, __) => const HelpScreen()),

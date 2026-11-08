@@ -18,10 +18,12 @@ class StepMotionLibrary {
 
   static bool hasLottie(StepMotion intent) => _lottieAssets.containsKey(intent);
 
-  static StepMotion intentFor(String stepText) => StepDiagram.motionFor(stepText);
+  static StepMotion intentFor(String stepText) =>
+      StepDiagram.motionFor(stepText);
 
   /// Renders the best available illustration for a step.
-  static Widget build(BuildContext context, String stepText, {double height = 168}) {
+  static Widget build(BuildContext context, String stepText,
+      {double height = 168}) {
     final intent = intentFor(stepText);
     final asset = _lottieAssets[intent];
 

@@ -25,7 +25,8 @@ Dish _dish({List<String>? ingredients}) => Dish(
           id: 'v1',
           number: 1,
           changes: const [],
-          ingredients: ingredients ?? const ['400 g paneer', '2 tbsp oil', 'salt'],
+          ingredients:
+              ingredients ?? const ['400 g paneer', '2 tbsp oil', 'salt'],
           createdAt: DateTime(2026, 1, 1),
           steps: const ['Heat the oil', 'Add the paneer'],
         ),
@@ -61,7 +62,8 @@ void main() {
   }
 
   testWidgets('everything that matters fits above the fold', (tester) async {
-    await PantryRepository(db).add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
+    await PantryRepository(db)
+        .add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
     await open(tester);
 
     for (final key in [
@@ -79,7 +81,8 @@ void main() {
 
   testWidgets('the strip counts lines, and offers the missing ones',
       (tester) async {
-    await PantryRepository(db).add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
+    await PantryRepository(db)
+        .add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
     await PantryRepository(db).add(name: 'oil', wanted: true);
     await open(tester);
 

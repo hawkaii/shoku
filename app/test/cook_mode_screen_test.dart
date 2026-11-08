@@ -22,7 +22,12 @@ Dish _dish({String versionId = 'v1'}) => Dish(
       sourceHandle: '@me',
       status: DishStatus.cooked,
       minutes: 20,
-      steps: const ['Mix for 5 min', 'Chop the onion', 'Simmer 10 min', 'Plate'],
+      steps: const [
+        'Mix for 5 min',
+        'Chop the onion',
+        'Simmer 10 min',
+        'Plate'
+      ],
       versions: [
         RecipeVersion(
           id: versionId,

@@ -129,54 +129,62 @@ class ShokuStroke {
 /// Type system: Fraunces for editorial voice, Plus Jakarta Sans for reading,
 /// JetBrains Mono for anything numeric.
 class ShokuType {
-  static TextStyle get display => const TextStyle(fontFamily: 'ShokuSerif', 
+  static TextStyle get display => const TextStyle(
+        fontFamily: 'ShokuSerif',
         fontSize: 34,
         fontWeight: FontWeight.w700,
         height: 1.1,
         letterSpacing: -0.8,
       );
 
-  static TextStyle get h1 => const TextStyle(fontFamily: 'ShokuSerif', 
+  static TextStyle get h1 => const TextStyle(
+        fontFamily: 'ShokuSerif',
         fontSize: 26,
         fontWeight: FontWeight.w600,
         height: 1.18,
         letterSpacing: -0.5,
       );
 
-  static TextStyle get h2 => const TextStyle(fontFamily: 'ShokuSerif', 
+  static TextStyle get h2 => const TextStyle(
+        fontFamily: 'ShokuSerif',
         fontSize: 19,
         fontWeight: FontWeight.w600,
         height: 1.25,
         letterSpacing: -0.2,
       );
 
-  static TextStyle get title => const TextStyle(fontFamily: 'ShokuSans', 
+  static TextStyle get title => const TextStyle(
+        fontFamily: 'ShokuSans',
         fontSize: 16,
         fontWeight: FontWeight.w700,
         height: 1.3,
         letterSpacing: -0.1,
       );
 
-  static TextStyle get body => const TextStyle(fontFamily: 'ShokuSans', 
+  static TextStyle get body => const TextStyle(
+        fontFamily: 'ShokuSans',
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 1.55,
       );
 
-  static TextStyle get bodySmall => const TextStyle(fontFamily: 'ShokuSans', 
+  static TextStyle get bodySmall => const TextStyle(
+        fontFamily: 'ShokuSans',
         fontSize: 13,
         fontWeight: FontWeight.w500,
         height: 1.4,
       );
 
-  static TextStyle get label => const TextStyle(fontFamily: 'ShokuMono', 
+  static TextStyle get label => const TextStyle(
+        fontFamily: 'ShokuMono',
         fontSize: 11,
         fontWeight: FontWeight.w600,
         height: 1.2,
         letterSpacing: 1.2,
       );
 
-  static TextStyle get stat => const TextStyle(fontFamily: 'ShokuMono', 
+  static TextStyle get stat => const TextStyle(
+        fontFamily: 'ShokuMono',
         fontSize: 15,
         fontWeight: FontWeight.w700,
         height: 1.0,
@@ -184,7 +192,8 @@ class ShokuType {
         fontFeatures: [FontFeature.tabularFigures()],
       );
 
-  static TextStyle get statHero => const TextStyle(fontFamily: 'ShokuMono', 
+  static TextStyle get statHero => const TextStyle(
+        fontFamily: 'ShokuMono',
         fontSize: 22,
         fontWeight: FontWeight.w700,
         height: 1.0,
@@ -192,7 +201,8 @@ class ShokuType {
         fontFeatures: [FontFeature.tabularFigures()],
       );
 
-  static TextStyle get quote => const TextStyle(fontFamily: 'ShokuSerif', 
+  static TextStyle get quote => const TextStyle(
+        fontFamily: 'ShokuSerif',
         fontSize: 18,
         fontWeight: FontWeight.w400,
         fontStyle: FontStyle.italic,
@@ -201,7 +211,6 @@ class ShokuType {
 
   const ShokuType._();
 }
-
 
 /// Six gradients, each with exactly one home. Everything else stays flat:
 /// a gradient on a list row reads as venetian-blind striping.
@@ -284,7 +293,9 @@ class ShokuTheme {
       textTheme: base.textTheme.apply(
         bodyColor: c.ink,
         displayColor: c.ink,
-        fontFamily: const TextStyle(fontFamily: 'ShokuSans', ).fontFamily,
+        fontFamily: const TextStyle(
+          fontFamily: 'ShokuSans',
+        ).fontFamily,
       ),
       extensions: <ThemeExtension<dynamic>>[
         ShokuTokens(colors: c, isDark: isDark),
@@ -300,7 +311,8 @@ class ShokuTheme {
         backgroundColor: c.canvas,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(ShokuRadius.sheet)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(ShokuRadius.sheet)),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -324,9 +336,12 @@ extension ShokuContext on BuildContext {
   /// the whole screen, which is not a trade worth making for a colour.
   ShokuTokens get tokens {
     final tokens = Theme.of(this).extension<ShokuTokens>();
-    assert(tokens != null, 'Build this under ShokuTheme, not a bare ThemeData.');
-    return tokens ?? const ShokuTokens(colors: ShokuColors.light, isDark: false);
+    assert(
+        tokens != null, 'Build this under ShokuTheme, not a bare ThemeData.');
+    return tokens ??
+        const ShokuTokens(colors: ShokuColors.light, isDark: false);
   }
+
   ShokuColors get colors => tokens.colors;
   bool get isDark => tokens.isDark;
   TextTheme get text => Theme.of(this).textTheme;

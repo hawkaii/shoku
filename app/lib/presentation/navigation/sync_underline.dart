@@ -24,9 +24,7 @@ class SyncUnderline extends ConsumerWidget {
       child: Center(
         child: switch (status) {
           SyncStatus.syncing => _TravellingLine(color: c.ink),
-          SyncStatus.offline ||
-          SyncStatus.failed =>
-            Container(
+          SyncStatus.offline || SyncStatus.failed => Container(
               key: const ValueKey('sync-line-unsynced'),
               width: 14,
               height: 2,

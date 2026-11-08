@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +53,7 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
   Future<void> _deleteSelected() async {
     final ids = _selected.toList();
     if (ids.isEmpty) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     setState(() {
       _selected.clear();
       _selecting = false;
@@ -111,7 +112,8 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
               children: [
                 Row(
                   children: [
-                    Text(l10n.pantryTitle, style: ShokuType.h1.copyWith(color: c.ink)),
+                    Text(l10n.pantryTitle,
+                        style: ShokuType.h1.copyWith(color: c.ink)),
                     const SizedBox(width: ShokuSpace.sm),
                     Text(l10n.pantryItemCount(items.length),
                         style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
@@ -372,8 +374,7 @@ class _Row extends ConsumerWidget {
                     onEdit: onTap,
                   )
                 else
-                  Text(
-                      pantryAmount(l10n, locale, item.quantity, item.unit),
+                  Text(pantryAmount(l10n, locale, item.quantity, item.unit),
                       style: ShokuType.stat
                           .copyWith(fontSize: 11, color: c.inkMuted)),
               ],
@@ -384,7 +385,7 @@ class _Row extends ConsumerWidget {
     );
   }
 
-  static Color _sourceColour(String source, dynamic c) => switch (source) {
+  static Color _sourceColour(String source, ShokuColors c) => switch (source) {
         'photo' => c.reward,
         'voice' => c.ready,
         _ => c.inkMuted,
@@ -638,7 +639,7 @@ class _Shelf extends ConsumerWidget {
     );
   }
 
-  Widget _quiet(BuildContext context, dynamic c) => Text(
+  Widget _quiet(BuildContext context, ShokuColors c) => Text(
         context.l10n.shelfEmpty,
         key: const ValueKey('shelf-empty'),
         style: ShokuType.bodySmall.copyWith(color: c.inkMuted),

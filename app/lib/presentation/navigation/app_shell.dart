@@ -25,7 +25,8 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
   /// Built in `build`, not const: the five words are copy, and copy is the one
   /// thing that changes with the language.
   List<ShokuTabItem> _tabs(AppLocalizations l10n) => [
@@ -105,13 +106,13 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
       final pending = ref.read(pendingShareProvider) ?? stored;
       if (pending == null || !mounted) return;
       ref.read(pendingShareProvider.notifier).state = null;
-      HapticFeedback.mediumImpact();
-      showImportSheet(
+      unawaited(HapticFeedback.mediumImpact());
+      unawaited(showImportSheet(
         context,
         prefill: pending.url,
         // A share with no link is not silence: the sheet says why it is empty.
         notice: pending.hasUrl ? null : context.l10n.importShareNoLink,
-      );
+      ));
     } finally {
       _takingShare = false;
     }

@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +74,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
           ),
         );
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     Navigator.of(context).pop();
   }
 
@@ -82,7 +83,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
     setState(() => _saving = true);
     await ref.read(pantryStoreProvider.notifier).remove(widget.item.id);
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     Navigator.of(context).pop();
   }
 
@@ -105,7 +106,8 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
         children: [
           Row(
             children: [
-              Text(l10n.pantryEditTitle, style: ShokuType.h2.copyWith(color: c.ink)),
+              Text(l10n.pantryEditTitle,
+                  style: ShokuType.h2.copyWith(color: c.ink)),
               const Spacer(),
               ShokuPressable(
                 key: const ValueKey('pantry-edit-delete'),
@@ -164,8 +166,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
                   _quantity == null
                       ? l10n.pantryAmountHelp
                       : l10n.pantrySavedAs(
-                          pantryAmount(
-                              l10n, locale, _quantity, _unit)),
+                          pantryAmount(l10n, locale, _quantity, _unit)),
                   style:
                       ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted),
                 ),

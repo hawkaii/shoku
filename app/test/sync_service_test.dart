@@ -14,7 +14,9 @@ import 'package:http/testing.dart';
 
 /// These tests run the real database and the real merge rules; only HTTP is
 /// faked. That is the combination where sync bugs actually live.
-Dish _dish({String id = 'd1', int versions = 1, List<String> tags = const []}) => Dish(
+Dish _dish(
+        {String id = 'd1', int versions = 1, List<String> tags = const []}) =>
+    Dish(
       id: id,
       title: 'Paneer',
       subtitle: '',
@@ -100,7 +102,8 @@ void main() {
       tokenProvider: () => 'jwt',
       httpClient: MockClient((request) async {
         askedCursors.add(
-          (jsonDecode(request.body) as Map<String, dynamic>)['cursor'] as String?,
+          (jsonDecode(request.body) as Map<String, dynamic>)['cursor']
+              as String?,
         );
         final page = pages[index < pages.length ? index : pages.length - 1];
         index++;
@@ -134,8 +137,12 @@ void main() {
     final outcome = await SyncService(repository: sync, api: client()).sync();
 
     expect(outcome.pushed, 1);
-    expect(pushedBodies.single['dishes'].single['title'], 'Paneer');
-    expect(await sync.dirtyCount(), 0, reason: 'accepted rows must stop being dirty');
+    expect(
+        ((pushedBodies.single['dishes'] as List).single
+            as Map<String, dynamic>)['title'],
+        'Paneer');
+    expect(await sync.dirtyCount(), 0,
+        reason: 'accepted rows must stop being dirty');
   });
 
   test('a pushed version carries its provenance', () async {
@@ -279,7 +286,9 @@ void main() {
   });
 
   test('tags are pushed with the version that carries them', () async {
-    await local.seed([_dish(tags: const ['from video'])]);
+    await local.seed([
+      _dish(tags: const ['from video'])
+    ]);
     await local.commitCook(
       dishId: 'd1',
       mood: CookMood.comfort,
@@ -402,8 +411,8 @@ void main() {
       }),
     ).sync();
 
-    final dish = (await local.loadDishes())
-        .firstWhere((d) => d.id == 'remote-9');
+    final dish =
+        (await local.loadDishes()).firstWhere((d) => d.id == 'remote-9');
     expect(dish.versions.single.stepIngredients, isNull);
   });
 
@@ -501,7 +510,8 @@ void main() {
               'client has actually read');
     });
 
-    test('a server that always says has_more fails at the cap and keeps the cursor',
+    test(
+        'a server that always says has_more fails at the cap and keeps the cursor',
         () async {
       final asked = <String?>[];
       final api = paged(

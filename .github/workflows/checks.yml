@@ -46,6 +46,12 @@ jobs:
       - name: Dependencies
         run: flutter pub get
 
+      # Formatting is part of the gate, not a suggestion: an unformatted file is
+      # a review finding the machine can make for free, and one that never reaches
+      # main if this step is red.
+      - name: Formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
       # The ARBs are the source of the generated strings. Regenerating first
       # means a stale `app_localizations*.dart` is caught here, not at runtime.
       #

@@ -21,9 +21,14 @@ void main() {
     });
 
     test('timer with digits and words', () {
-      expect((parseVoiceCommand('start a 5 minute timer') as StartTimer).minutes, 5);
+      expect(
+          (parseVoiceCommand('start a 5 minute timer') as StartTimer).minutes,
+          5);
       expect((parseVoiceCommand('timer 12 minutes') as StartTimer).minutes, 12);
-      expect((parseVoiceCommand('set a timer for two minutes') as StartTimer).minutes, 2);
+      expect(
+          (parseVoiceCommand('set a timer for two minutes') as StartTimer)
+              .minutes,
+          2);
       expect((parseVoiceCommand('5 minute timer') as StartTimer).minutes, 5);
     });
 

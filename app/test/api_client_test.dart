@@ -54,13 +54,15 @@ void main() {
       baseUrl: 'https://api.test',
       tokenProvider: () => 'jwt',
       httpClient: MockClient(
-        (_) async => http.Response(jsonEncode({'error': 'unsupported_url'}), 422),
+        (_) async =>
+            http.Response(jsonEncode({'error': 'unsupported_url'}), 422),
       ),
     );
 
     await expectLater(
       client.post('/v1/imports', {'url': 'nope'}),
-      throwsA(isA<ApiError>().having((e) => e.reason, 'reason', 'unsupported_url')),
+      throwsA(
+          isA<ApiError>().having((e) => e.reason, 'reason', 'unsupported_url')),
     );
   });
 }

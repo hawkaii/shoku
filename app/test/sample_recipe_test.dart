@@ -131,8 +131,8 @@ void main() {
     expect(dish.cooks.single.versionNumber, 2);
 
     // And the fridge can deduct from it: 400 g paneer, 200 g used.
-    await PantryRepository(db).add(
-        name: 'paneer', quantity: 400, unit: PantryUnit.g);
+    await PantryRepository(db)
+        .add(name: 'paneer', quantity: 400, unit: PantryUnit.g);
     final container = ProviderContainer(
       overrides: [databaseProvider.overrideWithValue(db)],
     );

@@ -16,7 +16,9 @@ String outcomeLabel(AppLocalizations l10n, CookOutcome outcome) =>
 /// The outcome for a dish that has never been cooked, or null when it has.
 String dishOutcomeLabel(AppLocalizations l10n, Dish dish) {
   final outcome = dish.lastCook?.outcome;
-  return outcome == null ? l10n.cookbookNeverCooked : outcomeLabel(l10n, outcome);
+  return outcome == null
+      ? l10n.cookbookNeverCooked
+      : outcomeLabel(l10n, outcome);
 }
 
 String moodLabel(AppLocalizations l10n, CookMood mood) => switch (mood) {

@@ -68,88 +68,93 @@ class JournalScreen extends ConsumerWidget {
               0,
             ),
             sliver: SliverList(
-              delegate: SliverChildListDelegate([
-          // ---- Save a recipe -------------------------------------------
-          const _SaveRecipeRow(),
-          const SizedBox(height: ShokuSpace.md),
+              delegate: SliverChildListDelegate(
+                [
+                  // ---- Save a recipe -------------------------------------------
+                  const _SaveRecipeRow(),
+                  const SizedBox(height: ShokuSpace.md),
 
-          // ---- Rhythm header ------------------------------------------
-          Row(
-            children: [
-              const PlateMark(size: 24),
-              const SizedBox(width: ShokuSpace.sm),
-              Expanded(
-                child: Text(
-                  l10n.journalKitchenTitle(
-                    DateFormat.MMMM(locale).format(DateTime.now()),
+                  // ---- Rhythm header ------------------------------------------
+                  Row(
+                    children: [
+                      const PlateMark(size: 24),
+                      const SizedBox(width: ShokuSpace.sm),
+                      Expanded(
+                        child: Text(
+                          l10n.journalKitchenTitle(
+                            DateFormat.MMMM(locale).format(DateTime.now()),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ShokuType.h1.copyWith(color: c.ink),
+                        ),
+                      ),
+                      const SizedBox(width: ShokuSpace.sm),
+                      const _FridgeButton(),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: ShokuType.h1.copyWith(color: c.ink),
-                ),
-              ),
-              const SizedBox(width: ShokuSpace.sm),
-              const _FridgeButton(),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  metaLine([
-                    l10n.journalDishesCount(dishes.length),
-                    l10n.journalUpgradesCount(upgrades),
-                  ]),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                ),
-              ),
-              _CounterPill(
-                value: NumberFormat.decimalPattern(locale).format(totalCooks),
-                label: l10n.journalCooksLabel(totalCooks),
-                color: c.accent,
-                onTap: () {},
-              ),
-              const SizedBox(width: ShokuSpace.xs),
-              _CounterPill(
-                value: NumberFormat.decimalPattern(locale).format(upgrades),
-                label: l10n.journalUpgradesLabel(upgrades),
-                color: c.reward,
-                onTap: () {},
-              ),
-            ],
-          ),
-          const SizedBox(height: ShokuSpace.xl),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          metaLine([
+                            l10n.journalDishesCount(dishes.length),
+                            l10n.journalUpgradesCount(upgrades),
+                          ]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                        ),
+                      ),
+                      _CounterPill(
+                        value: NumberFormat.decimalPattern(locale)
+                            .format(totalCooks),
+                        label: l10n.journalCooksLabel(totalCooks),
+                        color: c.accent,
+                        onTap: () {},
+                      ),
+                      const SizedBox(width: ShokuSpace.xs),
+                      _CounterPill(
+                        value: NumberFormat.decimalPattern(locale)
+                            .format(upgrades),
+                        label: l10n.journalUpgradesLabel(upgrades),
+                        color: c.reward,
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: ShokuSpace.xl),
 
-          // ---- On the counter -----------------------------------------
-          if (pinned != null) ...[
-            ShokuLabel(l10n.journalOnTheCounter),
-            const SizedBox(height: ShokuSpace.sm),
-            // No entrance animation here: this card is the one thing on the
-            // screen a new cook must see, and content must never depend on an
-            // opacity controller to become visible.
-            _PinnedCard(
-              dish: pinned,
-              onCook: () => showLogSheet(context, pinned),
-              onOpen: () => context.push('/dish/${pinned.id}'),
-            ),
-            const SizedBox(height: ShokuSpace.xl),
+                  // ---- On the counter -----------------------------------------
+                  if (pinned != null) ...[
+                    ShokuLabel(l10n.journalOnTheCounter),
+                    const SizedBox(height: ShokuSpace.sm),
+                    // No entrance animation here: this card is the one thing on the
+                    // screen a new cook must see, and content must never depend on an
+                    // opacity controller to become visible.
+                    _PinnedCard(
+                      dish: pinned,
+                      onCook: () => showLogSheet(context, pinned),
+                      onOpen: () => context.push('/dish/${pinned.id}'),
+                    ),
+                    const SizedBox(height: ShokuSpace.xl),
 
-            // ---- Timeline -----------------------------------------------
-            Row(
-              children: [
-                ShokuLabel(l10n.journalCookLog),
-                const Spacer(),
-                Text(
-                  l10n.journalEntriesCount(cooks.length),
-                  style: ShokuType.stat.copyWith(fontSize: 11, color: c.inkMuted),
-                ),
-              ],
-            ),
-            const SizedBox(height: ShokuSpace.sm),
-          ],
+                    // ---- Timeline -----------------------------------------------
+                    Row(
+                      children: [
+                        ShokuLabel(l10n.journalCookLog),
+                        const Spacer(),
+                        Text(
+                          l10n.journalEntriesCount(cooks.length),
+                          style: ShokuType.stat
+                              .copyWith(fontSize: 11, color: c.inkMuted),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: ShokuSpace.sm),
+                  ],
                 ],
               ),
             ),
@@ -194,8 +199,8 @@ class JournalScreen extends ConsumerWidget {
                     index: i,
                     child: _TimelineEntry(
                       log: cooks[i],
-                      dish: dishes
-                          .firstWhere((d) => d.cooks.any((k) => k.id == cooks[i].id)),
+                      dish: dishes.firstWhere(
+                          (d) => d.cooks.any((k) => k.id == cooks[i].id)),
                       isLast: i == cooks.length - 1,
                     ),
                   ),
@@ -257,7 +262,9 @@ class _CounterPill extends StatelessWidget {
               value: value,
               style: ShokuType.stat.copyWith(fontSize: 14, color: color),
             ),
-            Text(label, style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+            Text(label,
+                style:
+                    ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
           ],
         ),
       ),
@@ -270,7 +277,8 @@ class _PinnedCard extends StatelessWidget {
   final VoidCallback onCook;
   final VoidCallback onOpen;
 
-  const _PinnedCard({required this.dish, required this.onCook, required this.onOpen});
+  const _PinnedCard(
+      {required this.dish, required this.onCook, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
@@ -291,7 +299,8 @@ class _PinnedCard extends StatelessWidget {
             SizedBox(
               width: 72,
               height: 72,
-              child: ShokuDishImage(url: dish.coverUrl, title: dish.title, radius: 6),
+              child: ShokuDishImage(
+                  url: dish.coverUrl, title: dish.title, radius: 6),
             ),
             const SizedBox(width: ShokuSpace.md),
             Expanded(
@@ -302,7 +311,8 @@ class _PinnedCard extends StatelessWidget {
                     children: [
                       Text(
                         'v${dish.currentVersion}',
-                        style: ShokuType.stat.copyWith(fontSize: 11, color: c.accent),
+                        style: ShokuType.stat
+                            .copyWith(fontSize: 11, color: c.accent),
                       ),
                       // A duration we don't know is not shown at all: a stray
                       // dot or a dash would read as data.
@@ -340,7 +350,8 @@ class _PinnedCard extends StatelessWidget {
                           cookCount: dish.cookCount,
                           compact: true),
                       if (dish.isSample)
-                        ShokuChip(l10n.labelSample, color: c.reward, filled: true),
+                        ShokuChip(l10n.labelSample,
+                            color: c.reward, filled: true),
                     ],
                   ),
                 ],
@@ -350,18 +361,23 @@ class _PinnedCard extends StatelessWidget {
             ShokuPressable(
               onTap: onCook,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                 decoration: BoxDecoration(
                   gradient: ShokuGradients.crimsonPress,
                   borderRadius: BorderRadius.circular(ShokuRadius.chip),
                   border: Border.all(color: c.ink, width: ShokuStroke.brutal),
                   boxShadow: [
-                    BoxShadow(color: c.ink, offset: ShokuStroke.brutalShadow, blurRadius: 0),
+                    BoxShadow(
+                        color: c.ink,
+                        offset: ShokuStroke.brutalShadow,
+                        blurRadius: 0),
                   ],
                 ),
                 child: Text(
                   l10n.journalCook,
-                  style: ShokuType.title.copyWith(color: c.onAccent, fontSize: 13),
+                  style:
+                      ShokuType.title.copyWith(color: c.onAccent, fontSize: 13),
                 ),
               ),
             ),
@@ -377,7 +393,8 @@ class _TimelineEntry extends StatelessWidget {
   final Dish dish;
   final bool isLast;
 
-  const _TimelineEntry({required this.log, required this.dish, required this.isLast});
+  const _TimelineEntry(
+      {required this.log, required this.dish, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
@@ -385,8 +402,7 @@ class _TimelineEntry extends StatelessWidget {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final day = log.cookedAt.day.toString().padLeft(2, '0');
-    final month =
-        DateFormat.MMM(locale).format(log.cookedAt).toUpperCase();
+    final month = DateFormat.MMM(locale).format(log.cookedAt).toUpperCase();
 
     return IntrinsicHeight(
       child: Row(
@@ -397,8 +413,11 @@ class _TimelineEntry extends StatelessWidget {
             width: 46,
             child: Column(
               children: [
-                Text(day, style: ShokuType.stat.copyWith(fontSize: 13, color: c.ink)),
-                Text(month, style: ShokuType.label.copyWith(fontSize: 9, color: c.inkMuted)),
+                Text(day,
+                    style: ShokuType.stat.copyWith(fontSize: 13, color: c.ink)),
+                Text(month,
+                    style: ShokuType.label
+                        .copyWith(fontSize: 9, color: c.inkMuted)),
                 const SizedBox(height: ShokuSpace.xs),
                 Expanded(
                   child: Container(
@@ -417,7 +436,8 @@ class _TimelineEntry extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: c.surface,
                   borderRadius: BorderRadius.circular(ShokuRadius.card),
-                  border: Border.all(color: c.hairline, width: ShokuStroke.hairline),
+                  border: Border.all(
+                      color: c.hairline, width: ShokuStroke.hairline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,27 +454,32 @@ class _TimelineEntry extends StatelessWidget {
                           top: ShokuSpace.sm,
                           right: ShokuSpace.sm,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: c.canvas.withValues(alpha: 0.92),
-                              borderRadius: BorderRadius.circular(ShokuRadius.chip),
+                              borderRadius:
+                                  BorderRadius.circular(ShokuRadius.chip),
                               border: Border.all(color: c.hairline),
                             ),
                             child: Row(
                               children: [
                                 Text(
                                   'v${log.versionNumber}',
-                                  style: ShokuType.stat.copyWith(fontSize: 11, color: c.accent),
+                                  style: ShokuType.stat
+                                      .copyWith(fontSize: 11, color: c.accent),
                                 ),
                                 Container(
                                   width: 1,
                                   height: 10,
-                                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 6),
                                   color: c.hairline,
                                 ),
                                 Text(
                                   outcomeLabel(l10n, log.outcome),
-                                  style: ShokuType.label.copyWith(fontSize: 9, color: c.ink),
+                                  style: ShokuType.label
+                                      .copyWith(fontSize: 9, color: c.ink),
                                 ),
                               ],
                             ),
@@ -467,7 +492,8 @@ class _TimelineEntry extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(dish.title, style: ShokuType.h2.copyWith(color: c.ink)),
+                          Text(dish.title,
+                              style: ShokuType.h2.copyWith(color: c.ink)),
                           const SizedBox(height: 2),
                           // How the night felt and what it was worth — quiet,
                           // in the words the log already stores.
@@ -486,7 +512,8 @@ class _TimelineEntry extends StatelessWidget {
                               runSpacing: 6,
                               children: [
                                 for (final change in log.changes.take(2))
-                                  ShokuChip(change, color: c.reward, icon: Icons.bolt),
+                                  ShokuChip(change,
+                                      color: c.reward, icon: Icons.bolt),
                               ],
                             ),
                           ],
@@ -533,7 +560,8 @@ class _EmptyJournal extends StatelessWidget {
         children: [
           const Center(child: PlateMark(size: 96)),
           const SizedBox(height: ShokuSpace.sm),
-          Text(l10n.journalFirstPage, style: ShokuType.h2.copyWith(color: c.ink)),
+          Text(l10n.journalFirstPage,
+              style: ShokuType.h2.copyWith(color: c.ink)),
           const SizedBox(height: ShokuSpace.xs),
           Text(
             l10n.journalFirstPageBody,
@@ -547,7 +575,6 @@ class _EmptyJournal extends StatelessWidget {
     );
   }
 }
-
 
 /// Shown for the frame or two while the journal is read from disk, and for a
 /// genuinely empty journal. No spinners: the mark, one line, and nothing to tap.
@@ -684,9 +711,7 @@ class _JournalError extends StatelessWidget {
                 style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
               const SizedBox(height: ShokuSpace.lg),
-              TextButton(
-                  onPressed: onRetry,
-                  child: Text(l10n.journalTryAgain)),
+              TextButton(onPressed: onRetry, child: Text(l10n.journalTryAgain)),
             ],
           ),
         ),

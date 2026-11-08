@@ -44,8 +44,7 @@ class LanguagePicker extends ConsumerWidget {
         final twoColumns = constraints.maxWidth >= 300;
         final columns = twoColumns ? 2 : 1;
         const gap = ShokuSpace.sm;
-        final width =
-            (constraints.maxWidth - gap * (columns - 1)) / columns;
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
         return Wrap(
           spacing: gap,
           runSpacing: gap,
@@ -55,8 +54,8 @@ class LanguagePicker extends ConsumerWidget {
                 width: width,
                 child: _LanguageTile(
                   option: option,
-                  selected: current?.languageCode ==
-                      option.locale?.languageCode,
+                  selected:
+                      current?.languageCode == option.locale?.languageCode,
                   onTap: () async {
                     await ref
                         .read(localeProvider.notifier)

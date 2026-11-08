@@ -97,7 +97,8 @@ class _FaqTileState extends State<_FaqTile> {
             ),
             AnimatedCrossFade(
               duration: const Duration(milliseconds: 160),
-              crossFadeState: _open ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              crossFadeState:
+                  _open ? CrossFadeState.showSecond : CrossFadeState.showFirst,
               firstChild: const SizedBox(width: double.infinity),
               secondChild: Padding(
                 padding: const EdgeInsets.only(top: ShokuSpace.sm),

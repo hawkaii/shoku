@@ -15,7 +15,8 @@ class NutritionComingSoonScreen extends StatelessWidget {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.nutritionTitle, style: ShokuType.h1.copyWith(color: c.ink)),
+        title: Text(l10n.nutritionTitle,
+            style: ShokuType.h1.copyWith(color: c.ink)),
       ),
       body: Center(
         child: Padding(
@@ -26,13 +27,15 @@ class NutritionComingSoonScreen extends StatelessWidget {
               const PlateMark(size: 96),
               const SizedBox(height: ShokuSpace.lg),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: c.reward,
                   borderRadius: BorderRadius.circular(ShokuRadius.chip),
                 ),
                 child: Text(l10n.nutritionComingSoon,
-                    style: ShokuType.label.copyWith(color: c.canvas, fontSize: 9)),
+                    style:
+                        ShokuType.label.copyWith(color: c.canvas, fontSize: 9)),
               ),
               const SizedBox(height: ShokuSpace.md),
               Text(l10n.nutritionHeadline,
@@ -48,7 +51,8 @@ class NutritionComingSoonScreen extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
                 child: Text(l10n.nutritionBackToYou,
-                    style: ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
+                    style:
+                        ShokuType.title.copyWith(color: c.ink, fontSize: 13)),
               ),
             ],
           ),

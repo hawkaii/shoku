@@ -40,12 +40,14 @@ void main() {
           mood: 'happy',
         ));
     final payload = await sync.dirtyPayload();
-    return (payload['cook_logs'] as List).last['photo_url'] as String;
+    return ((payload['cook_logs'] as List).last
+        as Map<String, dynamic>)['photo_url'] as String;
   }
 
   test('a camera path never leaves the phone', () async {
     expect(
-      await pushedPhotoUrl('/data/user/0/com.foodfinder.food_finder/cache/x.jpg'),
+      await pushedPhotoUrl(
+          '/data/user/0/com.foodfinder.food_finder/cache/x.jpg'),
       '',
     );
     expect(await pushedPhotoUrl('file:///tmp/x.jpg'), '');

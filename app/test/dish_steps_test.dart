@@ -47,16 +47,19 @@ Widget _app(Dish dish) => ProviderScope(
 
 void main() {
   test('a version keeps the links it was imported with, or none', () {
-    expect(_dish(links: const [
-      [0],
-      [1],
-    ]).versions.single.stepIngredientLinks(0), [0]);
+    expect(
+        _dish(links: const [
+          [0],
+          [1],
+        ]).versions.single.stepIngredientLinks(0),
+        [0]);
 
     expect(_dish().versions.single.stepIngredients, isNull);
     expect(_dish().versions.single.stepIngredientLinks(0), isNull);
   });
 
-  testWidgets('the dossier shows the method, with the ingredients each step uses',
+  testWidgets(
+      'the dossier shows the method, with the ingredients each step uses',
       (tester) async {
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1;
@@ -125,14 +128,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byKey(const ValueKey('from-video-note')), findsOneWidget);
-    expect(find.text('read from the video — amounts may be off'),
-        findsOneWidget);
+    expect(
+        find.text('read from the video — amounts may be off'), findsOneWidget);
 
     // Not a warning: muted body copy, and nowhere near the danger colour.
     final note = tester.widget<Text>(
       find.byKey(const ValueKey('from-video-note')),
     );
-    final context = tester.element(find.byKey(const ValueKey('from-video-note')));
+    final context =
+        tester.element(find.byKey(const ValueKey('from-video-note')));
     expect(note.style?.color, context.colors.inkMuted);
     expect(note.style?.fontSize, ShokuType.bodySmall.fontSize);
   });

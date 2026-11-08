@@ -41,7 +41,8 @@ Widget _harness(List<Dish> dishes) => ProviderScope(
 void main() {
   setUp(() {});
 
-  testWidgets('two columns, and the title sits under the photo', (tester) async {
+  testWidgets('two columns, and the title sits under the photo',
+      (tester) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

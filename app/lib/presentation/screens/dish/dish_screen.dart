@@ -56,8 +56,9 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     if (dish == null || dish.versions.isEmpty) {
       return _DishUnavailable(dishId: widget.dishId);
     }
-    final inspected =
-        ref.watch(inspectedVersionProvider(widget.dishId)).clamp(1, dish.versions.length);
+    final inspected = ref
+        .watch(inspectedVersionProvider(widget.dishId))
+        .clamp(1, dish.versions.length);
     final version = dish.versions[inspected - 1];
     final stepLines = version.steps.isNotEmpty ? version.steps : dish.steps;
     final pantry = ref.watch(pantryStoreProvider);
@@ -76,95 +77,96 @@ class _DishScreenState extends ConsumerState<DishScreen> {
         child: Stack(
           children: [
             Column(
-          children: [
-            _header(context, dish, version),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  ShokuSpace.lg,
-                  ShokuSpace.sm,
-                  ShokuSpace.lg,
-                  ShokuSpace.lg,
-                ),
-                children: [
-                  ShokuDishImage(
-                    url: dish.coverUrl,
-                    title: dish.title,
-                    height: 140,
-                    radius: ShokuRadius.card,
-                    heroTag: true,
-                  ),
-                  const SizedBox(height: ShokuSpace.md),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _header(context, dish, version),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      ShokuSpace.lg,
+                      ShokuSpace.sm,
+                      ShokuSpace.lg,
+                      ShokuSpace.lg,
+                    ),
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(dish.title,
-                                style: ShokuType.h1.copyWith(color: c.ink)),
-                            if (dish.subtitle.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(dish.subtitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: ShokuType.bodySmall
-                                      .copyWith(color: c.inkMuted)),
-                            ],
-                            if (dish.isSample) ...[
-                              const SizedBox(height: 6),
-                              ShokuChip(l10n.labelSample,
-                                  color: c.reward, filled: true),
-                              const SizedBox(height: 4),
-                              Text(
-                                l10n.dishSampleGate,
-                                key: const ValueKey('sample-gate'),
-                                style: ShokuType.bodySmall
-                                    .copyWith(color: c.inkMuted),
-                              ),
-                            ],
-                          ],
+                      ShokuDishImage(
+                        url: dish.coverUrl,
+                        title: dish.title,
+                        height: 140,
+                        radius: ShokuRadius.card,
+                        heroTag: true,
+                      ),
+                      const SizedBox(height: ShokuSpace.md),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(dish.title,
+                                    style: ShokuType.h1.copyWith(color: c.ink)),
+                                if (dish.subtitle.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(dish.subtitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: ShokuType.bodySmall
+                                          .copyWith(color: c.inkMuted)),
+                                ],
+                                if (dish.isSample) ...[
+                                  const SizedBox(height: 6),
+                                  ShokuChip(l10n.labelSample,
+                                      color: c.reward, filled: true),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    l10n.dishSampleGate,
+                                    key: const ValueKey('sample-gate'),
+                                    style: ShokuType.bodySmall
+                                        .copyWith(color: c.inkMuted),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: ShokuSpace.sm),
+                          Text(
+                            l10n.dishCookCount(dish.cookCount),
+                            style: ShokuType.stat
+                                .copyWith(fontSize: 11, color: c.inkMuted),
+                          ),
+                        ],
+                      ),
+                      if (version.tags.contains('from video')) ...[
+                        const SizedBox(height: ShokuSpace.xs),
+                        Text(
+                          l10n.dishFromVideoNote,
+                          key: const ValueKey('from-video-note'),
+                          style:
+                              ShokuType.bodySmall.copyWith(color: c.inkMuted),
                         ),
-                      ),
-                      const SizedBox(width: ShokuSpace.sm),
-                      Text(
-                        l10n.dishCookCount(dish.cookCount),
-                        style: ShokuType.stat
-                            .copyWith(fontSize: 11, color: c.inkMuted),
-                      ),
+                      ],
+                      if (_goneNote != null) ...[
+                        const SizedBox(height: ShokuSpace.xs),
+                        Text(
+                          _goneNote!,
+                          key: const ValueKey('version-gone-note'),
+                          style:
+                              ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                        ),
+                      ],
+                      const SizedBox(height: ShokuSpace.md),
+                      _fridgeStrip(context, dish, coverage),
+                      const SizedBox(height: ShokuSpace.md),
+                      _ingredients(context, dish, version, inspected, coverage),
+                      const SizedBox(height: ShokuSpace.md),
+                      _steps(context, dish, version, stepLines),
+                      const SizedBox(height: ShokuSpace.md),
+                      _history(context, dish, version),
                     ],
                   ),
-                  if (version.tags.contains('from video')) ...[
-                    const SizedBox(height: ShokuSpace.xs),
-                    Text(
-                      l10n.dishFromVideoNote,
-                      key: const ValueKey('from-video-note'),
-                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                    ),
-                  ],
-                  if (_goneNote != null) ...[
-                    const SizedBox(height: ShokuSpace.xs),
-                    Text(
-                      _goneNote!,
-                      key: const ValueKey('version-gone-note'),
-                      style:
-                          ShokuType.bodySmall.copyWith(color: c.inkMuted),
-                    ),
-                  ],
-                  const SizedBox(height: ShokuSpace.md),
-                  _fridgeStrip(context, dish, coverage),
-                  const SizedBox(height: ShokuSpace.md),
-                  _ingredients(context, dish, version, inspected, coverage),
-                  const SizedBox(height: ShokuSpace.md),
-                  _steps(context, dish, version, stepLines),
-                  const SizedBox(height: ShokuSpace.md),
-                  _history(context, dish, version),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
             Positioned(
               right: 16,
               bottom: 12,
@@ -275,8 +277,10 @@ class _DishScreenState extends ConsumerState<DishScreen> {
             valueListenable: ref.read(speechServiceProvider).speaking,
             builder: (context, speaking, _) => IconButton(
               key: const ValueKey('dish-speak'),
-              icon: Icon(speaking ? Icons.stop_circle_outlined : Icons.volume_up,
-                  size: 17, color: speaking ? c.accent : c.inkMuted),
+              icon: Icon(
+                  speaking ? Icons.stop_circle_outlined : Icons.volume_up,
+                  size: 17,
+                  color: speaking ? c.accent : c.inkMuted),
               tooltip: speaking ? l10n.dishStopReading : l10n.dishReadRecipe,
               onPressed: () => _speakAll(dish, version),
             ),
@@ -333,7 +337,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     ].join('. '));
   }
 
-  Widget _fridgeStrip(BuildContext context, Dish dish, FridgeCoverage coverage) {
+  Widget _fridgeStrip(
+      BuildContext context, Dish dish, FridgeCoverage coverage) {
     final c = context.colors;
     final l10n = context.l10n;
     return Container(
@@ -353,7 +358,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                     ? Icons.check_circle_outline
                     : Icons.shopping_basket_outlined,
             size: 15,
-            color: coverage.missing == 0 && !coverage.unset ? c.ready : c.inkMuted,
+            color:
+                coverage.missing == 0 && !coverage.unset ? c.ready : c.inkMuted,
           ),
           const SizedBox(width: ShokuSpace.sm),
           Expanded(
@@ -373,7 +379,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(l10n.dishSetUpFridge,
-                  style: ShokuType.label.copyWith(fontSize: 9.5, color: c.accent)),
+                  style:
+                      ShokuType.label.copyWith(fontSize: 9.5, color: c.accent)),
             )
           else if (coverage.missing > 0)
             ShokuPressable(
@@ -443,7 +450,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         if (!coverage.unset && missing > 0)
                           l10n.dishMissingCount(missing),
                       ]),
-                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                      style:
+                          ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                   ),
                   PopupMenuButton<int>(
@@ -458,9 +466,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         PopupMenuItem(
                           value: v,
                           child: Text(
-                            v == inspected
-                                ? l10n.dishVersionShowing(v)
-                                : 'v$v',
+                            v == inspected ? l10n.dishVersionShowing(v) : 'v$v',
                             style: ShokuType.bodySmall,
                           ),
                         ),
@@ -470,7 +476,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         Text('v$inspected',
                             style: ShokuType.stat
                                 .copyWith(fontSize: 12, color: c.accent)),
-                        Icon(Icons.arrow_drop_down, size: 18, color: c.inkMuted),
+                        Icon(Icons.arrow_drop_down,
+                            size: 18, color: c.inkMuted),
                       ],
                     ),
                   ),
@@ -480,7 +487,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
           ),
           if (_ingredientsOpen)
             for (var i = 0; i < version.ingredients.length; i++)
-              _ingredientLine(context, version.ingredients[i], coverage.matches[i], i),
+              _ingredientLine(
+                  context, version.ingredients[i], coverage.matches[i], i),
         ],
       ),
     );
@@ -498,8 +506,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     };
     return Container(
       key: ValueKey('ingredient-line-$index'),
-      padding: const EdgeInsets.symmetric(
-          horizontal: ShokuSpace.md, vertical: 9),
+      padding:
+          const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 9),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: c.hairline)),
       ),
@@ -507,8 +515,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(line,
-                style: ShokuType.bodySmall.copyWith(color: c.ink)),
+            child:
+                Text(line, style: ShokuType.bodySmall.copyWith(color: c.ink)),
           ),
           const SizedBox(width: ShokuSpace.sm),
           Text(
@@ -521,8 +529,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
     );
   }
 
-  Widget _steps(
-      BuildContext context, Dish dish, RecipeVersion version, List<String> steps) {
+  Widget _steps(BuildContext context, Dish dish, RecipeVersion version,
+      List<String> steps) {
     final c = context.colors;
     final l10n = context.l10n;
     final minutes = dish.minutes;
@@ -550,7 +558,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                         l10n.dishStepsCount(steps.length),
                         if (minutes > 0) l10n.minutesShort(minutes),
                       ]),
-                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                      style:
+                          ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                   ),
                   Icon(
@@ -573,8 +582,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                     SizedBox(
                       width: 20,
                       child: Text('${s + 1}',
-                          style:
-                              ShokuType.label.copyWith(color: c.inkMuted)),
+                          style: ShokuType.label.copyWith(color: c.inkMuted)),
                     ),
                     Expanded(
                       child: Column(
@@ -612,8 +620,8 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                                 behavior: HitTestBehavior.opaque,
                                 child: Text(
                                   l10n.dishAskAboutStep(s + 1),
-                                  style: ShokuType.label.copyWith(
-                                      fontSize: 9, color: c.accent),
+                                  style: ShokuType.label
+                                      .copyWith(fontSize: 9, color: c.accent),
                                 ),
                               ),
                             ],
@@ -675,8 +683,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                 alignment: Alignment.centerLeft,
                 child: cooks.isEmpty
                     ? Text(l10n.dishNotCookedYet,
-                        style: ShokuType.bodySmall
-                            .copyWith(color: c.inkMuted))
+                        style: ShokuType.bodySmall.copyWith(color: c.inkMuted))
                     : Wrap(
                         spacing: 6,
                         runSpacing: 6,
@@ -702,8 +709,7 @@ class _DishScreenState extends ConsumerState<DishScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.dishWhatAltered,
-                        style:
-                            ShokuType.label.copyWith(color: c.inkMuted)),
+                        style: ShokuType.label.copyWith(color: c.inkMuted)),
                     const SizedBox(height: 4),
                     Wrap(
                       spacing: 6,
@@ -926,8 +932,7 @@ class _ProvenanceCard extends StatelessWidget {
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style:
-                          ShokuType.bodySmall.copyWith(color: c.inkMuted),
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
                     ),
                   ],
                 ),

@@ -80,7 +80,8 @@ class _MicFieldState extends State<MicField> {
     final c = context.colors;
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 6),
+      padding:
+          const EdgeInsets.symmetric(horizontal: ShokuSpace.md, vertical: 6),
       decoration: BoxDecoration(
         color: c.surface,
         borderRadius: BorderRadius.circular(ShokuRadius.chip),
@@ -102,7 +103,9 @@ class _MicFieldState extends State<MicField> {
               cursorColor: c.accent,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: _listening ? l10n.micListening : (widget.hint ?? l10n.micHint),
+                hintText: _listening
+                    ? l10n.micListening
+                    : (widget.hint ?? l10n.micHint),
                 hintStyle: ShokuType.bodySmall.copyWith(color: c.inkMuted),
               ),
             ),

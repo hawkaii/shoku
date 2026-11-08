@@ -5,7 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_finder/core/theme/shoku_theme.dart';
 import 'package:food_finder/presentation/widgets/kit/bot_mark.dart';
 
-BotMarkPainter _painter({bool filled = false, bool offline = false, bool draft = false}) =>
+BotMarkPainter _painter(
+        {bool filled = false, bool offline = false, bool draft = false}) =>
     BotMarkPainter(
       ink: ShokuColors.light.ink,
       accent: ShokuColors.light.accent,
@@ -84,8 +85,8 @@ void main() {
     });
 
     test('the filled orb keeps its ink contour under an accent belly', () {
-      expect(_painter(filled: true).parts,
-          [BotMarkPart.crown, BotMarkPart.belly]);
+      expect(
+          _painter(filled: true).parts, [BotMarkPart.crown, BotMarkPart.belly]);
     });
 
     test('a draft outranks an unread reply, and offline outranks both', () {

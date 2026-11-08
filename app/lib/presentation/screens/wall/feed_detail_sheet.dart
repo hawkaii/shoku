@@ -61,8 +61,9 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
       _content = null;
     });
     try {
-      final content =
-          await ref.read(importServiceProvider).fetchContent(widget.item.shortcode);
+      final content = await ref
+          .read(importServiceProvider)
+          .fetchContent(widget.item.shortcode);
       if (!mounted) return;
       setState(() => _content = content);
       if (content == null) setState(() => _failed = true);
@@ -81,8 +82,9 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
     setState(() => _adding = true);
     try {
       // The cached extraction, never the import queue.
-      final dish =
-          await ref.read(importServiceProvider).createDish(widget.item.shortcode);
+      final dish = await ref
+          .read(importServiceProvider)
+          .createDish(widget.item.shortcode);
       await ref.read(journalStoreProvider.notifier).refresh();
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(
@@ -192,7 +194,8 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                 else ...[
                   Text(
                     metaLine([
-                      if (content.minutes > 0) l10n.minutesShort(content.minutes),
+                      if (content.minutes > 0)
+                        l10n.minutesShort(content.minutes),
                       l10n.wallIngredientsCount(content.ingredients.length),
                       l10n.wallStepsCount(content.steps.length),
                     ]),
@@ -205,8 +208,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                       spacing: 4,
                       runSpacing: 4,
                       children: [
-                        for (final tag in content.tags)
-                          _Tag(text: tag),
+                        for (final tag in content.tags) _Tag(text: tag),
                       ],
                     ),
                   ],
@@ -316,8 +318,7 @@ class _FeedDetailSheetState extends ConsumerState<FeedDetailSheet> {
                                   borderRadius:
                                       BorderRadius.circular(ShokuRadius.chip),
                                   border: Border.all(
-                                      color: c.ink,
-                                      width: ShokuStroke.brutal),
+                                      color: c.ink, width: ShokuStroke.brutal),
                                 ),
                                 child: Center(
                                   child: Text(

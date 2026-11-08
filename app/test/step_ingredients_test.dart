@@ -121,7 +121,8 @@ void main() {
         [1, 0],
       ])).createDish('SC');
 
-      final version = (await JournalRepository(db).loadDishes()).single.versions.single;
+      final version =
+          (await JournalRepository(db).loadDishes()).single.versions.single;
       expect(version.stepIngredientLinks(0), [0]);
       expect(version.stepIngredientLinks(1), [1, 0]);
     });
@@ -129,7 +130,8 @@ void main() {
     test('a null step_ingredients leaves the version with no links', () async {
       await service(content(null)).createDish('SC');
 
-      final version = (await JournalRepository(db).loadDishes()).single.versions.single;
+      final version =
+          (await JournalRepository(db).loadDishes()).single.versions.single;
       expect(version.stepIngredients, isNull);
       expect(version.stepIngredientLinks(0), isNull);
     });

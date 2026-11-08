@@ -43,7 +43,8 @@ void main() {
     test('says what it actually is, from its own bytes', () {
       expect(ReceiptImage.mimeTypeOf(_jpeg), 'image/jpeg');
       expect(ReceiptImage.mimeTypeOf(_png), 'image/png',
-          reason: 'a screenshot comes back as PNG even when JPEG was asked for');
+          reason:
+              'a screenshot comes back as PNG even when JPEG was asked for');
       expect(
         ReceiptImage.mimeTypeOf([
           0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, //
@@ -76,7 +77,8 @@ void main() {
           ]);
         }),
       );
-      final service = PantryVisionService(api: api, newRequestId: () => 'req-1234');
+      final service =
+          PantryVisionService(api: api, newRequestId: () => 'req-1234');
 
       final result = await service.read(_png, mimeType: 'image/png');
 
@@ -111,8 +113,8 @@ void main() {
         api: ApiClient(
           baseUrl: 'https://api.test',
           tokenProvider: () => 'jwt',
-          httpClient: MockClient((_) async =>
-              http.Response('{"error":"daily_cap_reached"}', 429)),
+          httpClient: MockClient(
+              (_) async => http.Response('{"error":"daily_cap_reached"}', 429)),
         ),
       );
       await expectLater(
@@ -127,7 +129,8 @@ void main() {
 
     setUp(() async {
       db = AppDatabase(NativeDatabase.memory());
-      SharedPreferences.setMockInitialValues({'receipt_vision_disclosure': true});
+      SharedPreferences.setMockInitialValues(
+          {'receipt_vision_disclosure': true});
     });
     tearDown(() async => db.close());
 
@@ -144,7 +147,8 @@ void main() {
                   routes: [
                     GoRoute(
                       path: 'add',
-                      builder: (_, __) => const Scaffold(body: PantryAddScreen()),
+                      builder: (_, __) =>
+                          const Scaffold(body: PantryAddScreen()),
                     ),
                   ],
                 ),
@@ -222,11 +226,12 @@ void main() {
       await openPhotoDoor(tester);
       await tester.tap(find.byKey(const ValueKey('pantry-photo')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('pantry-vision-disclosure')), findsOneWidget);
+      expect(find.byKey(const ValueKey('pantry-vision-disclosure')),
+          findsOneWidget);
       expect(picks, 0, reason: 'nothing is uploaded before the trade is said');
 
-      await tester.tap(
-          find.byKey(const ValueKey('pantry-vision-disclosure-ok')));
+      await tester
+          .tap(find.byKey(const ValueKey('pantry-vision-disclosure-ok')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Screenshot or photo'));
       await tester.pumpAndSettle();
@@ -235,7 +240,8 @@ void main() {
       // Second time: no sheet. The memory is the device's, not the session's.
       await tester.tap(find.byKey(const ValueKey('pantry-door-photo')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('pantry-vision-disclosure')), findsNothing);
+      expect(
+          find.byKey(const ValueKey('pantry-vision-disclosure')), findsNothing);
       expect(
         (await SharedPreferences.getInstance())
             .getBool('receipt_vision_disclosure'),

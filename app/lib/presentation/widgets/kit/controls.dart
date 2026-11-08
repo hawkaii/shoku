@@ -40,11 +40,13 @@ class ShokuButton extends StatelessWidget {
         bg = disabled ? c.surfaceAlt : c.accent;
         fg = disabled ? c.inkMuted : c.onAccent;
         gradient = disabled ? null : ShokuGradients.crimsonPress;
-        border = Border.all(color: disabled ? c.hairline : c.ink, width: ShokuStroke.brutal);
+        border = Border.all(
+            color: disabled ? c.hairline : c.ink, width: ShokuStroke.brutal);
       case ShokuButtonVariant.outline:
         bg = Colors.transparent;
         fg = disabled ? c.inkMuted : c.ink;
-        border = Border.all(color: disabled ? c.hairline : c.ink, width: ShokuStroke.hairline);
+        border = Border.all(
+            color: disabled ? c.hairline : c.ink, width: ShokuStroke.hairline);
       case ShokuButtonVariant.ghost:
         bg = Colors.transparent;
         fg = disabled ? c.inkMuted : c.ink;
@@ -99,9 +101,8 @@ class ShokuButton extends StatelessWidget {
     return GestureDetector(
       onTap: disabled ? null : onPressed,
       behavior: HitTestBehavior.opaque,
-      child: fullWidth
-          ? SizedBox(width: double.infinity, child: button)
-          : button,
+      child:
+          fullWidth ? SizedBox(width: double.infinity, child: button) : button,
     );
   }
 }

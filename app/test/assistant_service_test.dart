@@ -58,7 +58,12 @@ void main() {
           'remaining': 18,
           'reset_at': '2026-11-03T00:00:00Z',
           'edits': [
-            {'op': 'add', 'index': 5, 'text': '2 potatoes, cubed', 'previous': null},
+            {
+              'op': 'add',
+              'index': 5,
+              'text': '2 potatoes, cubed',
+              'previous': null
+            },
             {
               'op': 'change',
               'index': 3,
@@ -130,13 +135,15 @@ void main() {
   test('the daily cap is a state, not a network error', () async {
     final service = _service(MockClient((request) async {
       return http.Response(
-        jsonEncode({'error': 'daily_cap_reached', 'reset_at': '2026-11-03T00:00:00Z'}),
+        jsonEncode(
+            {'error': 'daily_cap_reached', 'reset_at': '2026-11-03T00:00:00Z'}),
         429,
       );
     }));
 
     await expectLater(
-      service.ask(scope: 'dish', dishId: 'd1', question: 'anything', requestId: 'r4'),
+      service.ask(
+          scope: 'dish', dishId: 'd1', question: 'anything', requestId: 'r4'),
       throwsA(isA<AssistantCapReached>()),
     );
   });

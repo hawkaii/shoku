@@ -51,7 +51,6 @@ class ProfileScreen extends ConsumerWidget {
             style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
           ),
           const SizedBox(height: ShokuSpace.lg),
-
           Row(
             children: [
               Expanded(
@@ -73,12 +72,10 @@ class ProfileScreen extends ConsumerWidget {
                       color: c.ready)),
             ],
           ),
-
           const SizedBox(height: ShokuSpace.lg),
           ShokuLabel(l10n.profileAccount),
           const SizedBox(height: ShokuSpace.sm),
           const _AccountRow(),
-
           const SizedBox(height: ShokuSpace.lg),
           ShokuLabel(l10n.nutritionTitle),
           const SizedBox(height: ShokuSpace.sm),
@@ -96,7 +93,8 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(l10n.profileComingSoon,
-                          style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+                          style: ShokuType.title
+                              .copyWith(color: c.ink, fontSize: 14)),
                       const SizedBox(height: 2),
                       Text(
                         l10n.profileNutritionBody,
@@ -110,7 +108,6 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ),
-
           const SizedBox(height: ShokuSpace.xl),
           ShokuLabel(l10n.profileAppearance),
           const SizedBox(height: ShokuSpace.sm),
@@ -120,14 +117,15 @@ class ProfileScreen extends ConsumerWidget {
               l10n.profileThemeLight,
               l10n.profileThemeDark,
             ],
-            selected: mode == ThemeMode.system ? 0 : (mode == ThemeMode.light ? 1 : 2),
+            selected: mode == ThemeMode.system
+                ? 0
+                : (mode == ThemeMode.light ? 1 : 2),
             onChanged: (i) => ref.read(themeModeProvider.notifier).state = [
               ThemeMode.system,
               ThemeMode.light,
               ThemeMode.dark,
             ][i],
           ),
-
           const SizedBox(height: ShokuSpace.sm),
           ShokuListRow(
             icon: Icons.translate,
@@ -137,7 +135,6 @@ class ProfileScreen extends ConsumerWidget {
                 : shokuLanguageName(locale) ?? context.l10n.languageSystem,
             onTap: () => showLanguagePickerSheet(context),
           ),
-
           const SizedBox(height: ShokuSpace.lg),
           ShokuListRow(
             icon: Icons.menu_book_outlined,
@@ -179,7 +176,8 @@ class _StatBlock extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _StatBlock({required this.value, required this.label, required this.color});
+  const _StatBlock(
+      {required this.value, required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -188,15 +186,16 @@ class _StatBlock extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: ShokuSpace.md),
       child: Column(
         children: [
-          ShokuNumberRoll(value: value, style: ShokuType.statHero.copyWith(color: color)),
+          ShokuNumberRoll(
+              value: value, style: ShokuType.statHero.copyWith(color: color)),
           const SizedBox(height: 2),
-          Text(label.toUpperCase(), style: ShokuType.label.copyWith(color: c.inkMuted)),
+          Text(label.toUpperCase(),
+              style: ShokuType.label.copyWith(color: c.inkMuted)),
         ],
       ),
     );
   }
 }
-
 
 /// Signed in, or a way to sign in — the one place auth surfaces in the app.
 class _AccountRow extends ConsumerStatefulWidget {
@@ -248,14 +247,15 @@ class _AccountRowState extends ConsumerState<_AccountRow> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      session == null ? l10n.authNotSignedIn : l10n.authSignedIn,
-                      style: ShokuType.title.copyWith(color: c.ink, fontSize: 14),
+                      session == null
+                          ? l10n.authNotSignedIn
+                          : l10n.authSignedIn,
+                      style:
+                          ShokuType.title.copyWith(color: c.ink, fontSize: 14),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      session == null
-                          ? l10n.authLocalOnly
-                          : email,
+                      session == null ? l10n.authLocalOnly : email,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: ShokuType.bodySmall.copyWith(color: c.inkMuted),
@@ -268,7 +268,8 @@ class _AccountRowState extends ConsumerState<_AccountRow> {
                 ShokuPressable(
                   onTap: _signIn,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: c.ink,
                       borderRadius: BorderRadius.circular(ShokuRadius.chip),

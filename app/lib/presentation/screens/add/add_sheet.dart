@@ -32,7 +32,6 @@ class _AddSheetState extends State<AddSheet> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
@@ -59,7 +58,8 @@ class _AddSheetState extends State<AddSheet> {
             decoration: BoxDecoration(
               color: c.surface,
               borderRadius: BorderRadius.circular(ShokuRadius.chip),
-              border: Border.all(color: c.hairline, width: ShokuStroke.hairline),
+              border:
+                  Border.all(color: c.hairline, width: ShokuStroke.hairline),
             ),
             child: TextField(
               controller: _controller,
@@ -139,8 +139,11 @@ class _Option extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
-                  Text(subtitle, style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
+                  Text(title,
+                      style:
+                          ShokuType.title.copyWith(color: c.ink, fontSize: 14)),
+                  Text(subtitle,
+                      style: ShokuType.bodySmall.copyWith(color: c.inkMuted)),
                 ],
               ),
             ),

@@ -127,7 +127,8 @@ void main() {
   }
 
   testWidgets('offline is a notice, and the composer closes', (tester) async {
-    await tester.pumpWidget(chat(_FakeAssistant(() async => throw Exception('down'))));
+    await tester
+        .pumpWidget(chat(_FakeAssistant(() async => throw Exception('down'))));
     await send(tester, 'is this done?');
 
     expect(find.byKey(const ValueKey('chat-notice')), findsOneWidget);
@@ -173,7 +174,8 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('an edit renders its diff and blocks the composer', (tester) async {
+  testWidgets('an edit renders its diff and blocks the composer',
+      (tester) async {
     await tester.pumpWidget(chat(_FakeAssistant(() async => _edit())));
     await send(tester, 'add potatoes');
 
@@ -187,7 +189,8 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('a stale base offers Recompute and writes nothing', (tester) async {
+  testWidgets('a stale base offers Recompute and writes nothing',
+      (tester) async {
     await tester.pumpWidget(
       chat(_FakeAssistant(() async => _edit(base: 'a-version-we-lost'))),
     );
@@ -241,7 +244,8 @@ void main() {
       expect(find.text('is this spicy?'), findsOneWidget);
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.controller!.text, isEmpty,
-          reason: 'the input clears when the send is accepted, not when the answer lands');
+          reason:
+              'the input clears when the send is accepted, not when the answer lands');
 
       // And the wait is visible without scrolling for it.
       final thinking = find.byKey(const ValueKey('chat-thinking'));
