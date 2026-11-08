@@ -43,12 +43,10 @@ abstract final class CookModeLogic {
   /// somebody else's instruction. The screen schedules the drop once.
   static bool shouldDropStaleTimer({
     required CookTimer? timer,
-    required String dishId,
     required String versionId,
     required bool alreadyScheduled,
   }) {
     if (timer == null) return false;
-    if (timer.dishId != dishId) return false;
     if (timer.versionId == versionId) return false;
     if (alreadyScheduled) return false;
     return true;

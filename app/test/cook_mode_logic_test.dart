@@ -3,7 +3,8 @@ import 'package:food_finder/data/models/cook_timer.dart';
 import 'package:food_finder/l10n/app_localizations_en.dart';
 import 'package:food_finder/presentation/screens/cook/cook_mode_logic.dart';
 
-CookTimer _timer({int stepIndex = 2, String versionId = 'v1', String dishId = 'd1'}) =>
+CookTimer _timer(
+        {int stepIndex = 2, String versionId = 'v1', String dishId = 'd1'}) =>
     CookTimer(
       dishId: dishId,
       versionId: versionId,
@@ -113,7 +114,6 @@ void main() {
       expect(
         CookModeLogic.shouldDropStaleTimer(
           timer: null,
-          dishId: 'd1',
           versionId: 'v2',
           alreadyScheduled: false,
         ),
@@ -125,19 +125,6 @@ void main() {
       expect(
         CookModeLogic.shouldDropStaleTimer(
           timer: _timer(versionId: 'v2'),
-          dishId: 'd1',
-          versionId: 'v2',
-          alreadyScheduled: false,
-        ),
-        isFalse,
-      );
-    });
-
-    test('false for a different dish', () {
-      expect(
-        CookModeLogic.shouldDropStaleTimer(
-          timer: _timer(dishId: 'd2'),
-          dishId: 'd1',
           versionId: 'v2',
           alreadyScheduled: false,
         ),
@@ -149,7 +136,6 @@ void main() {
       expect(
         CookModeLogic.shouldDropStaleTimer(
           timer: _timer(versionId: 'v1'),
-          dishId: 'd1',
           versionId: 'v2',
           alreadyScheduled: true,
         ),
@@ -161,7 +147,6 @@ void main() {
       expect(
         CookModeLogic.shouldDropStaleTimer(
           timer: _timer(versionId: 'v1'),
-          dishId: 'd1',
           versionId: 'v2',
           alreadyScheduled: false,
         ),

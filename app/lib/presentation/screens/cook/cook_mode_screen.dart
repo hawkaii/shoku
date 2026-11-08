@@ -268,7 +268,6 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
   void _dropStaleTimer(CookTimer? timer, String dishId, String versionId) {
     if (!CookModeLogic.shouldDropStaleTimer(
       timer: timer,
-      dishId: dishId,
       versionId: versionId,
       alreadyScheduled: _dropScheduled,
     )) {
