@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -65,7 +66,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
       _photo != null;
 
   Future<void> _pickPhoto() async {
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 1800,
@@ -118,7 +119,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
             photoUrl: photoUrl,
             photoKey: photoKey,
           );
-      HapticFeedback.mediumImpact();
+      unawaited(HapticFeedback.mediumImpact());
       navigator.pop();
       final outcome = _outcome;
       messenger.showSnackBar(
@@ -234,7 +235,7 @@ class _LogSheetState extends ConsumerState<LogSheet> {
                   Expanded(
                     child: ShokuPressable(
                       onTap: () {
-                        HapticFeedback.selectionClick();
+                        unawaited(HapticFeedback.selectionClick());
                         setState(() => _outcome = outcome);
                       },
                       child: AnimatedContainer(

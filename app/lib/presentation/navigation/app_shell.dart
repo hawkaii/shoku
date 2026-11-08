@@ -106,13 +106,13 @@ class _AppShellState extends ConsumerState<AppShell>
       final pending = ref.read(pendingShareProvider) ?? stored;
       if (pending == null || !mounted) return;
       ref.read(pendingShareProvider.notifier).state = null;
-      HapticFeedback.mediumImpact();
-      showImportSheet(
+      unawaited(HapticFeedback.mediumImpact());
+      unawaited(showImportSheet(
         context,
         prefill: pending.url,
         // A share with no link is not silence: the sheet says why it is empty.
         notice: pending.hasUrl ? null : context.l10n.importShareNoLink,
-      );
+      ));
     } finally {
       _takingShare = false;
     }

@@ -343,7 +343,7 @@ class _PantryAddScreenState extends ConsumerState<PantryAddScreen> {
       await store.confirmLine(line, source: _door.name);
     }
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     final messenger = ScaffoldMessenger.of(context);
     context.pop();
     messenger.showSnackBar(

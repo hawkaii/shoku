@@ -137,7 +137,10 @@ void main() {
     final outcome = await SyncService(repository: sync, api: client()).sync();
 
     expect(outcome.pushed, 1);
-    expect(pushedBodies.single['dishes'].single['title'], 'Paneer');
+    expect(
+        ((pushedBodies.single['dishes'] as List).single
+            as Map<String, dynamic>)['title'],
+        'Paneer');
     expect(await sync.dirtyCount(), 0,
         reason: 'accepted rows must stop being dirty');
   });

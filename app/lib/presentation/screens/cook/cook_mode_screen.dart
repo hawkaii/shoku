@@ -109,7 +109,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
       // Haptic only, and only because this screen is awake. The mirror is
       // cancelled as well: it has done its job or it never will.
       _rang = true;
-      HapticFeedback.mediumImpact();
+      unawaited(HapticFeedback.mediumImpact());
       unawaited(ref.read(cookTimerProvider.notifier).cancelAlert());
     }
     setState(() {});
@@ -568,7 +568,7 @@ class _CookModeScreenState extends ConsumerState<CookModeScreen>
                       controller: _pages,
                       itemCount: steps.length,
                       onPageChanged: (i) {
-                        HapticFeedback.selectionClick();
+                        unawaited(HapticFeedback.selectionClick());
                         // Leaving the step ends its timer. A ring for a step
                         // already left is the bug a kitchen notices.
                         if (!_adoptingPage) {

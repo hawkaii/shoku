@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +74,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
           ),
         );
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     Navigator.of(context).pop();
   }
 
@@ -82,7 +83,7 @@ class _PantryEditSheetState extends ConsumerState<PantryEditSheet> {
     setState(() => _saving = true);
     await ref.read(pantryStoreProvider.notifier).remove(widget.item.id);
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     Navigator.of(context).pop();
   }
 
